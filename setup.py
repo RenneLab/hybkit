@@ -19,7 +19,7 @@ with open(os.path.join(proj_dir, 'README.md'), encoding='utf-8') as f:
 
 # Get the remaining project details variables from the "__about__.py" file.
 about_vars = {}
-with open(os.path.join(proj_dir, '__about__.py') as f:
+with open(os.path.join(proj_dir, 'hybkit', '__about__.py') as f:
     exec(f.read(), about_vars)
 
 setup(
@@ -34,7 +34,7 @@ setup(
     classifiers=about_vars['classifiers'],
     keywords='genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA',
     packages=find_packages(where='src'),
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     project_urls=about_vars['info_urls'],
 
     #install_requires=['biopython'],  # Optional

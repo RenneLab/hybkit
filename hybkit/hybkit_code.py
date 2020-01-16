@@ -5,29 +5,13 @@
 
 '''
 Classes and Functions for manipulating data in the ".hyb" genomic sequence format.
+Public classes and methods are imported by hybkit/__init__.py so they are accessible
+as hybkit.HybRecord() ... etc.
 '''
 
 import os
 import io
 import types
-
-# Read project metadata and details from "__about__.py" file.
-proj_dir = os.path.abspath(os.path.dirname(__file__))
-about = {}
-with open(os.path.join(proj_dir, '__about__.py')) as f:
-    exec(f.read(), about)
-
-__author__ = about['__author__']
-__contact__ = about['__contact__']
-__credits__ = about['__credits__']
-__date__ = about['__date__']
-__depreciated__ = about['__depreciated__']
-__email__ = about['__email__']
-__license__ = about['__license__']
-__maintainer__ = about['__maintainer__']
-__status__ = about['__status__']
-__version__ = about['__version__']
-
 
 class HybRecord(object):
     '''
