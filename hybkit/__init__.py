@@ -14,4 +14,7 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 # Import public classes and methods of hybkit_code
-from hybkit.hybkit_code import HybRecord, HybFile
+from hybkit.hybkit_code import HybRecord, HybFile, \
+                               FoldRecord, \
+                               ViennaFile, HybViennaIter, HybViennaCmbIter, \
+                               ViennadFile, HybViennadIter, HybViennadCmbIter

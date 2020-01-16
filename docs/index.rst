@@ -10,7 +10,9 @@ Welcome to hybkit's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+automodule:: hybkit
+autoclass:: hybkit.HybRecord
+autoclass:: hybkit.HybFile
 
 Indices and tables
 ==================
