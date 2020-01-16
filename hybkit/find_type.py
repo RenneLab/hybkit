@@ -8,27 +8,12 @@ Functions and executable script for assignment of types for segments of ".hyb" g
 records stored in the HybRecord class.
 '''
 
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __depreciated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
+
 import os
 import hybkit
-
-# Read project metadata and details from "__about__.py" file.
-proj_dir = os.path.abspath(os.path.dirname(__file__))
-about = {}
-with open(os.path.join(proj_dir, '__about__.py')) as f:
-    exec(f.read(), about)
-
-__author__ = about['__author__']
-__contact__ = about['__contact__']
-__credits__ = about['__credits__']
-__date__ = about['__date__']
-__depreciated__ = about['__depreciated__']
-__email__ = about['__email__']
-__license__ = about['__license__']
-__maintainer__ = about['__maintainer__']
-__status__ = about['__status__']
-__version__ = about['__version__']
-
-
 
 find_seg_type_hyb = hybkit.HybRecord.find_seg_type_hyb
 

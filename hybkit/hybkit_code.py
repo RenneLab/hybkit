@@ -9,6 +9,10 @@ Public classes and methods are imported by hybkit/__init__.py so they are access
 as hybkit.HybRecord() ... etc.
 '''
 
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __depreciated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
+
 import os
 import io
 import types
