@@ -8,6 +8,11 @@ Package-level initialization of hybkit.
 Public classes and methods of hybkit.hybkit_code are imported so they are accessible
 as hybkit.HybRecord() ... etc.
 '''
+import os
+
+# Set package directory and code directory
+package_dir = os.path.abspath(os.path.dirname(__file__))
+code_dir = os.path.join(package_dir, 'code_dir')
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __depreciated__, \
@@ -17,4 +22,5 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 from hybkit.hybkit_code import HybRecord, HybFile, \
                                FoldRecord, \
                                ViennaFile, HybViennaIter, HybViennaCmbIter, \
-                               ViennadFile, HybViennadIter, HybViennadCmbIter
+                               ViennadFile, HybViennadIter, HybViennadCmbIter, \
+                               CtFile, HybCtIter, HybCtCmbIter

@@ -1,5 +1,9 @@
 # User-custom
 *test*
+*.tar
+*.gz
+GSM27200*
+*/output
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

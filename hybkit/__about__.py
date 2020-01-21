@@ -11,7 +11,8 @@ Package details for the hybkit project.
 
 description = 'Toolkit for analysis of .hyb format genomic sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
-keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA'
+keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
+keywords += 'RNA DNA vienna viennad unafold'
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [

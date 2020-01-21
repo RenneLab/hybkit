@@ -11,7 +11,7 @@ import setuptools
 import os
 
 # Set project directory
-proj_dir = os.path.abspath(path.dirname(__file__))
+proj_dir = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
 with open(os.path.join(proj_dir, 'README.md'), encoding='utf-8') as f:
