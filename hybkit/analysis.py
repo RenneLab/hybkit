@@ -8,7 +8,7 @@ Methods for analyzing HybRecord and FoldRecord Objects.
 '''
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __depreciated__, \
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
 
 import hybkit

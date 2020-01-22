@@ -4,6 +4,7 @@
 *.gz
 GSM27200*
 */output
+*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

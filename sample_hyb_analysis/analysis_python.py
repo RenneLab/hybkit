@@ -76,9 +76,6 @@ for in_file_path in input_files:
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)
 
-    # Add the completed output file to the list of output files:
-    out_file_paths.append(out_file_path)
-       
     # Write mirna_analysis for input file to outputs. 
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)

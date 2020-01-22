@@ -13,26 +13,26 @@
 
 '''
 Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
-Public classes and methods are imported by hybkit/__init__.py so they are accessible
+Public classes and methods in this file are imported by hybkit/__init__.py so they are accessible
 as hybkit.HybRecord() ... etc.
 '''
 
 # hybkit_code.py Index:
-# HybRecord Class
-# HybFile Class
-# FoldRecord Class
-# ViennaFile Class
-# HybViennaIter Class
-# HybViennaCmbIter Class
-# ViennadFile Class
-# HybViennadIter Class
-# HybViennadCmbIter Class#
-# CtFile Class
-# HybCtIter Class
-# HybCtCmbIter Class
+#   HybRecord Class
+#   HybFile Class
+#   FoldRecord Class
+#   ViennaFile Class
+#   HybViennaIter Class
+#   HybViennaCmbIter Class
+#   ViennadFile Class
+#   HybViennadIter Class
+#   HybViennadCmbIter Class#
+#   CtFile Class
+#   HybCtIter Class
+#   HybCtCmbIter Class
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __depreciated__, \
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
 
 import os
