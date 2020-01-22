@@ -11,6 +11,10 @@ as hybkit.HybRecord() ... etc.
 import os
 import hybkit.analysis
 
+# Set package directory and code directory
+package_dir = os.path.abspath(os.path.dirname(__file__))
+code_dir = os.path.join(package_dir, 'code_dir')
+
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
@@ -21,7 +25,3 @@ from hybkit.hybkit_code import HybRecord, HybFile, \
                                ViennaFile, HybViennaIter, HybViennaCmbIter, \
                                ViennadFile, HybViennadIter, HybViennadCmbIter, \
                                CtFile, HybCtIter, HybCtCmbIter
-
-# Set package directory and code directory
-package_dir = os.path.abspath(os.path.dirname(__file__))
-code_dir = os.path.join(package_dir, 'code_dir')
