@@ -22,8 +22,13 @@ def plot_type_analysis_hybrid_type_counts(analysis_dict, sep=','):
     ret_lines = ['hybrid_type' + sep + 'count']
     sorted_pairs = sorted(analysis_dict['hybrid_type_counts'].items(),
                           key=lambda item: item[1], reverse=True)
-    ret_lines += ['%s%s%i' % (key, sep, count) for (key, count) in sorted_pairs]
-    return ret_lines
+    labels = []
+    counts = []
+    for key, count in sorted_pairs:
+        labels.append(key)
+        counts.append(count)
+
+    _plot_pie_chart(labels,counts)
 
 
 # Public Methods : HybRecord Type Analysis Parsing
@@ -132,6 +137,8 @@ def _import_matplotlib():
 
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes):
+    _import_matplotlib()
+    plot = matplotlib.pyplot
     # Data to plot
     #labels = 'Python', 'C++', 'Ruby', 'Java'
     #sizes = [215, 130, 245, 210]
@@ -139,11 +146,11 @@ def _plot_pie_chart(labels, sizes):
     #explode = (0.1, 0, 0, 0)  # explode 1st slice
     
     # Plot
-    patches, texts = plt.pie(sizes, explode=explode, labels=labels, colors=colors,
-    autopct='%1.1f%%', shadow=False, startangle=0)
+    patches, texts = plot.pie(sizes, explode=explode, labels=labels, # colors=colors,
+                              autopct='%1.1f%%', shadow=False, startangle=0)
     
-    plt.axis('equal')
-    plt.show()
+    plot.axis('equal')
+    plot.show()
     #patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
     #plt.legend(patches, labels, loc="best")
     #plt.axis('equal')

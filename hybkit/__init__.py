@@ -10,6 +10,7 @@ as hybkit.HybRecord() ... etc.
 '''
 import os
 import hybkit.analysis
+import hybkit.plot
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \

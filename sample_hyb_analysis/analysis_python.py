@@ -62,10 +62,16 @@ for in_file_path in input_files:
     with hybkit.HybFile(in_file_path, 'r') as in_file, \
          hybkit.HybFile(out_file_path, 'w') as out_file:
 
+        count = 0
+
         # Iterate over each record of the input file
         for hyb_record in in_file:
             # Find the segments type of each record
             hyb_record.find_seg_types()
+
+            if count > 10000:
+                break
+            count += 1
 
             # Perform microRNA analysis
             hyb_record.mirna_analysis()
