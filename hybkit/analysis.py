@@ -107,7 +107,6 @@ def format_type_analysis_hybrid_type_counts(analysis_dict, sep=','):
 # Public Methods : HybRecord Type Analysis Parsing
 def format_type_analysis_all_seg_types(analysis_dict, sep=','):
     'Return the results of all_seg_types in a list of sep-delimited lines.'
-    print(analysis_dict)
     # Sort by count in descending order
     sorted_pairs = sorted(analysis_dict['all_seg_types'].items(), 
                           key=lambda item: item[1], reverse=True)
@@ -139,6 +138,7 @@ def write_type_analysis_multi_files(file_name_base, analysis_dict, sep=',', file
     analyses = [
                 ('hybrid_types', format_type_analysis_hybrid_type_counts),
                 ('seg_types', format_type_analysis_all_seg_types),
+                ('combined_types', format_type_analysis),
                ]
     for analysis_name, analysis_method in analyses:
         analysis_file_name = file_name_base + '_' + analysis_name + file_suffix
@@ -181,6 +181,7 @@ def write_mirna_analysis_multi_files(file_name_base, analysis_dict, sep=',', fil
                 ('hybrid_types', format_type_analysis_hybrid_type_counts),
                 ('seg_types', format_type_analysis_all_seg_types),
                 ('mirna', format_mirna_analysis_counts),
+                ('combined', format_mirna_analysis),
                ]
     for analysis_name, analysis_method in analyses:
         analysis_file_name = file_name_base + '_' + analysis_name + file_suffix

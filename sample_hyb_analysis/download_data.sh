@@ -3,6 +3,8 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
+# usage: "sh ./download_data.sh"
+
 echo -e "\nDownloading Data for sample data analysis."
 
 # Download tar-compressed hyb-format genomic sequence datafile GSE101978_RAW.tar from NCBI Gene Expression Ombnibus (GEO) GSE101978, at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978

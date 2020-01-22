@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 '''
-Analysis for Sample_analysis performed as a python workflow, as an example of direct 
+Analysis for sample_hyb_analysis performed as a python workflow, as an example of direct 
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
 '''
 
@@ -31,8 +31,9 @@ match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
 
-print('Performing Analysis\n')
-print('Starting at: %s' % str(datetime.datetime.now()))
+print('\nPerforming Analysis')
+print('Starting at: %s\n' % str(datetime.datetime.now()))
+
 print('Creating Output Directory:\n    %s\n' % out_dir)
 os.mkdir(out_dir)
 
@@ -43,9 +44,6 @@ print('    ' + '\n    '.join(input_files) + '\n')
 match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
-
-# Create an empty list to store output file names:
-out_file_paths = []
 
 # Initialize Analysis Dict Object
 analysis_dict = hybkit.analysis.mirna_analysis_dict()
@@ -85,8 +83,8 @@ for in_file_path in input_files:
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     hybkit.analysis.write_mirna_analysis_multi_files(analysis_file_basename, analysis_dict)
-    combined_analysis_file_basename = analysis_file_basename + '_combined_analysis.csv'
-    hybkit.analysis.write_mirna_analysis_file(combined_analysis_file_basename, analysis_dict)
+ 
+    sys.stdout.flush()  # DEBUG
  
 print('Ending At: %s' % str(datetime.datetime.now()))
-sys.stdout.flush()
+sys.stdout.flush()  # DEBUG
