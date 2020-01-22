@@ -44,7 +44,7 @@ def mirna_analysis_dict():
 
 
 # Public Methods : HybRecord Analysis
-def running_type_analysis(record, analysis_dict):
+def running_type_analysis(record, analysis_dict, type_sep = '---', mirna_centric_sorting=True):
     '''
     Add information regarding various properties from the HybRecord object provided in
     "record" to the dictionary provided in the analysis_dict argument.
@@ -54,9 +54,20 @@ def running_type_analysis(record, analysis_dict):
         print(message)
         raise Exception(message)
 
-    hybrid_type = '---'.join(record.seg_types_sorted())
     seg1_type = record.seg1_type()
     seg2_type = record.seg2_type()
+
+    if mirna_centric_sorting:
+        mirna_types = hybkit.HybRecord.MIRNA_TYPES
+        if seg1_type in mirna_types:
+            join1, join2 = seg1_type, seg2_type
+        elif seg2_type in mirna_types:
+            join1, join2 = seg2_type, seg1_type
+        else:
+            join1, join2 = sorted(seg1_type, seg2_type)
+        hybrid_type = type_sep.join([join1, join2])
+    else:
+        hybrid_type = type_sep.join(record.seg_types_sorted())
 
     _add_count(analysis_dict['hybrid_type_counts'], hybrid_type)
     _add_count(analysis_dict['seg1_types'], seg1_type)
