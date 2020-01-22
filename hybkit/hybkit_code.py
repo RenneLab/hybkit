@@ -636,7 +636,7 @@ class HybRecord(object):
             elif prop_type == '5p_mirna':
                 ret_val = self.flags['miRNA_seg'] in ['5p', 'B']
             elif prop_type == '3p_mirna':
-                ret_val = self.flags['miRNA_seg'] == ['3p', 'B']
+                ret_val = self.flags['miRNA_seg'] in ['3p', 'B']
             elif prop_type == '5p_target':
                 ret_val = self.flags['miRNA_seg'] == '3p'
             elif prop_type == '3p_target':
