@@ -62,16 +62,16 @@ for in_file_path in input_files:
     with hybkit.HybFile(in_file_path, 'r') as in_file, \
          hybkit.HybFile(out_file_path, 'w') as out_file:
 
-        count = 0
+        #count = 0
 
         # Iterate over each record of the input file
         for hyb_record in in_file:
             # Find the segments type of each record
             hyb_record.find_seg_types()
 
-            if count > 10000:
-                break
-            count += 1
+            #if count > 10000:
+            #    break
+            #count += 1
 
             # Perform microRNA analysis
             hyb_record.mirna_analysis()
@@ -86,8 +86,11 @@ for in_file_path in input_files:
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     hybkit.analysis.write_mirna_analysis_multi_files(analysis_file_basename, analysis_dict)
+
+    hybkit.plot.plot_type_analysis_hybrid_type_counts(analysis_dict)
  
     sys.stdout.flush()  # DEBUG
+    break # DEBUG
  
 print('Ending At: %s' % str(datetime.datetime.now()))
 sys.stdout.flush()  # DEBUG

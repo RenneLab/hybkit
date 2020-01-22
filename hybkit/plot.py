@@ -22,11 +22,22 @@ def plot_type_analysis_hybrid_type_counts(analysis_dict, sep=','):
     ret_lines = ['hybrid_type' + sep + 'count']
     sorted_pairs = sorted(analysis_dict['hybrid_type_counts'].items(),
                           key=lambda item: item[1], reverse=True)
+    other_threshhold = 0.90
+    total_count = 0
+    for key, count in sorted_pairs:
+        total_count += count
     labels = []
     counts = []
+    running_total = 0
     for key, count in sorted_pairs:
-        labels.append(key)
-        counts.append(count)
+        running_total += count
+        if running_total/total_count > other_threshhold:
+            labels.append('Other')
+            counts.append(total_count - running_total)
+            break
+        else:
+            labels.append(key)
+            counts.append(count)
 
     _plot_pie_chart(labels,counts)
 
@@ -124,12 +135,12 @@ def write_mirna_analysis_multi_files(file_name_base, analysis_dict, sep=',', fil
 
 
 # Private Methods : Utility
-def _import_matplotlib():
+def _check_matplotlib():
     # lazy-importing is being used to allow matplotlib to serve as an 
     #   optional dependency for the package.
     try:
         import matplotlib
-    except ImportError
+    except ImportError:
         message = 'The python package matplotlib is required for plotting funciton.'
         message += '\nPlease install this package before using plotting features.'
         print(message)
@@ -137,17 +148,14 @@ def _import_matplotlib():
 
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes):
-    _import_matplotlib()
-    plot = matplotlib.pyplot
+    _check_matplotlib()
+    import matplotlib.pyplot as plot
     # Data to plot
-    #labels = 'Python', 'C++', 'Ruby', 'Java'
-    #sizes = [215, 130, 245, 210]
-    #colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue']
     #explode = (0.1, 0, 0, 0)  # explode 1st slice
     
     # Plot
-    patches, texts = plot.pie(sizes, explode=explode, labels=labels, # colors=colors,
-                              autopct='%1.1f%%', shadow=False, startangle=0)
+    plot.pie(sizes, labels=labels, # explode=explode, colors=colors,
+             autopct='%1.1f%%', shadow=False, startangle=90)
     
     plot.axis('equal')
     plot.show()
