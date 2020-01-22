@@ -9,7 +9,8 @@ echo -e "\nDownloading Data for sample data analysis."
 
 # Download tar-compressed hyb-format genomic sequence datafile GSE101978_RAW.tar from NCBI Gene Expression Ombnibus (GEO) GSE101978, at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 echo -e "Downloading tar-compressed data-file..."
-wget -O GSE101978_RAW.tar "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE101978&format=file"
+#wget -O GSE101978_RAW.tar "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE101978&format=file"
+curl -o GSE101978_RAW.tar "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE101978&format=file" 
 
 # Unpack tar-compressed file:
 echo -e "Unpacking tar-compressed data-file...\n"
