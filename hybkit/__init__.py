@@ -9,6 +9,7 @@ Public classes and methods of hybkit.hybkit_code are imported so they are access
 as hybkit.HybRecord() ... etc.
 '''
 import os
+import hybkit.analysis
 
 # Set package directory and code directory
 package_dir = os.path.abspath(os.path.dirname(__file__))

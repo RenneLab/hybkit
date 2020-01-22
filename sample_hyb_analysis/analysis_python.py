@@ -47,9 +47,8 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 # Create an empty list to store output file names:
 out_file_paths = []
 
-# Initialize Analysis Information Dictionaries
-hyb_analysis_dict = hybkit.HybRecord.running_hyb_analysis_dict()
-mirna_analysis_dict = hybkit.HybRecord.running_mirna_analysis_dict()
+# Initialize Analysis Dict Object
+analysis_dict = hybkit.analysis.mirna_analysis_dict()
 
 # Iterate over each input file, find the segment types, and save the output 
 #   in the output directory.
@@ -70,32 +69,24 @@ for in_file_path in input_files:
             # Find the segments type of each record
             hyb_record.find_seg_types()
 
-            # Add seg_type analysis details to hyb_analysis_dict
-            hyb_record.running_hyb_analysis(hyb_analysis_dict)
-
             # Perform microRNA analysis
             hyb_record.mirna_analysis()
 
             # Add mirna_analysis details to mirna_analysis_dict
-            hyb_record.running_mirna_analysis(mirna_analysis_dict)
+            hybkit.analysis.running_mirna_analysis(hyb_record, analysis_dict)
  
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)
 
-            #print(hyb_analysis_dict)
-            #print(mirna_analysis_dict)
-            #input('\nContinue?...\n')
-
     # Add the completed output file to the list of output files:
     out_file_paths.append(out_file_path)
+       
+    # Write mirna_analysis for input file to outputs. 
+    analysis_file_basename = out_file_path.replace('.hyb', '')
+    print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
+    hybkit.analysis.write_mirna_analysis_multi_files(analysis_file_basename, analysis_dict)
+    combined_analysis_file_basename = analysis_file_basename + '_combined_analysis.csv'
+    hybkit.analysis.write_mirna_analysis_file(combined_analysis_file_basename, analysis_dict)
  
-    print('HybRecord Analysis:')
-    for key in hyb_analysis_dict.keys():
-        print(key, hyb_analysis_dict[key])
-    print('\nmiRNA Analysis:')
-    for key in mirna_analysis_dict.keys():
-        print(key, mirna_analysis_dict[key])
-    break
-         
 print('Ending At: %s' % str(datetime.datetime.now()))
 sys.stdout.flush()

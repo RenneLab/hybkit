@@ -12,7 +12,7 @@
 # Future: Add seg_fold_info details to FoldRecord using HybRecord
 
 '''
-Classes and Functions for manipulating data in the ".hyb" genomic sequence format.
+Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
 Public classes and methods are imported by hybkit/__init__.py so they are accessible
 as hybkit.HybRecord() ... etc.
 '''
@@ -643,85 +643,6 @@ class HybRecord(object):
                 ret_val = self.flags['miRNA_seg'] == '5p'
         return ret_val
 
-    # TODO Move to public staticmethods
-    # HybRecord : Public Staticmethods : Analysis
-    @staticmethod
-    def running_hyb_analysis_dict():
-        'Create a dictionary with keys for running hyb analysis.'
-        ret_dict = {
-                    'hybrid_type_counts':{},
-                    'seg1_types':{},
-                    'seg2_types':{},
-                    'all_seg_types':{},
-                   } 
-        return ret_dict
-
-    # TODO Move to public staticmethods
-    # HybRecord : Public Staticmethods : Analysis
-    @staticmethod
-    def running_mirna_analysis_dict():
-        'Create a dictionary with keys for running hyb analysis.'
-        ret_dict = {
-                    '5p_mirna_count':0,
-                    '3p_mirna_count':0,
-                    'mirna_dimer_count':0,
-                    'all_mirna_count':0,
-                    'no_mirna_count':0,
-                    'mirna_fold_count':0,
-                    'mirna_fold_details':{i:0 for i in range(1,26)},
-                   }
-        return ret_dict
-
-    # HybRecord : Public Methods : Analysis
-    def running_hyb_analysis(self, analysis_dict):
-        '''
-        Add information regarding various properties to the dictionary provided in 
-        the analysis_dict argument.
-        '''
-        if not self.has_property('has_seg_types'): 
-            message = 'seg_type flag is required for record analysis.'
-            print(message)
-            raise Exception(message)
-
-        hybrid_type = '---'.join(self.seg_types_sorted())
-        seg1_type = self.seg1_type()
-        seg2_type = self.seg2_type()
-       
-        self._add_dict_count(analysis_dict['hybrid_type_counts'], hybrid_type)
-        self._add_dict_count(analysis_dict['seg1_types'], seg1_type)
-        self._add_dict_count(analysis_dict['seg2_types'], seg2_type)
-        for seg_type in seg1_type, seg2_type:
-            self._add_dict_count(analysis_dict['all_seg_types'], seg_type)
-
-
-    # HybRecord : Public Methods : Analysis
-    def running_mirna_analysis(self, analysis_dict):
-        '''
-        Add information regarding various properties to the dictionary provided in
-        the analysis_dict argument.
-        '''
-        self._ensure_mirna_analysis()
-        #['5p_mirna_count', '3p_mirna_count', 'mirna_dimer_count']:
-        if self.has_property('has_mirna_dimer'):
-            self._add_dict_count(analysis_dict, 'mirna_dimer_count')
-            self._add_dict_count(analysis_dict, 'all_mirna_count')
-        elif self.has_property('3p_mirna'):
-            self._add_dict_count(analysis_dict, '3p_mirna_count')
-            self._add_dict_count(analysis_dict, 'all_mirna_count')
-        elif self.has_property('5p_mirna'):
-            self._add_dict_count(analysis_dict, '5p_mirna_count')
-            self._add_dict_count(analysis_dict, 'all_mirna_count')
-        else:
-            self._add_dict_count(analysis_dict, 'no_mirna_count')
-
-        if self.has_property('has_mirna_fold'):
-            self._add_dict_count(analysis_dict, 'mirna_fold_count')
-            mirna_fold = self.mirna_details['mirna_fold']
-            for i in range(1, (len(mirna_fold) + 1)):
-                self._add_dict_count(analysis_dict['mirna_fold_details'], i)
-      
-            
-
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False):
         'Return a Hyb-format string representation of the Hyb record.'
@@ -1079,12 +1000,6 @@ class HybRecord(object):
             flags[flag_key] = flag_value
         return flags
 
-    # HybRecord : Private Staticmethods : Utility
-    @staticmethod
-    def _add_dict_count(count_dict, key):
-        if key not in count_dict:
-            count_dict[key] = 0
-        count_dict[key] += 1
 
 class HybFile(io.FileIO):
     '''
