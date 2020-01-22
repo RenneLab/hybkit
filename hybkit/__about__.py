@@ -7,7 +7,7 @@
 Package details for the hybkit project.
 '''
 
-#Preparation for initial PIP release, not yet completed.
+# Preparation for initial PIP release, not yet completed.
 
 description = 'Toolkit for analysis of .hyb format genomic sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
@@ -35,7 +35,8 @@ classifiers = [
 info_urls = {
     'Renne Lab Github': 'https://github.com/RenneLab',
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
-    'Hyb Format Specification': 'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
+    'Hyb Format Specification':
+    'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
     }
 
 __author__ = "Daniel Stribling"
@@ -43,10 +44,8 @@ __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel B. Stribling", "Lauren A. Gay", "Rolf Renne"]
 __date__ = "YYYY/MM/DD"
 __depreciated__ = False
-__email__ =  "ds@ufl.edu"
+__email__ = "ds@ufl.edu"
 __license__ = "GPLv3"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
 __version__ = "0.1.0"
-
-

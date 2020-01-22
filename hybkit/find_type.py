@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 '''
-Functions and executable script for assignment of types for segments of ".hyb" genomic sequence 
+Functions and executable script for assignment of types for segments of ".hyb" genomic sequence
 records stored in the HybRecord class.
 '''
 
@@ -19,6 +19,7 @@ find_seg_type_hyb = hybkit.HybRecord.find_seg_type_hyb
 find_seg_type_string_match = hybkit.HybRecord.find_seg_type_string_match
 make_string_match_parameters = hybkit.HybRecord.make_string_match_parameters
 
+
 def assign_segment_types(in_hyb, out_hyb, **args_info):
     print('stub function')
 
@@ -31,11 +32,11 @@ if __name__ == '__main__':
 
     find_seg_type_method = find_seg_type_methods[mode]
     find_param_method = find_seg_type_param_methods[mode]
-    
+
     find_type_params = find_param_method(legend)
-        
+
     hybkit.HybRecord.set_find_type_method(find_seg_type_method, find_type_params)
-    
+
     with hybkit.HybFile(test_file, 'r') as hf, hybkit.HybFile(test_out, 'w') as of:
         for record in hf:
             record.find_seg_types()
@@ -45,5 +46,3 @@ if __name__ == '__main__':
     #    if not args_info:
     #        sys.exit()
     #    assign_segment_types(**args_info)
-    
-   

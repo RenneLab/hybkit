@@ -40,6 +40,7 @@ import io
 import types
 import hybkit
 
+
 class HybRecord(object):
     '''
     Class for storing information about a chimeric or hybrid sequence read from a .hyb format file.
@@ -96,7 +97,7 @@ class HybRecord(object):
                                     #   performed by the Hyb software package.
                    ]
 
-    # miRNA Types for use in ".mirna_analysis" function 
+    # miRNA Types for use in ".mirna_analysis" function
     MIRNA_TYPES = ['miRNA', 'microRNA']
 
     # HybRecord : Class-Level Variables
@@ -111,17 +112,17 @@ class HybRecord(object):
     fill_flags = False                  # Fill flags-dict with default flags
     allow_undefined_flags = False       # Allow undefined flags
 
-    #Ideally the following paramaters should be set to False, and True, respctively, however the 
-    #  output of the Hyb program often provides vienna/viennad fold-records that do not 
-    #  match the sequences in the corresponding hyb entry, as an artifact of collapsing 
-    #  multiple hyb records into the same entry.
+    # Ideally the following paramaters should be set to False, and True, respctively, however the
+    #   output of the Hyb program often provides vienna/viennad fold-records that do not
+    #   match the sequences in the corresponding hyb entry, as an artifact of collapsing
+    #   multiple hyb records into the same entry.
     allow_fold_record_mismatch = True   # Allow mismatch with self.fold_record sequence
     warn_fold_record_mismatch = False   # Warn if mismatch with self.fold_record sequence
 
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
     placeholder = '.'
 
-    # HybRecord : Public Methods : Initialization 
+    # HybRecord : Public Methods : Initialization
     def __init__(self, hyb_id, seq, energy=placeholder,
                  seg1_info={}, seg2_info={}, flags={},
                  find_seg_types=False,
@@ -156,7 +157,7 @@ class HybRecord(object):
         else:
             return None
 
-    # HybRecord : Public Methods : Segment_Info    
+    # HybRecord : Public Methods : Segment_Info
     def seg2_id(self):
         'Return a copy of the id for segment 2 (3p), or None if not defined.'
         if 'ref' in self.seg2_info:
@@ -164,17 +165,17 @@ class HybRecord(object):
         else:
             return None
 
-    # HybRecord : Public Methods : Segment_Info    
+    # HybRecord : Public Methods : Segment_Info
     def seg1_info(self):
         'Return a copy of the info dict object for segment 1 (5p).'
         return self.seg1_info.copy()
 
-    # HybRecord : Public Methods : Segment_Info    
+    # HybRecord : Public Methods : Segment_Info
     def seg2_info(self):
         'Return a copy of the info dict object for segment 2 (3p).'
         return self.seg2_info.copy()
 
-    # HybRecord : Public Methods : Segment_Info    
+    # HybRecord : Public Methods : Segment_Info
     def seg_ids(self):
         'Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined.'
         return (self.seg1_id(), self.seg2_id())
@@ -216,7 +217,7 @@ class HybRecord(object):
         self._set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
-    def set_seg_types(self, seg1_type, seg2_type): 
+    def set_seg_types(self, seg1_type, seg2_type):
         'Set "seg1_type" and "seg2_type" flags in flags.'
         self._set_flag('seg1_type', seg1_type)
         self._set_flag('seg2_type', seg2_type)
@@ -247,7 +248,7 @@ class HybRecord(object):
                 types.append(seg_type)
         self.set_seg_types(types[0], types[1])
 
-    # HybRecord : Public Methods : Flag_Info : find_seg_type  
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_hyb(self, seg_info, find_type_params={}):
         '''
         Return the type of the provided segment, or return None if the segment cannot be
@@ -269,15 +270,16 @@ class HybRecord(object):
     # Set find_seg_type_method as the defulat seg_type finding method.
     find_type_method = find_seg_type_hyb
 
-    # HybRecord : Public Methods : Flag_Info : find_seg_type  
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_string_match(self, seg_info, find_type_params={}, check_all=False):
         '''
         Return the type of the provided segment, or return None if the segment cannot be
         identified.
         This method attempts to find a string matching a specific pattern within the identifier
-        of the aligned segment. Search options include "prefix", "contains", "suffix", and "matches"
-        The required find_types_param dict should contain a key for each desired search type,
-        with a list of 2-tuples for each search-string with assigned-type. For example:
+        of the aligned segment. Search options include "prefix", "contains", "suffix", and
+        "matches". The required find_types_param dict should contain a key for each desired
+        search type, with a list of 2-tuples for each search-string with assigned-type.
+        For example:
         find_type_params = {'suffix': [('_miR', 'microRNA'),
                                        ('_trans', 'mRNA')   ]}
         This dict can be generated with the associated make_string_match_parameters()
@@ -320,13 +322,13 @@ class HybRecord(object):
                     if not check_all:
                         check_done = True
                         break
-    
+
         if not found_types:
             return None
         elif len(found_types) == 1:
             return found_types[0]
         elif len(found_types) > 1:
-            #If multiple types found, check if they are the same.
+            # If multiple types found, check if they are the same.
             if all(((found_type == found_types[0]) for found_type in found_types)):
                 return found_types[0]
             else:
@@ -334,7 +336,7 @@ class HybRecord(object):
                 message += '  ' + ', '.join(found_types)
                 print(message)
                 raise Exception(message)
-    
+
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     # Populate the list of builtin methods available to assign segment types
     find_type_methods = {'hyb': find_seg_type_hyb,
@@ -367,15 +369,15 @@ class HybRecord(object):
         return (self.seq == fold_record.seq)
 
     # HybRecord : Public Methods : fold_record
-    def set_fold_record(self, fold_record, 
+    def set_fold_record(self, fold_record,
                         allow_fold_record_mismatch=None,
                         warn_fold_record_mismatch=None):
         '''
-        Check to ensure that fold_record argument is an instance of FoldRecord, and that 
+        Check to ensure that fold_record argument is an instance of FoldRecord, and that
         it has a matching sequence to this HybRecord, then set it as self.fold_record.
-        allow_fold_record_mismatch allows mismatches between the HybRecord sequence 
+        allow_fold_record_mismatch allows mismatches between the HybRecord sequence
         and the FoldRecord sequence.
-        warn_fold_record_mismatch prints a warning when there is a mismatch between the 
+        warn_fold_record_mismatch prints a warning when there is a mismatch between the
         HybRecord sequence and hte FoldRecord sequence.
         If either argument is provided to the method, it overrides default behavior.
         Otherwise, the method falls back to the class default setting.
@@ -414,8 +416,8 @@ class HybRecord(object):
                 num_mismatch = max(len(seq1), len(seq2))
                 message = 'WARNING: Hybrid: %s' % self.id
                 message += ' has fold_record sequence with a %i base mismatch.' % num_mismatch
-                #message += '\n%s\n%s' % (self.seq, fold_record.seq)
-                #message += '\nMismatch Region: %s | %s' % (seq1, seq2) 
+                # message += '\n%s\n%s' % (self.seq, fold_record.seq)
+                # message += '\nMismatch Region: %s | %s' % (seq1, seq2)
                 print(message)
 
         self.fold_record = fold_record
@@ -430,7 +432,7 @@ class HybRecord(object):
         If mirna_types is provided, miRNA types will be assigned using this list of types.
         Otherwise it will be assigned using the entries in HybRecord.MIRNA_TYPES .
         # If allow_mirna_dimers is provided as True, entries where seg1_type and seg2_type are
-        # both identified as a miRNA will be included in miRNA analyses, where they would 
+        # both identified as a miRNA will be included in miRNA analyses, where they would
         # otherwise be excluded to prevent ambiguity.
         '''
 
@@ -438,7 +440,7 @@ class HybRecord(object):
             mirna_types = self.MIRNA_TYPES
 
         # If miRNA_seg flag is not defined, find and set flag.
-        if not self.has_property('has_mirna_seg'): 
+        if not self.has_property('has_mirna_seg'):
             seg_types = self.seg_types()
             if any(seg_type is None for seg_type in seg_types):
                 message = 'Segment types not assigned for mirna analysis of record: %s' % str(self)
@@ -446,10 +448,10 @@ class HybRecord(object):
                 message += 'Please use the "find_seg_types" method to assign segment types.'
                 print(message)
                 raise Exception(message)
-    
+
             seg1_is_mirna = seg_types[0] in mirna_types
             seg2_is_mirna = seg_types[1] in mirna_types
-           
+
             if seg1_is_mirna and seg2_is_mirna:
                 mirna_flag = 'B'
             elif seg1_is_mirna:
@@ -458,7 +460,7 @@ class HybRecord(object):
                 mirna_flag = '3p'
             else:
                 mirna_flag = 'N'
-            self._set_flag('miRNA_seg', mirna_flag)       
+            self._set_flag('miRNA_seg', mirna_flag)
 
         # If miRNA_seg flag already defined, recall value.
         else:
@@ -502,10 +504,9 @@ class HybRecord(object):
             self.mirna_details['mirna_fold'] = mirna_fold_details['seg_fold']
             self.mirna_details['target_fold'] = target_fold_details['seg_fold']
 
-
     # TODO move to "constants section"
-    # List of string-comparison properties for the ".has_property()" method. 
-    _STR_PROPERTIES = [ 
+    # List of string-comparison properties for the ".has_property()" method.
+    _STR_PROPERTIES = [
         'id', 'id_prefix', 'id_suffix', 'id_contains',
         'seg', 'seg_prefix', 'seg_suffix', 'seg_contains',
         'seg1', 'seg1_prefix', 'seg1_suffix', 'seg1_contains',
@@ -523,7 +524,7 @@ class HybRecord(object):
     # List of miRNA-analysis properties for the ".has_property()" method.
     _MIRNA_PROPERTIES = [
         'has_mirna', 'has_mirna_dimer',
-        '3p_mirna', '5p_mirna', 
+        '3p_mirna', '5p_mirna',
         '3p_target', '5p_target',
     ]
 
@@ -533,24 +534,24 @@ class HybRecord(object):
     # HybRecord : Public Methods : has_property
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
         '''
-        Check if HybRecord has property of prop_type defined in list of allowed properties 
-        stored in record.PROPERTIES. If query property has a comparator, provide this 
+        Check if HybRecord has property of prop_type defined in list of allowed properties
+        stored in record.PROPERTIES. If query property has a comparator, provide this
         in prop_compare.
         If allow_unknown is False, an error will be raised if the requested property is undefined.
         '''
-        
+
         if prop_type not in self.PROPERTIES:
             message = 'Requested Property: %s is not defined. ' % prop_type
             message += 'Available proprties are:\n' + ', '.join(self.PROPERTIES)
             print(message)
             raise Exception(message)
-       
+
         # Check if a substring compares to a desired property string.
         if prop_type in self._STR_PROPERTIES:
             if not prop_compare:
                 message = 'Property: %s  requires a comparison string. ' % prop_type
                 message += 'Please provide an argument to prop_compare.'
-            
+
             prop_type_split = prop_type.split('_')
             if len(prop_type_split) == 1 or prop_type_split[-1] == 'type':
                 check_attr = prop_type
@@ -558,7 +559,7 @@ class HybRecord(object):
             else:
                 check_attr = '_'.join(prop_type_split[:-2])
                 check_type = prop_type_split[-1]
-    
+
             check_info = None
             multi_check = False
             if check_attr in ['id', 'seq']:
@@ -578,22 +579,22 @@ class HybRecord(object):
             elif check_attr == 'seg_types':
                 check_info = self.seg_types()
                 multi_check = True
-    
+
             # Wrap single check_info value in a list, if not already.
             if not multi_check:
-               check_info = [check_info]
-    
+                check_info = [check_info]
+
             if require_known:
                 for info in check_info:
                     if info is None:
                         message = 'HybRecord Instance: %s does not have a ' % (str(self))
-                        message += 'value for requested property: %s' % check_attr 
+                        message += 'value for requested property: %s' % check_attr
                         message += '\nTo allow unknown values, require_known as False.'
                         print(message)
                         raise Exception(message)
-    
-            if any((val is None) for val in check_info):     
-                ret_val = None  
+
+            if any((val is None) for val in check_info):
+                ret_val = None
             elif check_type == 'prefix':
                 ret_val = any((val.startswith(prop_compare)) for val in check_info)
             elif check_type == 'contains':
@@ -602,7 +603,7 @@ class HybRecord(object):
                 ret_val = any((val.endswith(prop_compare)) for val in check_info)
             elif check_type == 'matches':
                 ret_val = any((prop_copmpare == val) for val in check_info)
-    
+
         # Check whether a property exists and has a non-None / non-blank value.
         elif prop_type in self._HAS_PROPERTIES:
             if prop_type == 'has_seg1_type':
@@ -610,7 +611,7 @@ class HybRecord(object):
             elif prop_type == 'has_seg2_type':
                 datum = self._get_flag_or_none(self, 'seg2_type')
             elif prop_type == 'has_seg_types':
-                datum = all((bool(self._get_flag_or_none('seg1_type')), 
+                datum = all((bool(self._get_flag_or_none('seg1_type')),
                              bool(self._get_flag_or_none('seg2_type'))))
             elif prop_type == 'has_mirna_details':
                 datum = self.mirna_details
@@ -624,11 +625,11 @@ class HybRecord(object):
                     if 'mirna_fold' in self.mirna_details:
                         datum = self.mirna_details['mirna_fold']
             ret_val = bool(datum)
-    
+
         # Check mirna-specific properties (requires mirna-analysis)
         elif prop_type in self._MIRNA_PROPERTIES:
             self._ensure_mirna_analysis()
-           
+
             if prop_type == 'has_mirna':
                 ret_val = self.flags['miRNA_seg'] in ['5p', '3p', 'B']
             elif prop_type == 'has_mirna_dimer':
@@ -671,12 +672,12 @@ class HybRecord(object):
         'Return True if ".id" and ".seq" attributes match.'
         return (self.id == other.id and self.seq == other.seq)
 
-    # HybRecord : Public MagicMethods : Comparison 
+    # HybRecord : Public MagicMethods : Comparison
     def __neq__(self, other):
         'Return False if either ".id" or ".seq" attributes mismatch.'
         return (self.id != other.id or self.seq != other.seq)
 
-    # HybRecord : Public MagicMethods : Evaluation 
+    # HybRecord : Public MagicMethods : Evaluation
     def __hash__(self):
         'Return a hash of the record ".id" attribute'
         return hash(self.id)
@@ -714,7 +715,7 @@ class HybRecord(object):
         Select this method from the methods available in HybRecord.find_type_methods.
         '''
         if find_method_name not in cls.find_type_methods:
-            message = 'Selected find_seg_type_method: %s is not defined.\n' % find_method_name 
+            message = 'Selected find_seg_type_method: %s is not defined.\n' % find_method_name
             message += 'Allowed Options:' + ', '.join(cls.find_type_methods.keys())
         cls.find_type_method = cls.find_type_methods[find_method_name]
         cls.find_type_params = find_params
@@ -742,7 +743,7 @@ class HybRecord(object):
     #     return flags
 
     # HybRecord : Public Classmethods : flags
-    # Currently disabled, pending revision or deletion 
+    # Currently disabled, pending revision or deletion
     # @classmethod
     # def default_hybkit_flags(cls):
     #     flags = {
@@ -786,8 +787,8 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_string_match_parameters(
-        legend_file=os.path.join(hybkit.code_dir, 'find_type_string_match.csv')
-        ):
+            legend_file=os.path.join(hybkit.code_dir, 'find_type_string_match.csv')
+            ):
         '''
         Read csv file provided in legend_file, and return a dict of search parameters
         for use with the find_seg_type_string_match method.
@@ -802,8 +803,8 @@ class HybRecord(object):
           {'suffix': [('_miR', 'microRNA'),
                       ('_trans', 'mRNA')   ]}
         '''
-    
-        ALLOWED_SEARCH_TYPES = {'prefix':'', 'contains':'', 'suffix':'', 'matches':''}
+
+        ALLOWED_SEARCH_TYPES = {'prefix': '', 'contains': '', 'suffix': '', 'matches': ''}
         return_dict = {}
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
@@ -816,8 +817,8 @@ class HybRecord(object):
                 line = line.rstrip()
                 split_line = line.split(',')
                 if len(split_line) != 3:
-                    message = 'Error reading legend line: \n%s\n%s\n' % (str(line), str(split_line))
-                    message += 'Three comma-separated entries expected.'
+                    message = 'Error reading legend line: \n%s\n%s' % (str(line), str(split_line))
+                    message += '\nThree comma-separated entries expected.'
                     print(message)
                     raise Exception(message)
                 search_type = split_line[0]
@@ -825,11 +826,11 @@ class HybRecord(object):
                 seg_type = split_line[2]
                 if search_type not in ALLOWED_SEARCH_TYPES:
                     message = 'Read Search type: "%s"\n' % search_type
-                    message += 'Not in allowed types: %s\n' % ', '.join(ALLOWED_SEARCH_TYPES.keys())
-                    message += 'For legend line: \n%s\n' % (str(line))
+                    message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES.keys())
+                    message += '\nFor legend line: \n%s\n' % (str(line))
                     print(message)
                     raise Exception(message)
-    
+
                 if search_type not in return_dict:
                     return_dict[search_type] = []
 
@@ -837,15 +838,14 @@ class HybRecord(object):
 
         return return_dict
 
-
-    # HybRecord : Private Methods : Initialization    
+    # HybRecord : Private Methods : Initialization
     def _post_init_tasks(self):
         # Stub for subclassing
         pass
 
     # HybRecord : Private Methods : Record Parsing
     def _format_seg_info(self, seg_info, prefix='', suffix='', indent_str=''):
-        #Returns a formatted string of the sgement info information
+        # Returns a formatted string of the sgement info information
         ret_string = prefix
         ret_string += indent_str + 'Map Reference:  %s\n' % seg_info['ref']
         ret_string += indent_str + 'Read Start Pos: %s\n' % seg_info['read_start']
@@ -870,7 +870,7 @@ class HybRecord(object):
         # If argument is provided to the method, it overrides default behavior.
         # Otherwise, the method falls back to the object-defaults.
         if allow_undefined_flags is None:
-           allow_undefined_flags = self.allow_undefined_flags
+            allow_undefined_flags = self.allow_undefined_flags
 
         if not allow_undefined_flags and flag_key not in self.all_flags:
             message = 'Flag "%s" is not defined. Please check flag key' % flag_key
@@ -884,7 +884,7 @@ class HybRecord(object):
     def _make_flag_string(self, use_all_flags=False):
         flag_string = ''
         for flag in self._get_flag_keys():
-           flag_string += ('%s=%s;' % (flag, str(self.flags[flag])))
+            flag_string += ('%s=%s;' % (flag, str(self.flags[flag])))
         return flag_string
 
     # HybRecord : Private Methods : flags
@@ -980,7 +980,7 @@ class HybRecord(object):
             message = 'Problem with HybRecord instance: %s\n' % str(self)
             message += 'Method requries running ".mirna_analysis()" before use.'
             print(message)
-            raise Exception(message) 
+            raise Exception(message)
 
     # HybRecord : Private Classmethods : flags
     @classmethod
@@ -1053,7 +1053,6 @@ class HybFile(io.FileIO):
             message = 'Item: "%s" is not a HybRecord object.' % record
             print(message)
             raise Exception(message)
-
 
 
 class FoldRecord(object):
@@ -1177,7 +1176,7 @@ class FoldRecord(object):
         ret_lines.append(self.id + suffix)   # Add line 1, id
         ret_lines.append(self.seq + suffix)  # Add line 2, sequence
 
-        #Create formatted energy string which uses no decimal places for integer numbers
+        # Create formatted energy string which uses no decimal places for integer numbers
         if abs(self.energy - round(self.energy)) > 0.00001:
             energy_str = ("%.5f" % self.energy).rstrip('0')
         else:
@@ -1212,7 +1211,7 @@ class FoldRecord(object):
                         self.seg1_detail('ref_end')]
         line_3 = '\t'.join([str(item) if item is not None
                             else self.placeholder
-                            for item in line_3_items ])
+                            for item in line_3_items])
         ret_lines.append(line_3 + suffix)
         line_4_items = [self.seg2_detail('highlight'),
                         self.seg2_detail('ref'),
@@ -1223,7 +1222,7 @@ class FoldRecord(object):
                             for item in line_4_items])
         ret_lines.append(line_4 + suffix)
 
-        #Create formatted energy string which uses no decimal places for integer numbers
+        # Create formatted energy string which uses no decimal places for integer numbers
         if abs(self.energy - round(self.energy)) > 0.00001:
             energy_str = ("%.5f" % self.energy).rstrip('0')
         else:
@@ -1231,7 +1230,7 @@ class FoldRecord(object):
 
         line_5 = '%s\t(%s)' % (self.fold, energy_str)
         ret_lines.append(line_5 + suffix)  # Add line 5, fold representaiton and energy
-        ret_lines.append(suffix)           # Add line 6, blank/newline  
+        ret_lines.append(suffix)           # Add line 6, blank/newline
         return ret_lines
 
     # FoldRecord : Public Methods : Parsing : Viennad
@@ -1255,7 +1254,7 @@ class FoldRecord(object):
     def __eq__(self, other):
         return (self.id == other.id and self.seq == other.seq)
 
-    # FoldRecord : Public MagicMethods : Comparison  
+    # FoldRecord : Public MagicMethods : Comparison
     def __neq__(self, other):
         return (self.id != other.id or self.seq != other.seq)
 
@@ -1263,11 +1262,11 @@ class FoldRecord(object):
     def __hash__(self):
         return hash(self.id)
 
-    # FoldRecord : Public MagicMethods : Evaluation 
+    # FoldRecord : Public MagicMethods : Evaluation
     def __bool__(self):
         return True
 
-    # FoldRecord : Public MagicMethods : Evaluation 
+    # FoldRecord : Public MagicMethods : Evaluation
     def __len__(self):
         return len(self.seq)
 
@@ -1276,10 +1275,10 @@ class FoldRecord(object):
     def from_vienna_lines(cls, record_lines, hyb_format_vienna=False):
         '''
         Create a FoldRecord entry from a list of 3 strings corresponding to lines in the
-        Vienna format.   
-        The Hyb Software Package contains further information in the "name" field of the 
+        Vienna format.
+        The Hyb Software Package contains further information in the "name" field of the
         vienna record that can be used to infer further information about the fold divisions.
-        If hyb_format_vienna is provided as True, this extra information will be read. 
+        If hyb_format_vienna is provided as True, this extra information will be read.
         extra information.
         '''
 
@@ -1353,10 +1352,10 @@ class FoldRecord(object):
             print(message)
             raise Exception(message)
         seg1_fold_info = {
-                          'highlight' : line_3_split[0],
-                          'ref' : line_3_split[1],
-                          'ref_start' : line_3_split[2],
-                          'ref_end' : line_3_split[3],
+                          'highlight': line_3_split[0],
+                          'ref': line_3_split[1],
+                          'ref_start': line_3_split[2],
+                          'ref_end': line_3_split[3],
                          }
         line_4 = record_lines[3].strip()
         line_4_split = line_4.split('\t')
@@ -1369,10 +1368,10 @@ class FoldRecord(object):
             print(message)
             raise Exception(message)
         seg2_fold_info = {
-                          'highlight' : line_4_split[0],
-                          'ref' : line_4_split[1],
-                          'ref_start' : line_4_split[2],
-                          'ref_end' : line_4_split[3],
+                          'highlight': line_4_split[0],
+                          'ref': line_4_split[1],
+                          'ref_start': line_4_split[2],
+                          'ref_end': line_4_split[3],
                          }
 
         line_5 = record_lines[4].strip()
@@ -1387,7 +1386,7 @@ class FoldRecord(object):
     @classmethod
     def from_viennad_string(cls, record_string):
         '''
-        Create a FoldRecord entry from a string containing 5 or 6 lines corresponding 
+        Create a FoldRecord entry from a string containing 5 or 6 lines corresponding
         to lines in the Viennad format.
         '''
         lines = record_string.strip().split('\n')
@@ -1397,7 +1396,7 @@ class FoldRecord(object):
     @classmethod
     def from_ct_lines(cls, record_lines):
         '''
-        Create a FoldRecord entry from a list of an arbitrary number of strings 
+        Create a FoldRecord entry from a list of an arbitrary number of strings
         corresponding to lines in the ".ct" file format.
         '''
         header_line = record_lines[0].strip()
@@ -1428,7 +1427,7 @@ class FoldRecord(object):
 
         seq = ''
         fold = ''
-        seg1_highlight = ''    
+        seg1_highlight = ''
         seg1_fold = ''
         seg2_highlight = ''
         seg2_fold = ''
@@ -1454,22 +1453,22 @@ class FoldRecord(object):
                 fold_char = ')'
             else:
                 raise Exception
-            fold += fold_char 
-      
+            fold += fold_char
+
             seg_i = line_split[5]
             if int(seg_i) < i:
                 found_seg2 = True
-            if found_seg2 == False:
+            if found_seg2 is False:
                 seg1_highlight += base
                 seg2_highlight += '-'
                 seg1_fold += fold_char
-            elif found_seg2 == True:
+            elif found_seg2 is True:
                 seg1_highlight += '_'
                 seg2_highlight += base
                 seg2_fold += fold_char
             last_seg_i = seg_i
-       
-        #guess middle '-' char:
+
+        # Guess middle '-' char:
         full_name_split = full_name.split('-')
         full_name_split_len = len(full_name_split)
         slice_i = int((full_name_split_len/2))
@@ -1510,7 +1509,7 @@ class FoldRecord(object):
     def _find_segN_fold_details(self, seg_start_n, seg_end_n):
         raise NotImplementedError
 
-    # FoldRecord : Private Methods : seg_info   
+    # FoldRecord : Private Methods : seg_info
     def _set_segN_fold_info(self, seg, seg_info_obj={}):
         # Create a dictionary with segment fold information.
         return_dict = {}
@@ -1518,7 +1517,7 @@ class FoldRecord(object):
                                'ref_start': int,
                                'ref_end': int,
                                'highlight': str,
-                               'seg_fold': str ,
+                               'seg_fold': str,
                                }
         for param in segment_param_types.keys():
             if param in seg_info_obj:
@@ -1540,7 +1539,7 @@ class FoldRecord(object):
         else:
             raise Exception('Unidentified value "%s" for seg argument' % str(seg))
 
-    # FoldRecord : Private Methods : seg_info   
+    # FoldRecord : Private Methods : seg_info
     def _get_segN_detail(self, seg, detail):
         if seg == 1:
             seg_dict = self.seg1_fold_info
@@ -1614,7 +1613,7 @@ class FoldRecord(object):
     # FoldRecord : Private Methods : Parsing : Output
     def _format_seg_info(self, seg_info, prefix='', suffix='', indent_str=''):
         raise NotImplementedError
-        #Returns a formatted string of the sgement info information
+        # Returns a formatted string of the sgement info information
         ret_string = prefix
         ret_string += indent_str + 'Map Reference:  %s\n' % seg_info['ref']
         ret_string += indent_str + 'Read Start Pos: %s\n' % seg_info['read_start']
@@ -1634,11 +1633,11 @@ class ViennaFile(io.FileIO):
     base class methods (like .read() and .write()) utilize bytestrings, not unicode strings.
     '''
     # ViennaFile : Class-Level Variables
-    # The Hyb Software Package contains further information in the "name" field of the 
+    # The Hyb Software Package contains further information in the "name" field of the
     #   vienna record that can be used to infer further information about the fold divisions.
-    #   Set this value to True with hybkit.ViennaFile.hyb_format_file = True to read this 
+    #   Set this value to True with hybkit.ViennaFile.hyb_format_file = True to read this
     #   extra information.
-    hyb_format_vienna = False  
+    hyb_format_vienna = False
 
     # ViennaFile : Public Methods : Reading
     def __next__(self):
@@ -1676,7 +1675,7 @@ class ViennaFile(io.FileIO):
         record_bytestring = bytearray(record_string, 'utf-8')
         self.write(record_bytestring)
 
-    # ViennaFile : Public Methods : Writing 
+    # ViennaFile : Public Methods : Writing
     def write_records(self, write_records):
         '''
         Write a sequence of FoldRecord objects as vienna-format lines to the vienna file.
@@ -1686,7 +1685,7 @@ class ViennaFile(io.FileIO):
         for write_record in write_records:
             self.write_record(write_record)
 
-    # ViennaFile : Private Methods : Writing 
+    # ViennaFile : Private Methods : Writing
     def _ensure_FoldRecord(self, record):
         if not isinstance(record, FoldRecord):
             message = 'Item: "%s" is not a FoldRecord object.' % record
@@ -1721,7 +1720,7 @@ class HybViennaCmbIter(object):
     '''
     This class provides an iterator to iterate through a HybFile and ViennaFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned vienna entry.
-    Each ViennaRecord will be added to the corresponding HybRecord. 
+    Each ViennaRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated ViennaRecord entry.
     '''
     # HybViennaCmbIter : Public Methods
@@ -1730,18 +1729,18 @@ class HybViennaCmbIter(object):
         self.viennafile_handle = viennafile_handle
         self.counter = 0
 
-    # HybViennaCmbIter : Public Methods 
+    # HybViennaCmbIter : Public Methods
     def __iter__(self):
         return self
 
-    # HybViennaCmbIter : Public Methods 
+    # HybViennaCmbIter : Public Methods
     def __next__(self):
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
         next_vienna_record = next(self.viennafile_handle)
         try:
             next_hyb_record.set_fold_record(next_vienna_record)
-        except:
+        except StopIteration:
             print('For %s counter iteration: %i ...' % (str(self), self.counter))
             raise
         return next_hyb_record
@@ -1768,12 +1767,12 @@ class ViennadFile(io.FileIO):
         line_6 = str(super().__next__(), 'utf-8')
         return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6))
 
-    # ViennadFile : Public Methods : Reading    
+    # ViennadFile : Public Methods : Reading
     def read_record(self):
         'Return next six lines of viennad file as FoldRecord object.'
         return next(self)
 
-    # ViennadFile : Public Methods : Reading    
+    # ViennadFile : Public Methods : Reading
     def read_records(self):
         'Return list of viennad records in viennad file as FoldRecord objects.'
         records = []
@@ -1781,7 +1780,7 @@ class ViennadFile(io.FileIO):
             records.append(record)
         return records
 
-    # ViennadFile : Public Methods : Writing   
+    # ViennadFile : Public Methods : Writing
     def write_record(self, write_record):
         '''
         Write a FoldRecord object to file as a viennad-format string.
@@ -1793,7 +1792,7 @@ class ViennadFile(io.FileIO):
         record_bytestring = bytearray(record_string, 'utf-8')
         self.write(record_bytestring)
 
-    # ViennadFile : Public Methods : Writing     
+    # ViennadFile : Public Methods : Writing
     def write_records(self, write_records):
         '''
         Write a sequence of FoldRecord objects as viennad-format lines to the viennad file.
@@ -1839,7 +1838,7 @@ class HybViennadCmbIter(object):
     '''
     This class provides an iterator to iterate through a HybFile and ViennadFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned viennad entry.
-    Each FoldRecord will be added to the corresponding HybRecord. 
+    Each FoldRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
     '''
     # HybViennaCmbIter : Public Methods
@@ -1859,7 +1858,7 @@ class HybViennadCmbIter(object):
         next_viennad_record = next(self.viennadfile_handle)
         try:
             next_hyb_record.set_fold_record(next_viennad_record)
-        except:
+        except StopIteration:
             print('For %s counter iteration: %i ...' % (str(self), self.counter))
             raise
         return next_hyb_record
@@ -1902,7 +1901,7 @@ class CtFile(io.FileIO):
     # No write_record method is implmeneted for ct files, as the FoldRecord object does not
     #   contain the complete set of ct record information.
     # def write_record(self, write_record):
-    
+
     # No write_records method is implmeneted for ct files, as the FoldRecord object does not
     #   contain the complete set of ct record information.
     # def write_records(self, write_records):
@@ -1919,11 +1918,11 @@ class HybCtIter(object):
         self.ctfile_handle = ctfile_handle
         self.counter = 0
 
-    # HybCtIter : Public Methods 
+    # HybCtIter : Public Methods
     def __iter__(self):
         return self
 
-    # HybCtIter : Public Methods 
+    # HybCtIter : Public Methods
     def __next__(self):
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
@@ -1935,10 +1934,10 @@ class HybCtCmbIter(object):
     '''
     This class provides an iterator to iterate through a HybFile and CtFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned ct entry.
-    Each FoldRecord will be added to the corresponding HybRecord. 
+    Each FoldRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
     '''
-    # HybCtCmbIter : Public Methods 
+    # HybCtCmbIter : Public Methods
     def __init__(self, hybfile_handle, ctfile_handle):
         self.hybfile_handle = hybfile_handle
         self.ctfile_handle = ctfile_handle
@@ -1955,7 +1954,7 @@ class HybCtCmbIter(object):
         next_ct_record = next(self.ctfile_handle)
         try:
             next_hyb_record.set_fold_record(next_viennad_record)
-        except:
+        except StopIteration:
             print('For %s counter iteration: %i ...' % (str(self), self.counter))
             raise
         return next_hyb_record
