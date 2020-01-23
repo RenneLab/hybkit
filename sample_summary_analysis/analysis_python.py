@@ -34,8 +34,9 @@ match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 print('\nPerforming Analysis')
 print('Starting at: %s\n' % str(datetime.datetime.now()))
 
-print('Creating Output Directory:\n    %s\n' % out_dir)
-os.mkdir(out_dir)
+if not os.path.isdir(out_dir):
+    print('Creating Output Directory:\n    %s\n' % out_dir)
+    os.mkdir(out_dir)
 
 print('Analyzing Files:')
 print('    ' + '\n    '.join(input_files) + '\n')

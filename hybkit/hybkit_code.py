@@ -423,7 +423,7 @@ class HybRecord(object):
         self.fold_record = fold_record
 
     # HybRecord : Public Methods : mir_analysis
-    def mirna_analysis(self, mirna_types=None, allow_dimers=True):
+    def mirna_analysis(self, mirna_types=None):
         '''
         Perform an analysis of miRNA properties within the sequence record, and store
         the results in the miRNA_seg flag, and in the miRNA_analysis dict.
@@ -470,10 +470,13 @@ class HybRecord(object):
         self.mirna_details = {}
 
         if mirna_flag == 'B':
-            if allow_dimers:
-                self.mirna_details['mirna_hybrid'] = True
-            else:
-                self.mirna_details['mirna_hybrid'] = False
+            #if allow_dimers:
+            #    self.mirna_details['mirna_hybrid'] = True
+            #else:
+            #    self.mirna_details['mirna_hybrid'] = False
+            self.mirna_details['mirna_hybrid'] = True
+            self.mirna_info = self.seg1_info
+            self.target_info = self.seg2_info
         elif mirna_flag == '5p':
             self.mirna_details['mirna_hybrid'] = True
             self.mirna_info = self.seg1_info
@@ -557,7 +560,7 @@ class HybRecord(object):
                 check_attr = prop_type
                 check_type = 'matches'
             else:
-                check_attr = '_'.join(prop_type_split[:-2])
+                check_attr = '_'.join(prop_type_split[:-1])
                 check_type = prop_type_split[-1]
 
             check_info = None
@@ -565,12 +568,12 @@ class HybRecord(object):
             if check_attr in ['id', 'seq']:
                 check_info = getattr(self, check_attr)
             elif check_attr == 'seg1':
-                check_info = getattr(self.seg1_info, 'ref', None)
+                check_info = self.seg1_info.get('ref')
             elif check_attr == 'seg2':
-                check_info = getattr(self.seg2_info, 'ref', None)
+                check_info = self.seg2_info.get('ref')
             elif check_attr == 'seg':
-                check_info = [getattr(self.seg1_info, 'ref', None),
-                              getattr(self.seg2_info, 'ref', None)]
+                check_info = [self.seg1_info.get('ref'),
+                              self.seg2_info.get('ref')]
                 multi_check = True
             elif check_attr == 'seg1_type':
                 check_info = self.seg1_type()
@@ -584,7 +587,7 @@ class HybRecord(object):
             if not multi_check:
                 check_info = [check_info]
 
-            if require_known:
+            if not allow_unknown:
                 for info in check_info:
                     if info is None:
                         message = 'HybRecord Instance: %s does not have a ' % (str(self))

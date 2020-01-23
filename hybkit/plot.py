@@ -47,7 +47,7 @@ def _check_matplotlib():
     #   optional dependency for the package.
     try:
         import matplotlib
-    except ImportError:
+    except ModuleNotFoundError:
         message = 'The python package matplotlib is required for plotting funciton.'
         message += '\nPlease install this package before using plotting features.'
         print(message)
