@@ -4,7 +4,6 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 # Todo:
-# Add "fold_seq_match" attribute to HybRecord
 # Test .ct -> vienna, viennad parsing
 # Future: Add seg_fold_info details to FoldRecord using HybRecord
 
@@ -36,7 +35,7 @@ import os
 import io
 import types
 import hybkit
-
+from Collections import OrderedDict
 
 class HybRecord(object):
     '''
@@ -106,7 +105,6 @@ class HybRecord(object):
     # HybRecord : Class-Level Variables : Class-Level Settings
     # These settings can be changed in a script to change the default behavior of the class.
     reorder_flags = True                # Reorder flags to default order when writing
-    fill_flags = False                  # Fill flags-dict with default flags
     allow_undefined_flags = False       # Allow undefined flags
 
     # Ideally the following paramaters should be set to False, and True, respctively, however the
@@ -135,6 +133,7 @@ class HybRecord(object):
         if find_seg_types:
             self.find_seg_types()
 
+        self.fold_seq_match = None  # Placeholder to be filled during set_fold_record()
         if fold_record is not None:
             self.set_fold_record(fold_record)
         else:
@@ -339,24 +338,6 @@ class HybRecord(object):
     find_type_methods = {'hyb': find_seg_type_hyb,
                          'string_match': find_seg_type_string_match}
 
-    # HybRecord : Public Methods : Flag_Info
-    # Currently disabled, pending revision or deletion
-    # def initialize_hyb_flags(self):
-    #    'Add Hyb-default flags with initial options to entry flags.'
-    #    hyb_flags = self.default_hyb_flags()
-    #    for flag in hyb_flags:
-    #        if flag not in self.flags:
-    #            self.flags[flag] = hyb_flags[flag]
-
-    # HybRecord : Public Methods : Flag_Info
-    # Currently disabled, pending revision or deletion
-    # def initialize_hybkit_flags(self):
-    #    'Add hybkit-default flags with initial options to entry flags.'
-    #    hybkit_flags = self.default_hybkit_flags()
-    #    for flag in hybkit_flags:
-    #        if flag not in self.flags:
-    #            self.flags[flag] = hybkit_flags[flag]
-
     # HybRecord : Public Methods : fold_record
     def check_fold_record_match(self, fold_record):
         '''
@@ -389,7 +370,10 @@ class HybRecord(object):
             message += '\n   is not a FoldRecord object.'
             print(message)
             raise Exception(message)
-        elif not self.check_fold_record_match(fold_record):
+        if self.check_fold_seq_match(fold_record):
+            self.fold_seq_match = True
+        else:
+            self.fold_seq_match = False
             if not allow_fold_record_mismatch:
                 message = 'For HybRecord: %s\n' % str(self)
                 message += 'Supplied FoldRecord %s\n' % str(fold_record)
@@ -914,14 +898,10 @@ class HybRecord(object):
         return return_list
 
     # HybRecord : Private Methods : flags
-    def _make_flags_dict(self, flag_obj={}, fill_flags=None, allow_undefined_flags=None):
-        #  fill_flags_dict option populates the entry with the default flags and corresponding
-        #   values where appropriate.
+    def _make_flags_dict(self, flag_obj={}, allow_undefined_flags=None):
         #  allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         #  If either argument is provided to the method, it overrides default behavior.
         #  Otherwise, the method falls back to the object-defaults.
-        if fill_flags is None:
-            fill_flags = self.fill_flags
         if allow_undefined_flags is None:
             allow_undefined_flags = self.allow_undefined_flags
 
@@ -930,12 +910,6 @@ class HybRecord(object):
             message += self.all_flags.join(', ')
             print(message)
             raise Exception(message)
-
-        if fill_flags:
-            message = 'This feature has not yet been implemented, to ensure that false data is not'
-            message += ' unintentionally added to Hyb entries.'
-            print(message)
-            raise NotImplementedError(message)
 
         if not allow_undefined_flags:
             for flag in flag_obj:
