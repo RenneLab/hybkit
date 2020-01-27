@@ -4,9 +4,6 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 # Todo:
-# Add .has_property() to HybRecord
-# Add .miRNA_analysis() to HybRecord
-# Add .add_miRNA_details to HybRecord
 # Add "fold_seq_match" attribute to HybRecord
 # Test .ct -> vienna, viennad parsing
 # Future: Add seg_fold_info details to FoldRecord using HybRecord
@@ -98,7 +95,7 @@ class HybRecord(object):
                    ]
 
     # miRNA Types for use in ".mirna_analysis" function
-    MIRNA_TYPES = ['miRNA', 'microRNA']
+    MIRNA_TYPES = {'miRNA', 'microRNA'}
 
     # HybRecord : Class-Level Variables
     custom_flags = []
@@ -508,8 +505,8 @@ class HybRecord(object):
             self.mirna_details['target_fold'] = target_fold_details['seg_fold']
 
     # TODO move to "constants section"
-    # List of string-comparison properties for the ".has_property()" method.
-    _STR_PROPERTIES = [
+    # Set object of string-comparison properties for the ".has_property()" method.
+    _STR_PROPERTIES = {
         'id', 'id_prefix', 'id_suffix', 'id_contains',
         'seg', 'seg_prefix', 'seg_suffix', 'seg_contains',
         'seg1', 'seg1_prefix', 'seg1_suffix', 'seg1_contains',
@@ -518,21 +515,21 @@ class HybRecord(object):
         'seg_type', 'seg_type_prefix', 'seg_type_suffix', 'seg_type_contains',
         'seg1_type', 'seg1_type_prefix', 'seg1_type_suffix', 'seg1_type_contains',
         'seg2_type', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
-    ]
-    # List of non-sstring-comparison properties for the ".has_property()" method.
-    _HAS_PROPERTIES = [
+    }
+    # Set object of non-sstring-comparison properties for the ".has_property()" method.
+    _HAS_PROPERTIES = {
         'has_seg1_type', 'has_seg2_type', 'has_seg_types',
         'has_mirna_details', 'has_fold_record', 'has_mirna_seg', 'has_mirna_fold',
-    ]
-    # List of miRNA-analysis properties for the ".has_property()" method.
-    _MIRNA_PROPERTIES = [
+    }
+    # Set object of miRNA-analysis properties for the ".has_property()" method.
+    _MIRNA_PROPERTIES = {
         'has_mirna', 'has_mirna_dimer',
         '3p_mirna', '5p_mirna',
         '3p_target', '5p_target',
-    ]
+    }
 
-    # List of all allowed properties for the ".has_property()" method.
-    PROPERTIES = _STR_PROPERTIES + _HAS_PROPERTIES + _MIRNA_PROPERTIES
+    # Set object of all allowed properties for the ".has_property()" method.
+    PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES
 
     # HybRecord : Public Methods : has_property
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
@@ -565,15 +562,15 @@ class HybRecord(object):
 
             check_info = None
             multi_check = False
-            if check_attr in ['id', 'seq']:
+            if check_attr in {'id', 'seq'}:
                 check_info = getattr(self, check_attr)
             elif check_attr == 'seg1':
                 check_info = self.seg1_info.get('ref')
             elif check_attr == 'seg2':
                 check_info = self.seg2_info.get('ref')
             elif check_attr == 'seg':
-                check_info = [self.seg1_info.get('ref'),
-                              self.seg2_info.get('ref')]
+                check_info = {self.seg1_info.get('ref'),
+                              self.seg2_info.get('ref')}
                 multi_check = True
             elif check_attr == 'seg1_type':
                 check_info = self.seg1_type()
@@ -585,7 +582,7 @@ class HybRecord(object):
 
             # Wrap single check_info value in a list, if not already.
             if not multi_check:
-                check_info = [check_info]
+                check_info = {check_info}
 
             if not allow_unknown:
                 for info in check_info:
@@ -605,7 +602,8 @@ class HybRecord(object):
             elif check_type == 'suffix':
                 ret_val = any((val.endswith(prop_compare)) for val in check_info)
             elif check_type == 'matches':
-                ret_val = any((prop_copmpare == val) for val in check_info)
+                 ret_val = bool(prop_compare in check_info)
+                # ret_val = any((prop_copmpare == val) for val in check_info)
 
         # Check whether a property exists and has a non-None / non-blank value.
         elif prop_type in self._HAS_PROPERTIES:
@@ -807,7 +805,7 @@ class HybRecord(object):
                       ('_trans', 'mRNA')   ]}
         '''
 
-        ALLOWED_SEARCH_TYPES = {'prefix': '', 'contains': '', 'suffix': '', 'matches': ''}
+        ALLOWED_SEARCH_TYPES = {'prefix', 'contains', 'suffix', 'matches'}
         return_dict = {}
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
@@ -1004,7 +1002,7 @@ class HybRecord(object):
         return flags
 
 
-class HybFile(io.FileIO):
+class HybFile_First(io.FileIO):
     '''
     File-object subclass that provides abiltity to return file lines as HybRecord entries.
     io.FileIO (apparently) only supports reading and writing bytestrings, so any utilized
@@ -1056,6 +1054,89 @@ class HybFile(io.FileIO):
             message = 'Item: "%s" is not a HybRecord object.' % record
             print(message)
             raise Exception(message)
+
+
+class HybFile(object):
+    '''
+    File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
+    '''
+    # HybFile : Public Methods : Initialization / Closing
+    def __init__(self, *args, **kwargs):
+        '''Wrapper for open() function that stores resulting file.'''
+        self.fh = open(*args, **kwargs)
+
+    # HybFile : Public Methods : Initialization / Closing
+    def __enter__(self, *args, **kwargs):
+        '''Open "with" syntax.'''
+        return self
+
+    # HybFile : Public Methods : Initialization / Closing
+    def __exit__(self, type, value, traceback):
+        '''Close "with" syntax'''
+        self.close()
+
+    # HybFile : Public Methods : Initialization / Closing
+    def __iter__(self):
+        '''Return an iterator.'''
+        return self
+
+    # HybFile : Public Methods : Reading
+    def __next__(self):
+        'Return next line as HybRecord object.'
+        return HybRecord.from_line(self.fh.__next__())
+
+    # HybFile : Public Methods : Reading
+    def close(self):
+        '''Close the file.'''
+        self.fh.close()
+
+    # HybFile : Public Methods : Reading
+    def read_record(self):
+        'Return next line of hyb file as HybRecord object.'
+        return next(self)
+
+    # HybFile : Public Methods : Reading
+    def read_records(self):
+        'Return list of all records in hyb file as HybRecord objects.'
+        records = []
+        for record in self:
+            records.append(record)
+        return records
+
+    # HybFile : Public Methods : Writing
+    def write_record(self, write_record):
+        '''
+        Write a HybRecord object to file as a Hyb-format string.
+        Unlike the file.write() method, this method will add a newline to the
+        end of each written record line.
+        '''
+        self._ensure_HybRecord(write_record)
+        record_string = write_record.to_line(newline=True)
+        self.fh.write(record_string)
+
+    # HybFile : Public Methods : Writing
+    def write_records(self, write_records):
+        '''
+        Write a sequence of HybRecord objects as hyb-format lines to the Hyb file.
+        Unlike the file.writelines() method, this method will add a newline to the
+        end of each written record line.
+        '''
+        for write_record in write_records:
+            self.fh.write_record(write_record)
+
+    # HybFile : Public Classmethods : Initialization
+    @classmethod
+    def open(cls, *args, **kwargs):
+        'Return a new HybFile object.'
+        return cls(*args, **kwargs)
+
+    # HybFile : Private Methods
+    def _ensure_HybRecord(self, record):
+        if not isinstance(record, HybRecord):
+            message = 'Item: "%s" is not a HybRecord object.' % record
+            print(message)
+            raise Exception(message)
+
 
 
 class FoldRecord(object):
