@@ -12,6 +12,7 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 import hybkit
+import matplotlib
 import matplotlib.pyplot as plot
 import copy
 
@@ -19,7 +20,8 @@ import copy
 DEFAULT_PIE_MATPLOTLIB_SETTINGS = {
     'autopct':'%1.1f%%',
     'shadow':False,
-    'startangle':90
+    'startangle':90,
+    'counterclock':False,
     }
 DEFAULT_PIE_DPI = 600
 DEFAULT_PIE_FILE_TYPE = 'png'
@@ -28,11 +30,13 @@ DEFAULT_PIE_MIN_WEDGE_SIZE = 0.05
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE = 'Total Segment Portions'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
+DEFAULT_FIG_SIZE = matplotlib.rcParams['figure.figsize']  # 6.4, 4.8 in
 TITLE_PAD = 15
 FORMAT_NAME_MAP = {'5p_mirna_hybrids':"5'_miRNA_Hybrids",
                    '3p_mirna_hybrids':"3'_miRNA_Hybrids",
                    'mirna_dimer_hybrids':'miRNA_Duplexes',
                    'no_mirna_hybrids':'Non-miRNA_Hybrids'}
+
 
 
 # Public Methods : HybRecord Type Analysis Plotting
@@ -143,9 +147,14 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
         labels.append(key)
         counts.append(count)
 
-    if title is not None:
+    if title is None:
         title = 'Targets of ' + str(mirna_name) 
 
+    matplotlib_settings.update({'textprops':{'size':'small'},
+                                #'radius':0.2,
+                               })
+
+    figsize = _autosize_target_analysis(labels)
     _plot_pie_chart(labels=labels,
                     sizes=counts,
                     plot_file_name=plot_file_name,
@@ -154,9 +163,18 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
                     min_wedge_size=(0.025),
                     plot_file_type=plot_file_type,
                     dpi=dpi,
+                    figsize=figsize,
                     matplotlib_settings=matplotlib_settings,
-                   )
+                    )
 
+
+def _autosize_target_analysis(labels):
+    longest = max((len(label) for label in labels))
+    add_count = longest-20
+    width = max((6.5 - (0.16 * add_count)), (3.0))
+    return(9, width)
+    # height 3 for 45 character labels
+    # height 6.5 for 20 character labels 
 
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes, plot_file_name,
@@ -165,6 +183,7 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
                     min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                     plot_file_type=DEFAULT_PIE_FILE_TYPE,
                     dpi=DEFAULT_PIE_DPI,
+                    figsize=DEFAULT_FIG_SIZE,
                     matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
     total_size = sum(sizes)
     fraction_sizes = [size/total_size for size in sizes]
@@ -185,13 +204,11 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
         use_labels.append('other')
         use_sizes.append(other_size)
 
-    # Reverse ordering to create expected clockwise big->small order.
-    use_labels_ordered = [label for label in reversed(use_labels)]
-    use_sizes_ordered = [size for size in reversed(use_sizes)]
-
-    plot.pie(use_sizes_ordered, 
-             labels=use_labels_ordered, 
-             **matplotlib_settings)
+    fig = plot.gcf()
+    fig.set_size_inches(figsize)
+    patches, texts, autotexts = plot.pie(use_sizes,
+                                         labels=use_labels,
+                                         **matplotlib_settings)
     plot.axis('equal')
     if title is not None:
         plot.title(title, pad=TITLE_PAD)
@@ -199,6 +216,7 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
         plot_file_name += '.' + plot_file_type
     plot.savefig(plot_file_name, dpi=dpi)  
     plot.clf()
+    plot.close()
 
     #patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
     #plt.legend(patches, labels, loc="best")

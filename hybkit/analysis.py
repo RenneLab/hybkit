@@ -401,16 +401,16 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
                 one_counts_dict = None
             write_lines = format_mirna_targets(one_mirna_dict, one_counts_dict,
                                                sep=sep, spacer_line=False)
-            with open(analysis_file_name, 'w') as out_file:
+            with open(_sanitize_name(analysis_file_name), 'w') as out_file:
                 out_file.write('\n'.join(write_lines))
 
             if make_plots:
                 hybkit.plot.mirna_targets(mirna, 
                                           collections.Counter(analysis_dict[mirna]), 
-                                          file_name_base + '_' + mirna)
+                                          _sanitize_name(file_name_base + '_' + mirna))
 
     else:
-        analysis_file_name = file_name_base + '_' + 'mirna' + file_suffix
+        analysis_file_name = _sanitize_name(file_name_base + '_' + 'mirna' + file_suffix)
         analysis = format_mirna_targets(analysis_dict, counts_dict, sep, spacer_line)
         with open(analysis_file_name, 'w') as out_file:
             out_file.write('\n'.join(analysis))
@@ -425,6 +425,11 @@ def _add_count(count_dict, key):
         count_dict[key] = 0
     count_dict[key] += 1
 
+
+def _sanitize_name(file_name):
+    for char, replace in [('*', 'star'), (',','com')]:
+        file_name = file_name.replace(char, replace)
+    return file_name
 
 # Private Methods : HybRecord Type Analysis Parsing
 def _format_hybrid_type_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
