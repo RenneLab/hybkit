@@ -313,7 +313,7 @@ class HybRecord(object):
                         check_done = True
                         break
         if not check_done and 'matches' in find_type_params:
-            for search_string, search_type in find_type_params['prefix']:
+            for search_string, search_type in find_type_params['matches']:
                 if search_string == seg_name:
                     found_types.append(search_type)
                     if not check_all:
@@ -1655,12 +1655,10 @@ class FoldRecord(object):
         return ret_string
 
 
-class ViennaFile(io.FileIO):
+class ViennaFile(object):
     '''
-    File-object subclass that provides abiltity to return sets of three file lines as
+    File-object wrapper that provides abiltity to return sets of three file lines as
     FoldRecord entries.
-    io.FileIO (apparently) only supports reading and writing bytestrings, so any utilized
-    base class methods (like .read() and .write()) utilize bytestrings, not unicode strings.
     '''
     # ViennaFile : Class-Level Variables
     # The Hyb Software Package contains further information in the "name" field of the
@@ -1669,16 +1667,38 @@ class ViennaFile(io.FileIO):
     #   extra information.
     hyb_format_vienna = False
 
+    # ViennaFile : Public Methods : Initialization / Closing
+    def __init__(self, *args, **kwargs):
+        '''Wrapper for open() function that stores resulting file.'''
+        self.fh = open(*args, **kwargs)
+
+    # ViennaFile : Public Methods : Initialization / Closing
+    def __enter__(self, *args, **kwargs):
+        '''Open "with" syntax.'''
+        return self
+
+    # ViennaFile : Public Methods : Initialization / Closing
+    def __exit__(self, type, value, traceback):
+        '''Close "with" syntax'''
+        self.close()
+
+    # ViennaFile : Public Methods : Initialization / Closing
+    def __iter__(self):
+        '''Return an iterator.'''
+        return self
+
     # ViennaFile : Public Methods : Reading
     def __next__(self):
-        '''
-        Call io.FileIO __next__ method for next three lines and return
-        output as FoldRecord object.'
-        '''
-        line_1 = str(super().__next__(), 'utf-8')
-        line_2 = str(super().__next__(), 'utf-8')
-        line_3 = str(super().__next__(), 'utf-8')
+        '''Read next three lines and return output as FoldRecord object.'''
+        line_1 = next(self.fh)
+        line_2 = next(self.fh)
+        line_3 = next(self.fh)
         return FoldRecord.from_vienna_lines((line_1, line_2, line_3), self.hyb_format_vienna)
+
+    # ViennaFile : Public Methods : Reading
+    def close(self):
+        '''Close the file.'''
+        self.fh.close()
 
     # ViennaFile : Public Methods : Reading
     def read_record(self):
@@ -1714,6 +1734,12 @@ class ViennaFile(io.FileIO):
         '''
         for write_record in write_records:
             self.write_record(write_record)
+
+    # ViennaFile : Public Classmethods : Initialization
+    @classmethod
+    def open(cls, *args, **kwargs):
+        'Return a new ViennaFile object.'
+        return cls(*args, **kwargs)
 
     # ViennaFile : Private Methods : Writing
     def _ensure_FoldRecord(self, record):
@@ -1776,26 +1802,50 @@ class HybViennaCmbIter(object):
         return next_hyb_record
 
 
-class ViennadFile(io.FileIO):
+class ViennadFile(object):
     '''
-    File-object subclass that provides abiltity to return sets of six viennad file lines as
+    File-object wrapper that provides abiltity to return sets of six viennad file lines as
     FoldRecord entries.
-    io.FileIO (apparently) only supports reading and writing bytestrings, so any utilized
-    base class methods (like .read() and .write()) utilize bytestrings, not unicode strings.
     '''
+
+    # ViennadFile : Public Methods : Initialization / Closing
+    def __init__(self, *args, **kwargs):
+        '''Wrapper for open() function that stores resulting file.'''
+        self.fh = open(*args, **kwargs)
+
+    # ViennadFile : Public Methods : Initialization / Closing
+    def __enter__(self, *args, **kwargs):
+        '''Open "with" syntax.'''
+        return self
+
+    # ViennadFile : Public Methods : Initialization / Closing
+    def __exit__(self, type, value, traceback):
+        '''Close "with" syntax'''
+        self.close()
+
+    # ViennadFile : Public Methods : Initialization / Closing
+    def __iter__(self):
+        '''Return an iterator.'''
+        return self
+
     # ViennadFile : Public Methods : Reading
     def __next__(self):
         '''
         Call io.FileIO __next__ method for next three six lines and return
         output as FoldRecord object.'
         '''
-        line_1 = str(super().__next__(), 'utf-8')
-        line_2 = str(super().__next__(), 'utf-8')
-        line_3 = str(super().__next__(), 'utf-8')
-        line_4 = str(super().__next__(), 'utf-8')
-        line_5 = str(super().__next__(), 'utf-8')
-        line_6 = str(super().__next__(), 'utf-8')
+        line_1 = next(self.fh)
+        line_2 = next(self.fh)
+        line_3 = next(self.fh)
+        line_4 = next(self.fh)
+        line_5 = next(self.fh)
+        line_6 = next(self.fh)
         return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6))
+
+    # ViennadFile : Public Methods : Reading
+    def close(self):
+        '''Close the file.'''
+        self.fh.close()
 
     # ViennadFile : Public Methods : Reading
     def read_record(self):
@@ -1831,6 +1881,12 @@ class ViennadFile(io.FileIO):
         '''
         for write_record in write_records:
             self.write_record(write_record)
+
+    # ViennadFile : Public Classmethods : Initialization
+    @classmethod
+    def open(cls, *args, **kwargs):
+        'Return a new ViennadFile object.'
+        return cls(*args, **kwargs)
 
     # ViennadFile : Private Methods
     def _ensure_FoldRecord(self, record):
@@ -1894,26 +1950,50 @@ class HybViennadCmbIter(object):
         return next_hyb_record
 
 
-class CtFile(io.FileIO):
+class CtFile(object):
     '''
-    File-object subclass that provides abiltity to return sets of ct file lines as
+    File-object wrapper that provides abiltity to return sets of ct file lines as
     FoldRecord entries.
-    io.FileIO (apparently) only supports reading and writing bytestrings, so any utilized
-    base class methods (like .read() and .write()) utilize bytestrings, not unicode strings.
     '''
+
+    # CtFile : Public Methods : Initialization / Closing
+    def __init__(self, *args, **kwargs):
+        '''Wrapper for open() function that stores resulting file.'''
+        self.fh = open(*args, **kwargs)
+
+    # CtFile : Public Methods : Initialization / Closing
+    def __enter__(self, *args, **kwargs):
+        '''Open "with" syntax.'''
+        return self
+
+    # CtFile : Public Methods : Initialization / Closing
+    def __exit__(self, type, value, traceback):
+        '''Close "with" syntax'''
+        self.close()
+
+    # CtFile : Public Methods : Initialization / Closing
+    def __iter__(self):
+        '''Return an iterator.'''
+        return self
+
     # CtFile : Public Methods
     def __next__(self):
         '''
-        Call io.FileIO __next__ method for the first line of the next entry.
+        Call return the first line of the next entry.
         Read the expected number of following lines in the entry, and read that number
         lines further. Return lines as FoldRecord object.
         '''
-        header = str(super().__next__(), 'utf-8')
+        header = next(self.fh)
         record_lines = [header]
         expected_line_num = int(header.strip().split()[0])
         for i in range(expected_line_num):
-            record_lines.append(str(super().__next__(), 'utf-8'))
+            record_lines.append(next(self.fh))
         return FoldRecord.from_ct_lines(record_lines)
+
+    # CtFile : Public Methods : Reading
+    def close(self):
+        '''Close the file.'''
+        self.fh.close()
 
     # CtFile : Public Methods
     def read_record(self):
@@ -1935,6 +2015,12 @@ class CtFile(io.FileIO):
     # No write_records method is implmeneted for ct files, as the FoldRecord object does not
     #   contain the complete set of ct record information.
     # def write_records(self, write_records):
+
+    # CtFile : Public Classmethods : Initialization
+    @classmethod
+    def open(cls, *args, **kwargs):
+        'Return a new CtFile object.'
+        return cls(*args, **kwargs)
 
 
 class HybCtIter(object):
