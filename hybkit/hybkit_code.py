@@ -1002,60 +1002,6 @@ class HybRecord(object):
         return flags
 
 
-class HybFile_First(io.FileIO):
-    '''
-    File-object subclass that provides abiltity to return file lines as HybRecord entries.
-    io.FileIO (apparently) only supports reading and writing bytestrings, so any utilized
-    base class methods (like .read() and .write()) utilize bytestrings, not unicode strings.
-    '''
-    # HybFile : Public Methods : Reading
-    def __next__(self):
-        'Call io.FileIO __next__ method and return output as HybRecord object.'
-        return HybRecord.from_line(str(super().__next__(), 'utf-8'))
-
-    # HybFile : Public Methods : Reading
-    def read_record(self):
-        'Return next line of hyb file as HybRecord object.'
-        return next(self)
-
-    # HybFile : Public Methods : Reading
-    def read_records(self):
-        'Return list of all records in hyb file as HybRecord objects.'
-        records = []
-        for record in self:
-            records.append(record)
-        return records
-
-    # HybFile : Public Methods : Writing
-    def write_record(self, write_record):
-        '''
-        Write a HybRecord object to file as a Hyb-format string.
-        Unlike the file.write() method, this method will add a newline to the
-        end of each written record line.
-        '''
-        self._ensure_HybRecord(write_record)
-        record_string = write_record.to_line(newline=True)
-        record_bytestring = bytearray(record_string, 'utf-8')
-        self.write(record_bytestring)
-
-    # HybFile : Public Methods : Writing
-    def write_records(self, write_records):
-        '''
-        Write a sequence of HybRecord objects as hyb-format lines to the Hyb file.
-        Unlike the file.writelines() method, this method will add a newline to the
-        end of each written record line.
-        '''
-        for write_record in write_records:
-            self.write_record(write_record)
-
-    # HybFile : Private Methods
-    def _ensure_HybRecord(self, record):
-        if not isinstance(record, HybRecord):
-            message = 'Item: "%s" is not a HybRecord object.' % record
-            print(message)
-            raise Exception(message)
-
-
 class HybFile(object):
     '''
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
