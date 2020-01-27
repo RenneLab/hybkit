@@ -24,6 +24,8 @@ DEFAULT_ENTRY_SEP = ','
 DEFAULT_FILE_SUFFIX = '.csv'
 DEFAULT_WRITE_MULTI_FILES = False
 DEFAULT_TARGET_SPACER_LINE = True
+DEFAULT_MAKE_PLOTS = True
+DEFAULT_MAX_MIRNA = 10
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def type_dict():
@@ -176,7 +178,8 @@ def format_types(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 def write_types(file_name_base, analysis_dict,
                 multi_files=DEFAULT_WRITE_MULTI_FILES,
                 sep=DEFAULT_ENTRY_SEP, 
-                file_suffix=DEFAULT_FILE_SUFFIX):
+                file_suffix=DEFAULT_FILE_SUFFIX,
+                make_plots=DEFAULT_MAKE_PLOTS):
     '''
     Write the results of the type-analysis to a file or series of files with names based
     on file_name_base.
@@ -199,6 +202,9 @@ def write_types(file_name_base, analysis_dict,
         with open(analysis_file_name, 'w') as out_file:
                 out_file.write('\n'.join(write_lines))
 
+    if make_plots:
+        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids')
+        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg')
 
 # Public Methods : HybRecord miRNA Count Analysis Parsing
 def format_mirna_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
@@ -220,12 +226,17 @@ def write_mirna_counts(file_name, analysis_dict,
     with open(use_file_name, 'w') as out_file:
         out_file.write('\n'.join(format_mirna_counts(analysis_dict, sep)))
 
+    if make_plots:
+        hybkit.plot.mirna_counts(analysis_dict, file_name + '_mirna_counts')
+    
+
 
 # Public Methods : HybRecord Multiple Analysis Writing
 def write_full(file_name_base, analysis_dict, 
                multi_files=DEFAULT_WRITE_MULTI_FILES,             
                sep=DEFAULT_ENTRY_SEP,
-               file_suffix=DEFAULT_FILE_SUFFIX):
+               file_suffix=DEFAULT_FILE_SUFFIX,
+               make_plots=DEFAULT_MAKE_PLOTS):
     '''
     Write the results of the full analysis to a file or series of files with names based
     on file_name_base.
@@ -249,6 +260,10 @@ def write_full(file_name_base, analysis_dict,
         with open(analysis_file_name, 'w') as out_file:
             out_file.write('\n'.join(write_lines))
 
+    if make_plots:
+        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids')
+        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg')
+        hybkit.plot.mirna_counts(analysis_dict, file_name_base + '_mirna_counts')
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def mirna_target_dict():
@@ -361,12 +376,14 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
                         multi_files=DEFAULT_WRITE_MULTI_FILES,
                         sep=DEFAULT_ENTRY_SEP,
                         file_suffix=DEFAULT_FILE_SUFFIX,
-                        spacer_line=DEFAULT_TARGET_SPACER_LINE):
+                        spacer_line=DEFAULT_TARGET_SPACER_LINE,
+                        make_plots=DEFAULT_MAKE_PLOTS,
+                        max_mirna=DEFAULT_MAX_MIRNA):
     '''
     Write the results of the mirna_target_analysis to a file or series of files with names based
     on file_name_base.
     '''
-    if multi_files and len(analysis_dict) > 10:
+    if multi_files and len(analysis_dict) > max_mirna:
         message = 'miRNA-specific individual output files not supported for > 10 miRNA, with '
         message += '%i miRNA to be written in this case.\n' % len(analysis_dict)
         message += 'Please write fewer output files, or write a combined output with '
@@ -377,21 +394,29 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
     if multi_files:
         for mirna in analysis_dict:
             analysis_file_name = file_name_base + '_' + mirna + file_suffix
-            one_mirna_dict = {analysis_dict[mirna]}
-            if counts is not None:
-                one_counts_dict = {counts_dict[mirna]}
+            one_mirna_dict = collections.Counter({mirna:analysis_dict[mirna]})
+            if counts_dict is not None:
+                one_counts_dict = {mirna:counts_dict[mirna]}
             else:
                 one_counts_dict = None
             write_lines = format_mirna_targets(one_mirna_dict, one_counts_dict,
                                                sep=sep, spacer_line=False)
             with open(analysis_file_name, 'w') as out_file:
                 out_file.write('\n'.join(write_lines))
+
+            if make_plots:
+                hybkit.plot.mirna_targets(mirna, 
+                                          collections.Counter(analysis_dict[mirna]), 
+                                          file_name_base + '_' + mirna)
+
     else:
         analysis_file_name = file_name_base + '_' + 'mirna' + file_suffix
         analysis = format_mirna_targets(analysis_dict, counts_dict, sep, spacer_line)
         with open(analysis_file_name, 'w') as out_file:
             out_file.write('\n'.join(analysis))
         
+        if make_plots:
+            print('Plotting Not Supported for combined miRNA output')
 
 
 # Private Methods : Utility

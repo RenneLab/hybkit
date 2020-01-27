@@ -35,7 +35,7 @@ import os
 import io
 import types
 import hybkit
-from Collections import OrderedDict
+from collections import OrderedDict
 
 class HybRecord(object):
     '''
@@ -868,19 +868,19 @@ class HybRecord(object):
         '''
 
         return_dict = {}
-        if not any(arg is not None for arg in mapped_id_files, type_file_pairs):
+        if not any((arg is not None for arg in (mapped_id_files, type_file_pairs))):
             message = 'make_seg_type_id_map function requires either a mapped_id_files '
             message += 'or type_file_pairs arguement.'
             print(message)
             raise Exception(message)
         for arguement in mapped_id_files, type_file_pairs:
-            if arguement is not None and not any(isinstance(arguement, allowed_type) 
-                                                 for allowed_type in (list, tuple)):
-            message = 'arguements passed to mapped_id_files and type_file_pairs must be '
-            message += 'provided as a list or tuple.\n  Current passed aruement: '
-            message += str(arguement)
-            print(message)
-            raise Exception(message)
+            if ((arguement is not None) and not any((isinstance(arguement, allowed_type) 
+                                                     for allowed_type in (list, tuple)))):
+                message = 'arguements passed to mapped_id_files and type_file_pairs must be '
+                message += 'provided as a list or tuple.\n  Current passed aruement: '
+                message += str(arguement)
+                print(message)
+                raise Exception(message)
 
         if mapped_id_files is not None:
             for mapped_id_file in mapped_id_files:

@@ -10,11 +10,15 @@ usage of hybkit functions. File names are hardcoded, and functions are accessed 
 
 import os
 import sys
-import hybkit
 import datetime
 
+# Ensure hybkit is accessible
+analysis_dir = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(os.path.join(analysis_dir, '..'))
+import hybkit
+
 SHORT_CHECK = True # DEBUG
-SHORT_CHECK = False # DEBUG
+#SHORT_CHECK = False # DEBUG
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -35,7 +39,7 @@ match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 # Begin Analysis
 
 print('\nPerforming Analysis')
-print('Starting at: %s\n' % str(datetime.datetime.now()))
+start_time = datetime.datetime.now()
 
 if not os.path.isdir(out_dir):
     print('Creating Output Directory:\n    %s\n' % out_dir)
@@ -92,11 +96,9 @@ for in_file_path in input_files:
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True)
 
-    #hybkit.plot.plot_type_analysis_hybrid_type_counts(analysis_dict)
-
     sys.stdout.flush()  # DEBUG
     if SHORT_CHECK:
         break # DEBUG
  
-print('Ending At: %s' % str(datetime.datetime.now()))
+print('Time taken: %s' % str(datetime.datetime.now() - start_time)) # DEBUG
 sys.stdout.flush()  # DEBUG

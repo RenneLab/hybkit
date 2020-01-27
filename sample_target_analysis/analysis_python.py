@@ -10,8 +10,12 @@ usage of hybkit functions. File names are hardcoded, and functions are accessed 
 
 import os
 import sys
-import hybkit
 import datetime
+
+# Ensure hybkit is accessible
+analysis_dir = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(os.path.join(analysis_dir, '..'))
+import hybkit
 
 SHORT_CHECK = True # DEBUG
 SHORT_CHECK = False # DEBUG
@@ -96,10 +100,11 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     hybkit.analysis.write_mirna_targets(analysis_basename, 
                                         sorted_target_dict,
                                         counts_dict,
-                                        multi_files=False,   # Default
+                                        multi_files=True,    # Default
                                         sep=',',             # Default
                                         file_suffix='.csv',  # Default
-                                        spacer_line=True)    # Default
+                                        spacer_line=True,    # Default
+                                        max_mirna=25)
 
 print('Done\n')
 
