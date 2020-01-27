@@ -273,7 +273,7 @@ class HybRecord(object):
         identified.
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "prefix", "contains", "suffix", and
-        "matches". The required find_types_param dict should contain a key for each desired
+        "matches". The required find_type_params dict should contain a key for each desired
         search type, with a list of 2-tuples for each search-string with assigned-type.
         For example:
         find_type_params = {'suffix': [('_miR', 'microRNA'),
@@ -333,10 +333,32 @@ class HybRecord(object):
                 print(message)
                 raise Exception(message)
 
+
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    def find_seg_type_from_id_map(self, seg_info, find_type_params={}):
+        '''
+        Return the type of the provided segment, or return None if the segment cannot be
+        identified.
+        This method checks to see if the identifer of the segment is present in a list provided 
+        in find_type_params. find_type_params should be formatted as a dict with keys as 
+        sequence identifier names, and the corresponding type as the respective values.
+        For example:
+        find_type_params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
+                            'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
+        This dict can be generated with the associated make_seg_type_id_map()
+        method.
+        '''
+        seg_name = seg_info['ref']
+        if seg_name in find_type_params:
+            return find_type_params[seg_name]
+        else:
+            return None        
+
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     # Populate the list of builtin methods available to assign segment types
     find_type_methods = {'hyb': find_seg_type_hyb,
-                         'string_match': find_seg_type_string_match}
+                         'string_match': find_seg_type_string_match,
+                         'id_map': find_seg_type_from_id_map}
 
     # HybRecord : Public Methods : fold_record
     def check_fold_record_match(self, fold_record):
@@ -821,6 +843,93 @@ class HybRecord(object):
 
                 return_dict[search_type].append((search_string, seg_type))
 
+        return return_dict
+
+
+    # HybRecord : Public Staticmethods : find_seg_type
+    @staticmethod
+    def make_seg_type_id_map(mapped_id_files=None, type_file_pairs=None):
+        '''
+        Read file(s) provided and return a mapping of sequence identifiers to types 
+        for use with the find_seg_type_from_id_map method.
+        The method requires passing either a list/tuple of one or more files to mapped_id_files,
+        or a list/tuple of one or more pairs of file lists and file types 
+        passed to type_file_pairs.
+        Files listed in the mapped_id_files argument should have the format: 
+            #commentline
+            #seg_id,seg_type
+            seg1_unique_id,seg1_type
+            seg2_unique_id,seg2_type
+        Entries in the list/tuple passed to type_file_pairs should have the format:
+            (seg1_type, file1_name)
+            Ex: [(seg1_type, file1_name), (seg2_type, file2_name),]
+            The first entry in each (non-commented, non-blank) file line will be read and
+            added to the mapping dictionary mapped to the provided seg_type.
+        '''
+
+        return_dict = {}
+        if not any(arg is not None for arg in mapped_id_files, type_file_pairs):
+            message = 'make_seg_type_id_map function requires either a mapped_id_files '
+            message += 'or type_file_pairs arguement.'
+            print(message)
+            raise Exception(message)
+        for arguement in mapped_id_files, type_file_pairs:
+            if arguement is not None and not any(isinstance(arguement, allowed_type) 
+                                                 for allowed_type in (list, tuple)):
+            message = 'arguements passed to mapped_id_files and type_file_pairs must be '
+            message += 'provided as a list or tuple.\n  Current passed aruement: '
+            message += str(arguement)
+            print(message)
+            raise Exception(message)
+
+        if mapped_id_files is not None:
+            for mapped_id_file in mapped_id_files:
+                with open(mapped_id_file, 'r') as mapped_id_file_obj:
+                    for line in mapped_id_file_obj:
+                        # Skip Blank Lines
+                        if not line.split():
+                            continue
+                        # Skip Commented Lines
+                        if line.lstrip().startswith('#'):
+                            continue
+                        line = line.rstrip()
+                        split_line = line.split(',')
+                        if len(split_line) != 2:
+                            message = 'Error reading mapped-id line: \n%s\n%s' % (str(line), str(split_line))
+                            message += '\nTwo comma-separated entries expected.'
+                            print(message)
+                            raise Exception(message)
+                        seq_id = split_line[0]
+                        seg_type = split_line[1]
+        
+                        if seq_id in return_dict and seg_type != return_dict[seq_id]:
+                            message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
+                            message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
+                            print(message)
+                            raise Exception(message)
+                        else:
+                            return_dict[seq_id] = seg_type
+    
+        if type_file_pairs is not None: 
+            for seg_type, id_file in type_file_pairs:
+                with open(id_file, 'r') as id_file_obj:
+                    for line in id_file_obj:
+                        # Skip Blank Lines
+                        if not line.split():
+                            continue
+                        # Skip Commented Lines
+                        if line.lstrip().startswith('#'):
+                            continue
+                        seq_id = line.strip().split()[0]
+        
+                        if seq_id in return_dict and seg_type != return_dict[seq_id]:
+                            message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
+                            message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
+                            print(message)
+                            raise Exception(message)
+                        else:
+                            return_dict[seq_id] = seg_type
+    
         return return_dict
 
     # HybRecord : Private Methods : Initialization
