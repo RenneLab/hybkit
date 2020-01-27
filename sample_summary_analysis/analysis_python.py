@@ -13,6 +13,9 @@ import sys
 import hybkit
 import datetime
 
+SHORT_CHECK = True # DEBUG
+SHORT_CHECK = False # DEBUG
+
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output')
@@ -47,7 +50,7 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
 
 # Initialize Analysis Dict Object
-analysis_dict = hybkit.analysis.mirna_analysis_dict()
+analysis_dict = hybkit.analysis.full_analysis_dict()
 
 # Iterate over each input file, find the segment types, and save the output 
 #   in the output directory.
@@ -63,22 +66,23 @@ for in_file_path in input_files:
     with hybkit.HybFile(in_file_path, 'r') as in_file, \
          hybkit.HybFile(out_file_path, 'w') as out_file:
 
-        #count = 0
+        count = 0 # DEBUG
 
         # Iterate over each record of the input file
         for hyb_record in in_file:
             # Find the segments type of each record
             hyb_record.find_seg_types()
 
-            #if count > 10000:
-            #    break
-            #count += 1
+            if SHORT_CHECK: # DEBUG
+                if count > 10000:
+                    break
+                count += 1
 
-            # Perform microRNA analysis
+            # Perform record analysis
             hyb_record.mirna_analysis()
 
             # Add mirna_analysis details to mirna_analysis_dict
-            hybkit.analysis.running_mirna_analysis(hyb_record, analysis_dict)
+            hybkit.analysis.running_full(hyb_record, analysis_dict)
  
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)
@@ -86,12 +90,13 @@ for in_file_path in input_files:
     # Write mirna_analysis for input file to outputs. 
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
-    hybkit.analysis.write_mirna_analysis_multi_files(analysis_file_basename, analysis_dict)
+    hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True)
 
-    hybkit.plot.plot_type_analysis_hybrid_type_counts(analysis_dict)
- 
+    #hybkit.plot.plot_type_analysis_hybrid_type_counts(analysis_dict)
+
     sys.stdout.flush()  # DEBUG
-    break # DEBUG
+    if SHORT_CHECK:
+        break # DEBUG
  
 print('Ending At: %s' % str(datetime.datetime.now()))
 sys.stdout.flush()  # DEBUG

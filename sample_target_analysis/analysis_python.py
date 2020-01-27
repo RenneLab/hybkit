@@ -13,6 +13,9 @@ import sys
 import hybkit
 import datetime
 
+SHORT_CHECK = True # DEBUG
+SHORT_CHECK = False # DEBUG
+
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output')
@@ -36,13 +39,13 @@ match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_fi
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 
 # Create custom list of miRNA types for analysis
-mirna_types = hybkit.HybRecord.MIRNA_TYPES + ['kshv_microRNA']
+mirna_types = set(list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA'])
 
 out_file_name = in_file_name.replace('.hyb', '_KSHV_only.hyb')
 out_file_name = out_file_name.replace(analysis_dir, out_dir)
 out_file_path = os.path.join(out_dir, out_file_name)
 
-print('Outputting KSHV-Specific Sequences to:\n    %s\n' % out_file_path)
+print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
 
 # Open one HybFile entry for reading, and one for writing
 with hybkit.HybFile(in_file_name, 'r') as in_file, \
@@ -51,19 +54,21 @@ with hybkit.HybFile(in_file_name, 'r') as in_file, \
     # Prepare Target Analysis dict
     target_analysis = {}
 
-    count = 0
+    count = 0 # DEBUG
 
     # Iterate over each record of the input file
     for hyb_record in in_file:
 
-        count += 1
-        if count > 5000:
-            break
-
+        if SHORT_CHECK: # DEBUG
+            count += 1
+            if count > 5000:
+                break
 
         # Find the segments type of each record
         hyb_record.find_seg_types()
         hyb_record.mirna_analysis(mirna_types=mirna_types)
+
+        # Output only sequences where a segment identifier contains the string "kshv"
         if hyb_record.has_property('seg_contains', 'kshv'):
             out_kshv_file.write_record(hyb_record)
 
@@ -76,17 +81,27 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
 
     for hyb_record in out_kshv_file:
         hyb_record.mirna_analysis(mirna_types=mirna_types)
-        hybkit.analysis.running_target_analysis(hyb_record, target_dict, 
-                                                double_count_duplexes=True)
+        hybkit.analysis.running_mirna_targets(hyb_record, target_dict, 
+                                              double_count_duplexes=True, # Includes mirna duplexes
+                                              # Limits output to KSHV miRNA:
+                                              mirna_contains='kshv')
         
     # Process and sort dictionary of miRNA and targets
-    sorted_target_dict, counts, total_count = hybkit.analysis.process_target_analysis(target_dict)
+    results = hybkit.analysis.process_mirna_targets(target_dict)
+    sorted_target_dict, counts_dict, total_count = results
 
     # Write target information to output file
-    hybkit.analysis.write_target_analysis_file(out_file_path.replace('.hyb','.csv'), 
-                                               sorted_target_dict,
-                                               counts=counts,
-                                               sep=',')
+    # Set analysis basename without ".hyb" extension
+    analysis_basename = out_file_path.replace('.hyb','')
+    hybkit.analysis.write_mirna_targets(analysis_basename, 
+                                        sorted_target_dict,
+                                        counts_dict,
+                                        multi_files=False,   # Default
+                                        sep=',',             # Default
+                                        file_suffix='.csv',  # Default
+                                        spacer_line=True)    # Default
+
+print('Done\n')
 
 print('Ending At: %s' % str(datetime.datetime.now()))
 sys.stdout.flush()  # DEBUG
