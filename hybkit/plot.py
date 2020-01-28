@@ -40,7 +40,8 @@ FORMAT_NAME_MAP = {'5p_mirna_hybrids':"5'_miRNA_Hybrids",
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def hybrid_type_counts(analysis_dict, plot_file_name, 
+def hybrid_type_counts(analysis_dict, plot_file_name,
+                       analysis_name=None,
                        title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
                        other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                        min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -68,7 +69,8 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def all_seg_types(analysis_dict, plot_file_name, 
+def all_seg_types(analysis_dict, plot_file_name,
+                  analysis_name=None,
                   title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
                   other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                   min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -97,6 +99,7 @@ def all_seg_types(analysis_dict, plot_file_name,
 
 # Public Methods : HybRecord Type Analysis Plotting
 def mirna_counts(analysis_dict, plot_file_name, 
+                 analysis_name=None,
                  title=DEFAULT_MIRNA_COUNTS_TITLE,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -153,14 +156,19 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
     matplotlib_settings.update({'textprops':{'size':'small'},
                                })
 
+
+    # Set figsize:
+    # Width set at constant 9(inches)
+    # Height 3 for >= 45 character labels, ratio of 9:3 (more rectangular)
+    # Height 3 + (0.16 * count-20) for: 20 < count < 45 labels
+    # Height 6.5 for <= 20 character labels, ratio of 9:6.5 (more square)
     longest = max((len(label) for label in labels))
-    add_count = max(longest-20, 0)
+    add_count = max(longest-20, 0)  
     max_height = 6.5
     min_height = 3.0
-    height = max((max_height - (0.16 * add_count)), (3.0))
+    height = max((max_height - (0.16 * add_count)), (3.0))  # Ensure no less than min_height
+    height = min(height, max_height)                        # Ensure no more than max_height
     figsize = (9, height)
-    # height 3 for 45 character labels
-    # height 6.5 for 20 character labels
 
     _plot_pie_chart(labels=labels,
                     sizes=counts,
