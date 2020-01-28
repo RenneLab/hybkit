@@ -18,7 +18,7 @@ sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
 SHORT_CHECK = True # DEBUG
-#SHORT_CHECK = False # DEBUG
+SHORT_CHECK = False # DEBUG
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -55,6 +55,7 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 
 # Initialize Analysis Dict Object
 analysis_dict = hybkit.analysis.full_analysis_dict()
+analysis_dicts = []
 
 # Iterate over each input file, find the segment types, and save the output 
 #   in the output directory.
@@ -79,6 +80,7 @@ for in_file_path in input_files:
 
             if SHORT_CHECK: # DEBUG
                 if count > 10000:
+                    #break
                     break
                 count += 1
 
@@ -96,9 +98,17 @@ for in_file_path in input_files:
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True)
 
+    analysis_dicts.append(analysis_dict)
+
     sys.stdout.flush()  # DEBUG
     if SHORT_CHECK:
-        break # DEBUG
- 
+        #break # DEBUG
+        pass
+
+combined_analysis_dict = hybkit.analysis.combine_full_dicts(analysis_dicts) 
+combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
+print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
+hybkit.analysis.write_full(combined_analysis_file_basename, combined_analysis_dict, multi_files=True)
+
 print('Time taken: %s' % str(datetime.datetime.now() - start_time)) # DEBUG
 sys.stdout.flush()  # DEBUG

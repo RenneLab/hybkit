@@ -90,6 +90,7 @@ def combine_mirna_count_dicts(analysis_dicts):
     for add_dict in analysis_dicts[1:]:
         for key in MIRNA_COUNT_ANALYSIS_KEYS:
             ret_dict[key] += add_dict[key]
+    return ret_dict
 
 
 # Public Methods : HybRecord Analysis
@@ -229,6 +230,31 @@ def write_mirna_counts(file_name, analysis_dict,
     if make_plots:
         hybkit.plot.mirna_counts(analysis_dict, file_name + '_mirna_counts')
     
+
+# Public Methods : HybRecord Analysis Preparation : Type Analysis
+def combine_full_dicts(analysis_dicts):
+    'Combine a list/tuple of dictionaries created from running full analyses.'
+    # Check that method input is formatted correctly:
+    if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
+        or  (len(analysis_dicts) < 2)
+        or  (not all(isinstance(item, dict) for item in analysis_dicts))):
+        message = 'Input to "combine_full_dicts" method must be a list/tuple of two '
+        message += 'or more dicts.\n'
+        message += 'Current input:\n    %s' % str(analysis_dicts)
+        print(message)
+        raise Exception(message)
+
+    ret_dict = copy.deepcopy(analysis_dicts[0])
+    for add_dict in analysis_dicts[1:]:
+        for category in TYPE_ANALYSIS_KEYS:
+            for entry in add_dict[category].keys():
+                ret_dict[category][entry] += add_dict[category][entry]
+
+    for add_dict in analysis_dicts[1:]:
+        for key in MIRNA_COUNT_ANALYSIS_KEYS:
+            ret_dict[key] += add_dict[key]
+
+    return ret_dict
 
 
 # Public Methods : HybRecord Multiple Analysis Writing

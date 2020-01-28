@@ -23,8 +23,8 @@ DEFAULT_PIE_MATPLOTLIB_SETTINGS = {
     'startangle':90,
     'counterclock':False,
     }
-DEFAULT_PIE_DPI = 600
-DEFAULT_PIE_FILE_TYPE = 'png'
+DEFAULT_DPI = 600
+DEFAULT_FILE_TYPE = 'png'
 DEFAULT_PIE_OTHER_THRESHHOLD = 0.1
 DEFAULT_PIE_MIN_WEDGE_SIZE = 0.05
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
@@ -44,9 +44,9 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
                        title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
                        other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                        min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                       plot_file_type=DEFAULT_PIE_FILE_TYPE,
-                       dpi=DEFAULT_PIE_DPI,
-                       matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
+                       plot_file_type=DEFAULT_FILE_TYPE,
+                       dpi=DEFAULT_DPI,
+                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     'Plot the results of hybrid_type_counts'
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -72,9 +72,9 @@ def all_seg_types(analysis_dict, plot_file_name,
                   title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
                   other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                   min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                  plot_file_type=DEFAULT_PIE_FILE_TYPE,
-                  dpi=DEFAULT_PIE_DPI,
-                  matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
+                  plot_file_type=DEFAULT_FILE_TYPE,
+                  dpi=DEFAULT_DPI,
+                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     'Plot the results of hybrid_type_counts'
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -100,9 +100,9 @@ def mirna_counts(analysis_dict, plot_file_name,
                  title=DEFAULT_MIRNA_COUNTS_TITLE,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                 plot_file_type=DEFAULT_PIE_FILE_TYPE,
-                 dpi=DEFAULT_PIE_DPI,
-                 matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
+                 plot_file_type=DEFAULT_FILE_TYPE,
+                 dpi=DEFAULT_DPI,
+                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     'Plot the results of hybrid_type_counts'
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -137,9 +137,9 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
                  title=None,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                 plot_file_type=DEFAULT_PIE_FILE_TYPE,
-                 dpi=DEFAULT_PIE_DPI,
-                 matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
+                 plot_file_type=DEFAULT_FILE_TYPE,
+                 dpi=DEFAULT_DPI,
+                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     'Plot the targets of a single mirna'
     labels = []
     counts = []
@@ -151,10 +151,17 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
         title = 'Targets of ' + str(mirna_name) 
 
     matplotlib_settings.update({'textprops':{'size':'small'},
-                                #'radius':0.2,
                                })
 
-    figsize = _autosize_target_analysis(labels)
+    longest = max((len(label) for label in labels))
+    add_count = max(longest-20, 0)
+    max_height = 6.5
+    min_height = 3.0
+    height = max((max_height - (0.16 * add_count)), (3.0))
+    figsize = (9, height)
+    # height 3 for 45 character labels
+    # height 6.5 for 20 character labels
+
     _plot_pie_chart(labels=labels,
                     sizes=counts,
                     plot_file_name=plot_file_name,
@@ -168,23 +175,15 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
                     )
 
 
-def _autosize_target_analysis(labels):
-    longest = max((len(label) for label in labels))
-    add_count = longest-20
-    width = max((6.5 - (0.16 * add_count)), (3.0))
-    return(9, width)
-    # height 3 for 45 character labels
-    # height 6.5 for 20 character labels 
-
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes, plot_file_name,
                     title=None,
                     other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                     min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                     plot_file_type=DEFAULT_PIE_FILE_TYPE,
-                    dpi=DEFAULT_PIE_DPI,
+                    dpi=DEFAULT_DPI,
                     figsize=DEFAULT_FIG_SIZE,
-                    matplotlib_settings=DEFAULT_PIE_MATPLOTLIB_SETTINGS):
+                    matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     total_size = sum(sizes)
     fraction_sizes = [size/total_size for size in sizes]
     use_labels = []
