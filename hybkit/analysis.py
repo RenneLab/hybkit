@@ -339,12 +339,15 @@ def running_mirna_targets(record, analysis_dict, double_count_duplexes=False,
 
     check_pairs = []
     if record.has_property('has_mirna'):
-        check_pairs.append((record.mirna_info['ref'], record.target_info['ref']))
+        mirna_target_pair = ((record.mirna_info['ref'], record.mirna_details['mirna_seg_type']),
+                            (record.target_info['ref'], record.mirna_details['target_seg_type']))
+        check_pairs.append(mirna_target_pair)
 
         if double_count_duplexes and record.has_property('has_mirna_dimer'):
-            check_pairs.append((record.target_info['ref'], record.mirna_info['ref']))
-        
-    for mirna, target in check_pairs:
+
+            check_pairs.append((mirna_target_pair[1], mirna_target_pair[0]))
+    
+    for ((mirna, mirna_seg_type), (target, target_seg_type)) in check_pairs:
         if any(check is not None for check in (mirna_contains, mirna_matches, 
                                                target_contains, target_matches)):
             use_pair = False
@@ -356,32 +359,42 @@ def running_mirna_targets(record, analysis_dict, double_count_duplexes=False,
         else:
             use_pair = True
 
-        if use_pair:    
-            if mirna not in analysis_dict:
+        if use_pair:
+            mirna_id = (mirna, mirna_seg_type)
+            target_id = (target, target_seg_type) 
+            if mirna_id not in analysis_dict:
             #    analysis_dict[mirna] = {}
-                analysis_dict[mirna] = collections.Counter()
+                analysis_dict[mirna_id] = collections.Counter()
             # Existence checking not required for counter objects.
             # _add_count(analysis_dict[mirna], target)
-            analysis_dict[mirna][target] += 1
+            analysis_dict[mirna_id][target_id] += 1
 
 
 # Public Methods : HybRecord miRNA Target Analysis Parsing
 def process_mirna_targets(analysis_dict):
     'process and sort the results of target analysis'
     counts = {} 
+    target_type_counts = {}
     ret_dict = {}
-    for mirna in sorted(analysis_dict.keys()):
+    for mirna_id in sorted(analysis_dict.keys()):
         # Get count of all targets of a particular mirna
-        counts[mirna] = sum(analysis_dict[mirna].values())
+        counts[mirna_id] = sum(analysis_dict[mirna_id].values())
+        #for key, count in analysis_dict[mirna_id].most_common():
+        #    print(key, count)
+        target_type_counts[mirna_id] = collections.Counter()
+        for target_id in analysis_dict[mirna_id].keys():
+            target, target_seg_type = target_id
+            target_type_counts[mirna_id][target_seg_type] += analysis_dict[mirna_id][target_id]
         # For each miRNA, sort targets by target count.
-        # targets_by_count = sorted(analysis_dict[mirna].items(), key=lambda item: item[1])
+        # targets_by_count = sorted(analysis_dict[mirna_id].items(), key=lambda item: item[1])
         # Use Counter Implementation:
-        targets_by_count = analysis_dict[mirna].most_common() 
+        targets_by_count = analysis_dict[mirna_id].most_common() 
         # Add sorted target dict to ret_dict
-        ret_dict[mirna] = {target: target_count for target, target_count in targets_by_count}
+        mirna_ret_dict = {target_id: target_count for target_id, target_count in targets_by_count}
+        ret_dict[mirna_id] = collections.Counter(mirna_ret_dict)
 
     total_count = sum(counts.values())
-    return (ret_dict, counts, total_count)
+    return (ret_dict, counts, target_type_counts, total_count)
 
 
 # Public Methods : HybRecord miRNA Target Analysis Parsing
@@ -389,19 +402,28 @@ def format_mirna_targets(analysis_dict, counts=None,
                          sep=DEFAULT_ENTRY_SEP, 
                          spacer_line=DEFAULT_TARGET_SPACER_LINE):
     'Return the results of target analysis in a list of sep-delimited lines.'
-    ret_lines = ['mirna' + sep + 'target' + sep + 'count']
-    for mirna in analysis_dict:
+    header_items = ['mirna', 'mirna_type', 'target', 'target_type', 'count']
+    ret_lines = []
+    ret_lines.append(sep.join(header_items))
+    for mirna_id in analysis_dict:
+        mirna, mirna_seg_type = mirna_id
         if counts is not None:
-            ret_lines.append(mirna + sep + 'total' + sep + str(counts[mirna]))
-        for target in analysis_dict[mirna]:
-            ret_lines.append(mirna + sep + target + sep + str(analysis_dict[mirna][target]))
+            line_items = ['mirna', '-', 'total', '-', str(counts[mirna_id])]
+            ret_lines.append(sep.join(line_items))
+        for target_id in analysis_dict[mirna_id]:
+            target, target_seg_type = target_id
+            count = str(analysis_dict[mirna_id][target_id])
+            line_items = [mirna, mirna_seg_type, target, target_seg_type, count]
+            ret_lines.append(sep.join(line_items))
         if spacer_line:
             ret_lines.append('')
     return ret_lines
 
 
 # Public Methods : HybRecord miRNA Target Analysis Writing
-def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None, 
+def write_mirna_targets(file_name_base, analysis_dict,
+                        counts_dict=None, 
+                        target_types_count_dict=None,
                         name=None,
                         multi_files=DEFAULT_WRITE_MULTI_FILES,
                         sep=DEFAULT_ENTRY_SEP,
@@ -410,7 +432,7 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
                         make_plots=DEFAULT_MAKE_PLOTS,
                         max_mirna=DEFAULT_MAX_MIRNA):
     '''
-    Write the results of the mirna_target_analysis to a file or series of files with names based
+    Write the results of the mirna_target to a file or series of files with names based
     on file_name_base.
     '''
     if multi_files and len(analysis_dict) > max_mirna:
@@ -422,11 +444,12 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
         raise Exception(message)
 
     if multi_files:
-        for mirna in analysis_dict:
+        for mirna_id in analysis_dict:
+            mirna, mirna_seg_type = mirna_id
             analysis_file_name = file_name_base + '_' + mirna + file_suffix
-            one_mirna_dict = collections.Counter({mirna:analysis_dict[mirna]})
+            one_mirna_dict = collections.Counter({mirna_id:analysis_dict[mirna_id]})
             if counts_dict is not None:
-                one_counts_dict = {mirna:counts_dict[mirna]}
+                one_counts_dict = {mirna_id:counts_dict[mirna_id]}
             else:
                 one_counts_dict = None
             write_lines = format_mirna_targets(one_mirna_dict, one_counts_dict,
@@ -435,11 +458,19 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
                 out_file.write('\n'.join(write_lines))
 
             if make_plots:
+                target_plot_name = _sanitize_name(file_name_base + '_' + mirna)
                 hybkit.plot.mirna_targets(mirna, 
-                                          collections.Counter(analysis_dict[mirna]), 
-                                          _sanitize_name(file_name_base + '_' + mirna),
+                                          analysis_dict[mirna_id], 
+                                          target_plot_name,
                                           name=name,
                                           )
+
+                target_type_plot_name = _sanitize_name(file_name_base + '_' + mirna + '_types')
+                hybkit.plot.mirna_target_types(mirna,
+                                               target_types_count_dict[mirna_id],
+                                               target_type_plot_name,
+                                               name=name
+                                              )
 
     else:
         analysis_file_name = _sanitize_name(file_name_base + '_' + 'mirna' + file_suffix)

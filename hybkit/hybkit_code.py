@@ -177,30 +177,50 @@ class HybRecord(object):
         return (self.seg1_id(), self.seg2_id())
 
     # HybRecord : Public Methods : Flag_Info : seg_type
-    def seg1_type(self):
-        'If the "seg1_type" flag is defined, return it. Otherwise return "None"'
-        return self._get_flag_or_none('seg1_type')
-
-    # HybRecord : Public Methods : Flag_Info : seg_type
-    def seg2_type(self):
-        'If the "seg2_type" flag is defined, return it. Otherwise return "None"'
-        return self._get_flag_or_none('seg2_type')
-
-    # HybRecord : Public Methods : Flag_Info : seg_type
-    def seg_types(self):
+    def seg1_type(self, require=False):
         '''
-        If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values
-        or None where each respective value is not defined.
+        If the "seg1_type" flag is defined, return it. 
+        If require is provided as True, raise an error if the seg1_type is not defined.
+        Otherwise return "None"
         '''
-        return (self._get_flag_or_none('seg1_type'), self._get_flag_or_none('seg2_type'))
+        if require:
+            return self._get_flag('seg1_type')
+        else:
+            return self._get_flag_or_none('seg1_type')
 
     # HybRecord : Public Methods : Flag_Info : seg_type
-    def seg_types_sorted(self):
+    def seg2_type(self, require=False):
+        '''
+        If the "seg2_type" flag is defined, return it.
+        If require is provided as True, raise an error if the seg2_type flag is not defined.
+        Otherwise return "None"
+        '''
+        if require:
+            return self._get_flag('seg2_type')
+        else:
+            return self._get_flag_or_none('seg2_type')
+
+    # HybRecord : Public Methods : Flag_Info : seg_type
+    def seg_types(self, require=False):
+        '''
+        If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values.
+        If require is provided as True, raise an error if either of the seg1_type or seg2_type 
+        flags are not defined. Otherwise return "None" for each undefined flag.
+        '''
+        if require:
+            return (self._get_flag('seg1_type'), self._get_flag('seg2_type'))
+        else:
+            return (self._get_flag_or_none('seg1_type'), self._get_flag_or_none('seg2_type'))
+
+    # HybRecord : Public Methods : Flag_Info : seg_type
+    def seg_types_sorted(self, require=False):
         '''
         If the "seg1_type" and "seg2_type" flags are defined, return a tuple of both values
-        sorted alphabetically, or None where each respective value is not defined.
+        sorted alphabetically. 
+        If require is provided as True, raise an error if either of the seg1_type or seg2_type
+        flags are not defined. Otherwise return "None" for each undefined flag. 
         '''
-        return sorted(self.seg_types())
+        return sorted(self.seg_types(require=require))
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg1_type(self, seg1_type):
@@ -478,20 +498,30 @@ class HybRecord(object):
             #else:
             #    self.mirna_details['mirna_hybrid'] = False
             self.mirna_details['mirna_hybrid'] = True
+            self.mirna_details['mirna_seg_type'] = self.seg1_type(require=True)
+            self.mirna_details['target_seg_type'] = self.seg2_type(require=True)
             self.mirna_info = self.seg1_info
             self.target_info = self.seg2_info
         elif mirna_flag == '5p':
             self.mirna_details['mirna_hybrid'] = True
+            self.mirna_details['mirna_seg_type'] = self.seg1_type(require=True)
+            self.mirna_details['target_seg_type'] = self.seg2_type(require=True)
             self.mirna_info = self.seg1_info
             self.target_info = self.seg2_info
         elif mirna_flag == '3p':
             self.mirna_details['mirna_hybrid'] = True
+            self.mirna_details['mirna_seg_type'] = self.seg2_type(require=True)
+            self.mirna_details['target_seg_type'] = self.seg1_type(require=True)
             self.mirna_info = self.seg2_info
             self.target_info = self.seg1_info
         elif mirna_flag == 'N':
             self.mirna_details['mrina_hybird'] = False
+            self.mirna_details['mirna_seg_type'] = None
+            self.mirna_details['target_seg_type'] = None
         elif mirna_flag == 'U':
             self.mirna_details['mirna_hybrid'] = False
+            self.mirna_details['mirna_seg_type'] = None
+            self.mirna_details['target_seg_type'] = None
         else:
             message = 'Problem with mirna_analysis for hybrecord: %s ' % str(self)
             message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
@@ -949,6 +979,15 @@ class HybRecord(object):
         ret_string += indent_str + 'Map Score:      %s\n' % seg_info['score']
         ret_string += suffix
         return ret_string
+
+    # HybRecord : Private Methods : flags
+    def _get_flag(self, flag_key):
+        if flag_key in self.flags:
+            return self.flags[flag_key]
+        else:
+            message = 'Expected Flag Key: %s, but it is not present in record.' % flag_key
+            print(message)
+            raise Exception(message)
 
     # HybRecord : Private Methods : flags
     def _get_flag_or_none(self, flag_key):

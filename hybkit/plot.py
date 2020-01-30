@@ -26,7 +26,7 @@ DEFAULT_PIE_MATPLOTLIB_SETTINGS = {
 DEFAULT_DPI = 600
 DEFAULT_FILE_TYPE = 'png'
 DEFAULT_PIE_OTHER_THRESHHOLD = 0.1
-DEFAULT_PIE_MIN_WEDGE_SIZE = 0.05
+DEFAULT_PIE_MIN_WEDGE_SIZE = 0.04
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE = 'Total Segment Portions'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
@@ -156,8 +156,8 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
     'Plot the targets of a single mirna'
     labels = []
     counts = []
-    for key, count in mirna_targets_dict.most_common(): 
-        labels.append(key)
+    for ((target, target_seg_type), count) in mirna_targets_dict.most_common(): 
+        labels.append(target)
         counts.append(count)
 
     if title is None:
@@ -195,6 +195,43 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
                     matplotlib_settings=matplotlib_settings,
                     )
 
+
+# Public Methods : HybRecord miRNA Target Analysis Plotting
+def mirna_target_types(mirna_name, mirna_target_type_counts_dict, plot_file_name, 
+                       title=None,
+                       name=None,
+                       other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
+                       min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
+                       plot_file_type=DEFAULT_FILE_TYPE,
+                       dpi=DEFAULT_DPI,
+                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+    'Plot the targets types of a single mirna'
+    labels = []
+    counts = []
+    for key, count in mirna_target_type_counts_dict.most_common(): 
+        labels.append(key)
+        counts.append(count)
+
+    if title is None:
+        title = str(mirna_name) + ' Target Types'
+
+    if name is not None:
+        title = str(name) + ': ' + title
+
+    matplotlib_settings.update({'textprops':{'size':'small'},
+                               })
+
+
+    _plot_pie_chart(labels=labels,
+                    sizes=counts,
+                    plot_file_name=plot_file_name,
+                    title=title,
+                    other_threshhold=other_threshhold,
+                    # min_wedge_size=(0.025),
+                    plot_file_type=plot_file_type,
+                    dpi=dpi,
+                    matplotlib_settings=matplotlib_settings,
+                    )
 
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes, plot_file_name,

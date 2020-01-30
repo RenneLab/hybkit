@@ -19,7 +19,7 @@ sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
 SHORT_CHECK = True   # DEBUG
-# SHORT_CHECK = False  # DEBUG
+SHORT_CHECK = False  # DEBUG
 ONE_CHECK = True     # DEBUG
 ONE_CHECK = False    # DEBUG
 
@@ -106,9 +106,10 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
         
     # Process and sort dictionary of miRNA and targets
     results = hybkit.analysis.process_mirna_targets(target_dict)
-    (sorted_target_dict,  # Contains same data as target_dict, but with keys sorted by count.
-     counts_dict,         # dict with keys of miRNA, and values of total mirna-specific hybrids.
-     total_count          # integer: total number of mirna found.
+    (sorted_target_dict,       # Contains same data as target_dict, but with keys sorted by count
+     counts_dict,              # dict with keys: mirna_id, values: total mirna-specific hybrids
+     target_type_counts_dict,  # dict with keys: mirna_id, values: dict of targeted type counts
+     total_count               # integer: total number of mirna found.
      ) = results
 
     # Write target information to output file
@@ -117,6 +118,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     hybkit.analysis.write_mirna_targets(analysis_basename, 
                                         sorted_target_dict,
                                         counts_dict,
+                                        target_type_counts_dict,
                                         name=analysis_label,
                                         multi_files=True,    # Default
                                         sep=',',             # Default
