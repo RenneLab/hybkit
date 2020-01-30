@@ -17,8 +17,10 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
-SHORT_CHECK = True # DEBUG
-SHORT_CHECK = False # DEBUG
+SHORT_CHECK = True  # DEBUG
+SHORT_CHECK = False  # DEBUG
+ONE_CHECK = True  # DEBUG
+ONE_CHECK = False  # DEBUG
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -61,6 +63,7 @@ analysis_dicts = []
 #   in the output directory.
 for in_file_path in input_files:
     in_file_name = os.path.basename(in_file_path)
+    in_file_label = in_file_name.replace('.hyb', '')
     out_file_name = in_file_name.replace('.hyb', '_typed.hyb')
     out_file_path = os.path.join(out_dir, out_file_name)
 
@@ -96,19 +99,21 @@ for in_file_path in input_files:
     # Write mirna_analysis for input file to outputs. 
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
-    hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True)
+    hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True, name=in_file_label)
 
     analysis_dicts.append(analysis_dict)
 
     sys.stdout.flush()  # DEBUG
-    if SHORT_CHECK:
-        #break # DEBUG
-        pass
+    if ONE_CHECK:
+        break  # DEBUG
 
 combined_analysis_dict = hybkit.analysis.combine_full_dicts(analysis_dicts) 
 combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
 print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
-hybkit.analysis.write_full(combined_analysis_file_basename, combined_analysis_dict, multi_files=True)
+hybkit.analysis.write_full(combined_analysis_file_basename, 
+                           combined_analysis_dict, 
+                           multi_files=True,
+                           name='Combined')
 
 print('Time taken: %s' % str(datetime.datetime.now() - start_time)) # DEBUG
 sys.stdout.flush()  # DEBUG

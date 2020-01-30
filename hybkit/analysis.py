@@ -19,7 +19,7 @@ import hybkit
 TYPE_ANALYSIS_KEYS = ['hybrid_type_counts', 'seg1_types', 'seg2_types', 'all_seg_types']
 MIRNA_COUNT_ANALYSIS_KEYS = ['5p_mirna_hybrids', '3p_mirna_hybrids', 'mirna_dimer_hybrids', 
                              'all_mirna_hybrids', 'no_mirna_hybrids']
-DEFAULT_HYBRID_TYPE_SEP = '---'
+DEFAULT_HYBRID_TYPE_SEP = '-'
 DEFAULT_ENTRY_SEP = ','
 DEFAULT_FILE_SUFFIX = '.csv'
 DEFAULT_WRITE_MULTI_FILES = False
@@ -177,6 +177,7 @@ def format_types(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 
 # Public Methods : HybRecord Type Analysis Writing
 def write_types(file_name_base, analysis_dict,
+                name=None,
                 multi_files=DEFAULT_WRITE_MULTI_FILES,
                 sep=DEFAULT_ENTRY_SEP, 
                 file_suffix=DEFAULT_FILE_SUFFIX,
@@ -204,8 +205,8 @@ def write_types(file_name_base, analysis_dict,
                 out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids')
-        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg')
+        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids', name=name)
+        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg', name=name)
 
 # Public Methods : HybRecord miRNA Count Analysis Parsing
 def format_mirna_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
@@ -217,6 +218,7 @@ def format_mirna_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 
 # Public Methods : HybRecord miRNA Count Analysis Writing
 def write_mirna_counts(file_name, analysis_dict,
+                       name=None,
                        multi_files=DEFAULT_WRITE_MULTI_FILES, # Currently a dummy option
                        sep=DEFAULT_ENTRY_SEP,
                        file_suffix=DEFAULT_FILE_SUFFIX):
@@ -228,7 +230,7 @@ def write_mirna_counts(file_name, analysis_dict,
         out_file.write('\n'.join(format_mirna_counts(analysis_dict, sep)))
 
     if make_plots:
-        hybkit.plot.mirna_counts(analysis_dict, file_name + '_mirna_counts')
+        hybkit.plot.mirna_counts(analysis_dict, file_name + '_mirna_counts', name=name)
     
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
@@ -258,7 +260,8 @@ def combine_full_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Multiple Analysis Writing
-def write_full(file_name_base, analysis_dict, 
+def write_full(file_name_base, analysis_dict,
+               name=None,
                multi_files=DEFAULT_WRITE_MULTI_FILES,             
                sep=DEFAULT_ENTRY_SEP,
                file_suffix=DEFAULT_FILE_SUFFIX,
@@ -287,9 +290,9 @@ def write_full(file_name_base, analysis_dict,
             out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids')
-        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg')
-        hybkit.plot.mirna_counts(analysis_dict, file_name_base + '_mirna_counts')
+        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids', name=name)
+        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg', name=name)
+        hybkit.plot.mirna_counts(analysis_dict, file_name_base + '_mirna_counts', name=name)
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def mirna_target_dict():
@@ -399,6 +402,7 @@ def format_mirna_targets(analysis_dict, counts=None,
 
 # Public Methods : HybRecord miRNA Target Analysis Writing
 def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None, 
+                        name=None,
                         multi_files=DEFAULT_WRITE_MULTI_FILES,
                         sep=DEFAULT_ENTRY_SEP,
                         file_suffix=DEFAULT_FILE_SUFFIX,
@@ -433,7 +437,9 @@ def write_mirna_targets(file_name_base, analysis_dict, counts_dict=None,
             if make_plots:
                 hybkit.plot.mirna_targets(mirna, 
                                           collections.Counter(analysis_dict[mirna]), 
-                                          _sanitize_name(file_name_base + '_' + mirna))
+                                          _sanitize_name(file_name_base + '_' + mirna),
+                                          name=name,
+                                          )
 
     else:
         analysis_file_name = _sanitize_name(file_name_base + '_' + 'mirna' + file_suffix)

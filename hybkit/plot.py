@@ -41,7 +41,7 @@ FORMAT_NAME_MAP = {'5p_mirna_hybrids':"5'_miRNA_Hybrids",
 
 # Public Methods : HybRecord Type Analysis Plotting
 def hybrid_type_counts(analysis_dict, plot_file_name,
-                       analysis_name=None,
+                       name=None,
                        title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
                        other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                        min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -55,6 +55,9 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
     for key, count in analysis_dict['hybrid_type_counts'].most_common(): 
         labels.append(key)
         counts.append(count)
+
+    if name is not None:
+        title = str(name) + ': ' + title
 
     _plot_pie_chart(labels=labels,
                     sizes=counts,
@@ -70,7 +73,7 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
 
 # Public Methods : HybRecord Type Analysis Plotting
 def all_seg_types(analysis_dict, plot_file_name,
-                  analysis_name=None,
+                  name=None,
                   title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
                   other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                   min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -84,6 +87,9 @@ def all_seg_types(analysis_dict, plot_file_name,
     for key, count in analysis_dict['all_seg_types'].most_common(): 
         labels.append(key)
         counts.append(count)
+
+    if name is not None:
+        title = str(name) + ': ' + title
 
     _plot_pie_chart(labels=labels,
                     sizes=counts,
@@ -99,7 +105,7 @@ def all_seg_types(analysis_dict, plot_file_name,
 
 # Public Methods : HybRecord Type Analysis Plotting
 def mirna_counts(analysis_dict, plot_file_name, 
-                 analysis_name=None,
+                 name=None,
                  title=DEFAULT_MIRNA_COUNTS_TITLE,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
@@ -123,6 +129,9 @@ def mirna_counts(analysis_dict, plot_file_name,
             labels.append(key)
         counts.append(count)
 
+    if name is not None:
+        title = str(name) + ': ' + title
+
     _plot_pie_chart(labels=labels,
                     sizes=counts,
                     plot_file_name=plot_file_name,
@@ -138,6 +147,7 @@ def mirna_counts(analysis_dict, plot_file_name,
 # Public Methods : HybRecord miRNA Target Analysis Plotting
 def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name, 
                  title=None,
+                 name=None,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                  plot_file_type=DEFAULT_FILE_TYPE,
@@ -152,6 +162,9 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
 
     if title is None:
         title = 'Targets of ' + str(mirna_name) 
+
+    if name is not None:
+        title = str(name) + ': ' + title
 
     matplotlib_settings.update({'textprops':{'size':'small'},
                                })
@@ -188,7 +201,7 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
                     title=None,
                     other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                     min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                    plot_file_type=DEFAULT_PIE_FILE_TYPE,
+                    plot_file_type=DEFAULT_FILE_TYPE,
                     dpi=DEFAULT_DPI,
                     figsize=DEFAULT_FIG_SIZE,
                     matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):

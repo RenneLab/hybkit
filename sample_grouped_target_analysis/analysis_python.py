@@ -4,8 +4,9 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 '''
-Analysis for sample_hyb_analysis performed as a python workflow, as an example of direct 
-usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
+Analysis for sample_grouped_target_analysis performed as a python workflow, as an example 
+of direct usage of hybkit functions. 
+File names are hardcoded, and functions are accessed directly.
 '''
 
 import os
@@ -17,17 +18,24 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
-SHORT_CHECK = True  # DEBUG
-#SHORT_CHECK = False  # DEBUG
+SHORT_CHECK = True   # DEBUG
+# SHORT_CHECK = False  # DEBUG
+ONE_CHECK = True     # DEBUG
+ONE_CHECK = False    # DEBUG
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
+analysis_label = 'KSHV_Hyb_Combined'
 out_dir = os.path.join(analysis_dir, 'output')
-
-in_file_label = 'GSM2720020_WT_BR1'
-in_file_path = os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb')
-out_file_path = os.path.join(analysis_dir, 'output', 'GSM2720020_WT_BR1_KSHV_only.hyb')
-
+input_files = [
+    os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720021_WT_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720022_WT_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720023_D11_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720024_D11_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720025_D11_BR1.hyb')
+]
+out_file_path = os.path.join(analysis_dir, 'output', 'KSHV_Hyb_Combined.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
@@ -38,8 +46,8 @@ if not os.path.isdir(out_dir):
     print('Creating Output Directory:\n    %s\n' % out_dir)
     os.mkdir(out_dir)
 
-print('Analyzing File:')
-print('    ' + in_file_path + '\n')
+print('Analyzing Files:')
+print('    ' + '\n    '.join(input_files) + '\n')
 
 # Set the method of finding segment type
 match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
@@ -50,31 +58,37 @@ mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
 
 print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
 
-# Open one HybFile entry for reading, and one for writing
-with hybkit.HybFile(in_file_path, 'r') as in_file, \
-     hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
+# Open out-file for writing, one output file will be used for all inputs.
+with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
+    # Iterate through input files:
+    for in_file_path in input_files:
+        print('Analyzing:\n    %s' % in_file_path)
+        with hybkit.HybFile(in_file_path, 'r') as in_file:
+        
+            count = 0 # DEBUG
 
-    count = 0 # DEBUG
+            # Iterate over each record of the input file
+            for hyb_record in in_file:
 
-    # Iterate over each record of the input file
-    for hyb_record in in_file:
+                if SHORT_CHECK: # DEBUG
+                    count += 1
+                    if count > 10000:
+                        break
 
-        if SHORT_CHECK: # DEBUG
-            count += 1
-            if count > 10000:
-                break
+                # Analyze and output only sequences where a segment identifier contains the string "kshv"
+                if hyb_record.has_property('seg_contains', 'kshv'):
+                    # Find the segment types of each record
+                    hyb_record.find_seg_types()
+                    hyb_record.mirna_analysis(mirna_types=mirna_types)
+        
+                    # Write the records to the output file
+                    out_kshv_file.write_record(hyb_record)
 
-        # Analyze and output only sequences where a segment identifier contains the string "kshv"
-        if hyb_record.has_property('seg_contains', 'kshv'):
-            # Find the segment types of each record
-            hyb_record.find_seg_types()
-            hyb_record.mirna_analysis(mirna_types=mirna_types)
-
-            # Write the records to the output file
-            out_kshv_file.write_record(hyb_record)
+        if ONE_CHECK:  # DEBUG
+            break
 
 sys.stdout.flush()  # DEBUG
-print('Performing Target Analysis...\n')
+print('\nPerforming Combined Target Analysis...\n')
 # Reiterate over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Prepare target analysis dict:
@@ -103,7 +117,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     hybkit.analysis.write_mirna_targets(analysis_basename, 
                                         sorted_target_dict,
                                         counts_dict,
-                                        name=in_file_label,
+                                        name=analysis_label,
                                         multi_files=True,    # Default
                                         sep=',',             # Default
                                         file_suffix='.csv',  # Default
@@ -111,7 +125,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
                                         make_plots=True,     # Default
                                         max_mirna=25)        # Default is 10
 
-print('\nTotal time: %s' % str(datetime.datetime.now() - start_time))  # DEBUG
+print('Total time: %s' % str(datetime.datetime.now() - start_time))  # DEBUG
 
 print('Done\n')
 
