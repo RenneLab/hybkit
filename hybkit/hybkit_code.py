@@ -60,7 +60,7 @@ class HybRecord(object):
                        'read_end',    # int, End position of mapping within hybrid, ex: "21"
                        'ref_start',   # int, Start position of mapping within reference, ex: "1723"
                        'ref_end',     # int, End position of mapping within reference, ex: "1744"
-                       'score',       # str(of int/float) Alignment Score, can be BLAST e-score
+                       'score',       # str(int or float) Alignment Score, can be BLAST e-score
                                       #   or mapping alignment score, depending on analysis
                                       #   implementation type.
                       ]
@@ -68,8 +68,8 @@ class HybRecord(object):
     #   “feature1=value1; feature2=value2;..."
     #   Flags utilized in the Hyb software package
     HYB_FLAGS = [
-                 'count_total',            # int, total represented hybrids
-                 'count_last_clustering',  # int, total represented hybrids at last clustring
+                 'count_total',            # str(int), total represented hybrids
+                 'count_last_clustering',  # str(int), total represented hybrids at last clustring
                  'two_way_merged',         # "0" or "1", boolean representation of whether
                                            #   entries with mirrored 5' and 3' hybrids were merged
                  'seq_IDs_in_cluster',     # str, comma-separated list of all ids of hybrids
@@ -77,6 +77,8 @@ class HybRecord(object):
                 ]
     # Additional flag specifications utilized by hybkit
     HYBKIT_FLAGS = [
+                    'read_count',   # str(int), number of sequence reads represented by record
+                                    #   if merged record, represents total for all merged entries
                     'orient',       # str, orientation of strand. Options:
                                     #   "F" (Forward), "IF" (Inferred Forward),
                                     #   "R" (Reverse), "IR" (Inferred Reverse),
@@ -89,7 +91,7 @@ class HybRecord(object):
                                     #   options are "N" (none), "3p" (seg1), "5p" (seg2),
                                     #   "B" (both), or "U" (unknown)
                     'extended',     # "0" or "1", boolean representation of whether
-                                    #   sequences were artificailly extended as is
+                                    #   record sequences were bioinformatically extended as is
                                     #   performed by the Hyb software package.
                    ]
 
@@ -120,6 +122,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Initialization
     def __init__(self, hyb_id, seq, energy=placeholder,
                  seg1_info={}, seg2_info={}, flags={},
+                 read_count=None,
                  find_seg_types=False,
                  fold_record=None):
         self.id = hyb_id
@@ -162,6 +165,11 @@ class HybRecord(object):
             return None
 
     # HybRecord : Public Methods : Segment_Info
+    def seg_ids(self):
+        'Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined.'
+        return (self.seg1_id(), self.seg2_id())
+
+    # HybRecord : Public Methods : Segment_Info
     def seg1_info(self):
         'Return a copy of the info dict object for segment 1 (5p).'
         return self.seg1_info.copy()
@@ -170,11 +178,6 @@ class HybRecord(object):
     def seg2_info(self):
         'Return a copy of the info dict object for segment 2 (3p).'
         return self.seg2_info.copy()
-
-    # HybRecord : Public Methods : Segment_Info
-    def seg_ids(self):
-        'Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined.'
-        return (self.seg1_id(), self.seg2_id())
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg1_type(self, require=False):
@@ -237,6 +240,45 @@ class HybRecord(object):
         'Set "seg1_type" and "seg2_type" flags in flags.'
         self._set_flag('seg1_type', seg1_type)
         self._set_flag('seg2_type', seg2_type)
+
+    # HybRecord : Public Methods : Flag_Info : read_count
+    def read_count(self, require=False):
+        '''
+        If the "read_count" flag is defined, return it in integer form.
+        If require is provided as True, raise an error if the read_count flag is not defined.
+        Otherwise return "None"
+        '''
+        if require:
+            return int(self._get_flag('read_count'))
+        else:
+            ret_val = self._get_flag_or_none('read_count')
+            if ret_val is None:
+                return None
+            else:
+                return int(ret_val)
+
+    # HybRecord : Public Methods : Flag_Info : read_count
+    def set_read_count(self, read_count):
+        'Set "read_count" flag in flags.'
+        self._set_flag('read_count', str(read_count))
+
+    # HybRecord : Public Methods : Flag_Info : record_count
+    def record_count(self, require=False):
+        '''
+        If the "count_total" flag is defined, return it as an int.
+        If require is provided as True, raise an error if the count_total is not defined.
+        Otherwise return 1, indicating that the record contains only itself.
+        '''
+        if require:
+            return int(self._get_flag('count_total'))
+        else:
+            ret_val = self._get_flag_or_none('count_total')
+            if ret_val is None:
+                ret_val = 1
+            return ret_val
+
+    # HybRecord : Public Methods : Flag_Info : record_count
+    count_total = record_count
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_types(self, allow_unknown=False):
@@ -768,33 +810,19 @@ class HybRecord(object):
         cls.custom_flags = custom_flags
         cls.all_flags = HYB_FLAGS + HYBKIT_FLAGS + cls.custom_flags
 
-    # HybRecord : Public Classmethods : flags
-    # Currently disabled, pending revision or deletion
-    # @classmethod
-    # def default_hyb_flags(cls):
-    #     flags = {}
-    #     flags['count_total'] = 0
-    #     flags['count_last_clustering'] = 0
-    #     flags['two_way_merged'] = 0
-    #     flags['seq_IDs_in_cluster'] = ''
-    #     return flags
-
-    # HybRecord : Public Classmethods : flags
-    # Currently disabled, pending revision or deletion
-    # @classmethod
-    # def default_hybkit_flags(cls):
-    #     flags = {
-    #              'orient': 'U',
-    #              'seg1_type': 'unk',
-    #              'seg2_type': 'unk',
-    #              'miRNA_seg': 'U',
-    #              'extended': 0,
-    #             }
-    #     return flags
-
     # HybRecord : Public Classmethods : Record Construction
     @classmethod
-    def from_line(cls, line):
+    def from_line(cls, line, hybformat_id=False, hybformat_ref=False):
+        '''
+        Takes as input a line in .hyb format and returns a HybRecord object containing the 
+        line's data.
+        The Hyb Software Package contains further information in the "id" field of the
+        line that can be used to infer read counts represented by the hyb record.
+        If hybformat_id is provided as True, this extra information will be read.
+        The Hyb Software Package also utilizes a database by default that contains 
+        further information in the names of each respective reference sequence. 
+        If hybformat_ref is provided as True, this extra information will be read.
+        '''
         line_items = line.strip().split('\t')
         # print(line_items)
         hyb_id = line_items[0]
@@ -818,6 +846,25 @@ class HybRecord(object):
         if len(line_items) > 15:
             flags = cls._read_flags(line_items[15])
 
+        if hybformat_id:
+            read_id, read_count = cls._parse_hybformat_id(hyb_id)
+            if 'read_count' not in flags:
+                flags['read_count'] = read_count
+                 
+        if hybformat_ref:
+            for i, seg_info in enumerate([seg1_info, seg2_info], start=1):
+                ref = seg_info['ref']
+                seg_type_key = 'seg%i_type' % i
+                gene_id, transcript_id, gene_name, seg_type = cls._parse_hybformat_ref(ref)
+                if seg_type_key in flags and flags[seg_type_key] != seg_type:
+                    message = 'Problem reading in hybformat ref for reference: %s\n' % ref
+                    message += 'Inferred type: %s\n' % seg_type
+                    message += 'Does not equal current type flag: %s' % flags[seg_string]
+                    print(message)
+                    raise Exception(message)
+                elif seg_type_key not in flags:
+                    flags[seg_type_key] = seg_type
+              
         return_obj = cls(hyb_id, seq, energy, seg1_info, seg2_info, flags)
         return return_obj
 
@@ -925,7 +972,8 @@ class HybRecord(object):
                         line = line.rstrip()
                         split_line = line.split(',')
                         if len(split_line) != 2:
-                            message = 'Error reading mapped-id line: \n%s\n%s' % (str(line), str(split_line))
+                            message = 'Error reading mapped-id line: '
+                            message += '\n%s\n%s' % (str(line), str(split_line))
                             message += '\nTwo comma-separated entries expected.'
                             print(message)
                             raise Exception(message)
@@ -1046,7 +1094,7 @@ class HybRecord(object):
         return return_list
 
     # HybRecord : Private Methods : flags
-    def _make_flags_dict(self, flag_obj={}, allow_undefined_flags=None):
+    def _make_flags_dict(self, flag_obj, allow_undefined_flags=None):
         #  allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         #  If either argument is provided to the method, it overrides default behavior.
         #  Otherwise, the method falls back to the object-defaults.
@@ -1105,6 +1153,34 @@ class HybRecord(object):
             print(message)
             raise Exception(message)
 
+    # HybRecord : Private Classmethods : hybformat record parsing
+    @classmethod
+    def _parse_hybformat_id(cls, record_id):
+        # Parse id in format: "48_50002" into read_id, read_count
+        split_id = record_id.split('_')
+        if not len(split_id) == 2:
+            message = 'Failed attempt to parse record id: %s in hyb format.\n' % record_id
+            message += 'Hyb-Program format record ids have form: <read_id>_<read_count>'
+            print(message)
+            raise Exception(message)
+        return (split_id[0], split_id[1])
+
+    # HybRecord : Private Classmethods : hybformat record parsing
+    @classmethod
+    def _parse_hybformat_ref(cls, seg_ref):
+        # Parse reference sequence identifier in format: 
+        # "ENSG00000146425_ENST00000367089_DYNLT1_mRNA" 
+        # into <gene_id>_<transcript_id>_<gene_name>_<seg_type> information.
+        split_ref = seg_ref.split('_')
+        if not len(split_ref) == 4:
+            message = 'Failed attempt to parse segment reference id: "%s"'  % seg_ref
+            message += ' in hyb format.\n'
+            message += 'Hyb-Program format record ids have form:\n'
+            message += '    <gene_id>_<transcript_id>_<gene_name>_<seg_type>'
+            print(message)
+            raise Exception(message)
+        return (split_ref[0], split_ref[1], split_ref[2], split_ref[3])
+
     # HybRecord : Private Classmethods : flags
     @classmethod
     def _read_flags(cls, flag_string, allow_undefined_flags=True):
@@ -1128,6 +1204,17 @@ class HybFile(object):
     '''
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
     '''
+    # The Hyb Software Package places further information in the "id" field of the
+    #   hybrid record that can be used to infer the number of contained read counts.
+    #   Set this value to True with "hybkit.HybFile.hybformat_id = True" to read this
+    #   extra information.
+    hybformat_id = False
+    # The Hyb Software Package by default uses a reference database with identifiers
+    #   that contain sequence type and other information.
+    #   Set this value to True with "hybkit.HybFile.hybformat_ref = True" to read this
+    #   extra information.
+    hybformat_ref = False
+
     # HybFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
         '''Wrapper for open() function that stores resulting file.'''
@@ -1151,7 +1238,9 @@ class HybFile(object):
     # HybFile : Public Methods : Reading
     def __next__(self):
         'Return next line as HybRecord object.'
-        return HybRecord.from_line(self.fh.__next__())
+        return HybRecord.from_line(self.fh.__next__(),
+                                   hybformat_id=self.hybformat_id,
+                                   hybformat_ref=self.hybformat_ref)
 
     # HybFile : Public Methods : Reading
     def close(self):
@@ -1204,7 +1293,6 @@ class HybFile(object):
             message = 'Item: "%s" is not a HybRecord object.' % record
             print(message)
             raise Exception(message)
-
 
 
 class FoldRecord(object):

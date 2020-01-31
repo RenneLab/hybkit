@@ -50,6 +50,9 @@ if not os.path.isdir(out_dir):
 print('Analyzing Files:')
 print('    ' + '\n    '.join(input_files) + '\n')
 
+# Tell hybkit that identifiers are in Hyb-Program standard format.
+hybkit.HybFile.hybformat_id = True
+
 # Set the method of finding segment type
 match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
