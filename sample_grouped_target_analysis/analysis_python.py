@@ -23,6 +23,11 @@ SHORT_CHECK = False  # DEBUG
 ONE_CHECK = True     # DEBUG
 ONE_CHECK = False    # DEBUG
 
+# Set count_mode:
+# count_mode = 'read'    # Count reads represented by each record, instead of number of records.
+count_mode = 'record'  # Count each record/line as one, unless record is combined.
+                       #   (Default count mode, but specified here for readability)
+
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 analysis_label = 'KSHV_Hyb_Combined'
@@ -100,6 +105,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
 
         # Perform target-analysis of mirna within kshv-associated data.
         hybkit.analysis.running_mirna_targets(hyb_record, target_dict, 
+                                              count_mode=count_mode,
                                               double_count_duplexes=True, # Includes mirna duplexes
                                               # Limits output to KSHV miRNA:
                                               mirna_contains='kshv')
