@@ -243,6 +243,9 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
                     figsize=DEFAULT_FIG_SIZE,
                     matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     total_size = sum(sizes)
+    if total_size < 0.00000001:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
     fraction_sizes = [size/total_size for size in sizes]
     use_labels = []
     use_sizes = []

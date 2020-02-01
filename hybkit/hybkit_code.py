@@ -133,6 +133,10 @@ class HybRecord(object):
         self.seg2_info = self._make_seg_info_dict(seg2_info)
         self.flags = self._make_flags_dict(flags)
 
+        if read_count is not None:
+            if read_count not in flags:
+                self.set_flag('read_count', read_count)
+
         if find_seg_types:
             self.find_seg_types()
 
@@ -279,6 +283,17 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : record_count
     count_total = record_count
+
+    def count(self, count_mode):
+        if count_mode in {'read', 'read_count'}:
+            return self.read_count(require=True)
+        elif count_mode in {'record', 'record_count', 'total', 'count_total'}:
+            return self.record_count(require=False)
+        else:
+            message = 'Unrecognized Count Mode: "%s"\n' % count_mode
+            message += 'Allowed options are: %s' % ', '.join(['read', 'record'])
+            print(message)
+            raise Exception(message)
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_types(self, allow_unknown=False):

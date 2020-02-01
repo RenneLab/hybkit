@@ -22,6 +22,11 @@ SHORT_CHECK = False  # DEBUG
 ONE_CHECK = True  # DEBUG
 ONE_CHECK = False  # DEBUG
 
+# Set count_mode:
+# count_mode = 'read'    # Count reads represented by each record, instead of number of records.
+count_mode = 'record'  # Count each record/line as one, unless record is combined.
+                       #   (Default count mode, but specified here for readability)
+
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output')
@@ -58,9 +63,9 @@ match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_fi
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
 
-# Initialize Analysis Dict Object
-analysis_dict = hybkit.analysis.full_analysis_dict()
-analysis_dicts = []
+# Initialize Two Sets of Analysis Dict Objects
+analysis_dict_by_record = hybkit.analysis.full_analysis_dict()
+analysis_dicts_by_record = []
 
 # Iterate over each input file, find the segment types, and save the output 
 #   in the output directory.
@@ -93,28 +98,33 @@ for in_file_path in input_files:
             # Perform record analysis
             hyb_record.mirna_analysis()
 
-            # Add mirna_analysis details to mirna_analysis_dict
-            hybkit.analysis.running_full(hyb_record, analysis_dict)
- 
+            # Add mirna_analysis details to mirna_analysis_dict, using record numbers for counts
+            hybkit.analysis.running_full(hyb_record,
+                                         analysis_dict_by_record, 
+                                         count_mode=count_mode)
+
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)
 
     # Write mirna_analysis for input file to outputs. 
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
-    hybkit.analysis.write_full(analysis_file_basename, analysis_dict, multi_files=True, name=in_file_label)
+    hybkit.analysis.write_full(analysis_file_basename, 
+                               analysis_dict_by_record, 
+                               multi_files=True, 
+                               name=in_file_label)
 
-    analysis_dicts.append(analysis_dict)
+    analysis_dicts_by_record.append(analysis_dict_by_record)
 
     sys.stdout.flush()  # DEBUG
     if ONE_CHECK:
         break  # DEBUG
 
-combined_analysis_dict = hybkit.analysis.combine_full_dicts(analysis_dicts) 
+combined_analysis_dict_by_record = hybkit.analysis.combine_full_dicts(analysis_dicts_by_record) 
 combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
 print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
 hybkit.analysis.write_full(combined_analysis_file_basename, 
-                           combined_analysis_dict, 
+                           combined_analysis_dict_by_record, 
                            multi_files=True,
                            name='Combined')
 

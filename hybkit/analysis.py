@@ -19,6 +19,7 @@ import hybkit
 TYPE_ANALYSIS_KEYS = ['hybrid_type_counts', 'seg1_types', 'seg2_types', 'all_seg_types']
 MIRNA_COUNT_ANALYSIS_KEYS = ['5p_mirna_hybrids', '3p_mirna_hybrids', 'mirna_dimer_hybrids', 
                              'all_mirna_hybrids', 'no_mirna_hybrids']
+DEFAULT_COUNT_MODE = 'record'
 DEFAULT_HYBRID_TYPE_SEP = '-'
 DEFAULT_ENTRY_SEP = ','
 DEFAULT_FILE_SUFFIX = '.csv'
@@ -94,7 +95,9 @@ def combine_mirna_count_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis
-def running_types(record, analysis_dict, type_sep=DEFAULT_HYBRID_TYPE_SEP, 
+def running_types(record, analysis_dict, 
+                  count_mode=DEFAULT_COUNT_MODE,
+                  type_sep=DEFAULT_HYBRID_TYPE_SEP, 
                   mirna_centric_sorting=True):
     '''
     Add information regarding various properties from the HybRecord object provided in
@@ -105,6 +108,7 @@ def running_types(record, analysis_dict, type_sep=DEFAULT_HYBRID_TYPE_SEP,
         print(message)
         raise Exception(message)
 
+    count = record.count(count_mode)
     seg1_type = record.seg1_type()
     seg2_type = record.seg2_type()
 
@@ -124,45 +128,49 @@ def running_types(record, analysis_dict, type_sep=DEFAULT_HYBRID_TYPE_SEP,
     # _add_count(analysis_dict['seg1_types'], seg1_type)
     # _add_count(analysis_dict['seg2_types'], seg2_type)
     # Entry Checking not necessary with counter objects.
-    analysis_dict['hybrid_type_counts'][hybrid_type] += 1
-    analysis_dict['seg1_types'][seg1_type] += 1
-    analysis_dict['seg2_types'][seg2_type] += 1
+    analysis_dict['hybrid_type_counts'][hybrid_type] += count
+    analysis_dict['seg1_types'][seg1_type] += count
+    analysis_dict['seg2_types'][seg2_type] += count
 
     for seg_type in seg1_type, seg2_type:
     #    _add_count(analysis_dict['all_seg_types'], seg_type)
         analysis_dict['all_seg_types'][seg_type] += 1
 
 # Public Methods : HybRecord Analysis
-def running_mirna_counts(record, analysis_dict):
+def running_mirna_counts(record, analysis_dict,
+                         count_mode=DEFAULT_COUNT_MODE):
     '''
     Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     '''
     record._ensure_mirna_analysis()
+    count = record.count(count_mode)
 
     # Add mirna-analysis specific details
     if record.has_property('has_mirna_dimer'):
-        _add_count(analysis_dict, 'mirna_dimer_hybrids')
-        _add_count(analysis_dict, 'all_mirna_hybrids')
+        analysis_dict['mirna_dimer_hybrids'] += count
+        analysis_dict['all_mirna_hybrids'] += count
     elif record.has_property('3p_mirna'):
-        _add_count(analysis_dict, '3p_mirna_hybrids')
-        _add_count(analysis_dict, 'all_mirna_hybrids')
+        analysis_dict['3p_mirna_hybrids'] += count
+        analysis_dict['all_mirna_hybrids'] += count
     elif record.has_property('5p_mirna'):
-        _add_count(analysis_dict, '5p_mirna_hybrids')
-        _add_count(analysis_dict, 'all_mirna_hybrids')
+        analysis_dict['5p_mirna_hybrids'] += count
+        analysis_dict['all_mirna_hybrids'] += count
     else:
-        _add_count(analysis_dict, 'no_mirna_hybrids')
+        analysis_dict['no_mirna_hybrids'] += count
 
 
 # Public Methods : HybRecord Analysis
-def running_full(record, analysis_dict, type_sep=DEFAULT_HYBRID_TYPE_SEP,
+def running_full(record, analysis_dict,
+                 count_mode=DEFAULT_COUNT_MODE,
+                 type_sep=DEFAULT_HYBRID_TYPE_SEP,
                  mirna_centric_sorting=True):
     '''
     Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     '''
-    running_types(record, analysis_dict, type_sep, mirna_centric_sorting)
-    running_mirna_counts(record, analysis_dict)
+    running_types(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
+    running_mirna_counts(record, analysis_dict, count_mode)
 
 
 # Public Methods : HybRecord Type Analysis Parsing
@@ -326,7 +334,9 @@ def combine_mirna_target_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis
-def running_mirna_targets(record, analysis_dict, double_count_duplexes=False,
+def running_mirna_targets(record, analysis_dict, 
+                          count_mode=DEFAULT_COUNT_MODE,
+                          double_count_duplexes=False,
                           mirna_contains=None, mirna_matches=None,
                           target_contains=None, target_matches=None):
     '''
@@ -336,6 +346,7 @@ def running_mirna_targets(record, analysis_dict, double_count_duplexes=False,
     in both orientations. If False, the 3p miRNA will be considered as the target.
     '''
     record._ensure_mirna_analysis()
+    count = record.count(count_mode)
 
     check_pairs = []
     if record.has_property('has_mirna'):
@@ -367,7 +378,7 @@ def running_mirna_targets(record, analysis_dict, double_count_duplexes=False,
                 analysis_dict[mirna_id] = collections.Counter()
             # Existence checking not required for counter objects.
             # _add_count(analysis_dict[mirna], target)
-            analysis_dict[mirna_id][target_id] += 1
+            analysis_dict[mirna_id][target_id] += count
 
 
 # Public Methods : HybRecord miRNA Target Analysis Parsing
