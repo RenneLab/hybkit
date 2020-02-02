@@ -22,7 +22,7 @@ except ImportError:
 
 try:
     import hybkit
-except ImportError:
+except ModuleNotFoundError:
     message = 'The "hybkit" module cannot be found. Please ensure this is accessible '
     message += 'on your $PYTHONPATH'
     print(message)
