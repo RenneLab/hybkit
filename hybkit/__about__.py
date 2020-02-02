@@ -8,7 +8,6 @@ Package details for the hybkit project.
 '''
 
 # Preparation for initial PIP release, not yet completed.
-
 description = 'Toolkit for analysis of .hyb format genomic sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
@@ -26,7 +25,6 @@ classifiers = [
     'Operating System :: OS Independent',
     'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -41,7 +39,7 @@ info_urls = {
 
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
-__credits__ = ["Daniel B. Stribling", "Lauren A. Gay", "Rolf Renne"]
+__credits__ = ["Daniel B. Stribling", "Rolf Renne"]
 __date__ = "YYYY/MM/DD"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
