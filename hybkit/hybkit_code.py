@@ -34,14 +34,23 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 import os
 import io
 import types
+import csv
 import hybkit
 from collections import OrderedDict
 
 class HybRecord(object):
     '''
-    Class for storing information about a chimeric or hybrid sequence read from a .hyb format file.
-    A minimum amount of data necessary for a HybRecord object is the genomic sequence and its
-    corresponding identifier.
+    Class for storing and analayzing information about a chimeric or hybrid 
+    sequence read from a .hyb format file.  A minimum amount of data necessary 
+    for a HybRecord object is the genomic sequence and its
+    corresponding identifier. The .hyb file format is specified in
+        "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
+        (crosslinking, ligation and sequencing of hybrids) data." 
+        Methods 65.3 (2014): 263-273."
+    and consists of 15-16 columns separated by tabs, briefly described as: 
+    "id, sequence, binding_energy, seg1_name, seg1_read_start, seg1_read_end, 
+     seg1_ref_start, seg1_ref_end, seg1_map_score, seg2_read_start, seg2_read_end,
+     seg2_ref_start, seg2_ref_end, seg2_map_score, [flag1=val1; flag2=val2;flag3=val3...]"
     '''
 
     # HybRecord : Class-Level Constants
@@ -85,12 +94,15 @@ class HybRecord(object):
                                     #   "U" (Unknown), or "C" (Conflicting)
                     'seg1_type',    # str, assigned "type" of segment 1, ex: "miRNA" or "mRNA"
                     'seg2_type',    # str, assigned "type" of segment 2, ex: "miRNA" or "mRNA"
-                    'seg1_detail',  # str, arbitrary detail about segment 1
-                    'seg2_detail',  # str, arbitrary detail about segment 2
+                    'seg1_det',     # str, arbitrary detail about segment 1
+                    'seg2_det',     # str, arbitrary detail about segment 2
                     'miRNA_seg',    # str, indicates which (if any) mapping is a miRNA
                                     #   options are "N" (none), "3p" (seg1), "5p" (seg2),
                                     #   "B" (both), or "U" (unknown)
-                    'extended',     # "0" or "1", boolean representation of whether
+                    'target_reg',   # str, assigned region of the miRNA target.
+                                    #   options are "5pUTR", "coding", "3pUTR",
+                                    #   "N" (none), or "U" (unknown)
+                    'ext',          # "0" or "1", boolean representation of whether
                                     #   record sequences were bioinformatically extended as is
                                     #   performed by the Hyb software package.
                    ]
@@ -98,20 +110,24 @@ class HybRecord(object):
     # miRNA Types for use in ".mirna_analysis" function
     MIRNA_TYPES = {'miRNA', 'microRNA'}
 
+    # Coding types for use in the target_region_analysis function
+    CODING_TYPES = {'mRNA'}
+
     # HybRecord : Class-Level Variables
     custom_flags = []
     all_flags = HYB_FLAGS + HYBKIT_FLAGS
     find_type_method = None             # Will be populated after method definition
-    find_type_params = {}
+    find_type_params = {}               # May be populated during use.
+    target_region_info = {}             # May be populated during use.
 
     # HybRecord : Class-Level Variables : Class-Level Settings
     # These settings can be changed in a script to change the default behavior of the class.
     reorder_flags = True                # Reorder flags to default order when writing
     allow_undefined_flags = False       # Allow undefined flags
 
-    # Ideally the following paramaters should be set to False, and True, respctively, however the
-    #   output of the Hyb program often provides vienna/viennad fold-records that do not
-    #   match the sequences in the corresponding hyb entry, as an artifact of collapsing
+    # Ideally the following paramaters should be set to False, and True, respectively. However
+    #   the output of the Hyb program often provides vienna/viennad fold-records that do not
+    #   match the sequences in the corresponding hyb entry, perhaps as an artifact of collapsing
     #   multiple hyb records into the same entry.
     allow_fold_record_mismatch = True   # Allow mismatch with self.fold_record sequence
     warn_fold_record_mismatch = False   # Warn if mismatch with self.fold_record sequence
@@ -146,9 +162,9 @@ class HybRecord(object):
         else:
             self.fold_record = None
 
-        self.mirna_details = None  # Placeholder mirna_details variable for mirna_analysis
-        self.mirna_info = None     # Placeholder mirna_info variable for mirna_analysis
-        self.target_info = None    # Placeholder target_info variable for mirna_analysis
+        self.mirna_details = None  # Placeholder variable for mirna_analysis
+        self.mirna_info = None     # Placeholder variable for mirna_analysis
+        self.target_info = None    # Placeholder variable for mirna_analysis
 
         self._post_init_tasks()
 
@@ -597,6 +613,100 @@ class HybRecord(object):
             self.mirna_details['mirna_fold'] = mirna_fold_details['seg_fold']
             self.mirna_details['target_fold'] = target_fold_details['seg_fold']
 
+    def target_region_analysis(self, region_info=None, coding_types=None):
+        '''
+        If the record contains an identified mirna and coding target, 
+        find the region in which the targeted sequence resides and store the results in the 
+        "target_reg" flag and miRNA_analysis dict.
+        This analysis requries the seg1_type and seg2_type flags to be populated, which
+        can be performed by the ".find_seg_types()" method. It also requires ".mirna_analysis()"
+        to have been performed. If the miRNA_seg flag is one of "3p" or "5p", the target type
+        will be checked for membership in the coding types arguement if provided, and 
+        default HybRecord.CODING_TYPES if not. if both are true, then the analysis 
+        will be performed. 
+        The region_info dict should contain keys of transcript identifiers with values as a 
+        four or six-item dict containing containing transcript region information.
+        Required keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
+        Optional keys are cdna_coding_start, cdna_coding_end
+        Example:
+           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
+                                'cdna_coding_start':  'cdna_coding_end':,
+                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+        This dict can be set at the class level using 
+        ".make_region_info()', with ".set_region_info()", or with
+        ".make_set_region_info()", or can be supplied directly to this method.         
+        '''
+
+        if coding_types is None:
+            mirna_types = self.CODING_TYPES
+
+        if region_info is None:
+            region_info = self.target_region_info
+
+        # Ensure mirna_analysis has been performed.
+        self._ensure_mirna_analysis()
+         
+        # Get miRNA flag.
+        mirna_flag = self._get_flag_or_none('miRNA_seg')
+        if (mirna_flag in {'5p', '3p'} 
+            and self.mirna_details['target_seg_type'] in coding_types):
+
+            self.mirna_details['target_coding'] = True
+            target = self.target_info['ref']
+            
+            if target not in region_info:
+                message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
+                message += 'Coding Transcript identifier: "%s" ' % target
+                message += 'cannot be found.\n'
+                message += 'Please check the region_info dict provided to method/class.'
+                print(message)
+                raise Exception(message)
+
+            target_regions = region_info[target]
+            required_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
+            if not all(key in region_info for key in required_keys):
+                message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
+                message += 'Provided region information: \n%s\n' % str(region_info)
+                message += 'Does not have required keys:\n    %s' % ', '.join(required_keys)
+                print(message)
+                raise Exception(message)
+
+            # Setup Variables
+            five_utr = ('5pUTR', target_regions['5_utr_start'], target_regions['5_utr_end'])
+            three_utr = ('3pUTR', target_regions['3_utr_start'], target_regions['3_utr_end'])
+            seg_start = int(self.target_info['ref_start'])
+            seg_end = int(self.target_info['ref_end'])
+
+            # Assignment based on lower and higher position number, which can vary based on 
+            #   sense orientation of transcript, so determine and assign order:
+            if five_utr[1] < three_utr[1]:
+                first_utr, second_utr = five_utr, three_utr
+            else:
+                first_utr, second_utr = three_utr, five_utr
+
+            # Assign Categories
+            if seg_start < first_utr[2]:
+                target_reg = first_utr[0]
+            elif seg_end > second_utr[1]:
+                target_reg = second_utr[0]
+            else:
+                target_reg = 'coding'
+
+            print(first_utr, second_utr)
+            print(seg_start, seg_end)
+            print(target_reg)
+            input()
+
+            self.mirna_details['target_reg'] = target_reg 
+            self._set_flag('target_reg', target_reg)           
+ 
+        else:
+            self.mirna_details['target_coding'] = False
+            self.mirna_details['target_reg'] = None
+            self._set_flag('target_reg', 'N')
+
+        
+
     # TODO move to "constants section"
     # Set object of string-comparison properties for the ".has_property()" method.
     _STR_PROPERTIES = {
@@ -620,9 +730,15 @@ class HybRecord(object):
         '3p_mirna', '5p_mirna',
         '3p_target', '5p_target',
     }
+    # Set object of miRNA-analysis properties for the ".has_property()" method.
+    _TARGET_PROPERTIES = {
+        'has_target',
+        'target_3p_utr', 'target_coding', 'target_5p_utr',
+    }
+    
 
     # Set object of all allowed properties for the ".has_property()" method.
-    PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES
+    PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES | _TARGET_PROPERTIES
 
     # HybRecord : Public Methods : has_property
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
@@ -813,6 +929,87 @@ class HybRecord(object):
             message += 'Allowed Options:' + ', '.join(cls.find_type_methods.keys())
         cls.find_type_method = cls.find_type_methods[find_method_name]
         cls.find_type_params = find_params
+
+    @classmethod
+    def make_region_info(cls, region_csv_name, sep=','):
+        '''
+        Make a dict containing information on a coding transcript utr regions from an
+        input csv file. The input csv must contain a header line, and must have the columns:
+        5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end.
+        Optional keys are cdna_coding_start, cdna_coding_end
+        Example return dict object:
+           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
+                                'cdna_coding_start':  'cdna_coding_end':,
+                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+        This dict can then be passed to ".set_region_info()" or supplied directly to
+        the ".target_region_analysis()" method.
+        '''
+
+        data_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
+        required_keys = ['ensembl_transcript_id'] + data_keys
+
+        if not os.path.isfile(region_csv_name):
+            message = 'Problem with creation of target region information dict.\n'
+            message += 'Provided input target region csv file:\n    %s\n' % region_csv_name
+            message += 'cannot be found.'
+            print(message)
+            raise Exception(message)
+
+        ret_dict = {}
+
+        with open(region_csv_name, 'r', newline='') as region_csv:
+            reader = csv.DictReader(region_csv, delimiter=sep) 
+            for i, line_items in enumerate(reader, start=1):
+                # If line does not contain required format or information, raise error.
+                if (not all(key in line_items for key in required_keys)
+                    or any (line_items[key] is None for key in required_keys)):
+                    message = 'Problem with creation of target region information dict.\n'
+                    message += 'Provided input target region csv file:\n    %s' % region_csv_name
+                    message += 'Does not contain the required information at line: '
+                    message += '%i\nRequired Keys: %s\n' % (i, ', '.join(required_keys))
+                    print(message)
+                    raise Exception(message)
+
+                seq_id = line_items['ensembl_transcript_id']
+            
+                # If information has already been read for line, raise error.
+                if seq_id in ret_dict:
+                    message = 'Problem with creation of target region information dict.\n'
+                    message += 'Provided input target region csv file:\n    %s' % region_csv_name
+                    message += 'Contains duplicate information for entry:'
+                    message += '%s\nProvided at line %i\n' % (seq_id, i)
+                    message += str(line_items)
+                    print(message)
+                    raise Exception(message)
+                
+                ret_dict[seq_id] = {key:int(line_items[key]) for key in data_keys}                
+
+        return ret_dict
+
+    @classmethod
+    def set_region_info(cls, region_info_dict):
+        '''
+        Set the class-level reference dict object with information on coding transcript utr 
+        regions. This dict must have transcript identifiers as keys, with values of dicts with
+        defined keys of: 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
+        Optional keys are cdna_coding_start, cdna_coding_end
+        Example dict format:
+           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
+                                'cdna_coding_start':  'cdna_coding_end':,
+                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+        '''
+
+        cls.target_region_info = region_info_dict
+    
+    @classmethod
+    def make_set_region_info(cls, region_csv_name, sep=','):
+        '''
+        Convenience wrapper, sequentially callse ".make_region_info()" followed by 
+        ".set_region_info()" to set the HybRecord.target_region_info class dict object 
+        required for target_region_analysis. 
+        '''
+        region_info = cls.make_region_info(region_csv_name, sep=sep)
+        cls.set_region_info(region_info)
 
     # HybRecord : Public Classmethods : flags
     @classmethod
@@ -1461,7 +1658,7 @@ class FoldRecord(object):
         ret_lines.append(self.id + suffix)   # Add line 1, id
         ret_lines.append(self.seq + suffix)  # Add line 2, sequence
         line_3_items = [self.seg1_detail('highlight'),
-                        self.seg1_detail('ref'),
+                        self.seg1_detail('ref_short'),
                         self.seg1_detail('ref_start'),
                         self.seg1_detail('ref_end')]
         line_3 = '\t'.join([str(item) if item is not None
@@ -1469,7 +1666,7 @@ class FoldRecord(object):
                             for item in line_3_items])
         ret_lines.append(line_3 + suffix)
         line_4_items = [self.seg2_detail('highlight'),
-                        self.seg2_detail('ref'),
+                        self.seg2_detail('ref_short'),
                         self.seg2_detail('ref_start'),
                         self.seg2_detail('ref_end')]
         line_4 = '\t'.join([str(item) if item is not None
@@ -1527,13 +1724,13 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
-    def from_vienna_lines(cls, record_lines, hyb_format_vienna=False):
+    def from_vienna_lines(cls, record_lines, hybformat_file=False):
         '''
         Create a FoldRecord entry from a list of 3 strings corresponding to lines in the
         Vienna format.
         The Hyb Software Package contains further information in the "name" field of the
         vienna record that can be used to infer further information about the fold divisions.
-        If hyb_format_vienna is provided as True, this extra information will be read.
+        If hybformat_file is provided as True, this extra information will be read.
         extra information.
         '''
 
@@ -1561,7 +1758,7 @@ class FoldRecord(object):
         seg1_fold_info = {}
         seg2_fold_info = {}
 
-        if hyb_format_vienna:
+        if hybformat_file:
             seg1_fold_info, seg2_fold_info = self._parse_hybformat_name(rec_id, seq, fold)
 
         return_obj = cls(rec_id, seq, fold, energy,
@@ -1581,13 +1778,13 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Viennad
     @classmethod
-    def from_viennad_lines(cls, record_lines):
+    def from_viennad_lines(cls, record_lines, hybformat_file=False):
         '''
         Create a FoldRecord entry from a list of 5 or 6 strings corresponding to lines in the
         Viennad format.
         '''
 
-        if len(record_lines) not in [5, 6]:
+        if len(record_lines) not in {5, 6}:
             message = 'Provided Viennad Record Lines:\n'
             message += '\n'.join([line.rstrip() for line in record_lines])
             message += '\n  ... are not in required 5-line or 6-line format.'
@@ -1609,6 +1806,7 @@ class FoldRecord(object):
         seg1_fold_info = {
                           'highlight': line_3_split[0],
                           'ref': line_3_split[1],
+                          'ref_short': line_3_split[1],
                           'ref_start': line_3_split[2],
                           'ref_end': line_3_split[3],
                          }
@@ -1625,9 +1823,16 @@ class FoldRecord(object):
         seg2_fold_info = {
                           'highlight': line_4_split[0],
                           'ref': line_4_split[1],
+                          'ref_short': line_4_split[1],
                           'ref_start': line_4_split[2],
                           'ref_end': line_4_split[3],
                          }
+        
+
+        if hybformat_file:
+            seg1_hybformat_info, seg2_hybformat_info = cls._parse_hybformat_name(full_name)
+            seg1_fold_info['ref_short'] = seg1_hybformat_info['ref_short']
+            seg2_fold_info['ref_short'] = seg2_hybformat_info['ref_short']
 
         line_5 = record_lines[4].strip()
         line_5_split = line_5.split('\t')
@@ -1649,10 +1854,14 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod
-    def from_ct_lines(cls, record_lines):
+    def from_ct_lines(cls, record_lines, hybformat_file=False):
         '''
         Create a FoldRecord entry from a list of an arbitrary number of strings
         corresponding to lines in the ".ct" file format.
+        The Hyb Software Package contains further information in the "name" field of the
+        ct record that can be used to infer further information about the fold divisions.
+        If hybformat_file is provided as True, this extra information will be read.
+        extra information.
         '''
         header_line = record_lines[0].strip()
         if 'dG' not in header_line:
@@ -1678,7 +1887,7 @@ class FoldRecord(object):
         enthalpy_string = header_items[2]
         enthalpy = float(enthalpy_string.split()[-1])
         full_name = header_items[3]
-        short_name = full_name.split()[1]
+        # short_name = full_name.split()[1]
 
         seq = ''
         fold = ''
@@ -1718,29 +1927,33 @@ class FoldRecord(object):
                 seg2_highlight += '-'
                 seg1_fold += fold_char
             elif found_seg2 is True:
-                seg1_highlight += '_'
+                seg1_highlight += '-'
                 seg2_highlight += base
                 seg2_fold += fold_char
             last_seg_i = seg_i
 
-        # Guess middle '-' char:
-        full_name_split = full_name.split('-')
-        full_name_split_len = len(full_name_split)
-        slice_i = int((full_name_split_len/2))
-        seg1_ref_guess = '-'.join(full_name_split[:slice_i])
-        seg2_ref_guess = '-'.join(full_name_split[slice_i:])
+        if hybformat_file:
+            seg1_fold_info, seg2_fold_info = cls._parse_hybformat_name(full_name)
 
-        seg1_fold_info = {'ref': seg1_ref_guess,
-                          # 'ref_start': seg1_start,
-                          # 'ref_end': seg1_end,
-                          'highlight': seg1_highlight,
-                          'seg_fold': seg1_fold}
-        seg2_fold_info = {'ref': seg2_ref_guess,
-                          # 'ref_start': seg2_start,
-                          # 'ref_end': seg2_end,
-                          'highlight': seg2_highlight,
-                          'seg_fold': seg2_fold}
-
+        else:
+            # Guess middle '-' char:
+            full_name_split = full_name.split('-')
+            full_name_split_len = len(full_name_split)
+            slice_i = int((full_name_split_len/2))
+            seg1_ref_guess = '-'.join(full_name_split[:slice_i])
+            seg2_ref_guess = '-'.join(full_name_split[slice_i:])
+    
+            seg1_fold_info = {'ref': seg1_ref_guess,
+                              'ref_start': None,
+                              'ref_end': None}
+            seg2_fold_info = {'ref': seg2_ref_guess,
+                              'ref_start': None,
+                              'ref_end': None, }
+     
+        seg1_fold_info.update({'highlight': seg1_highlight,
+                              'seg_fold': seg1_fold})
+        seg2_fold_info.update({'highlight': seg2_highlight,
+                              'seg_fold': seg2_fold})
         for param in [seq, fold, seg1_highlight, seg2_highlight, (seg1_fold + seg2_fold)]:
             if len(param) != expected_seq_len:
                 raise Exception('Problem in record construction, should not occur.')
@@ -1769,6 +1982,7 @@ class FoldRecord(object):
         # Create a dictionary with segment fold information.
         return_dict = {}
         segment_param_types = {'ref': str,
+                               'ref_short': str,
                                'ref_start': int,
                                'ref_end': int,
                                'highlight': str,
@@ -1807,8 +2021,9 @@ class FoldRecord(object):
         else:
             return None
 
-    # FoldRecord : Private Methods : Parsing : Input
-    def _parse_hybformat_name(self, name, seq, fold):
+    # FoldRecord : Private Classmethods : Parsing : Input
+    @classmethod
+    def _parse_hybformat_name(cls, name, seq=None, fold=None):
         # If the provided sequence name is in the Hyb-Program output format required
         #   for parsing, find segment information using name, sequence, and fold, and return
         #   seg_fold_info dicts.
@@ -1818,55 +2033,74 @@ class FoldRecord(object):
         err_message += name.rstrip() + '\n'
         err_message += '    ... is being parsed in Hyb-Program format, but is not of the '
         err_message += 'required "seq1-seq2" format, where seq1/seq2 each have the format:\n'
-        err_message += '  AAA_BBB_CCC_SOURCE_SEQID_SEQTYPE_REFSTART_REFEND\n'
-        err_message += '  (disallowing "-" in the sequence name)'
+        err_message += '  READID_READCOUNT_GENEID_TRANSRIPTID_SEQID_SEQTYPE_REFSTART_REFEND\n'
+        #err_message += '  (disallowing "-" in the sequence name)'
 
-        name_split = name.split('-')
-        # Check that only a single '-' exists in the name.
-        if len(name_split) != 2:
+        #name_split = name.split('-')
+        ## Check that only a single '-' exists in the name.
+        #if len(name_split) != 2:
+        #    print(err_message)
+        #    raise Exception(err_message)
+
+        ## Check that each segment name contains seven '_' characters (8 divisions).
+        #if not all((len(seg.split('_')) == 8 for seg in name_split)):
+        #    print(err_message)
+        #    raise Exception(err_message)
+
+        #seg1_string, seg2_string = name.split('-')
+        #seg1_split = seg1_string.split('_')
+        #seg2_split = seg2_string.split('_')
+
+        # Check that the split name has 15 divisions (with one joint middle item)
+        name_split = name.split('_')
+        if not len(name_split) == 15 :
             print(err_message)
             raise Exception(err_message)
 
-        # Check that each segment name contains seven '_' characters (8 divisions).
-        if not all((len(seg.split('_')) == 8 for seg in name_split)):
-            print(err_message)
-            raise Exception(err_message)
-
-        seg1_string, seg2_string = name.split('-')
+        seg1_split = name_split[:7]
+        seg1_split.append(name_split[7].split('-')[0])
+        seg2_split = [name_split[7].split('-')[1]]
+        seg2_split += name_split[8:]
 
         seg1_fold_info = {}
-        seg1_split = seg1_string.split('_')
-        seg1_fold_info['ref'] = '_'.join(seg1_split[4:5])
+        seg1_fold_info['ref'] = '_'.join(seg1_split[2:6])
+        seg1_fold_info['ref_short'] = '_'.join(seg1_split[4:6])
         seg1_fold_info['ref_start'] = seg1_split[6]
         seg1_fold_info['ref_end'] = seg1_split[7]
-        seg1_len = int(seg1_fold_info['ref_start']) - (seg1_fold_info['ref_start'])
-        seg1_fold_info['highlight'] = seq[1:seg1_len] + ('-' * (len(seg) - seg1_len))
-        seg1_fold_info['seg_fold'] = fold[1:seg1_len]
+        seg1_len = int(seg1_fold_info['ref_start']) - int(seg1_fold_info['ref_start'])
+        if seq is not None:
+            seg1_fold_info['highlight'] = seq[1:seg1_len] + ('-' * (len(seg) - seg1_len))
+        if fold is not None:
+            seg1_fold_info['seg_fold'] = fold[1:seg1_len]
 
         seg2_fold_info = {}
-        seg2_split = seg2_string.split('_')
-        seg2_fold_info['ref'] = '_'.join(seg2_split[4:5])
+        seg2_fold_info['ref'] = '_'.join(seg2_split[2:6])
+        seg2_fold_info['ref_short'] = '_'.join(seg2_split[4:6])
         seg2_fold_info['ref_start'] = seg2_split[6]
         seg2_fold_info['ref_end'] = seg2_split[7]
-        seg2_len = int(seg2_fold_info['ref_start']) - (seg2_fold_info['ref_start'])
+        seg2_len = int(seg2_fold_info['ref_start']) - int(seg2_fold_info['ref_start'])
         seg2_start = seg1_len
-        seg2_fold_info['highlight'] = ('-' * seg1_len) + seq[seg2_start:]
-        seg2_fold_info['seg_fold'] = fold[seg2_start:]
+        if seq is not None:
+            seg2_fold_info['highlight'] = ('-' * seg1_len) + seq[seg2_start:]
+        if fold is not None:
+            seg2_fold_info['seg_fold'] = fold[seg2_start:]
 
-        if len(seq) != seg1_len + seg2_len:
+        if seq is not None and (len(seq) != seg1_len + seg2_len):
             message = 'Problem with Hyb-Program-Format name parsing.'
             message += 'Sum of segment lengths: %i + %i ' % (seg1_len, seg2_len)
             message += ' = %i\nDoes not equal sequence length: ' % (seg1_len + seg2_len)
             message += str(len(seq))
 
-        for param in [seg1_highlight, seg2_highlight, (seg1_fold + seg2_fold)]:
-            if len(param) != len(seq):
-                raise Exception('Problem in record construction, should not occur.')
+        if seq is not None:
+            for param in [seg1_highlight, seg2_highlight, (seg1_fold + seg2_fold)]:
+                if len(param) != len(seq):
+                    raise Exception('Problem in record construction, should not occur.')
 
         return seg1_fold_info, seg2_fold_info
 
-    # FoldRecord : Private Methods : Parsing : Output
-    def _format_seg_info(self, seg_info, prefix='', suffix='', indent_str=''):
+    # FoldRecord : Private Classmethods : Parsing : Output
+    @classmethod
+    def _format_seg_info(cls, seg_info, prefix='', suffix='', indent_str=''):
         raise NotImplementedError
         # Returns a formatted string of the sgement info information
         ret_string = prefix
@@ -1884,13 +2118,12 @@ class ViennaFile(object):
     '''
     File-object wrapper that provides abiltity to return sets of three file lines as
     FoldRecord entries.
+    The Hyb Software Package contains further information in the "name" field of the
+    vienna record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.ViennaFile.hybformat_file = True to read this
+    extra information.
     '''
-    # ViennaFile : Class-Level Variables
-    # The Hyb Software Package contains further information in the "name" field of the
-    #   vienna record that can be used to infer further information about the fold divisions.
-    #   Set this value to True with hybkit.ViennaFile.hyb_format_file = True to read this
-    #   extra information.
-    hyb_format_vienna = False
+    hybformat_file = False
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -1918,7 +2151,7 @@ class ViennaFile(object):
         line_1 = next(self.fh)
         line_2 = next(self.fh)
         line_3 = next(self.fh)
-        return FoldRecord.from_vienna_lines((line_1, line_2, line_3), self.hyb_format_vienna)
+        return FoldRecord.from_vienna_lines((line_1, line_2, line_3), self.hybformat_file)
 
     # ViennaFile : Public Methods : Reading
     def close(self):
@@ -1947,8 +2180,7 @@ class ViennaFile(object):
         '''
         self._ensure_FoldRecord(write_record)
         record_string = write_record.to_vienna_string(newline=True)
-        record_bytestring = bytearray(record_string, 'utf-8')
-        self.write(record_bytestring)
+        self.fh.write(record_string)
 
     # ViennaFile : Public Methods : Writing
     def write_records(self, write_records):
@@ -2031,7 +2263,12 @@ class ViennadFile(object):
     '''
     File-object wrapper that provides abiltity to return sets of six viennad file lines as
     FoldRecord entries.
+    The Hyb Software Package contains further information in the "name" field of the
+    viennad record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.ViennadFile.hybformat_file = True to read this
+    extra information.
     '''
+    hybformat_file = False
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2065,7 +2302,8 @@ class ViennadFile(object):
         line_4 = next(self.fh)
         line_5 = next(self.fh)
         line_6 = next(self.fh)
-        return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6))
+        return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6),
+                                             hybformat_file=self.hybformat_file)
 
     # ViennadFile : Public Methods : Reading
     def close(self):
@@ -2094,8 +2332,7 @@ class ViennadFile(object):
         '''
         self._ensure_FoldRecord(write_record)
         record_string = write_record.to_viennad_string(newline=True)
-        record_bytestring = bytearray(record_string, 'utf-8')
-        self.write(record_bytestring)
+        self.fh.write(record_string)
 
     # ViennadFile : Public Methods : Writing
     def write_records(self, write_records):
@@ -2179,7 +2416,12 @@ class CtFile(object):
     '''
     File-object wrapper that provides abiltity to return sets of ct file lines as
     FoldRecord entries.
+    The Hyb Software Package contains further information in the "name" field of the
+    ct record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.CtFile.hybformat_file = True to read this
+    extra information.
     '''
+    hybformat_file = False
 
     # CtFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2213,7 +2455,7 @@ class CtFile(object):
         expected_line_num = int(header.strip().split()[0])
         for i in range(expected_line_num):
             record_lines.append(next(self.fh))
-        return FoldRecord.from_ct_lines(record_lines)
+        return FoldRecord.from_ct_lines(record_lines, hybformat_file=self.hybformat_file)
 
     # CtFile : Public Methods : Reading
     def close(self):

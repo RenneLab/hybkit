@@ -56,7 +56,7 @@ server.verbose = True
 #h_genes.show_attributes()
 
 h_genes = server.datasets['hsapiens_gene_ensembl'] 
-print(dir(h_genes))
+#print(dir(h_genes))
 
 features_attributes = [
     'ensembl_gene_id',
@@ -113,10 +113,10 @@ search_settings = {
 #     line = raw_line.decode('utf-8')
 #     print(line)
 
-#response = h_genes.search(search_settings, header=1)
-#with open(out_file_name, 'wb') as out_file:
-#    for raw_line in response.iter_lines():
-#        out_file.write(raw_line)
+response = h_genes.search(search_settings, header=1)
+with open(out_file_name, 'wb') as out_file:
+    for raw_line in response.iter_lines():
+        out_file.write(raw_line + b'\n')
 
 print('Writing details to file: %s\n' % out_file_detail_name)
 

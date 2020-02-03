@@ -1,8 +1,12 @@
 # User-custom
 *test*
-*.tar
-*.gz
-GSM27200*
+# *.tar
+# *.gz
+*.hyb
+*.vienna
+*.viennad
+*.ct
+# GSM27200*
 */output
 *.swp
 
