@@ -1497,7 +1497,7 @@ class HybRecord(object):
         # undefined flags allowed in this method by default, to allow the object-level setting to
         # take precedence
         if allow_undefined_flags is None:
-            allow_undefined_flags = self.settings['allow_undefined_flags']
+            allow_undefined_flags = cls.settings['allow_undefined_flags']
 
         flag_string = flag_string.rstrip()
         flag_string = flag_string.rstrip(';')
