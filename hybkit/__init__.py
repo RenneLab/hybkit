@@ -13,8 +13,8 @@ import hybkit.analysis
 import hybkit.plot
 
 # Set package directory and code directory
-package_dir = os.path.abspath(os.path.dirname(__file__))
-code_dir = os.path.join(package_dir, 'code_dir')
+package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+code_dir = os.path.join(package_dir, 'hybkit')
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \

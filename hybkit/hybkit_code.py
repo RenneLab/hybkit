@@ -3,7 +3,8 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-# Todo:
+# TODO:
+# Find archive versions of the ensembl database for no-unknown read-creation.
 # Test .ct -> vienna, viennad parsing
 # Future: Add seg_fold_info details to FoldRecord using HybRecord
 
@@ -35,6 +36,7 @@ import os
 import io
 import types
 import csv
+import copy
 import hybkit
 from collections import OrderedDict
 
@@ -102,9 +104,11 @@ class HybRecord(object):
                     'target_reg',   # str, assigned region of the miRNA target.
                                     #   options are "5pUTR", "coding", "3pUTR",
                                     #   "N" (none), or "U" (unknown)
-                    'ext',          # "0" or "1", boolean representation of whether
+                    'ext',          # int, "0" or "1", boolean representation of whether
                                     #   record sequences were bioinformatically extended as is
                                     #   performed by the Hyb software package.
+                    'source',       # str, label for sequence source, when combining records 
+                                    #   from different sources.
                    ]
 
     # miRNA Types for use in ".mirna_analysis" function
@@ -113,6 +117,24 @@ class HybRecord(object):
     # Coding types for use in the target_region_analysis function
     CODING_TYPES = {'mRNA'}
 
+
+    # HybRecord : Class-Level Default Settings:
+    # These settings can be changed in a script to change the analysis-specific behavior
+    #   of the class.
+    DEFAULTS = {}
+    DEFAULTS['reorder_flags'] = True           # Reorder flags to default order when writing
+    DEFAULTS['allow_undefined_flags'] = False  # Allow undefined flags
+
+    # Ideally the following paramaters should be set to False, and True, respectively. However
+    #   the output of the Hyb program often provides vienna/viennad fold-records that do not
+    #   match the sequences in the corresponding hyb entry, perhaps as an artifact of collapsing
+    #   multiple hyb records into the same entry.
+    DEFAULTS['allow_fold_record_mismatch'] = True   # Allow mismatch in self.fold_record sequence
+    DEFAULTS['warn_fold_record_mismatch'] = False   # Warn if mismatch, self.fold_record sequence
+
+    # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
+    DEFAULTS['placeholder'] = '.'
+
     # HybRecord : Class-Level Variables
     custom_flags = []
     all_flags = HYB_FLAGS + HYBKIT_FLAGS
@@ -120,30 +142,22 @@ class HybRecord(object):
     find_type_params = {}               # May be populated during use.
     target_region_info = {}             # May be populated during use.
 
-    # HybRecord : Class-Level Variables : Class-Level Settings
-    # These settings can be changed in a script to change the default behavior of the class.
-    reorder_flags = True                # Reorder flags to default order when writing
-    allow_undefined_flags = False       # Allow undefined flags
-
-    # Ideally the following paramaters should be set to False, and True, respectively. However
-    #   the output of the Hyb program often provides vienna/viennad fold-records that do not
-    #   match the sequences in the corresponding hyb entry, perhaps as an artifact of collapsing
-    #   multiple hyb records into the same entry.
-    allow_fold_record_mismatch = True   # Allow mismatch with self.fold_record sequence
-    warn_fold_record_mismatch = False   # Warn if mismatch with self.fold_record sequence
-
-    # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
-    placeholder = '.'
+    # set class initial settings to defaults.
+    settings = copy.deepcopy(DEFAULTS)
 
     # HybRecord : Public Methods : Initialization
-    def __init__(self, hyb_id, seq, energy=placeholder,
+    def __init__(self, hyb_id, seq, energy=None,
                  seg1_info={}, seg2_info={}, flags={},
                  read_count=None,
                  find_seg_types=False,
                  fold_record=None):
         self.id = hyb_id
         self.seq = seq
-        self.energy = energy
+
+        if energy is not None:
+            self.energy = energy
+        else:
+            energy = self.settings['placeholder']
 
         self.seg1_info = self._make_seg_info_dict(seg1_info)
         self.seg2_info = self._make_seg_info_dict(seg2_info)
@@ -166,7 +180,7 @@ class HybRecord(object):
         self.mirna_info = None     # Placeholder variable for mirna_analysis
         self.target_info = None    # Placeholder variable for mirna_analysis
 
-        self._post_init_tasks()
+        self._post_init_tasks()    # Method stub to enable convenient subclassing
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_id(self):
@@ -198,6 +212,26 @@ class HybRecord(object):
     def seg2_info(self):
         'Return a copy of the info dict object for segment 2 (3p).'
         return self.seg2_info.copy()
+
+    # HybRecord : Public Methods : flags
+    def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
+        '''
+        Set the value of self.flags: flag_key to value flag_val.
+        allow_undefined_flags allows the inclusion of flags not defined in hybkit.
+        If argument is provided to the method, it overrides default behavior.
+        Otherwise, the method falls back to the object-defaults.
+        '''
+
+        if allow_undefined_flags is None:
+            allow_undefined_flags = self.settings['allow_undefined_flags']
+
+        if not allow_undefined_flags and flag_key not in self.all_flags:
+            message = 'Flag "%s" is not defined. Please check flag key' % flag_key
+            message += ' or run with: "allow_undefined_flags=True"'
+            print(message)
+            raise Exception(message)
+
+        self.flags[flag_key] = flag_val
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg1_type(self, require=False):
@@ -248,18 +282,18 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg1_type(self, seg1_type):
         'Set "seg1_type" flag in flags.'
-        self._set_flag('seg1_type', seg1_type)
+        self.set_flag('seg1_type', seg1_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg2_type(self, seg2_type):
         'Set "seg2_type" flag in flags.'
-        self._set_flag('seg2_type', seg2_type)
+        self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg_types(self, seg1_type, seg2_type):
         'Set "seg1_type" and "seg2_type" flags in flags.'
-        self._set_flag('seg1_type', seg1_type)
-        self._set_flag('seg2_type', seg2_type)
+        self.set_flag('seg1_type', seg1_type)
+        self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def read_count(self, require=False):
@@ -280,7 +314,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : read_count
     def set_read_count(self, read_count):
         'Set "read_count" flag in flags.'
-        self._set_flag('read_count', str(read_count))
+        self.set_flag('read_count', str(read_count))
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def record_count(self, require=False):
@@ -454,7 +488,7 @@ class HybRecord(object):
                          'id_map': find_seg_type_from_id_map}
 
     # HybRecord : Public Methods : fold_record
-    def check_fold_record_match(self, fold_record):
+    def check_fold_seq_match(self, fold_record):
         '''
         Return True if the sequence (".seq") attribute of a FoldRecord instance matches the
         sequence (".seq") attribute of this instance.
@@ -476,11 +510,23 @@ class HybRecord(object):
         Otherwise, the method falls back to the class default setting.
         '''
         if allow_fold_record_mismatch is None:
-            allow_fold_record_mismatch = self.allow_fold_record_mismatch
+            allow_fold_record_mismatch = self.settings['allow_fold_record_mismatch']
         if warn_fold_record_mismatch is None:
-            warn_fold_record_mismatch = self.warn_fold_record_mismatch
+            warn_fold_record_mismatch = self.settings['warn_fold_record_mismatch']
 
-        if not isinstance(fold_record, FoldRecord):
+        if fold_record is None:
+            if not allow_fold_record_mismatch:
+                message = 'Trying to assign None-object as FoldRecord is disallowed with '
+                message += 'option "allow_fold_record_mismatch" as true.'
+                print(message)
+                raise Exception(message)
+            elif warn_fold_record_mismatch:
+                print('WARNING: Assigning None-Type as fold_record.')        
+            self.fold_seq_match = False
+            self.fold_record = None
+            return
+
+        if fold_record is not None and not isinstance(fold_record, FoldRecord):
             message = 'Supplied argument to fold_record: %s' % str(fold_record)
             message += '\n   is not a FoldRecord object.'
             print(message)
@@ -556,7 +602,7 @@ class HybRecord(object):
                 mirna_flag = '3p'
             else:
                 mirna_flag = 'N'
-            self._set_flag('miRNA_seg', mirna_flag)
+            self.set_flag('miRNA_seg', mirna_flag)
 
         # If miRNA_seg flag already defined, recall value.
         else:
@@ -603,15 +649,15 @@ class HybRecord(object):
 
         self.mirna_details['mirna_fold'] = None
         self.mirna_details['target_fold'] = None
-        if self.fold_record is not None:
-            if mirna_flag in ['B', '5p']:
-                mirna_fold_details = self.fold_record.seg1_info
-                target_details = self.fold_record.seg2_info
+        if self.fold_record is not None and mirna_flag in {'B', '5p', '3p'}:
+            if mirna_flag in {'B', '5p'}:
+                mirna_details = self.fold_record.seg1_info()
+                target_details = self.fold_record.seg2_info()
             elif mirna_flag == '3p':
-                target_details = self.fold_record.seg1_info
-                mirna_details = self.fold_record.seg2_info
-            self.mirna_details['mirna_fold'] = mirna_fold_details['seg_fold']
-            self.mirna_details['target_fold'] = target_fold_details['seg_fold']
+                target_details = self.fold_record.seg1_info()
+                mirna_details = self.fold_record.seg2_info()
+            self.mirna_details['mirna_fold'] = mirna_details['seg_fold']
+            self.mirna_details['target_fold'] = target_details['seg_fold']
 
     def target_region_analysis(self, region_info=None, coding_types=None):
         '''
@@ -625,9 +671,9 @@ class HybRecord(object):
         default HybRecord.CODING_TYPES if not. if both are true, then the analysis 
         will be performed. 
         The region_info dict should contain keys of transcript identifiers with values as a 
-        four or six-item dict containing containing transcript region information.
-        Required keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
-        Optional keys are cdna_coding_start, cdna_coding_end
+        dict containing containing transcript region information.
+        Required keys are cdna_coding_start, cdna_coding_end
+        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
         Example:
            {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
                                 'cdna_coding_start':  'cdna_coding_end':,
@@ -638,7 +684,7 @@ class HybRecord(object):
         '''
 
         if coding_types is None:
-            mirna_types = self.CODING_TYPES
+            coding_types = self.CODING_TYPES
 
         if region_info is None:
             region_info = self.target_region_info
@@ -652,58 +698,90 @@ class HybRecord(object):
             and self.mirna_details['target_seg_type'] in coding_types):
 
             self.mirna_details['target_coding'] = True
-            target = self.target_info['ref']
-            
+            #target = self.target_info['ref']
+            target = self.target_info['ref'].split('_')[1]  # TODO Make Fancy
+            allow_unknown = True  # TODO Make Fancy 
+            warn = True  # TODO Make Fancy
             if target not in region_info:
-                message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
-                message += 'Coding Transcript identifier: "%s" ' % target
-                message += 'cannot be found.\n'
-                message += 'Please check the region_info dict provided to method/class.'
-                print(message)
-                raise Exception(message)
+                if allow_unknown:
+                    if warn:
+                        message = 'WARNING: Unknown transcript identifier: %s' % target
+                        print(message)
+                    self.mirna_details['target_reg'] = 'Unknown'
+                    self.set_flag('target_reg', 'Unk')               
+                    return
+                else:
+                    message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
+                    message += 'Coding Transcript identifier: "%s" ' % target
+                    message += 'cannot be found.\n'
+                    message += 'Please check the region_info dict provided to method/class.'
+                    print(message)
+                    raise Exception(message)
 
             target_regions = region_info[target]
-            required_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
-            if not all(key in region_info for key in required_keys):
+            required_keys = ['cdna_coding_start', 'cdna_coding_end']
+            if not all(key in target_regions for key in required_keys):
                 message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
-                message += 'Provided region information: \n%s\n' % str(region_info)
+                message += 'Provided region information: \n%s\n' % str(target_regions)
                 message += 'Does not have required keys:\n    %s' % ', '.join(required_keys)
                 print(message)
                 raise Exception(message)
 
             # Setup Variables
-            five_utr = ('5pUTR', target_regions['5_utr_start'], target_regions['5_utr_end'])
-            three_utr = ('3pUTR', target_regions['3_utr_start'], target_regions['3_utr_end'])
+            # five_utr = ('5pUTR', target_regions['5_utr_start'], target_regions['5_utr_end'])
+            # three_utr = ('3pUTR', target_regions['3_utr_start'], target_regions['3_utr_end'])
+            ref_cds_start = int(target_regions['cdna_coding_start'])
+            ref_cds_end = int(target_regions['cdna_coding_end'])
             seg_start = int(self.target_info['ref_start'])
             seg_end = int(self.target_info['ref_end'])
 
             # Assignment based on lower and higher position number, which can vary based on 
             #   sense orientation of transcript, so determine and assign order:
-            if five_utr[1] < three_utr[1]:
-                first_utr, second_utr = five_utr, three_utr
+            # if five_utr[1] < three_utr[1]:
+            #     first_utr, second_utr = five_utr, three_utr
+            # else:
+            #     first_utr, second_utr = three_utr, five_utr
+            if ref_cds_start < ref_cds_end:
+                rev_orientation = False
+                low_cds_bound = ref_cds_start
+                high_cds_bound = ref_cds_end
+                low_utr = '5pUTR'
+                high_utr = '3pUTR'
             else:
-                first_utr, second_utr = three_utr, five_utr
+                rev_orientation = True
+                low_cds_bound = ref_cds_end
+                high_cds_bound = ref_cds_start
+                low_utr = '3pUTR'
+                high_utr = '5pUTR'
+                print('Reverse Oreintation Detected!',self.target_info['ref'])
+                raise Exception
 
             # Assign Categories
-            if seg_start < first_utr[2]:
-                target_reg = first_utr[0]
-            elif seg_end > second_utr[1]:
-                target_reg = second_utr[0]
+            # if seg_start < first_utr[2]:
+            #     target_reg = first_utr[0]
+            # elif seg_end > second_utr[1]:
+            #     target_reg = second_utr[0]
+            # else:
+            #     target_reg = 'coding'
+
+            if seg_end < low_cds_bound:
+                target_reg = low_utr
+            elif seg_end > high_cds_bound:
+                target_reg = high_utr
             else:
                 target_reg = 'coding'
 
-            print(first_utr, second_utr)
-            print(seg_start, seg_end)
-            print(target_reg)
-            input()
+            #print('cds:', ref_cds_start, ref_cds_end, 'seg:', seg_start, seg_end)
+            #print(target_reg)
+            #input()
 
             self.mirna_details['target_reg'] = target_reg 
-            self._set_flag('target_reg', target_reg)           
+            self.set_flag('target_reg', target_reg)           
  
         else:
             self.mirna_details['target_coding'] = False
             self.mirna_details['target_reg'] = None
-            self._set_flag('target_reg', 'N')
+            self.set_flag('target_reg', 'N')
 
         
 
@@ -825,7 +903,7 @@ class HybRecord(object):
                              bool(self._get_flag_or_none('seg2_type'))))
             elif prop_type == 'has_mirna_details':
                 datum = self.mirna_details
-            elif prop_type == 'has_fold_info':
+            elif prop_type == 'has_fold_record':
                 datum = self.fold_record
             elif prop_type == 'has_mirna_seg':
                 datum = self._get_flag_or_none('miRNA_seg')
@@ -852,7 +930,13 @@ class HybRecord(object):
                 ret_val = self.flags['miRNA_seg'] == '3p'
             elif prop_type == '3p_target':
                 ret_val = self.flags['miRNA_seg'] == '5p'
-        return ret_val
+
+        elif prop_type in self._TARGET_PROPERTIES:
+            self._ensure_mirna_analysis()
+            if prop_type == 'has_target':
+                ret_val = bool(self.mirna_details['target_coding'])
+        return ret_val         
+                 
 
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False):
@@ -935,8 +1019,8 @@ class HybRecord(object):
         '''
         Make a dict containing information on a coding transcript utr regions from an
         input csv file. The input csv must contain a header line, and must have the columns:
-        5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end.
-        Optional keys are cdna_coding_start, cdna_coding_end
+        Required keys are cdna_coding_start, cdna_coding_end
+        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
         Example return dict object:
            {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
                                 'cdna_coding_start':  'cdna_coding_end':,
@@ -945,7 +1029,8 @@ class HybRecord(object):
         the ".target_region_analysis()" method.
         '''
 
-        data_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
+        # data_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
+        data_keys = ['cdna_coding_start', 'cdna_coding_end']
         required_keys = ['ensembl_transcript_id'] + data_keys
 
         if not os.path.isfile(region_csv_name):
@@ -964,7 +1049,7 @@ class HybRecord(object):
                 if (not all(key in line_items for key in required_keys)
                     or any (line_items[key] is None for key in required_keys)):
                     message = 'Problem with creation of target region information dict.\n'
-                    message += 'Provided input target region csv file:\n    %s' % region_csv_name
+                    message += 'Provided input target region csv file:\n    %s\n' % region_csv_name
                     message += 'Does not contain the required information at line: '
                     message += '%i\nRequired Keys: %s\n' % (i, ', '.join(required_keys))
                     print(message)
@@ -973,15 +1058,43 @@ class HybRecord(object):
                 seq_id = line_items['ensembl_transcript_id']
             
                 # If information has already been read for line, raise error.
+                allow_duplicate_info = True
+                warn = True
+                permissive = True 
                 if seq_id in ret_dict:
-                    message = 'Problem with creation of target region information dict.\n'
-                    message += 'Provided input target region csv file:\n    %s' % region_csv_name
-                    message += 'Contains duplicate information for entry:'
-                    message += '%s\nProvided at line %i\n' % (seq_id, i)
-                    message += str(line_items)
-                    print(message)
-                    raise Exception(message)
+                    if allow_duplicate_info:
+                        if warn:
+                            message = 'WARNING: duplicate entry for transcript: %s detected.' % seq_id
+                            print(message)
+                            continue
+                    else:
+                        message = 'Problem with creation of target region information dict.\n'
+                        message += 'Provided input target region csv file:\n    %s\n' % region_csv_name
+                        message += 'Contains duplicate information for entry:'
+                        message += '%s\nProvided at line %i\n' % (seq_id, i)
+                        message += 'Previous: %s\n' % str(ret_dict[seq_id])
+                        message += 'Current: %s\n' % str(line_items)
+                        print(message)
+                        raise Exception(message)
                 
+                data_pairs = [(key, line_items[key]) for key in data_keys]
+                bad_entry = False
+                for key, item in data_pairs:
+                    if not item.isnumeric():
+                        if permissive:
+                            if warn:
+                                message = 'WARNING: Skipping entry for %s ' % seq_id
+                                message += 'with non-numeric values.'
+                                print(message)
+                            bad_entry = True
+                            break
+                        else:
+                            message = 'Data for entry: %s contains non-numeric values.' % seq_id
+                            message += 'Data: %s' % str(data_pairs)
+                            print(message)
+                            raise Exception(message)
+                if bad_entry:
+                    continue
                 ret_dict[seq_id] = {key:int(line_items[key]) for key in data_keys}                
 
         return ret_dict
@@ -991,8 +1104,9 @@ class HybRecord(object):
         '''
         Set the class-level reference dict object with information on coding transcript utr 
         regions. This dict must have transcript identifiers as keys, with values of dicts with
-        defined keys of: 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
-        Optional keys are cdna_coding_start, cdna_coding_end
+        defined keys of: 
+        Required keys are cdna_coding_start, cdna_coding_end
+        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
         Example dict format:
            {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
                                 'cdna_coding_start':  'cdna_coding_end':,
@@ -1257,23 +1371,6 @@ class HybRecord(object):
             return None
 
     # HybRecord : Private Methods : flags
-    def _set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
-        # Set the value of self.flags: flag_key to value flag_val.
-        # allow_undefined_flags allows the inclusion of flags not defined in hybkit.
-        # If argument is provided to the method, it overrides default behavior.
-        # Otherwise, the method falls back to the object-defaults.
-        if allow_undefined_flags is None:
-            allow_undefined_flags = self.allow_undefined_flags
-
-        if not allow_undefined_flags and flag_key not in self.all_flags:
-            message = 'Flag "%s" is not defined. Please check flag key' % flag_key
-            message += ' or run with: "allow_undefined_flags=True"'
-            print(message)
-            raise Exception(message)
-
-        self.flags[flag_key] = flag_val
-
-    # HybRecord : Private Methods : flags
     def _make_flag_string(self, use_all_flags=False):
         flag_string = ''
         for flag in self._get_flag_keys():
@@ -1287,7 +1384,7 @@ class HybRecord(object):
         #  Otherwise, the method falls back to the object-default.
         return_list = []
         if reorder_flags is None:
-            reorder_flags = self.reorder_flags
+            reorder_flags = self.settings['reorder_flags']
         if reorder_flags:
             return_list = self._get_ordered_flag_keys()
         else:
@@ -1311,7 +1408,7 @@ class HybRecord(object):
         #  If either argument is provided to the method, it overrides default behavior.
         #  Otherwise, the method falls back to the object-defaults.
         if allow_undefined_flags is None:
-            allow_undefined_flags = self.allow_undefined_flags
+            allow_undefined_flags = self.settings['allow_undefined_flags']
 
         if not isinstance(flag_obj, dict):
             message = '"flag_obj" argument must be a dict obj. Defined keys are:'
@@ -1395,10 +1492,13 @@ class HybRecord(object):
 
     # HybRecord : Private Classmethods : flags
     @classmethod
-    def _read_flags(cls, flag_string, allow_undefined_flags=True):
+    def _read_flags(cls, flag_string, allow_undefined_flags=None):
         # allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         # undefined flags allowed in this method by default, to allow the object-level setting to
         # take precedence
+        if allow_undefined_flags is None:
+            allow_undefined_flags = self.settings['allow_undefined_flags']
+
         flag_string = flag_string.rstrip()
         flag_string = flag_string.rstrip(';')
         flag_pairs = [flag_pair.split('=') for flag_pair in flag_string.split(';')]
@@ -1416,16 +1516,22 @@ class HybFile(object):
     '''
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
     '''
+
+    # HybFile : Class-Level Constants:
+    DEFAULTS = {}
     # The Hyb Software Package places further information in the "id" field of the
     #   hybrid record that can be used to infer the number of contained read counts.
     #   Set this value to True with "hybkit.HybFile.hybformat_id = True" to read this
     #   extra information.
-    hybformat_id = False
+    DEFAULTS['hybformat_id'] = False
     # The Hyb Software Package by default uses a reference database with identifiers
     #   that contain sequence type and other information.
     #   Set this value to True with "hybkit.HybFile.hybformat_ref = True" to read this
     #   extra information.
-    hybformat_ref = False
+    DEFAULTS['hybformat_ref'] = False
+
+    # HybFile : Class-Level variables:
+    settings = copy.deepcopy(DEFAULTS)
 
     # HybFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -1451,8 +1557,8 @@ class HybFile(object):
     def __next__(self):
         'Return next line as HybRecord object.'
         return HybRecord.from_line(self.fh.__next__(),
-                                   hybformat_id=self.hybformat_id,
-                                   hybformat_ref=self.hybformat_ref)
+                                   hybformat_id=self.settings['hybformat_id'],
+                                   hybformat_ref=self.settings['hybformat_ref'])
 
     # HybFile : Public Methods : Reading
     def close(self):
@@ -1539,11 +1645,16 @@ class FoldRecord(object):
     '''
 
     # FoldRecord : Class-Level Constants
-
-    # FoldRecord : Class-Level variables
+    # Default settings:
+    DEFAULTS = {}
+    DEFAULTS['skip_bad'] = False
+    DEFAULTS['warn_bad'] = True
 
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
-    placeholder = '.'
+    DEFAULTS['placeholder'] = '.'
+
+    # FoldRecord : Class-Level Settings
+    settings = copy.deepcopy(DEFAULTS)
 
     # FoldRecord : Public Methods : Initialization
     def __init__(self, id, seq, fold, energy,
@@ -1662,7 +1773,7 @@ class FoldRecord(object):
                         self.seg1_detail('ref_start'),
                         self.seg1_detail('ref_end')]
         line_3 = '\t'.join([str(item) if item is not None
-                            else self.placeholder
+                            else self.settings['placeholder']
                             for item in line_3_items])
         ret_lines.append(line_3 + suffix)
         line_4_items = [self.seg2_detail('highlight'),
@@ -1670,7 +1781,7 @@ class FoldRecord(object):
                         self.seg2_detail('ref_start'),
                         self.seg2_detail('ref_end')]
         line_4 = '\t'.join([str(item) if item is not None
-                            else self.placeholder
+                            else self.settings['placeholder']
                             for item in line_4_items])
         ret_lines.append(line_4 + suffix)
 
@@ -1778,24 +1889,34 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Viennad
     @classmethod
-    def from_viennad_lines(cls, record_lines, hybformat_file=False):
+    def from_viennad_lines(cls, record_lines, hybformat_file=False, skip_bad=None, warn_bad=None):
         '''
         Create a FoldRecord entry from a list of 5 or 6 strings corresponding to lines in the
         Viennad format.
         '''
+        if skip_bad is None:
+            skip_bad = cls.settings['skip_bad']
+        if warn_bad is None:
+            warn_bad = cls.settings['warn_bad']
 
         if len(record_lines) not in {5, 6}:
-            message = 'Provided Viennad Record Lines:\n'
-            message += '\n'.join([line.rstrip() for line in record_lines])
-            message += '\n  ... are not in required 5-line or 6-line format.'
-            print(message)
-            raise Exception(message)
+            if skip_bad:
+                if warn_bad:
+                    message = 'WARNING: Improperly Viennad: Wrong-Line-Number'
+                    print(message)
+                return None
+            else:
+                message = 'Provided Viennad Record Lines:\n'
+                message += '\n'.join([line.rstrip() for line in record_lines])
+                message += '\n  ... are not in required 5-line or 6-line format.'
+                print(message)
+                raise Exception(message)
 
         rec_id = record_lines[0].strip()
         seq = record_lines[1].strip()
         line_3 = record_lines[2].strip()
         line_3_split = line_3.split('\t')
-        if len(line_3_split) != 4:
+        if hybformat_file and len(line_3_split) != 4:
             message = 'Provided Vienna Record Line 3:\n'
             message += line_3.rstrip() + '\n'
             message += str(line_3_split) + '\n'
@@ -1807,12 +1928,16 @@ class FoldRecord(object):
                           'highlight': line_3_split[0],
                           'ref': line_3_split[1],
                           'ref_short': line_3_split[1],
-                          'ref_start': line_3_split[2],
-                          'ref_end': line_3_split[3],
+                          'ref_start': None,
+                          'ref_end': None,
                          }
+        if len(line_3_split) == 4 and all(x.isnumeric() for x in line_3_split[2:]):
+            seg1_fold_info['ref_start'] = line_3_split[2]
+            seg1_fold_info['ref_end'] = line_3_split[3]
+
         line_4 = record_lines[3].strip()
         line_4_split = line_4.split('\t')
-        if len(line_4_split) != 4:
+        if hybformat_file and len(line_4_split) != 4:
             message = 'Provided Vienna Record Line 4:\n'
             message += line_4.rstrip() + '\n'
             message += str(line_4_split) + '\n'
@@ -1820,14 +1945,17 @@ class FoldRecord(object):
             message += 'name<tab>refstart<tab>refend" format.'
             print(message)
             raise Exception(message)
+
         seg2_fold_info = {
                           'highlight': line_4_split[0],
                           'ref': line_4_split[1],
                           'ref_short': line_4_split[1],
-                          'ref_start': line_4_split[2],
-                          'ref_end': line_4_split[3],
+                          'ref_start': None,
+                          'ref_end': None,
                          }
-        
+        if len(line_4_split) == 4 and all(x.isnumeric() for x in line_4_split[2:]):
+            seg1_fold_info['ref_start'] = line_4_split[2]
+            seg1_fold_info['ref_end'] = line_4_split[3]
 
         if hybformat_file:
             seg1_hybformat_info, seg2_hybformat_info = cls._parse_hybformat_name(full_name)
@@ -1836,6 +1964,17 @@ class FoldRecord(object):
 
         line_5 = record_lines[4].strip()
         line_5_split = line_5.split('\t')
+        if len(line_5_split) != 2:
+            message = 'WARNING: Improper viennad record: Line-5 Formatting Error.\n'
+            message += 'Full Record:\n'
+            message += '\n'.join(record_lines) + '\n'
+            if skip_bad:
+                if warn_bad:
+                    print(message)
+                return None
+            else:
+                print(message)
+                raise Exception(message)
         fold = line_5_split[0]
         energy = float(line_5_split[1].strip('()'))
         return_obj = cls(rec_id, seq, fold, energy,
@@ -1992,7 +2131,10 @@ class FoldRecord(object):
             if param in seg_info_obj:
                 param_type = segment_param_types[param]
                 try:
-                    return_dict[param] = param_type(seg_info_obj[param])
+                    if seg_info_obj[param] is None:
+                        return_dict[param] = None
+                    else:
+                        return_dict[param] = param_type(seg_info_obj[param])
                 except TypeError:
                     message = 'Entry "%s" ' % seg_info_obj[param]
                     message += 'for segment parameter: %s' % param
@@ -2120,10 +2262,16 @@ class ViennaFile(object):
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     vienna record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.ViennaFile.hybformat_file = True to read this
+    Set this value to True with hybkit.ViennaFile.settings["hybformat_file"] = True to read this
     extra information.
     '''
-    hybformat_file = False
+
+    # ViennaFile : Class-Level Constants
+    DEFAULTS = {}
+    DEFAULTS['hybformat_file'] = False
+
+    # ViennaFile : Class-Level Variables
+    settings = copy.deepcopy(DEFAULTS)
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2151,7 +2299,8 @@ class ViennaFile(object):
         line_1 = next(self.fh)
         line_2 = next(self.fh)
         line_3 = next(self.fh)
-        return FoldRecord.from_vienna_lines((line_1, line_2, line_3), self.hybformat_file)
+        return FoldRecord.from_vienna_lines((line_1, line_2, line_3), 
+                                            self.settings['hybformat_file'])
 
     # ViennaFile : Public Methods : Reading
     def close(self):
@@ -2265,10 +2414,15 @@ class ViennadFile(object):
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     viennad record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.ViennadFile.hybformat_file = True to read this
+    Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
     extra information.
     '''
-    hybformat_file = False
+    # ViennadFile : Class-Level Constants
+    DEFAULTS = {}
+    DEFAULTS['hybformat_file'] = False
+
+    # ViennadFile : Class-Level Variables
+    settings = copy.deepcopy(DEFAULTS)
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2303,7 +2457,7 @@ class ViennadFile(object):
         line_5 = next(self.fh)
         line_6 = next(self.fh)
         return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6),
-                                             hybformat_file=self.hybformat_file)
+                                             hybformat_file=self.settings['hybformat_file'])
 
     # ViennadFile : Public Methods : Reading
     def close(self):
@@ -2418,10 +2572,15 @@ class CtFile(object):
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     ct record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.CtFile.hybformat_file = True to read this
+    Set this value to True with hybkit.CtFile.settings['hybformat_file'] = True to read this
     extra information.
     '''
-    hybformat_file = False
+    # ViennaFile : Class-Level Constants
+    DEFAULTS = {}
+    DEFAULTS['hybformat_file'] = False
+
+    # ViennaFile : Class-Level Variables
+    settings = copy.deepcopy(DEFAULTS)
 
     # CtFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2455,7 +2614,9 @@ class CtFile(object):
         expected_line_num = int(header.strip().split()[0])
         for i in range(expected_line_num):
             record_lines.append(next(self.fh))
-        return FoldRecord.from_ct_lines(record_lines, hybformat_file=self.hybformat_file)
+        ret_record = FoldRecord.from_ct_lines(record_lines, 
+                                              hybformat_file=self.settings['hybformat_file'])
+        return ret_record
 
     # CtFile : Public Methods : Reading
     def close(self):
