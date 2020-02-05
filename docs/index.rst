@@ -2,8 +2,6 @@
 Welcome to hybkit's documentation!
 ==================================
 
-.. automodule:: hybkit
-    :members:
 
 .. toctree::
    :maxdepth: 2

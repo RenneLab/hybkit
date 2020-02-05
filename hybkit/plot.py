@@ -3,9 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-'''
-Methods for plotting analyses of HybRecord and FoldRecord Objects.
-'''
+"""Methods for plotting analyses of HybRecord and FoldRecord Objects."""
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
@@ -48,7 +46,7 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
                        plot_file_type=DEFAULT_FILE_TYPE,
                        dpi=DEFAULT_DPI,
                        matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    'Plot the results of hybrid_type_counts'
+    """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -80,7 +78,7 @@ def all_seg_types(analysis_dict, plot_file_name,
                   plot_file_type=DEFAULT_FILE_TYPE,
                   dpi=DEFAULT_DPI,
                   matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    'Plot the results of hybrid_type_counts'
+    """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -112,7 +110,7 @@ def mirna_counts(analysis_dict, plot_file_name,
                  plot_file_type=DEFAULT_FILE_TYPE,
                  dpi=DEFAULT_DPI,
                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    'Plot the results of hybrid_type_counts'
+    """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -153,7 +151,7 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
                  plot_file_type=DEFAULT_FILE_TYPE,
                  dpi=DEFAULT_DPI,
                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    'Plot the targets of a single mirna'
+    """Plot the targets of a single mirna."""
     labels = []
     counts = []
     for ((target, target_seg_type), count) in mirna_targets_dict.most_common(): 
@@ -205,7 +203,7 @@ def mirna_target_types(mirna_name, mirna_target_type_counts_dict, plot_file_name
                        plot_file_type=DEFAULT_FILE_TYPE,
                        dpi=DEFAULT_DPI,
                        matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    'Plot the targets types of a single mirna'
+    """Plot the targets types of a single mirna."""
     labels = []
     counts = []
     for key, count in mirna_target_type_counts_dict.most_common(): 

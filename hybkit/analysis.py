@@ -3,9 +3,9 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-'''
+"""
 Methods for analyzing HybRecord and FoldRecord Objects.
-'''
+"""
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
@@ -30,21 +30,21 @@ DEFAULT_MAX_MIRNA = 10
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def type_dict():
-    'Create a dictionary with keys of counter objects for running type analyses.'
+    """Create a dictionary with keys of counter objects for running type analyses."""
     ret_dict = {key: collections.Counter() for key in TYPE_ANALYSIS_KEYS}
     return ret_dict
 
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def mirna_count_dict():
-    'Create a dictionary with keys for running miRNA analyses.'
+    """Create a dictionary with keys for running miRNA analyses."""
     ret_dict = {key: 0 for key in MIRNA_COUNT_ANALYSIS_KEYS}
     return ret_dict
 
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def full_analysis_dict():
-    'Create a dictionary with keys for running both type and miRNA analyses.'
+    """Create a dictionary with keys for running both type and miRNA analyses."""
     ret_dict = type_dict()
     ret_dict.update(mirna_count_dict())
     return ret_dict
@@ -52,7 +52,7 @@ def full_analysis_dict():
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def combine_type_dicts(analysis_dicts):
-    'Combine a list/tuple of dictionaries created from running type analyses.'
+    """Combine a list/tuple of dictionaries created from running type analyses."""
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -76,7 +76,7 @@ def combine_type_dicts(analysis_dicts):
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def combine_mirna_count_dicts(analysis_dicts):
-    'Combine a list of two or more dicts created from running miRNA count analyses.'
+    """Combine a list of two or more dicts created from running miRNA count analyses."""
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -99,10 +99,10 @@ def running_types(record, analysis_dict,
                   count_mode=DEFAULT_COUNT_MODE,
                   type_sep=DEFAULT_HYBRID_TYPE_SEP, 
                   mirna_centric_sorting=True):
-    '''
+    """
     Add information regarding various properties from the HybRecord object provided in
     "record" to the dictionary provided in the analysis_dict argument.
-    '''
+    """
     if not record.has_property('has_seg_types'):
         message = 'seg_type flag is required for record analysis.'
         print(message)
@@ -139,10 +139,10 @@ def running_types(record, analysis_dict,
 # Public Methods : HybRecord Analysis
 def running_mirna_counts(record, analysis_dict,
                          count_mode=DEFAULT_COUNT_MODE):
-    '''
+    """
     Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
-    '''
+    """
     record._ensure_mirna_analysis()
     count = record.count(count_mode)
 
@@ -165,17 +165,17 @@ def running_full(record, analysis_dict,
                  count_mode=DEFAULT_COUNT_MODE,
                  type_sep=DEFAULT_HYBRID_TYPE_SEP,
                  mirna_centric_sorting=True):
-    '''
+    """
     Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
-    '''
+    """
     running_types(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
     running_mirna_counts(record, analysis_dict, count_mode)
 
 
 # Public Methods : HybRecord Type Analysis Parsing
 def format_types(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    'Return the results of a type_analysis in a list of sep-delimited lines.'
+    """Return the results of a type_analysis in a list of sep-delimited lines."""
     ret_lines = []
     ret_lines += _format_hybrid_type_counts(analysis_dict, sep)
     ret_lines.append('')
@@ -190,10 +190,10 @@ def write_types(file_name_base, analysis_dict,
                 sep=DEFAULT_ENTRY_SEP, 
                 file_suffix=DEFAULT_FILE_SUFFIX,
                 make_plots=DEFAULT_MAKE_PLOTS):
-    '''
+    """
     Write the results of the type-analysis to a file or series of files with names based
     on file_name_base.
-    '''
+    """
     analyses = [
                 ('types_hybrids', _format_hybrid_type_counts),
                 ('types_segs', _format_all_seg_types),
@@ -218,7 +218,7 @@ def write_types(file_name_base, analysis_dict,
 
 # Public Methods : HybRecord miRNA Count Analysis Parsing
 def format_mirna_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    'Return the results of mirna analysis in a list of sep-delimited lines.'
+    """Return the results of mirna analysis in a list of sep-delimited lines."""
     ret_lines = ['miRNA_type' + sep + 'count']
     for key in MIRNA_COUNT_ANALYSIS_KEYS:
         ret_lines.append('%s%s%i' % (key, sep, analysis_dict[key]))
@@ -230,7 +230,7 @@ def write_mirna_counts(file_name, analysis_dict,
                        multi_files=DEFAULT_WRITE_MULTI_FILES, # Currently a dummy option
                        sep=DEFAULT_ENTRY_SEP,
                        file_suffix=DEFAULT_FILE_SUFFIX):
-    'Write the results of the mirna-analysis to the file provided in file_name.'
+    """Write the results of the mirna-analysis to the file provided in file_name."""
     use_file_name = file_name
     if not use_file_name.endswith(file_suffix):
         use_file_name += file_suffix
@@ -243,7 +243,7 @@ def write_mirna_counts(file_name, analysis_dict,
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def combine_full_dicts(analysis_dicts):
-    'Combine a list/tuple of dictionaries created from running full analyses.'
+    """Combine a list/tuple of dictionaries created from running full analyses."""
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -274,10 +274,10 @@ def write_full(file_name_base, analysis_dict,
                sep=DEFAULT_ENTRY_SEP,
                file_suffix=DEFAULT_FILE_SUFFIX,
                make_plots=DEFAULT_MAKE_PLOTS):
-    '''
+    """
     Write the results of the full analysis to a file or series of files with names based
     on file_name_base.
-    '''
+    """
     analyses = [
                 ('types_hybrids', _format_hybrid_type_counts),
                 ('types_segs', _format_all_seg_types),
@@ -304,7 +304,7 @@ def write_full(file_name_base, analysis_dict,
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def mirna_target_dict():
-    'Create a dictionary with keys for running target analyses.'
+    """Create a dictionary with keys for running target analyses."""
     # Created for parallel methods, potential future expansion.
     ret_dict = {}
     return ret_dict
@@ -312,7 +312,7 @@ def mirna_target_dict():
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def combine_mirna_target_dicts(analysis_dicts):
-    'Combine a list/tuple of two or more dictionaries created from running miRNA target analyses.'
+    """Combine a list/tuple of two or more dictionaries created from running miRNA target analyses."""
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -339,12 +339,12 @@ def running_mirna_targets(record, analysis_dict,
                           double_count_duplexes=False,
                           mirna_contains=None, mirna_matches=None,
                           target_contains=None, target_matches=None):
-    '''
+    """
     Add information regarding mirna/target properties to the dictionary provided in
     the analysis_dict argument.
     If double_count_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
     in both orientations. If False, the 3p miRNA will be considered as the target.
-    '''
+    """
     record._ensure_mirna_analysis()
     count = record.count(count_mode)
 
@@ -383,7 +383,7 @@ def running_mirna_targets(record, analysis_dict,
 
 # Public Methods : HybRecord miRNA Target Analysis Parsing
 def process_mirna_targets(analysis_dict):
-    'process and sort the results of target analysis'
+    """process and sort the results of target analysis"""
     counts = {} 
     target_type_counts = {}
     ret_dict = {}
@@ -412,7 +412,7 @@ def process_mirna_targets(analysis_dict):
 def format_mirna_targets(analysis_dict, counts=None, 
                          sep=DEFAULT_ENTRY_SEP, 
                          spacer_line=DEFAULT_TARGET_SPACER_LINE):
-    'Return the results of target analysis in a list of sep-delimited lines.'
+    """Return the results of target analysis in a list of sep-delimited lines."""
     header_items = ['mirna', 'mirna_type', 'target', 'target_type', 'count']
     ret_lines = []
     ret_lines.append(sep.join(header_items))
@@ -442,10 +442,10 @@ def write_mirna_targets(file_name_base, analysis_dict,
                         spacer_line=DEFAULT_TARGET_SPACER_LINE,
                         make_plots=DEFAULT_MAKE_PLOTS,
                         max_mirna=DEFAULT_MAX_MIRNA):
-    '''
+    """
     Write the results of the mirna_target to a file or series of files with names based
     on file_name_base.
-    '''
+    """
     if multi_files and len(analysis_dict) > max_mirna:
         message = 'miRNA-specific individual output files not supported for > 10 miRNA, with '
         message += '%i miRNA to be written in this case.\n' % len(analysis_dict)
@@ -507,7 +507,7 @@ def _sanitize_name(file_name):
 
 # Private Methods : HybRecord Type Analysis Parsing
 def _format_hybrid_type_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    'Return the results of hybrid_type_counts in a list of sep-delimited lines.'
+    """Return the results of hybrid_type_counts in a list of sep-delimited lines."""
     # Sort by count in descending order
     ret_lines = ['hybrid_type' + sep + 'count']
     # sorted_pairs = sorted(analysis_dict['hybrid_type_counts'].items(),
@@ -520,7 +520,7 @@ def _format_hybrid_type_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 
 # Private Methods : HybRecord Type Analysis Parsing
 def _format_all_seg_types(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    'Return the results of all_seg_types in a list of sep-delimited lines.'
+    """Return the results of all_seg_types in a list of sep-delimited lines."""
     # Sort by count in descending order
     #sorted_pairs = sorted(analysis_dict['all_seg_types'].items(),
     #                      key=lambda item: item[1], reverse=True)

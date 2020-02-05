@@ -3,11 +3,12 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-'''
-Acquire list of ensembl protein-coding human genome transcripts
-by using the "biomart" python module, available at:
+"""
+Acquire list of ensembl protein-coding human genome transcripts.
+
+Utilizes the "biomart" python module, available at:
 https://pypi.org/project/biomart/
-'''
+"""
 
 import datetime
 import textwrap

@@ -8,11 +8,12 @@
 # Test .ct -> vienna, viennad parsing
 # Future: Add seg_fold_info details to FoldRecord using HybRecord
 
-'''
+"""
 Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
+
 Public classes and methods in this file are imported by hybkit/__init__.py so they are accessible
 as hybkit.HybRecord() ... etc.
-'''
+"""
 
 # hybkit_code.py Index:
 #   HybRecord Class
@@ -41,9 +42,11 @@ import hybkit
 from collections import OrderedDict
 
 class HybRecord(object):
-    '''
+    """
     Class for storing and analayzing information about a chimeric or hybrid 
-    sequence read from a .hyb format file.  A minimum amount of data necessary 
+    sequence read from a .hyb format file.  
+
+    A minimum amount of data necessary 
     for a HybRecord object is the genomic sequence and its
     corresponding identifier. The .hyb file format is specified in
         "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
@@ -53,7 +56,7 @@ class HybRecord(object):
     "id, sequence, binding_energy, seg1_name, seg1_read_start, seg1_read_end, 
      seg1_ref_start, seg1_ref_end, seg1_map_score, seg2_read_start, seg2_read_end,
      seg2_ref_start, seg2_ref_end, seg2_map_score, [flag1=val1; flag2=val2;flag3=val3...]"
-    '''
+    """
 
     # HybRecord : Class-Level Constants
     # Columns 1-3 defining parameters of the overall hybrid, defined by the Hyb format
@@ -184,7 +187,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_id(self):
-        'Return a copy of the id for segment 1 (5p), or None if not defined.'
+        """Return a copy of the id for segment 1 (5p), or None if not defined."""
         if 'ref' in self.seg1_info:
             return self.seg1_info['ref']
         else:
@@ -192,7 +195,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg2_id(self):
-        'Return a copy of the id for segment 2 (3p), or None if not defined.'
+        """Return a copy of the id for segment 2 (3p), or None if not defined."""
         if 'ref' in self.seg2_info:
             return self.seg2_info['ref']
         else:
@@ -200,27 +203,27 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg_ids(self):
-        'Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined.'
+        """Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined."""
         return (self.seg1_id(), self.seg2_id())
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_info(self):
-        'Return a copy of the info dict object for segment 1 (5p).'
+        """Return a copy of the info dict object for segment 1 (5p)."""
         return self.seg1_info.copy()
 
     # HybRecord : Public Methods : Segment_Info
     def seg2_info(self):
-        'Return a copy of the info dict object for segment 2 (3p).'
+        """Return a copy of the info dict object for segment 2 (3p)."""
         return self.seg2_info.copy()
 
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
-        '''
+        """
         Set the value of self.flags: flag_key to value flag_val.
         allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         If argument is provided to the method, it overrides default behavior.
         Otherwise, the method falls back to the object-defaults.
-        '''
+        """
 
         if allow_undefined_flags is None:
             allow_undefined_flags = self.settings['allow_undefined_flags']
@@ -235,11 +238,11 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg1_type(self, require=False):
-        '''
+        """
         If the "seg1_type" flag is defined, return it. 
         If require is provided as True, raise an error if the seg1_type is not defined.
         Otherwise return "None"
-        '''
+        """
         if require:
             return self._get_flag('seg1_type')
         else:
@@ -247,11 +250,11 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg2_type(self, require=False):
-        '''
+        """
         If the "seg2_type" flag is defined, return it.
         If require is provided as True, raise an error if the seg2_type flag is not defined.
         Otherwise return "None"
-        '''
+        """
         if require:
             return self._get_flag('seg2_type')
         else:
@@ -259,11 +262,11 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types(self, require=False):
-        '''
+        """
         If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values.
         If require is provided as True, raise an error if either of the seg1_type or seg2_type 
         flags are not defined. Otherwise return "None" for each undefined flag.
-        '''
+        """
         if require:
             return (self._get_flag('seg1_type'), self._get_flag('seg2_type'))
         else:
@@ -271,37 +274,37 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types_sorted(self, require=False):
-        '''
+        """
         If the "seg1_type" and "seg2_type" flags are defined, return a tuple of both values
         sorted alphabetically. 
         If require is provided as True, raise an error if either of the seg1_type or seg2_type
         flags are not defined. Otherwise return "None" for each undefined flag. 
-        '''
+        """
         return sorted(self.seg_types(require=require))
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg1_type(self, seg1_type):
-        'Set "seg1_type" flag in flags.'
+        """Set "seg1_type" flag in flags."""
         self.set_flag('seg1_type', seg1_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg2_type(self, seg2_type):
-        'Set "seg2_type" flag in flags.'
+        """Set "seg2_type" flag in flags."""
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg_types(self, seg1_type, seg2_type):
-        'Set "seg1_type" and "seg2_type" flags in flags.'
+        """Set "seg1_type" and "seg2_type" flags in flags."""
         self.set_flag('seg1_type', seg1_type)
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def read_count(self, require=False):
-        '''
+        """
         If the "read_count" flag is defined, return it in integer form.
         If require is provided as True, raise an error if the read_count flag is not defined.
         Otherwise return "None"
-        '''
+        """
         if require:
             return int(self._get_flag('read_count'))
         else:
@@ -313,16 +316,16 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def set_read_count(self, read_count):
-        'Set "read_count" flag in flags.'
+        """Set "read_count" flag in flags."""
         self.set_flag('read_count', str(read_count))
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def record_count(self, require=False):
-        '''
+        """
         If the "count_total" flag is defined, return it as an int.
         If require is provided as True, raise an error if the count_total is not defined.
         Otherwise return 1, indicating that the record contains only itself.
-        '''
+        """
         if require:
             return int(self._get_flag('count_total'))
         else:
@@ -347,7 +350,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_types(self, allow_unknown=False):
-        '''
+        """
         Find the types of each segment using the method currently set for the class.
         The default supplied method is HybRecord.find_seg_type_hyb, and works with alignemnt
         mapping identifiers in the format of the reference database provided by the Hyb
@@ -355,7 +358,7 @@ class HybRecord(object):
         "set_find_method" method.
         If allow_unknown is False, an error will be raised if a segment type cannot be identified.
         If allow_unknown is True, unidentified segments will be designated as "unknown".
-        '''
+        """
         types = []
         for seg_info in [self.seg1_info, self.seg2_info]:
             seg_type = self.find_type_method(seg_info, self.find_type_params)
@@ -373,7 +376,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_hyb(self, seg_info, find_type_params={}):
-        '''
+        """
         Return the type of the provided segment, or return None if the segment cannot be
         identified. This method works with sequence / alignment mapping identifiers
         in the format of the reference database provided by the Hyb Software Package,
@@ -381,7 +384,7 @@ class HybRecord(object):
         the fourth component of the identifier, split by "_", as the identfied sequence.
         For Example, "MIMAT0000076_MirBase_miR-21_microRNA" is identified as "microRNA".
         This method does not utilize the find_type_params arg.
-        '''
+        """
         split_id = seg_info['ref'].split('_')
         if len(split_id) != 4:
             return None
@@ -395,7 +398,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_string_match(self, seg_info, find_type_params={}, check_all=False):
-        '''
+        """
         Return the type of the provided segment, or return None if the segment cannot be
         identified.
         This method attempts to find a string matching a specific pattern within the identifier
@@ -413,7 +416,7 @@ class HybRecord(object):
             suffix,_trans,mRNA
         If check_all is provided as true, the method will continue checking search oftens after
         an option has been found, to ensure that no options conflict.
-        '''
+        """
         seg_name = seg_info['ref']
         found_types = []
         check_done = False
@@ -463,7 +466,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_from_id_map(self, seg_info, find_type_params={}):
-        '''
+        """
         Return the type of the provided segment, or return None if the segment cannot be
         identified.
         This method checks to see if the identifer of the segment is present in a list provided 
@@ -474,7 +477,7 @@ class HybRecord(object):
                             'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
         This dict can be generated with the associated make_seg_type_id_map()
         method.
-        '''
+        """
         seg_name = seg_info['ref']
         if seg_name in find_type_params:
             return find_type_params[seg_name]
@@ -489,17 +492,17 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : fold_record
     def check_fold_seq_match(self, fold_record):
-        '''
+        """
         Return True if the sequence (".seq") attribute of a FoldRecord instance matches the
         sequence (".seq") attribute of this instance.
-        '''
+        """
         return (self.seq == fold_record.seq)
 
     # HybRecord : Public Methods : fold_record
     def set_fold_record(self, fold_record,
                         allow_fold_record_mismatch=None,
                         warn_fold_record_mismatch=None):
-        '''
+        """
         Check to ensure that fold_record argument is an instance of FoldRecord, and that
         it has a matching sequence to this HybRecord, then set it as self.fold_record.
         allow_fold_record_mismatch allows mismatches between the HybRecord sequence
@@ -508,7 +511,7 @@ class HybRecord(object):
         HybRecord sequence and hte FoldRecord sequence.
         If either argument is provided to the method, it overrides default behavior.
         Otherwise, the method falls back to the class default setting.
-        '''
+        """
         if allow_fold_record_mismatch is None:
             allow_fold_record_mismatch = self.settings['allow_fold_record_mismatch']
         if warn_fold_record_mismatch is None:
@@ -566,7 +569,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : mir_analysis
     def mirna_analysis(self, mirna_types=None):
-        '''
+        """
         Perform an analysis of miRNA properties within the sequence record, and store
         the results in the miRNA_seg flag, and in the miRNA_analysis dict.
         This analysis requries the seg1_type and seg2_type flags to be populated, which
@@ -576,7 +579,7 @@ class HybRecord(object):
         # If allow_mirna_dimers is provided as True, entries where seg1_type and seg2_type are
         # both identified as a miRNA will be included in miRNA analyses, where they would
         # otherwise be excluded to prevent ambiguity.
-        '''
+        """
 
         if mirna_types is None:
             mirna_types = self.MIRNA_TYPES
@@ -660,7 +663,7 @@ class HybRecord(object):
             self.mirna_details['target_fold'] = target_details['seg_fold']
 
     def target_region_analysis(self, region_info=None, coding_types=None):
-        '''
+        """
         If the record contains an identified mirna and coding target, 
         find the region in which the targeted sequence resides and store the results in the 
         "target_reg" flag and miRNA_analysis dict.
@@ -681,7 +684,7 @@ class HybRecord(object):
         This dict can be set at the class level using 
         ".make_region_info()', with ".set_region_info()", or with
         ".make_set_region_info()", or can be supplied directly to this method.         
-        '''
+        """
 
         if coding_types is None:
             coding_types = self.CODING_TYPES
@@ -820,12 +823,12 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : has_property
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
-        '''
+        """
         Check if HybRecord has property of prop_type defined in list of allowed properties
         stored in record.PROPERTIES. If query property has a comparator, provide this
         in prop_compare.
         If allow_unknown is False, an error will be raised if the requested property is undefined.
-        '''
+        """
 
         if prop_type not in self.PROPERTIES:
             message = 'Requested Property: %s is not defined. ' % prop_type
@@ -940,7 +943,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False):
-        'Return a Hyb-format string representation of the Hyb record.'
+        """Return a Hyb-format string representation of the Hyb record."""
         line_items = []
         for item_key in self.HYBRID_COLUMNS:
             line_items.append(getattr(self, item_key, '.'))
@@ -963,51 +966,51 @@ class HybRecord(object):
 
     # HybRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
-        'Return True if ".id" and ".seq" attributes match.'
+        """Return True if ".id" and ".seq" attributes match."""
         return (self.id == other.id and self.seq == other.seq)
 
     # HybRecord : Public MagicMethods : Comparison
     def __neq__(self, other):
-        'Return False if either ".id" or ".seq" attributes mismatch.'
+        """Return False if either ".id" or ".seq" attributes mismatch."""
         return (self.id != other.id or self.seq != other.seq)
 
     # HybRecord : Public MagicMethods : Evaluation
     def __hash__(self):
-        'Return a hash of the record ".id" attribute'
+        """Return a hash of the record ".id" attribute"""
         return hash(self.id)
 
     # HybRecord : Public MagicMethods : Evaluation
     def __bool__(self):
-        'Return True wherever the class is defined.'
+        """Return True wherever the class is defined."""
         return True
 
     # HybRecord : Public MagicMethods : Evaluation
     def __len__(self):
-        'Return the length of the genomic sequence'
+        """Return the length of the genomic sequence"""
         return len(self.seq)
 
     # HybRecord : Public Classmethods : find_type_method
     @classmethod
     def set_find_type_method(cls, find_method, find_params={}):
-        '''
+        """
         Set the class-level custom method for segment assignemnt to callable method
         in find_method, that has the form: "def my_method(self, seg_info, find_params)".
         This method should return the string of the assigned segment type if found, or a
         None object if the type cannot be found.
         It can also take a dictionary in the "find_params" argument that specifies
         additional or dynamic search properties, as desired.
-        '''
+        """
         cls.find_type_method = types.MethodType(find_method, cls)
         cls.find_type_params = find_params
 
     # HybRecord : Public Classmethods : find_type_method
     @classmethod
     def select_find_type_method(cls, find_method_name, find_params={}):
-        '''
+        """
         Set the class-level custom method for segment assignemnt to callable method
         in find_method, that has the form: "def my_method(self, seg_info, find_params)".
         Select this method from the methods available in HybRecord.find_type_methods.
-        '''
+        """
         if find_method_name not in cls.find_type_methods:
             message = 'Selected find_seg_type_method: %s is not defined.\n' % find_method_name
             message += 'Allowed Options:' + ', '.join(cls.find_type_methods.keys())
@@ -1016,7 +1019,7 @@ class HybRecord(object):
 
     @classmethod
     def make_region_info(cls, region_csv_name, sep=','):
-        '''
+        """
         Make a dict containing information on a coding transcript utr regions from an
         input csv file. The input csv must contain a header line, and must have the columns:
         Required keys are cdna_coding_start, cdna_coding_end
@@ -1027,7 +1030,7 @@ class HybRecord(object):
                                 '3_utr_start':'45329242', '3_utr_end':'45329305'}}
         This dict can then be passed to ".set_region_info()" or supplied directly to
         the ".target_region_analysis()" method.
-        '''
+        """
 
         # data_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
         data_keys = ['cdna_coding_start', 'cdna_coding_end']
@@ -1101,7 +1104,7 @@ class HybRecord(object):
 
     @classmethod
     def set_region_info(cls, region_info_dict):
-        '''
+        """
         Set the class-level reference dict object with information on coding transcript utr 
         regions. This dict must have transcript identifiers as keys, with values of dicts with
         defined keys of: 
@@ -1111,35 +1114,35 @@ class HybRecord(object):
            {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
                                 'cdna_coding_start':  'cdna_coding_end':,
                                 '3_utr_start':'45329242', '3_utr_end':'45329305'}}
-        '''
+        """
 
         cls.target_region_info = region_info_dict
     
     @classmethod
     def make_set_region_info(cls, region_csv_name, sep=','):
-        '''
+        """
         Convenience wrapper, sequentially callse ".make_region_info()" followed by 
         ".set_region_info()" to set the HybRecord.target_region_info class dict object 
         required for target_region_analysis. 
-        '''
+        """
         region_info = cls.make_region_info(region_csv_name, sep=sep)
         cls.set_region_info(region_info)
 
     # HybRecord : Public Classmethods : flags
     @classmethod
     def set_custom_flags(cls, custom_flags):
-        '''
+        """
         Set the class-level HybRecord.custom_flags variable, (and update the
         HybRecord.all_flags variable) to allow custom flags in your Hyb file without
         causing an exception.
-        '''
+        """
         cls.custom_flags = custom_flags
         cls.all_flags = HYB_FLAGS + HYBKIT_FLAGS + cls.custom_flags
 
     # HybRecord : Public Classmethods : Record Construction
     @classmethod
     def from_line(cls, line, hybformat_id=False, hybformat_ref=False):
-        '''
+        """
         Takes as input a line in .hyb format and returns a HybRecord object containing the 
         line's data.
         The Hyb Software Package contains further information in the "id" field of the
@@ -1148,7 +1151,7 @@ class HybRecord(object):
         The Hyb Software Package also utilizes a database by default that contains 
         further information in the names of each respective reference sequence. 
         If hybformat_ref is provided as True, this extra information will be read.
-        '''
+        """
         line_items = line.strip().split('\t')
         # print(line_items)
         hyb_id = line_items[0]
@@ -1199,7 +1202,7 @@ class HybRecord(object):
     def make_string_match_parameters(
             legend_file=os.path.join(hybkit.code_dir, 'find_type_string_match.csv')
             ):
-        '''
+        """
         Read csv file provided in legend_file, and return a dict of search parameters
         for use with the find_seg_type_string_match method.
         The my_legend.csv file should have the format:
@@ -1212,7 +1215,7 @@ class HybRecord(object):
         2-tuples for each search-string and associated segment-type. For example:
           {'suffix': [('_miR', 'microRNA'),
                       ('_trans', 'mRNA')   ]}
-        '''
+        """
 
         ALLOWED_SEARCH_TYPES = {'prefix', 'contains', 'suffix', 'matches'}
         return_dict = {}
@@ -1252,7 +1255,7 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_seg_type_id_map(mapped_id_files=None, type_file_pairs=None):
-        '''
+        """
         Read file(s) provided and return a mapping of sequence identifiers to types 
         for use with the find_seg_type_from_id_map method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
@@ -1268,7 +1271,7 @@ class HybRecord(object):
             Ex: [(seg1_type, file1_name), (seg2_type, file2_name),]
             The first entry in each (non-commented, non-blank) file line will be read and
             added to the mapping dictionary mapped to the provided seg_type.
-        '''
+        """
 
         return_dict = {}
         if not any((arg is not None for arg in (mapped_id_files, type_file_pairs))):
@@ -1513,9 +1516,9 @@ class HybRecord(object):
 
 
 class HybFile(object):
-    '''
+    """
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
-    '''
+    """
 
     # HybFile : Class-Level Constants:
     DEFAULTS = {}
@@ -1535,44 +1538,44 @@ class HybFile(object):
 
     # HybFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
-        '''Wrapper for open() function that stores resulting file.'''
+        """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
 
     # HybFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
-        '''Open "with" syntax.'''
+        """Open "with" syntax."""
         return self
 
     # HybFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        '''Close "with" syntax'''
+        """Close "with" syntax"""
         self.close()
 
     # HybFile : Public Methods : Initialization / Closing
     def __iter__(self):
-        '''Return an iterator.'''
+        """Return an iterator."""
         return self
 
     # HybFile : Public Methods : Reading
     def __next__(self):
-        'Return next line as HybRecord object.'
+        """Return next line as HybRecord object."""
         return HybRecord.from_line(self.fh.__next__(),
                                    hybformat_id=self.settings['hybformat_id'],
                                    hybformat_ref=self.settings['hybformat_ref'])
 
     # HybFile : Public Methods : Reading
     def close(self):
-        '''Close the file.'''
+        """Close the file."""
         self.fh.close()
 
     # HybFile : Public Methods : Reading
     def read_record(self):
-        'Return next line of hyb file as HybRecord object.'
+        """Return next line of hyb file as HybRecord object."""
         return next(self)
 
     # HybFile : Public Methods : Reading
     def read_records(self):
-        'Return list of all records in hyb file as HybRecord objects.'
+        """Return list of all records in hyb file as HybRecord objects."""
         records = []
         for record in self:
             records.append(record)
@@ -1580,29 +1583,29 @@ class HybFile(object):
 
     # HybFile : Public Methods : Writing
     def write_record(self, write_record):
-        '''
+        """
         Write a HybRecord object to file as a Hyb-format string.
         Unlike the file.write() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         self._ensure_HybRecord(write_record)
         record_string = write_record.to_line(newline=True)
         self.fh.write(record_string)
 
     # HybFile : Public Methods : Writing
     def write_records(self, write_records):
-        '''
+        """
         Write a sequence of HybRecord objects as hyb-format lines to the Hyb file.
         Unlike the file.writelines() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         for write_record in write_records:
             self.fh.write_record(write_record)
 
     # HybFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
-        'Return a new HybFile object.'
+        """Return a new HybFile object."""
         return cls(*args, **kwargs)
 
     # HybFile : Private Methods
@@ -1614,7 +1617,7 @@ class HybFile(object):
 
 
 class FoldRecord(object):
-    '''
+    """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     This class supports:
         The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
@@ -1642,7 +1645,7 @@ class FoldRecord(object):
 
     A minimum amount of data necessary for a FoldRecord object is a sequence identifier,
     a genomic sequence, and its fold representaiton.
-    '''
+    """
 
     # FoldRecord : Class-Level Constants
     # Default settings:
@@ -1670,7 +1673,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg1_id(self):
-        'Return a copy of the id for segment 1 (5p), or None if not defined.'
+        """Return a copy of the id for segment 1 (5p), or None if not defined."""
         if 'ref' in self.seg1_fold_info:
             return self.seg1_fold_info['ref']
         else:
@@ -1678,7 +1681,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg2_id(self):
-        'Return a copy of the id for segment 2 (3p), or None if not defined.'
+        """Return a copy of the id for segment 2 (3p), or None if not defined."""
         if 'ref' in self.seg2_fold_info:
             return self.seg2_fold_info['ref']
         else:
@@ -1686,43 +1689,43 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg_ids(self):
-        'Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined.'
+        """Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined."""
         return (self.seg1_id(), self.seg2_id())
 
     # FoldRecord : Public Methods : seg_info
     def seg1_info(self):
-        'Return a copy of the info dict object for segment 1 (5p).'
+        """Return a copy of the info dict object for segment 1 (5p)."""
         return self.seg1_fold_info.copy()
 
     # FoldRecord : Public Methods : seg_info
     def seg2_info(self):
-        'Return a copy of the info dict object for segment 2 (3p).'
+        """Return a copy of the info dict object for segment 2 (3p)."""
         return self.seg2_fold_info.copy()
 
     # FoldRecord : Public Methods : seg_info
     def seg1_detail(self, detail):
-        '''
+        """
         Return a copy of the detail for seg1 provided in by the key in "detail" parameter,
         or if it does not exist return None.
-        '''
+        """
         return self._get_segN_detail(1, detail)
 
     # FoldRecord : Public Methods : seg_info
     def seg2_detail(self, detail):
-        '''
+        """
         Return a copy of the detail for seg2 provided in by the key in "detail" parameter,
         or if it does not exist return None.
-        '''
+        """
         return self._get_segN_detail(2, detail)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg1_fold_info(self, seg_info_obj):
-        'Set folding information for segment 1'
+        """Set folding information for segment 1"""
         self._set_segN_fold_info(1, seg_info_obj)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg2_fold_info(self, seg_info_obj):
-        'Set folding information for segment 2'
+        """Set folding information for segment 2"""
         self._set_segN_fold_info(2, seg_info_obj)
 
     # FoldRecord : Public Methods : seg_info
@@ -1731,7 +1734,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_lines(self, newline=False):
-        'Return a list of lines for the record in vienna format.'
+        """Return a list of lines for the record in vienna format."""
         ret_lines = []
         suffix = ''
         if newline:
@@ -1751,7 +1754,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_string(self, newline=False):
-        'return a 3-line string for the record in vienna format.'
+        """return a 3-line string for the record in vienna format."""
         if newline:
             suffix = '\n'
         else:
@@ -1760,7 +1763,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Viennad
     def to_viennad_lines(self, newline=False):
-        'Return a list of lines for the record in viennad format.'
+        """Return a list of lines for the record in viennad format."""
         ret_lines = []
         if not newline:
             suffix = ''
@@ -1798,7 +1801,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Viennad
     def to_viennad_string(self, newline=False):
-        'return a 6-line string for the record in viennad format.'
+        """return a 6-line string for the record in viennad format."""
         if newline:
             suffix = '\n'
         else:
@@ -1807,10 +1810,10 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : hyb_record
     def check_hyb_record_match(self, hyb_record):
-        '''
+        """
         Return True if the sequence (".seq") attribute of a HybRecord instance matches the
         sequence (".seq") attribute of this instance.
-        '''
+        """
         return (self.seq == hyb_record.seq)
 
     # FoldRecord : Public MagicMethods : Comparison
@@ -1836,14 +1839,14 @@ class FoldRecord(object):
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
     def from_vienna_lines(cls, record_lines, hybformat_file=False):
-        '''
+        """
         Create a FoldRecord entry from a list of 3 strings corresponding to lines in the
         Vienna format.
         The Hyb Software Package contains further information in the "name" field of the
         vienna record that can be used to infer further information about the fold divisions.
         If hybformat_file is provided as True, this extra information will be read.
         extra information.
-        '''
+        """
 
         if len(record_lines) != 3:
             message = 'Provided Vienna Record Lines:\n'
@@ -1880,20 +1883,20 @@ class FoldRecord(object):
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
     def from_vienna_string(cls, record_string):
-        '''
+        """
         Create a FoldRecord entry from a string containing 3 lines corresponding to lines in the
         Vienna format.
-        '''
+        """
         lines = record_string.strip().split('\n')
         return cls.from_vienna_lines(lines)
 
     # FoldRecord : Public Classmethods : Construction : Viennad
     @classmethod
     def from_viennad_lines(cls, record_lines, hybformat_file=False, skip_bad=None, warn_bad=None):
-        '''
+        """
         Create a FoldRecord entry from a list of 5 or 6 strings corresponding to lines in the
         Viennad format.
-        '''
+        """
         if skip_bad is None:
             skip_bad = cls.settings['skip_bad']
         if warn_bad is None:
@@ -1984,24 +1987,24 @@ class FoldRecord(object):
     # FoldRecord : Public Classmethods : Construction : Viennad
     @classmethod
     def from_viennad_string(cls, record_string):
-        '''
+        """
         Create a FoldRecord entry from a string containing 5 or 6 lines corresponding
         to lines in the Viennad format.
-        '''
+        """
         lines = record_string.strip().split('\n')
         return cls.from_vienna_lines(lines)
 
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod
     def from_ct_lines(cls, record_lines, hybformat_file=False):
-        '''
+        """
         Create a FoldRecord entry from a list of an arbitrary number of strings
         corresponding to lines in the ".ct" file format.
         The Hyb Software Package contains further information in the "name" field of the
         ct record that can be used to infer further information about the fold divisions.
         If hybformat_file is provided as True, this extra information will be read.
         extra information.
-        '''
+        """
         header_line = record_lines[0].strip()
         if 'dG' not in header_line:
             message = 'Provided ct Record Lines:\n'
@@ -2105,10 +2108,10 @@ class FoldRecord(object):
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod
     def from_ct_string(cls, record_string):
-        '''
+        """
         Create a FoldRecord entry from a string containing an arbitrary number of lines
         corresponding to lines in the ".ct" file format.
-        '''
+        """
         lines = record_string.strip().split('\n')
         return cls.from_ct_lines(lines)
 
@@ -2257,14 +2260,14 @@ class FoldRecord(object):
 
 
 class ViennaFile(object):
-    '''
+    """
     File-object wrapper that provides abiltity to return sets of three file lines as
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     vienna record that can be used to infer further information about the fold divisions.
     Set this value to True with hybkit.ViennaFile.settings["hybformat_file"] = True to read this
     extra information.
-    '''
+    """
 
     # ViennaFile : Class-Level Constants
     DEFAULTS = {}
@@ -2275,27 +2278,27 @@ class ViennaFile(object):
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
-        '''Wrapper for open() function that stores resulting file.'''
+        """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
-        '''Open "with" syntax.'''
+        """Open "with" syntax."""
         return self
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        '''Close "with" syntax'''
+        """Close "with" syntax"""
         self.close()
 
     # ViennaFile : Public Methods : Initialization / Closing
     def __iter__(self):
-        '''Return an iterator.'''
+        """Return an iterator."""
         return self
 
     # ViennaFile : Public Methods : Reading
     def __next__(self):
-        '''Read next three lines and return output as FoldRecord object.'''
+        """Read next three lines and return output as FoldRecord object."""
         line_1 = next(self.fh)
         line_2 = next(self.fh)
         line_3 = next(self.fh)
@@ -2304,17 +2307,17 @@ class ViennaFile(object):
 
     # ViennaFile : Public Methods : Reading
     def close(self):
-        '''Close the file.'''
+        """Close the file."""
         self.fh.close()
 
     # ViennaFile : Public Methods : Reading
     def read_record(self):
-        'Return next three line of vienna file as FoldRecord object.'
+        """Return next three line of vienna file as FoldRecord object."""
         return next(self)
 
     # ViennaFile : Public Methods : Reading
     def read_records(self):
-        'Return list of vienna records in vienna file as FoldRecord objects.'
+        """Return list of vienna records in vienna file as FoldRecord objects."""
         records = []
         for record in self:
             records.append(record)
@@ -2322,29 +2325,29 @@ class ViennaFile(object):
 
     # ViennaFile : Public Methods : Writing
     def write_record(self, write_record):
-        '''
+        """
         Write a FoldRecord object to file as a vienna-format string.
         Unlike the file.write() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         self._ensure_FoldRecord(write_record)
         record_string = write_record.to_vienna_string(newline=True)
         self.fh.write(record_string)
 
     # ViennaFile : Public Methods : Writing
     def write_records(self, write_records):
-        '''
+        """
         Write a sequence of FoldRecord objects as vienna-format lines to the vienna file.
         Unlike the file.writelines() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         for write_record in write_records:
             self.write_record(write_record)
 
     # ViennaFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
-        'Return a new ViennaFile object.'
+        """Return a new ViennaFile object."""
         return cls(*args, **kwargs)
 
     # ViennaFile : Private Methods : Writing
@@ -2356,10 +2359,10 @@ class ViennaFile(object):
 
 
 class HybViennaIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and ViennaFile simultaneously,
     returning a tuple of hyb_record, fold_record instances on each iteration.
-    '''
+    """
     # HybViennaIter : Public Methods
     def __init__(self, hybfile_handle, viennafile_handle):
         self.hybfile_handle = hybfile_handle
@@ -2379,12 +2382,12 @@ class HybViennaIter(object):
 
 
 class HybViennaCmbIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and ViennaFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned vienna entry.
     Each ViennaRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated ViennaRecord entry.
-    '''
+    """
     # HybViennaCmbIter : Public Methods
     def __init__(self, hybfile_handle, viennafile_handle):
         self.hybfile_handle = hybfile_handle
@@ -2409,14 +2412,14 @@ class HybViennaCmbIter(object):
 
 
 class ViennadFile(object):
-    '''
+    """
     File-object wrapper that provides abiltity to return sets of six viennad file lines as
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     viennad record that can be used to infer further information about the fold divisions.
     Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
     extra information.
-    '''
+    """
     # ViennadFile : Class-Level Constants
     DEFAULTS = {}
     DEFAULTS['hybformat_file'] = False
@@ -2426,30 +2429,30 @@ class ViennadFile(object):
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
-        '''Wrapper for open() function that stores resulting file.'''
+        """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
-        '''Open "with" syntax.'''
+        """Open "with" syntax."""
         return self
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        '''Close "with" syntax'''
+        """Close "with" syntax"""
         self.close()
 
     # ViennadFile : Public Methods : Initialization / Closing
     def __iter__(self):
-        '''Return an iterator.'''
+        """Return an iterator."""
         return self
 
     # ViennadFile : Public Methods : Reading
     def __next__(self):
-        '''
+        """
         Call io.FileIO __next__ method for next three six lines and return
-        output as FoldRecord object.'
-        '''
+        output as FoldRecord object.
+        """
         line_1 = next(self.fh)
         line_2 = next(self.fh)
         line_3 = next(self.fh)
@@ -2461,17 +2464,17 @@ class ViennadFile(object):
 
     # ViennadFile : Public Methods : Reading
     def close(self):
-        '''Close the file.'''
+        """Close the file."""
         self.fh.close()
 
     # ViennadFile : Public Methods : Reading
     def read_record(self):
-        'Return next six lines of viennad file as FoldRecord object.'
+        """Return next six lines of viennad file as FoldRecord object."""
         return next(self)
 
     # ViennadFile : Public Methods : Reading
     def read_records(self):
-        'Return list of viennad records in viennad file as FoldRecord objects.'
+        """Return list of viennad records in viennad file as FoldRecord objects."""
         records = []
         for record in self:
             records.append(record)
@@ -2479,29 +2482,29 @@ class ViennadFile(object):
 
     # ViennadFile : Public Methods : Writing
     def write_record(self, write_record):
-        '''
+        """
         Write a FoldRecord object to file as a viennad-format string.
         Unlike the file.write() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         self._ensure_FoldRecord(write_record)
         record_string = write_record.to_viennad_string(newline=True)
         self.fh.write(record_string)
 
     # ViennadFile : Public Methods : Writing
     def write_records(self, write_records):
-        '''
+        """
         Write a sequence of FoldRecord objects as viennad-format lines to the viennad file.
         Unlike the file.writelines() method, this method will add a newline to the
         end of each written record line.
-        '''
+        """
         for write_record in write_records:
             self.write_record(write_record)
 
     # ViennadFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
-        'Return a new ViennadFile object.'
+        """Return a new ViennadFile object."""
         return cls(*args, **kwargs)
 
     # ViennadFile : Private Methods
@@ -2513,10 +2516,10 @@ class ViennadFile(object):
 
 
 class HybViennadIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and ViennadFile simultaneously,
     returning a tuple of hyb_record, fold_record instances on each iteration.
-    '''
+    """
 
     # HybViennaIter : Public Methods
     def __init__(self, hybfile_handle, viennadfile_handle):
@@ -2537,12 +2540,12 @@ class HybViennadIter(object):
 
 
 class HybViennadCmbIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and ViennadFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned viennad entry.
     Each FoldRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
-    '''
+    """
     # HybViennaCmbIter : Public Methods
     def __init__(self, hybfile_handle, viennadfile_handle):
         self.hybfile_handle = hybfile_handle
@@ -2567,14 +2570,14 @@ class HybViennadCmbIter(object):
 
 
 class CtFile(object):
-    '''
+    """
     File-object wrapper that provides abiltity to return sets of ct file lines as
     FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     ct record that can be used to infer further information about the fold divisions.
     Set this value to True with hybkit.CtFile.settings['hybformat_file'] = True to read this
     extra information.
-    '''
+    """
     # ViennaFile : Class-Level Constants
     DEFAULTS = {}
     DEFAULTS['hybformat_file'] = False
@@ -2584,31 +2587,31 @@ class CtFile(object):
 
     # CtFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
-        '''Wrapper for open() function that stores resulting file.'''
+        """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
 
     # CtFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
-        '''Open "with" syntax.'''
+        """Open "with" syntax."""
         return self
 
     # CtFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        '''Close "with" syntax'''
+        """Close "with" syntax"""
         self.close()
 
     # CtFile : Public Methods : Initialization / Closing
     def __iter__(self):
-        '''Return an iterator.'''
+        """Return an iterator."""
         return self
 
     # CtFile : Public Methods
     def __next__(self):
-        '''
+        """
         Call return the first line of the next entry.
         Read the expected number of following lines in the entry, and read that number
         lines further. Return lines as FoldRecord object.
-        '''
+        """
         header = next(self.fh)
         record_lines = [header]
         expected_line_num = int(header.strip().split()[0])
@@ -2620,17 +2623,17 @@ class CtFile(object):
 
     # CtFile : Public Methods : Reading
     def close(self):
-        '''Close the file.'''
+        """Close the file."""
         self.fh.close()
 
     # CtFile : Public Methods
     def read_record(self):
-        'Return next lines of ct file as FoldRecord object.'
+        """Return next lines of ct file as FoldRecord object."""
         return next(self)
 
     # CtFile : Public Methods
     def read_records(self):
-        'Return list of records in ct file as FoldRecord objects.'
+        """Return list of records in ct file as FoldRecord objects."""
         records = []
         for record in self:
             records.append(record)
@@ -2647,15 +2650,15 @@ class CtFile(object):
     # CtFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
-        'Return a new CtFile object.'
+        """Return a new CtFile object."""
         return cls(*args, **kwargs)
 
 
 class HybCtIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and CtFile simultaneously,
     returning a tuple of hyb_record, fold_record instances on each iteration.
-    '''
+    """
     # HybCtIter : Public Methods
     def __init__(self, hybfile_handle, ctfile_handle):
         self.hybfile_handle = hybfile_handle
@@ -2675,12 +2678,12 @@ class HybCtIter(object):
 
 
 class HybCtCmbIter(object):
-    '''
+    """
     This class provides an iterator to iterate through a HybFile and CtFile simultaneously.
     It is presumed that each respective hyb entry corresponds to an aligned ct entry.
     Each FoldRecord will be added to the corresponding HybRecord.
     Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
-    '''
+    """
     # HybCtCmbIter : Public Methods
     def __init__(self, hybfile_handle, ctfile_handle):
         self.hybfile_handle = hybfile_handle

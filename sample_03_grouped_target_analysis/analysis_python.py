@@ -3,11 +3,12 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-'''
-Analysis for sample_grouped_target_analysis performed as a python workflow, as an example 
-of direct usage of hybkit functions. 
+"""
+Analysis for sample_grouped_target_analysis performed as a python workflow.
+
+Provided as an example of direct usage of hybkit functions. 
 File names are hardcoded, and functions are accessed directly.
-'''
+"""
 
 import os
 import sys

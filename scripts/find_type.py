@@ -3,10 +3,11 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-'''
-Functions and executable script for assignment of types for segments of ".hyb" genomic sequence
-records stored in the HybRecord class.
-'''
+"""
+Executable script for assignment of types for segments of ".hyb" genomic sequence.
+
+Records are stored in the HybRecord class.
+"""
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
@@ -21,6 +22,7 @@ make_string_match_parameters = hybkit.HybRecord.make_string_match_parameters
 
 
 def assign_segment_types(in_hyb, out_hyb, **args_info):
+    """Stub funciton."""
     print('stub function')
 
 
