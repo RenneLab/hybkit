@@ -11,35 +11,22 @@
 """
 Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
 
-Public classes and methods in this file are imported by hybkit/__init__.py so they are accessible
-as hybkit.HybRecord() ... etc.
+TODO Expand Definition.
 """
-
-# hybkit_code.py Index:
-#   HybRecord Class
-#   HybFile Class
-#   FoldRecord Class
-#   ViennaFile Class
-#   HybViennaIter Class
-#   HybViennaCmbIter Class
-#   ViennadFile Class
-#   HybViennadIter Class
-#   HybViennadCmbIter Class#
-#   CtFile Class
-#   HybCtIter Class
-#   HybCtCmbIter Class
-
-# Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
-                             __email__, __license__, __maintainer__, __status__, __version__
 
 import os
 import io
 import types
 import csv
 import copy
-import hybkit
 from collections import OrderedDict
+import hybkit
+import hybkit.analysis
+import hybkit.plot
+
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
 
 class HybRecord(object):
     """
@@ -1200,7 +1187,7 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_string_match_parameters(
-            legend_file=os.path.join(hybkit.code_dir, 'find_type_string_match.csv')
+            legend_file=os.path.join(hybkit.__about__.code_dir, 'find_type_string_match.csv')
             ):
         """
         Read csv file provided in legend_file, and return a dict of search parameters

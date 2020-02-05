@@ -7,6 +7,12 @@
 Package details for the hybkit project.
 '''
 
+import os
+
+# Set package directory and code directory
+package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+code_dir = os.path.join(package_dir, 'hybkit')
+
 # Preparation for initial PIP release, not yet completed.
 project_name = 'hybkit'
 description = 'Toolkit for analysis of .hyb format genomic sequence data.'
