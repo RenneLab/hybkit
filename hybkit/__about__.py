@@ -8,6 +8,7 @@ Package details for the hybkit project.
 '''
 
 # Preparation for initial PIP release, not yet completed.
+project_name = 'hybkit'
 description = 'Toolkit for analysis of .hyb format genomic sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
