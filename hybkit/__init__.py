@@ -29,8 +29,7 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 class HybRecord(object):
-    """
-    Class for storing and analayzing information about a chimeric or hybrid 
+    """Class for storing and analayzing information about a chimeric or hybrid 
     sequence read from a .hyb format file.  
 
     A minimum amount of data necessary 
@@ -205,8 +204,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
-        """
-        Set the value of self.flags: flag_key to value flag_val.
+        """Set the value of self.flags: flag_key to value flag_val.
         allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         If argument is provided to the method, it overrides default behavior.
         Otherwise, the method falls back to the object-defaults.
@@ -225,8 +223,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg1_type(self, require=False):
-        """
-        If the "seg1_type" flag is defined, return it. 
+        """If the "seg1_type" flag is defined, return it. 
         If require is provided as True, raise an error if the seg1_type is not defined.
         Otherwise return "None"
         """
@@ -237,8 +234,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg2_type(self, require=False):
-        """
-        If the "seg2_type" flag is defined, return it.
+        """If the "seg2_type" flag is defined, return it.
         If require is provided as True, raise an error if the seg2_type flag is not defined.
         Otherwise return "None"
         """
@@ -249,8 +245,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types(self, require=False):
-        """
-        If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values.
+        """If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values.
         If require is provided as True, raise an error if either of the seg1_type or seg2_type 
         flags are not defined. Otherwise return "None" for each undefined flag.
         """
@@ -261,8 +256,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types_sorted(self, require=False):
-        """
-        If the "seg1_type" and "seg2_type" flags are defined, return a tuple of both values
+        """If the "seg1_type" and "seg2_type" flags are defined, return a tuple of both values
         sorted alphabetically. 
         If require is provided as True, raise an error if either of the seg1_type or seg2_type
         flags are not defined. Otherwise return "None" for each undefined flag. 
@@ -287,8 +281,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def read_count(self, require=False):
-        """
-        If the "read_count" flag is defined, return it in integer form.
+        """If the "read_count" flag is defined, return it in integer form.
         If require is provided as True, raise an error if the read_count flag is not defined.
         Otherwise return "None"
         """
@@ -308,8 +301,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def record_count(self, require=False):
-        """
-        If the "count_total" flag is defined, return it as an int.
+        """If the "count_total" flag is defined, return it as an int.
         If require is provided as True, raise an error if the count_total is not defined.
         Otherwise return 1, indicating that the record contains only itself.
         """
@@ -337,8 +329,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_types(self, allow_unknown=False):
-        """
-        Find the types of each segment using the method currently set for the class.
+        """Find the types of each segment using the method currently set for the class.
         The default supplied method is HybRecord.find_seg_type_hyb, and works with alignemnt
         mapping identifiers in the format of the reference database provided by the Hyb
         Software Package. Custom methods with more complex behavior can be supplied via the
@@ -363,8 +354,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_hyb(self, seg_info, find_type_params={}):
-        """
-        Return the type of the provided segment, or return None if the segment cannot be
+        """Return the type of the provided segment, or return None if the segment cannot be
         identified. This method works with sequence / alignment mapping identifiers
         in the format of the reference database provided by the Hyb Software Package,
         specifically identifiers of the format: "AAAA_BBBB_CCCC_DDDD" This method returns
@@ -385,8 +375,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_string_match(self, seg_info, find_type_params={}, check_all=False):
-        """
-        Return the type of the provided segment, or return None if the segment cannot be
+        """Return the type of the provided segment, or return None if the segment cannot be
         identified.
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "prefix", "contains", "suffix", and
@@ -453,8 +442,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_from_id_map(self, seg_info, find_type_params={}):
-        """
-        Return the type of the provided segment, or return None if the segment cannot be
+        """Return the type of the provided segment, or return None if the segment cannot be
         identified.
         This method checks to see if the identifer of the segment is present in a list provided 
         in find_type_params. find_type_params should be formatted as a dict with keys as 
@@ -479,8 +467,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : fold_record
     def check_fold_seq_match(self, fold_record):
-        """
-        Return True if the sequence (".seq") attribute of a FoldRecord instance matches the
+        """Return True if the sequence (".seq") attribute of a FoldRecord instance matches the
         sequence (".seq") attribute of this instance.
         """
         return (self.seq == fold_record.seq)
@@ -489,8 +476,7 @@ class HybRecord(object):
     def set_fold_record(self, fold_record,
                         allow_fold_record_mismatch=None,
                         warn_fold_record_mismatch=None):
-        """
-        Check to ensure that fold_record argument is an instance of FoldRecord, and that
+        """Check to ensure that fold_record argument is an instance of FoldRecord, and that
         it has a matching sequence to this HybRecord, then set it as self.fold_record.
         allow_fold_record_mismatch allows mismatches between the HybRecord sequence
         and the FoldRecord sequence.
@@ -556,7 +542,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : mir_analysis
     def mirna_analysis(self, mirna_types=None):
-        """
+        """Analyze and store miRNA properties from other properties in the hyb record.
+
         Perform an analysis of miRNA properties within the sequence record, and store
         the results in the miRNA_seg flag, and in the miRNA_analysis dict.
         This analysis requries the seg1_type and seg2_type flags to be populated, which
@@ -650,8 +637,7 @@ class HybRecord(object):
             self.mirna_details['target_fold'] = target_details['seg_fold']
 
     def target_region_analysis(self, region_info=None, coding_types=None):
-        """
-        If the record contains an identified mirna and coding target, 
+        """If the record contains an identified mirna and coding target, 
         find the region in which the targeted sequence resides and store the results in the 
         "target_reg" flag and miRNA_analysis dict.
         This analysis requries the seg1_type and seg2_type flags to be populated, which
@@ -810,8 +796,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : has_property
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
-        """
-        Check if HybRecord has property of prop_type defined in list of allowed properties
+        """Check if HybRecord has property of prop_type defined in list of allowed properties
         stored in record.PROPERTIES. If query property has a comparator, provide this
         in prop_compare.
         If allow_unknown is False, an error will be raised if the requested property is undefined.
@@ -979,8 +964,7 @@ class HybRecord(object):
     # HybRecord : Public Classmethods : find_type_method
     @classmethod
     def set_find_type_method(cls, find_method, find_params={}):
-        """
-        Set the class-level custom method for segment assignemnt to callable method
+        """Set the class-level custom method for segment assignemnt to callable method
         in find_method, that has the form: "def my_method(self, seg_info, find_params)".
         This method should return the string of the assigned segment type if found, or a
         None object if the type cannot be found.
