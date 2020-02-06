@@ -7,6 +7,8 @@
 
 Todo:
     Expand Documentation
+    Implement "warn" paramater for target_region_database, fold parameter.
+    Change database implementation to full hyb-style identifiers by default.
 """
 
 import copy
