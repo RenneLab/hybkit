@@ -20,7 +20,7 @@ sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
 SHORT_CHECK = True  # DEBUG
-#SHORT_CHECK = False  # DEBUG
+SHORT_CHECK = False  # DEBUG
 
 # Set count_mode:
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
@@ -32,9 +32,11 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 input_hyb_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb')
 input_viennad_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
-region_info_csv = os.path.join(hybkit.package_dir, 'databases', 'Human_mRNAs_mod.csv')
+region_info_csv = os.path.join(hybkit.__about__.data_dir, 'Human_mRNAs_mod.csv')
 out_dir = os.path.join(analysis_dir, 'output')
 out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_coding.hyb')
+data_label = 'WT_BR1'
+out_analysis_basename = out_hyb_name.replace('.hyb', '')
 
 # Begin Analysis
 print('\nPerforming Analysis')
@@ -64,6 +66,9 @@ hybkit.HybRecord.make_set_region_info(region_info_csv)
 
 count = 0  # DEBUG
 
+# Prepare fold_analysis dict:
+analysis_dict = hybkit.analysis.mirna_fold_dict()
+
 # Use the combined iterator to iterate over the hyb and viennad files simultaneously, 
 #   returning hyb records containing their associated fold record.
 in_file_label = os.path.basename(input_hyb_name).replace('.hyb', '')
@@ -82,34 +87,26 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
                 break
             count += 1
 
-
-
         # Perform record analysis
         hyb_record.mirna_analysis()
 
-        # TODO Implement fold analysis.
-        
+        # Equivalent to 'has_mirna' and not 'has_mirna_dimer'
+        if hyb_record.has_property('has_mirna_not_dimer'):
+            hybkit.analysis.running_mirna_folds(hyb_record, 
+                                                analysis_dict,
+                                                skip_no_fold_record=True)
+            out_hyb.write_record(hyb_record)
 
-sys.exit()
-# Write mirna_analysis for input file to outputs. 
-analysis_file_basename = out_file_path.replace('.hyb', '')
-print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
-hybkit.analysis.write_full(analysis_file_basename, 
-                           analysis_dict_by_record, 
-                           multi_files=True, 
-                           name=in_file_label)
 
-analysis_dicts_by_record.append(analysis_dict_by_record)
-
-sys.stdout.flush()  # DEBUG
-
-combined_analysis_dict_by_record = hybkit.analysis.combine_full_dicts(analysis_dicts_by_record) 
-combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
-print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
-hybkit.analysis.write_full(combined_analysis_file_basename, 
-                       combined_analysis_dict_by_record, 
-                       multi_files=True,
-                       name='Combined')
-
-print('Time taken: %s' % str(datetime.datetime.now() - start_time)) # DEBUG
+# Write mirna_fold analysis for input file to outputs.
+analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
+print('\nOutputting Analyses to:\n    %s\n' % out_analysis_basename)
+print_str = '\n'.join(hybkit.analysis.format_mirna_folds(analysis_dict))
+hybkit.analysis.write_mirna_folds(out_analysis_basename,
+                                  analysis_dict,
+                                  multi_files=True,
+                                  name=data_label,
+                                 )
+                             
+print('Time taken: %s\n' % str(datetime.datetime.now() - start_time)) # DEBUG
 sys.stdout.flush()  # DEBUG

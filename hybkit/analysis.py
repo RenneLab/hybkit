@@ -3,17 +3,19 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
+"""Methods for analyzing HybRecord and FoldRecord Objects.
+
+Todo:
+    Expand Documentation
 """
-Methods for analyzing HybRecord and FoldRecord Objects.
-"""
+
+import copy
+from collections import Counter
+import hybkit
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
-
-import copy
-import collections
-import hybkit
 
 # Public Constants
 TYPE_ANALYSIS_KEYS = ['hybrid_type_counts', 'seg1_types', 'seg2_types', 'all_seg_types']
@@ -31,7 +33,7 @@ DEFAULT_MAX_MIRNA = 10
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def type_dict():
     """Create a dictionary with keys of counter objects for running type analyses."""
-    ret_dict = {key: collections.Counter() for key in TYPE_ANALYSIS_KEYS}
+    ret_dict = {key: Counter() for key in TYPE_ANALYSIS_KEYS}
     return ret_dict
 
 
@@ -99,8 +101,7 @@ def running_types(record, analysis_dict,
                   count_mode=DEFAULT_COUNT_MODE,
                   type_sep=DEFAULT_HYBRID_TYPE_SEP, 
                   mirna_centric_sorting=True):
-    """
-    Add information regarding various properties from the HybRecord object provided in
+    """Add information regarding various properties from the HybRecord object provided in
     "record" to the dictionary provided in the analysis_dict argument.
     """
     if not record.has_property('has_seg_types'):
@@ -139,8 +140,7 @@ def running_types(record, analysis_dict,
 # Public Methods : HybRecord Analysis
 def running_mirna_counts(record, analysis_dict,
                          count_mode=DEFAULT_COUNT_MODE):
-    """
-    Add information regarding various properties to the dictionary provided in
+    """Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     """
     record._ensure_mirna_analysis()
@@ -165,8 +165,7 @@ def running_full(record, analysis_dict,
                  count_mode=DEFAULT_COUNT_MODE,
                  type_sep=DEFAULT_HYBRID_TYPE_SEP,
                  mirna_centric_sorting=True):
-    """
-    Add information regarding various properties to the dictionary provided in
+    """Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     """
     running_types(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
@@ -190,8 +189,7 @@ def write_types(file_name_base, analysis_dict,
                 sep=DEFAULT_ENTRY_SEP, 
                 file_suffix=DEFAULT_FILE_SUFFIX,
                 make_plots=DEFAULT_MAKE_PLOTS):
-    """
-    Write the results of the type-analysis to a file or series of files with names based
+    """Write the results of the type-analysis to a file or series of files with names based
     on file_name_base.
     """
     analyses = [
@@ -274,8 +272,7 @@ def write_full(file_name_base, analysis_dict,
                sep=DEFAULT_ENTRY_SEP,
                file_suffix=DEFAULT_FILE_SUFFIX,
                make_plots=DEFAULT_MAKE_PLOTS):
-    """
-    Write the results of the full analysis to a file or series of files with names based
+    """Write the results of the full analysis to a file or series of files with names based
     on file_name_base.
     """
     analyses = [
@@ -339,8 +336,7 @@ def running_mirna_targets(record, analysis_dict,
                           double_count_duplexes=False,
                           mirna_contains=None, mirna_matches=None,
                           target_contains=None, target_matches=None):
-    """
-    Add information regarding mirna/target properties to the dictionary provided in
+    """Add information regarding mirna/target properties to the dictionary provided in
     the analysis_dict argument.
     If double_count_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
     in both orientations. If False, the 3p miRNA will be considered as the target.
@@ -375,7 +371,7 @@ def running_mirna_targets(record, analysis_dict,
             target_id = (target, target_seg_type) 
             if mirna_id not in analysis_dict:
             #    analysis_dict[mirna] = {}
-                analysis_dict[mirna_id] = collections.Counter()
+                analysis_dict[mirna_id] = Counter()
             # Existence checking not required for counter objects.
             # _add_count(analysis_dict[mirna], target)
             analysis_dict[mirna_id][target_id] += count
@@ -392,7 +388,7 @@ def process_mirna_targets(analysis_dict):
         counts[mirna_id] = sum(analysis_dict[mirna_id].values())
         #for key, count in analysis_dict[mirna_id].most_common():
         #    print(key, count)
-        target_type_counts[mirna_id] = collections.Counter()
+        target_type_counts[mirna_id] = Counter()
         for target_id in analysis_dict[mirna_id].keys():
             target, target_seg_type = target_id
             target_type_counts[mirna_id][target_seg_type] += analysis_dict[mirna_id][target_id]
@@ -402,7 +398,7 @@ def process_mirna_targets(analysis_dict):
         targets_by_count = analysis_dict[mirna_id].most_common() 
         # Add sorted target dict to ret_dict
         mirna_ret_dict = {target_id: target_count for target_id, target_count in targets_by_count}
-        ret_dict[mirna_id] = collections.Counter(mirna_ret_dict)
+        ret_dict[mirna_id] = Counter(mirna_ret_dict)
 
     total_count = sum(counts.values())
     return (ret_dict, counts, target_type_counts, total_count)
@@ -442,8 +438,7 @@ def write_mirna_targets(file_name_base, analysis_dict,
                         spacer_line=DEFAULT_TARGET_SPACER_LINE,
                         make_plots=DEFAULT_MAKE_PLOTS,
                         max_mirna=DEFAULT_MAX_MIRNA):
-    """
-    Write the results of the mirna_target to a file or series of files with names based
+    """Write the results of the mirna_target to a file or series of files with names based
     on file_name_base.
     """
     if multi_files and len(analysis_dict) > max_mirna:
@@ -458,7 +453,7 @@ def write_mirna_targets(file_name_base, analysis_dict,
         for mirna_id in analysis_dict:
             mirna, mirna_seg_type = mirna_id
             analysis_file_name = file_name_base + '_' + mirna + file_suffix
-            one_mirna_dict = collections.Counter({mirna_id:analysis_dict[mirna_id]})
+            one_mirna_dict = Counter({mirna_id:analysis_dict[mirna_id]})
             if counts_dict is not None:
                 one_counts_dict = {mirna_id:counts_dict[mirna_id]}
             else:
@@ -491,6 +486,190 @@ def write_mirna_targets(file_name_base, analysis_dict,
         
         if make_plots:
             print('Plotting Not Supported for combined miRNA output')
+
+
+# Public Methods : HybRecord Analysis Preparation : miRNA Fold Analysis
+def mirna_fold_dict():
+    """Create a dictionary with keys for running fold analyses."""
+    ret_dict = {}
+    ret_dict['base_counts'] = Counter()
+    for i in range(1,28):
+        ret_dict['base_counts'][i] = 0
+    ret_dict['base_percent'] = None
+    ret_dict['all_evaluated'] = 0
+    ret_dict['all_mirna'] = 0
+    ret_dict['no_mirna'] = 0
+    ret_dict['all_folds'] = 0
+    ret_dict['no_folds'] = 0
+    return ret_dict
+
+
+# Public Methods : HybRecord Analysis Preparation : miRNA Fold Analysis
+def combine_mirna_fold_dicts(analysis_dicts):
+    """Combine a list/tuple of two or more counter objects created from running miRNA fold analyses."""
+    # Check that method input is formatted correctly:
+    if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
+        or  (len(analysis_dicts) < 2)
+        or  (not all(isinstance(item, dict) for item in analysis_dicts))):
+        message = 'Input to "combine_mirna_fold_dicts" method must be '
+        message += 'a list/tuple of two or more dicts.\n'
+        message += 'Current input:\n    %s' % str(analysis_dicts)
+        print(message)
+        raise Exception(message)
+
+    ret_dict = copy.deepcopy(analysis_dicts[0])
+    ret_dict['base_fractions'] = None
+    for add_dict in analysis_dicts[1:]:
+        for key in analysis_dict['base_counts']:
+            ret_dict['base_counts'][key] = add_dict['base_counts'][key]
+        for key in ['all_evaluated', 'all_mirna', 'no_mirna', 'all_folds', 'no_folds']:
+            ret_dict[key] += add_dict[key]
+    return ret_dict
+
+
+# Public Methods : HybRecord Analysis : miRNA Fold Analysis
+def running_mirna_folds(record, analysis_dict, 
+                        count_mode=DEFAULT_COUNT_MODE,
+                        allow_duplexes=False,
+                        skip_no_fold_record=False):
+    """Add miRNA fold analysis to provided dict.
+
+    If allow_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
+    considering the 5p miRNA as the "miRNA" in the hybrid.
+    """
+    record._ensure_mirna_analysis()
+    count = record.count(count_mode)
+
+    analysis_dict['all_evaluated'] += count
+
+    if not record.has_property('has_mirna'):
+        analysis_dict['no_mirna'] += count
+    elif record.has_property('has_mirna'):  # For Readability
+        analysis_dict['all_mirna'] += count
+
+        if not record.has_property('has_fold_record'):
+            if not skip_no_fold_record:
+                message = 'Problem performing running miRNA fold analysis for record:\n'
+                message += '    %s\n' % str(record)
+                message += 'Record has no fold-record attribute.'
+                print(message)
+                raise Exception(message)
+            else:
+                analysis_dict['no_folds'] += count            
+                return
+
+        # Presume that record.mirna_details['mirna_fold'] is populated, as it should be:
+        mirna_fold = record.mirna_details['mirna_fold']  
+
+        # Segments should not have both fold directions, or neither fold direction.
+        if (('(' in mirna_fold and ')' in mirna_fold)               
+            or ('(' not in mirna_fold and ')' not in mirna_fold)):
+            analysis_dict['no_folds'] += count
+            message = 'WARNING: running_mirna_fold: Record: %s, ' % str(record)
+            message += 'Bad Fold: %s' % mirna_fold
+            print(message)
+            return 
+        
+        analysis_dict['all_folds'] += count
+        for str_i in range(len(mirna_fold)):
+            seq_i = str_i + 1
+            if mirna_fold[str_i] in {'(', ')'}:
+                analysis_dict['base_counts'][seq_i] += count
+
+
+# Public Methods : HybRecord miRNA Fold Analysis Parsing
+def process_mirna_folds(analysis_dict):
+    """Process results of mirna fold analysis."""
+    total_count = analysis_dict['all_folds']
+    if total_count == 0:
+        message = 'Problem with mirna fold analysis, total mirna countted is 0.'
+        print(message)
+        raise Exception(message)
+    test_sums = [(('all_mirna', 'no_mirna'), 'all_evaluated'),
+                 (('all_folds', 'no_folds'), 'all_mirna')]
+
+    for (test_1, test_2), ex_sum in test_sums:
+        if sum([analysis_dict[test_1], analysis_dict[test_2]]) != analysis_dict[ex_sum]:
+            message = 'Problem with processing of mirna_folds.'
+            message += 'Check of items: %s (%i) + ' % (test_1, analysis_dict[test_1])
+            message += '%s (%i) != ' % (test_2, analysis_dict[test_2])
+            message += '%s (%i)' % (ex_sum, analysis_dict[ex_sum])
+            print(message)
+            raise Exception(message)
+
+    analysis_dict['base_fractions'] = {}
+    for i, count in analysis_dict['base_counts'].items():
+        analysis_dict['base_fractions'][i] = count/total_count
+    return analysis_dict
+
+
+# Public Methods : HybRecord miRNA Fold Analysis Parsing
+def format_mirna_folds(analysis_dict,
+                         sep=DEFAULT_ENTRY_SEP):
+    """Return the results of mirna_fold analysis in a list of sep-delimited lines."""
+    header_items = ['data_type', 'count']
+    ret_lines = []
+    ret_lines.append(sep.join(header_items))
+    for count_type in ['all_evaluated', 'all_mirna', 'no_mirna', 'all_folds', 'no_folds']:
+        ret_lines.append(sep.join([count_type, str(analysis_dict[count_type])]))
+
+    ret_lines.append('')
+    line_values = ['index']
+    line_values +=  [str(key) for key in analysis_dict['base_counts'].keys()]
+    ret_lines.append(sep.join(line_values))
+    line_values = ['i_count']
+    line_values += [str(val) for val in analysis_dict['base_counts'].values()]
+    ret_lines.append(sep.join(line_values))
+    
+    if analysis_dict['base_fractions'] is not None:
+        line_values = ['i_fraction']
+        line_values += [str(val) for val in analysis_dict['base_fractions'].values()]
+        ret_lines.append(sep.join(line_values))
+
+    return ret_lines
+
+
+# Public Methods : HybRecord miRNA Fold Analysis Writing
+def write_mirna_folds(file_name_base, analysis_dict,
+                        name=None,
+                        multi_files=DEFAULT_WRITE_MULTI_FILES,
+                        sep=DEFAULT_ENTRY_SEP,
+                        file_suffix=DEFAULT_FILE_SUFFIX,
+                        spacer_line=DEFAULT_TARGET_SPACER_LINE,
+                        make_plots=DEFAULT_MAKE_PLOTS):
+    """Write the results of the mirna_fold analysis to a file or series of files with names based
+    on file_name_base.
+    """
+
+    write_lines = format_mirna_folds(analysis_dict, sep=sep)
+    if not multi_files:
+        fold_details_name = file_name_base + '_fold_info' + file_suffix
+        with open(fold_details_name, 'w') as fold_details_file:
+            for line in write_lines:
+                fold_details_file.write(line + '\n')
+
+    elif multi_files:
+        fold_counts_name = file_name_base + '_fold_counts' + file_suffix
+        with open(fold_counts_name, 'w') as fold_counts_file:
+            for line in write_lines[:6]:
+                fold_counts_file.write(line + '\n')
+
+        fold_base_counts_name = file_name_base + '_fold_base_counts' + file_suffix
+        with open(fold_base_counts_name, 'w') as fold_base_counts_file:
+            for line in write_lines[7:9]:
+                fold_base_counts_file.write(line + '\n')
+
+        if analysis_dict['base_fractions'] is not None:
+            fold_base_fractions_name = file_name_base + '_fold_base_fractions' + file_suffix
+            with open(fold_base_fractions_name, 'w') as fold_base_fractions_file:
+                fold_base_fractions_file.write(write_lines[7] + '\n')
+                fold_base_fractions_file.write(write_lines[9] + '\n')
+
+    if make_plots:
+        hybkit.plot.mirna_folds(analysis_dict, 
+                                file_name_base,
+                                name=name,
+                                )
 
 
 # Private Methods : Utility

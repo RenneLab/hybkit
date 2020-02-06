@@ -780,7 +780,7 @@ class HybRecord(object):
     }
     # Set object of miRNA-analysis properties for the ".has_property()" method.
     _MIRNA_PROPERTIES = {
-        'has_mirna', 'has_mirna_dimer',
+        'has_mirna', 'has_mirna_dimer', 'has_mirna_not_dimer',
         '3p_mirna', '5p_mirna',
         '3p_target', '5p_target',
     }
@@ -894,13 +894,15 @@ class HybRecord(object):
             self._ensure_mirna_analysis()
 
             if prop_type == 'has_mirna':
-                ret_val = self.flags['miRNA_seg'] in ['5p', '3p', 'B']
+                ret_val = self.flags['miRNA_seg'] in {'5p', '3p', 'B'}
             elif prop_type == 'has_mirna_dimer':
                 ret_val = self.flags['miRNA_seg'] == 'B'
+            elif prop_type == 'has_mirna_not_dimer':
+                ret_val = self.flags['miRNA_seg'] in {'5p', '3p'}
             elif prop_type == '5p_mirna':
-                ret_val = self.flags['miRNA_seg'] in ['5p', 'B']
+                ret_val = self.flags['miRNA_seg'] in {'5p', 'B'}
             elif prop_type == '3p_mirna':
-                ret_val = self.flags['miRNA_seg'] in ['3p', 'B']
+                ret_val = self.flags['miRNA_seg'] in {'3p', 'B'}
             elif prop_type == '5p_target':
                 ret_val = self.flags['miRNA_seg'] == '3p'
             elif prop_type == '3p_target':
@@ -910,6 +912,12 @@ class HybRecord(object):
             self._ensure_mirna_analysis()
             if prop_type == 'has_target':
                 ret_val = bool(self.mirna_details['target_coding'])
+            elif prop_type == 'target_5p_utr':
+                ret_val = (self._get_flag('target_reg') == '5pUTR')
+            elif prop_type == 'target_coding':
+                ret_val = (self._get_flag('target_reg') == 'coding')
+            elif prop_type == 'target_3p_utr':
+                ret_val = (self._get_flag('target_reg') == '3pUTR')
         return ret_val         
                  
 
@@ -960,6 +968,11 @@ class HybRecord(object):
     def __len__(self):
         """Return the length of the genomic sequence"""
         return len(self.seq)
+
+    # HybRecord : Public MagicMethods : Printing
+    def __str__(self):
+        """Print the identifier of the record."""
+        return '<HybRecord ID: %s>' % self.id
 
     # HybRecord : Public Classmethods : find_type_method
     @classmethod
@@ -1807,6 +1820,11 @@ class FoldRecord(object):
     def __len__(self):
         return len(self.seq)
 
+    # FoldRecord : Public MagicMethods : Printing
+    def __str__(self):
+        """Print the identifier of the record."""
+        return '<FoldRecord ID: %s>' % self.id
+
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
     def from_vienna_lines(cls, record_lines, hybformat_file=False):
@@ -1935,7 +1953,7 @@ class FoldRecord(object):
             seg1_hybformat_info, seg2_hybformat_info = cls._parse_hybformat_name(full_name)
             seg1_fold_info['ref_short'] = seg1_hybformat_info['ref_short']
             seg2_fold_info['ref_short'] = seg2_hybformat_info['ref_short']
-
+         
         line_5 = record_lines[4].strip()
         line_5_split = line_5.split('\t')
         if len(line_5_split) != 2:
@@ -1951,6 +1969,13 @@ class FoldRecord(object):
                 raise Exception(message)
         fold = line_5_split[0]
         energy = float(line_5_split[1].strip('()'))
+
+        for seg_info in (seg1_fold_info, seg2_fold_info):
+            seg_info['seg_fold'] = ''
+            for i, highlight_char in enumerate(seg_info['highlight']):
+                if highlight_char != '-':
+                    seg_info['seg_fold'] += fold[i]
+
         return_obj = cls(rec_id, seq, fold, energy,
                          seg1_fold_info, seg2_fold_info)
         return return_obj

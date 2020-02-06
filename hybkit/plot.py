@@ -21,10 +21,20 @@ DEFAULT_PIE_MATPLOTLIB_SETTINGS = {
     'startangle':90,
     'counterclock':False,
     }
+DEFAULT_PIE_RC_PARAMS = {
+    }
 DEFAULT_DPI = 600
 DEFAULT_FILE_TYPE = 'png'
 DEFAULT_PIE_OTHER_THRESHHOLD = 0.1
 DEFAULT_PIE_MIN_WEDGE_SIZE = 0.04
+DEFAULT_LINE_RC_PARAMS = {
+    'axes.titlesize':'x-large',
+    'axes.labelsize':'large',
+    'xtick.labelsize':'large',
+    'ytick.labelsize':'large',
+    }
+DEFAULT_LINE_DATA_FORMAT = '-'
+DEFAULT_LINE_MIN_FRACTION_SIZE = 0.01
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE = 'Total Segment Portions'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
@@ -231,6 +241,49 @@ def mirna_target_types(mirna_name, mirna_target_type_counts_dict, plot_file_name
                     matplotlib_settings=matplotlib_settings,
                     )
 
+# Public Methods : HybRecord miRNA Target Analysis Plotting
+def mirna_folds(fold_analysis_dict, plot_file_name, 
+                title=None,
+                name=None,
+                data_format=DEFAULT_LINE_DATA_FORMAT,
+                min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
+                plot_file_type=DEFAULT_FILE_TYPE,
+                dpi=DEFAULT_DPI,
+                matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+    """Plot the bound percentage of mirna by base."""
+    labels = []
+    fractions = []
+    max_fraction = 0.0
+    for seq_i, fraction in fold_analysis_dict['base_fractions'].items():
+        max_fraction = max(max_fraction, fraction)
+        if seq_i > 22:
+            if fraction/max_fraction < min_fraction_size:
+                break
+        labels.append(seq_i)
+        fractions.append(fraction)
+
+    if title is None:
+        title = 'Bound miRNA by Position'
+
+    if name is not None:
+        title = str(name) + ': ' + title
+
+    #matplotlib_settings.update({'textprops':{'size':'small'},
+    #                           })
+
+
+    _plot_line(labels=labels,
+               sizes=fractions,
+               plot_file_name=plot_file_name,
+               title=title,
+               data_format=data_format,
+               min_fraction_size=min_fraction_size,
+               plot_file_type=plot_file_type,
+               dpi=dpi,
+               matplotlib_settings=matplotlib_settings,
+               )
+
+
 # Private Methods : Pie Chart
 def _plot_pie_chart(labels, sizes, plot_file_name,
                     title=None,
@@ -275,6 +328,52 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
     plot.savefig(plot_file_name, dpi=dpi)  
     plot.clf()
     plot.close()
+
+    #patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
+    #plt.legend(patches, labels, loc="best")
+    #plt.axis('equal')
+    #plt.tight_layout()
+    #plt.show()
+   
+ 
+# Private Methods : Pie Chart
+def _plot_line(labels, sizes, plot_file_name,
+                    title=None,
+                    min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
+                    plot_file_type=DEFAULT_FILE_TYPE,
+                    data_format=DEFAULT_LINE_DATA_FORMAT,
+                    dpi=DEFAULT_DPI,
+                    figsize=DEFAULT_FIG_SIZE,
+                    matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+    max_size = max(sizes)
+    if abs(max_size) < 0.00000000000001:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
+    fraction_sizes = [size/max_size for size in sizes]
+    use_labels = []
+    use_sizes = []
+    for i in range(len(labels)):
+        if fraction_sizes[i] > min_fraction_size:
+            use_labels.append(labels[i])
+            use_sizes.append(sizes[i] * 100)
+
+    plot.rcParams.update(matplotlib_settings)
+
+    fig = plot.gcf()
+    fig.set_size_inches(figsize)
+    lines = plot.plot(use_labels, use_sizes, data_format)
+    plot.xlim(left=1)
+    plot.xticks(range(1,len(labels)+1,2))
+    plot.xlabel('miRNA Base Position Index')
+    plot.ylabel('Percent Bound')
+    if title is not None:
+        plot.title(title, pad=TITLE_PAD)
+    if not plot_file_name.endswith(plot_file_type):
+        plot_file_name += '.' + plot_file_type
+    plot.savefig(plot_file_name, dpi=dpi)  
+    plot.clf()
+    plot.close()
+    matplotlib.rcdefaults()
 
     #patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
     #plt.legend(patches, labels, loc="best")
