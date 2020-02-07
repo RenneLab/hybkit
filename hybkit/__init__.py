@@ -3,15 +3,22 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-# TODO:
-# Find archive versions of the ensembl database for no-unknown read-creation.
-# Test .ct -> vienna, viennad parsing
-# Future: Add seg_fold_info details to FoldRecord using HybRecord
-
 """
 Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
 
-TODO Expand Definition.
+Todo:
+    Expand Definition of class.
+    Check hybrecord/foldrecord match settings.
+    Add Hybrecord.to_csv_line()
+    Add Hybrecord.to_csv_header()
+    Clean from_viennd_lines() method.
+    Add analysis.target_region analyses.
+    Overhaul docstrings and make beautiful documentation.
+    Create hyb-format database download script.
+    Add user-friendly individual scripts.
+    Implement all sample analyses with bash workflows and individual scripts.
+    Implement all sample analyses with nextflow workflows and individual scripts.
+    Make decision and clean "extra" scripts.
 """
 
 import os
