@@ -698,7 +698,7 @@ class HybRecord(object):
             if target not in region_info:
                 if allow_unknown_regions:
                     if warn_unknown_regions:
-                        message = 'WARNING: Unknown transcript identifier: %s' % target
+                        message = 'WARNING: target_region_analysis: Unknown id: %s' % target
                         print(message)
                     self.mirna_details['target_reg'] = 'unknown'
                     self.set_flag('target_reg', 'Unk')               
