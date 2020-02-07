@@ -3,13 +3,13 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-# usage: "sh ./download_data.sh"
+# usage: "sh ./prepare_data.sh"
 
 echo -e "\nPreparing data for sample fold analysis."
 
 echo -e "\nCopying data to analysis directory."
-cp -v ./source_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
-      ./source_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad.gz \
+cp -v ../databases/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
+      ../databases/WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad.gz \
       ./
   
 

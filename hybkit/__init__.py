@@ -493,7 +493,7 @@ class HybRecord(object):
         if warn_fold_record_mismatch is None:
             warn_fold_record_mismatch = self.settings['warn_fold_record_mismatch']
 
-        if fold_record is None:
+        if fold_record is None or (isinstance(fold_record, tuple) and fold_record[0] is None):
             if not allow_fold_record_mismatch:
                 message = 'Trying to assign None-object as FoldRecord is disallowed with '
                 message += 'option "allow_fold_record_mismatch" as true.'
@@ -503,6 +503,7 @@ class HybRecord(object):
                 print('WARNING: Assigning None-Type as fold_record.')        
             self.fold_seq_match = False
             self.fold_record = None
+            self.fold_record_str = fold_record[1]
             return
 
         if fold_record is not None and not isinstance(fold_record, FoldRecord):
@@ -1905,7 +1906,7 @@ class FoldRecord(object):
                 if warn_bad:
                     message = 'WARNING: Improperly Viennad: Wrong-Line-Number'
                     print(message)
-                return None
+                return (None, ''.join(record_lines))
             else:
                 message = 'Provided Viennad Record Lines:\n'
                 message += '\n'.join([line.rstrip() for line in record_lines])
@@ -1955,8 +1956,8 @@ class FoldRecord(object):
                           'ref_end': None,
                          }
         if len(line_4_split) == 4 and all(x.isnumeric() for x in line_4_split[2:]):
-            seg1_fold_info['ref_start'] = line_4_split[2]
-            seg1_fold_info['ref_end'] = line_4_split[3]
+            seg2_fold_info['ref_start'] = line_4_split[2]
+            seg2_fold_info['ref_end'] = line_4_split[3]
 
         if hybformat_file:
             seg1_hybformat_info, seg2_hybformat_info = cls._parse_hybformat_name(full_name)
@@ -1968,11 +1969,11 @@ class FoldRecord(object):
         if len(line_5_split) != 2:
             message = 'WARNING: Improper viennad record: Line-5 Formatting Error.\n'
             message += 'Full Record:\n'
-            message += '\n'.join(record_lines) + '\n'
+            message += ''.join(record_lines) + '\n'
             if skip_bad:
                 if warn_bad:
                     print(message)
-                return None
+                return (None, ''.join(record_lines))
             else:
                 print(message)
                 raise Exception(message)

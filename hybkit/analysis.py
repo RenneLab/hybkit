@@ -565,7 +565,8 @@ def running_mirna_folds(record, analysis_dict,
 
         # Segments should not have both fold directions, or neither fold direction.
         if (('(' in mirna_fold and ')' in mirna_fold)               
-            or ('(' not in mirna_fold and ')' not in mirna_fold)):
+            or ('(' not in mirna_fold and ')' not in mirna_fold)
+            or len(mirna_fold) < 5):
             analysis_dict['no_folds'] += count
             message = 'WARNING: running_mirna_fold: Record: %s, ' % str(record)
             message += 'Bad Fold: %s' % mirna_fold

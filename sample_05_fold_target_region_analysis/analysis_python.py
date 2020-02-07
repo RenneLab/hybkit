@@ -70,10 +70,14 @@ hybkit.HybRecord.make_set_region_info(region_info_csv)
 count = 0  # DEBUG
 
 # Prepare 5 catgories for 2 classes in output_categories dict
-output_classes = ['cellular', 'kshv']
-record_types = ['5pUTR', 'coding', '3pUTR', 'unknown', 'noncoding']
+output_classes = {'cellular': 'Cellular', 'kshv': 'KSHV'}
+record_types = {'5pUTR': '5pUTR',
+                'coding': 'Coding', 
+                '3pUTR': '3pUTR',
+                'unknown': 'Unknown',
+                'noncoding': 'Noncoding'}
 output_categories = {}
-for out_class in output_classes:
+for out_class in output_classes.keys():
     output_categories.update({(out_class + '_' + rec_type):[] for rec_type in record_types})
 
 # Create an analysis dict and open an output file for each category.
@@ -81,7 +85,9 @@ for cat in output_categories.keys():
     output_categories[cat].append(hybkit.analysis.mirna_fold_dict())
     file_name = out_base + '_' + cat + '.hyb'
     output_categories[cat].append(hybkit.HybFile.open(file_name, 'w'))
-
+    cat_split = cat.split('_')
+    pretty_name = output_classes[cat_split[0]] + ' ' + record_types[cat_split[1]]
+    output_categories[cat].append(pretty_name)
 
 # Use the combined iterator to iterate over the hyb and viennad files simultaneously, 
 #   returning hyb records containing their associated fold record.
@@ -116,10 +122,10 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
                 if region not in {'5pUTR', 'coding', '3pUTR', 'unknown'}:
                     raise Exception('Unknown Region: %s' % region) 
                 record_params = output_categories[label_prefix + region]
-                [record_analysis_dict, record_out_file] = record_params
+                [record_analysis_dict, record_out_file, pretty_name] = record_params
             else:
                 category = label_prefix + 'noncoding'
-                [record_analysis_dict, record_out_file] = output_categories[category]
+                [record_analysis_dict, record_out_file, pretty_name] = output_categories[category]
 
             hybkit.analysis.running_mirna_folds(hyb_record, 
                                                 record_analysis_dict,
@@ -131,12 +137,12 @@ print('\nOutputting Analyses with prefix:\n    %s\n' % out_base)
 for category in output_categories.keys():
     print('Writing analyses for %s.' % category)
     analysis_name = out_base + '_' + category
-    analysis_dict, out_hyb_file = output_categories[category]
+    analysis_dict, out_hyb_file, pretty_name = output_categories[category]
     analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
     hybkit.analysis.write_mirna_folds(analysis_name,
                                       analysis_dict,
                                       multi_files=True,
-                                      name=data_label,
+                                      name=data_label + ', ' + pretty_name
                                      )
                              
 print('Time taken: %s\n' % str(datetime.datetime.now() - start_time)) # DEBUG
