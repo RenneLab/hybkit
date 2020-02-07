@@ -121,6 +121,9 @@ class HybRecord(object):
     DEFAULTS['allow_fold_record_mismatch'] = True   # Allow mismatch in self.fold_record sequence
     DEFAULTS['warn_fold_record_mismatch'] = False   # Warn if mismatch, self.fold_record sequence
 
+    DEFAULTS['allow_unknown_regions'] = False
+    DEFAULTS['warn_unknown_regions'] = True
+
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
     DEFAULTS['placeholder'] = '.'
 
@@ -636,7 +639,8 @@ class HybRecord(object):
             self.mirna_details['mirna_fold'] = mirna_details['seg_fold']
             self.mirna_details['target_fold'] = target_details['seg_fold']
 
-    def target_region_analysis(self, region_info=None, coding_types=None):
+    def target_region_analysis(self, region_info=None, coding_types=None,
+                               allow_unknown_regions=None, warn_unknown_regions=None):
         """If the record contains an identified mirna and coding target, 
         find the region in which the targeted sequence resides and store the results in the 
         "target_reg" flag and miRNA_analysis dict.
@@ -665,6 +669,12 @@ class HybRecord(object):
         if region_info is None:
             region_info = self.target_region_info
 
+        if allow_unknown_regions is None:
+            allow_unknown_regions = self.settings['allow_unknown_regions']
+
+        if warn_unknown_regions is None:
+            warn_unknown_regions = self.settings['warn_unknown_regions']
+
         # Ensure mirna_analysis has been performed.
         self._ensure_mirna_analysis()
          
@@ -675,15 +685,14 @@ class HybRecord(object):
 
             self.mirna_details['target_coding'] = True
             #target = self.target_info['ref']
-            target = self.target_info['ref'].split('_')[1]  # TODO Make Fancy
-            allow_unknown = True  # TODO Make Fancy 
+            target = self.target_info['ref']
             warn = True  # TODO Make Fancy
             if target not in region_info:
-                if allow_unknown:
-                    if warn:
+                if allow_unknown_regions:
+                    if warn_unknown_regions:
                         message = 'WARNING: Unknown transcript identifier: %s' % target
                         print(message)
-                    self.mirna_details['target_reg'] = 'Unknown'
+                    self.mirna_details['target_reg'] = 'unknown'
                     self.set_flag('target_reg', 'Unk')               
                     return
                 else:
@@ -730,6 +739,7 @@ class HybRecord(object):
                 low_utr = '3pUTR'
                 high_utr = '5pUTR'
                 print('Reverse Oreintation Detected!',self.target_info['ref'])
+                print('"Start:", %i,  "End:" %i' % (ref_cds_start, ref_cds_end))
                 raise Exception
 
             # Assign Categories
@@ -1006,7 +1016,7 @@ class HybRecord(object):
         """
         Make a dict containing information on a coding transcript utr regions from an
         input csv file. The input csv must contain a header line, and must have the columns:
-        Required keys are cdna_coding_start, cdna_coding_end
+        Required keys are identifier, cdna_coding_start, cdna_coding_end
         Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
         Example return dict object:
            {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
@@ -1016,9 +1026,8 @@ class HybRecord(object):
         the ".target_region_analysis()" method.
         """
 
-        # data_keys = ['5_utr_start', '5_utr_end', '3_utr_start', '3_utr_end']
         data_keys = ['cdna_coding_start', 'cdna_coding_end']
-        required_keys = ['ensembl_transcript_id'] + data_keys
+        required_keys = ['identifier'] + data_keys
 
         if not os.path.isfile(region_csv_name):
             message = 'Problem with creation of target region information dict.\n'
@@ -1042,12 +1051,12 @@ class HybRecord(object):
                     print(message)
                     raise Exception(message)
 
-                seq_id = line_items['ensembl_transcript_id']
+                seq_id = line_items['identifier']
             
                 # If information has already been read for line, raise error.
-                allow_duplicate_info = True
-                warn = True
-                permissive = True 
+                allow_duplicate_info = False  # TODO Make Fancy
+                warn = True   # TODO Make Fancy
+                permissive = False  #T TODO Make Fancy
                 if seq_id in ret_dict:
                     if allow_duplicate_info:
                         if warn:

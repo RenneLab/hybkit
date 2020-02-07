@@ -1,14 +1,13 @@
-# User-custom
+# hybkit-specific
+
 *test*
-# *.tar
-# *.gz
 *.hyb
 *.vienna
 *.viennad
 *.ct
-# GSM27200*
 */output
 *.swp
+working*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

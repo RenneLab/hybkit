@@ -32,7 +32,6 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 input_hyb_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb')
 input_viennad_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
-region_info_csv = os.path.join(hybkit.__about__.data_dir, 'Human_mRNAs_mod.csv')
 out_dir = os.path.join(analysis_dir, 'output')
 out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_coding.hyb')
 data_label = 'WT_BR1'
@@ -56,13 +55,13 @@ hybkit.HybFile.settings['hybformat_id'] = True
 #   raising an error.
 hybkit.FoldRecord.settings['skip_bad'] = True
 
+# Create a variable mirna-types for use in the miRNA analysis, that includes kshv mirna.
+mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
+
 # Set the method of finding segment type
 match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
-
-# Read the csv file containing coding sequence region info:
-hybkit.HybRecord.make_set_region_info(region_info_csv)
 
 count = 0  # DEBUG
 
@@ -88,7 +87,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
             count += 1
 
         # Perform record analysis
-        hyb_record.mirna_analysis()
+        hyb_record.mirna_analysis(mirna_types=mirna_types)
 
         # Equivalent to 'has_mirna' and not 'has_mirna_dimer'
         if hyb_record.has_property('has_mirna_not_dimer'):
@@ -99,9 +98,8 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
 
 
 # Write mirna_fold analysis for input file to outputs.
-analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
 print('\nOutputting Analyses to:\n    %s\n' % out_analysis_basename)
-print_str = '\n'.join(hybkit.analysis.format_mirna_folds(analysis_dict))
+analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
 hybkit.analysis.write_mirna_folds(out_analysis_basename,
                                   analysis_dict,
                                   multi_files=True,
