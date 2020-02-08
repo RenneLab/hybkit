@@ -38,7 +38,7 @@ out_file_path = os.path.join(analysis_dir, 'output', 'GSM2720020_WT_BR1_KSHV_onl
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
-print('\nPerforming Analysis')
+print('\nPerforming Target Analysis...')
 start_time = datetime.datetime.now()  # DEBUG
 
 if not os.path.isdir(out_dir):
@@ -109,6 +109,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb','')
+    print('Writing Analysis Files to Name Base:\n    %s' % analysis_basename)
     hybkit.analysis.write_mirna_targets(analysis_basename, 
                                         sorted_target_dict,
                                         counts_dict,

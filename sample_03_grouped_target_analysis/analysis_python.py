@@ -45,7 +45,7 @@ out_file_path = os.path.join(analysis_dir, 'output', 'KSHV_Hyb_Combined.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
-print('\nPerforming Analysis')
+print('\nPerforming Grouped Target Analysis...')
 start_time = datetime.datetime.now()  # DEBUG
 
 if not os.path.isdir(out_dir):
@@ -125,6 +125,8 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb','')
+    print('Writing Analyses to files named after:\n    %s\n' % analysis_basename)
+
     hybkit.analysis.write_mirna_targets(analysis_basename, 
                                         sorted_target_dict,
                                         counts_dict,

@@ -47,7 +47,7 @@ match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
 
-print('\nPerforming Analysis')
+print('\nPerforming Summary Analysis...')
 start_time = datetime.datetime.now()
 
 if not os.path.isdir(out_dir):

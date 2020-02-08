@@ -38,14 +38,14 @@ data_label = 'WT_BR1'
 out_analysis_basename = out_hyb_name.replace('.hyb', '')
 
 # Begin Analysis
-print('\nPerforming Analysis')
+print('\nPerforming Fold Analysis...')
 start_time = datetime.datetime.now()  # DEBUG
 
 if not os.path.isdir(out_dir):
     print('Creating Output Directory:\n    %s\n' % out_dir)
     os.mkdir(out_dir)
 
-print('Analyzing Files:')
+print('Using Input Files:')
 print('    ' + '\n    '.join([input_hyb_name, input_viennad_name]) + '\n')
 
 # Tell hybkit that identifiers are in Hyb-Program standard format.
@@ -98,7 +98,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
 
 
 # Write mirna_fold analysis for input file to outputs.
-print('\nOutputting Analyses to:\n    %s\n' % out_analysis_basename)
+print('Outputting Analyses to:\n    %s\n' % out_analysis_basename)
 analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
 hybkit.analysis.write_mirna_folds(out_analysis_basename,
                                   analysis_dict,

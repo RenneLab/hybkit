@@ -133,9 +133,9 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
             record_out_file.write_record(hyb_record)
 
 # Write mirna_fold analysis for each catetory.
-print('\nOutputting Analyses with prefix:\n    %s\n' % out_base)
+print('\nOutputting Analyses with prefix:\n    %s' % out_base)
 for category in output_categories.keys():
-    print('Writing analyses for %s.' % category)
+    print('    Writing analyses for %s.' % category)
     analysis_name = out_base + '_' + category
     analysis_dict, out_hyb_file, pretty_name = output_categories[category]
     analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
