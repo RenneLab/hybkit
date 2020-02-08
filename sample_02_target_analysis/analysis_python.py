@@ -122,6 +122,20 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
                                         make_plots=True,     # Default
                                         max_mirna=25)        # Default is 10
 
+    hybkit.analysis.write_mirna_targets(analysis_basename,
+                                        sorted_target_dict,
+                                        counts_dict,
+                                        target_type_counts_dict,
+                                        name=in_file_label,
+                                        multi_files=False,    # Default
+                                        sep=',',             # Default
+                                        file_suffix='.csv',  # Default
+                                        spacer_line=True,    # Default
+                                        make_plots=True,     # Default
+                                        max_mirna=25)        # Default is 10
+
+
+
 print('\nTotal time: %s' % str(datetime.datetime.now() - start_time))  # DEBUG
 
 print('Done\n')
