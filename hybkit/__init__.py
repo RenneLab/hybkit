@@ -5,8 +5,26 @@
 
 """
 This module contains classes and methods for reading, writing, and manipulating data 
-in the ".hyb" genomic sequence format. This includes:
-    HybRecord: Primary class for storage of records in ".hyb" format
+in the ".hyb" genomic sequence format. This module includes two classes for storage of 
+chimeric sequence information and associated fold-information:
+    * :class:`HybRecord` Class for storage of records in ".hyb" format
+    * :class:`FoldRecord` Class for storage of predicted folding formation 
+      hyb sequences
+    
+It also includes classes for reading, writing, and iterating over files containing that 
+information:
+    * :class:`HybFile` Class for reading a ".hyb"-format file containing chimeric
+      genomic sequence information.
+    * :class:`ViennaFile` Class for reading a ".vienna"-format file containing 
+      predicted folding information for a hyb sequence
+    * :class:`ViennadFile` Class for reading a ".viennad"-format file containing 
+      predicted folding information for a hyb sequence
+    * :class:`CtFile` Class for reading a ".ct"-format file containing 
+      predicted folding information for a hyb sequence
+    * :class:`HybViennaIter` Class for simultaneous iteration over ".hyb" and ".vienna" files.
+    * :class:`HybViennadIter` Class for simultaneous iteration over ".hyb" and ".viennad" files.
+    * :class:`HybCtIter` Class for simultaneous iteration over".hyb" and ".ct" files.
+
 
 Todo:
     Expand Definition of class.
@@ -175,7 +193,7 @@ class HybRecord(object):
         if fold_record is not None:
             self.set_fold_record(fold_record)
         else:
-            self.fold_record = None
+            self.fold_record = None 
 
         self.mirna_details = None  # Placeholder variable for mirna_analysis
         self.mirna_info = None     # Placeholder variable for mirna_analysis
@@ -2375,55 +2393,57 @@ class ViennaFile(object):
 
 class HybViennaIter(object):
     """
-    This class provides an iterator to iterate through a HybFile and ViennaFile simultaneously,
-    returning a tuple of hyb_record, fold_record instances on each iteration.
+    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`ViennaFile` Object.
+
+    This class provides an iterator to iterate through a :class:`HybFile` and :class:`ViennaFile`
+    simultaneously.
+    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
+    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
+    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
+    Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
+    containing the read information.
+
+    Args:
+        hybfile_handle (HybFile) : HybFile object for iteration
+        viennafile_handle (ViennaFile) : ViennaFile object for iteration
+        combine (bool) : Return a combined :class:`HybRecord` object.
+
+    Returns:
+        | Returns a combined :class:`HybRecord` object if "combine" is True.
+        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
+
+    Todo:
+        Add option to confirm match of HybRecord and FoldRecord Entries.
     """
     # HybViennaIter : Public Methods
-    def __init__(self, hybfile_handle, viennafile_handle):
+    def __init__(self, hybfile_handle, viennafile_handle, combine=False):
+        """Please see :class:`HybViennaIter` for initialization information."""
         self.hybfile_handle = hybfile_handle
         self.viennafile_handle = viennafile_handle
         self.counter = 0
+        self.combine = combine
 
     # HybViennaIter : Public Methods
     def __iter__(self):
+        """Return an iterator object."""
         return self
 
     # HybViennaIter : Public Methods
     def __next__(self):
+        """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
-        next_vienna_record = next(self.viennafile_handle)
-        return (next_hyb_record, next_vienna_record)
-
-
-class HybViennaCmbIter(object):
-    """
-    This class provides an iterator to iterate through a HybFile and ViennaFile simultaneously.
-    It is presumed that each respective hyb entry corresponds to an aligned vienna entry.
-    Each ViennaRecord will be added to the corresponding HybRecord.
-    Only the HybRecord entry will then be returned, containing the associated ViennaRecord entry.
-    """
-    # HybViennaCmbIter : Public Methods
-    def __init__(self, hybfile_handle, viennafile_handle):
-        self.hybfile_handle = hybfile_handle
-        self.viennafile_handle = viennafile_handle
-        self.counter = 0
-
-    # HybViennaCmbIter : Public Methods
-    def __iter__(self):
-        return self
-
-    # HybViennaCmbIter : Public Methods
-    def __next__(self):
-        self.counter += 1
-        next_hyb_record = next(self.hybfile_handle)
-        next_vienna_record = next(self.viennafile_handle)
-        try:
-            next_hyb_record.set_fold_record(next_vienna_record)
-        except StopIteration:
-            print('For %s counter iteration: %i ...' % (str(self), self.counter))
-            raise
-        return next_hyb_record
+        next_fold_record = next(self.viennafile_handle)
+        if self.combine:
+            try:
+                next_hyb_record.set_fold_record(next_fold_record)
+                ret_obj = next_hyb_record
+            except:
+                print('For %s counter iteration: %i ...' % (str(self), self.counter))
+                raise
+        else:
+            ret_obj = (next_hyb_record, next_fold_record)
+        return ret_obj
 
 
 class ViennadFile(object):
@@ -2532,56 +2552,58 @@ class ViennadFile(object):
 
 class HybViennadIter(object):
     """
-    This class provides an iterator to iterate through a HybFile and ViennadFile simultaneously,
-    returning a tuple of hyb_record, fold_record instances on each iteration.
+    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`ViennadFile` Object.
+
+    This class provides an iterator to iterate through a :class:`HybFile` and :class:`ViennadFile`
+    simultaneously.
+    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
+    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
+    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
+    Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
+    containing the read information.
+
+    Args:
+        hybfile_handle (HybFile) : HybFile object for iteration
+        viennadfile_handle (ViennadFile) : ViennadFile object for iteration
+        combine (bool) : Return a combined :class:`HybRecord` object.
+
+    Returns:
+        | Returns a combined :class:`HybRecord` object if "combine" is True.
+        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
+
+    Todo:
+        Add option to confirm match of HybRecord and FoldRecord Entries.
     """
 
     # HybViennaIter : Public Methods
-    def __init__(self, hybfile_handle, viennadfile_handle):
+    def __init__(self, hybfile_handle, viennadfile_handle, combine=False):
+        """Please see :class:`HybViennadIter` for initialization information."""
         self.hybfile_handle = hybfile_handle
         self.viennadfile_handle = viennadfile_handle
         self.counter = 0
+        self.combine = combine
 
     # HybViennaIter : Public Methods
     def __iter__(self):
+        """Return an iterator object."""
         return self
 
     # HybViennaIter : Public Methods
     def __next__(self):
+        """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
-        next_viennad_record = next(self.viennadfile_handle)
-        return (next_hyb_record, next_viennad_record)
-
-
-class HybViennadCmbIter(object):
-    """
-    This class provides an iterator to iterate through a HybFile and ViennadFile simultaneously.
-    It is presumed that each respective hyb entry corresponds to an aligned viennad entry.
-    Each FoldRecord will be added to the corresponding HybRecord.
-    Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
-    """
-    # HybViennaCmbIter : Public Methods
-    def __init__(self, hybfile_handle, viennadfile_handle):
-        self.hybfile_handle = hybfile_handle
-        self.viennadfile_handle = viennadfile_handle
-        self.counter = 0
-
-    # HybViennaCmbIter : Public Methods
-    def __iter__(self):
-        return self
-
-    # HybViennaCmbIter : Public Methods
-    def __next__(self):
-        self.counter += 1
-        next_hyb_record = next(self.hybfile_handle)
-        next_viennad_record = next(self.viennadfile_handle)
-        try:
-            next_hyb_record.set_fold_record(next_viennad_record)
-        except StopIteration:
-            print('For %s counter iteration: %i ...' % (str(self), self.counter))
-            raise
-        return next_hyb_record
+        next_fold_record = next(self.viennadfile_handle)
+        if self.combine:
+            try:
+                next_hyb_record.set_fold_record(next_fold_record)
+                ret_obj = next_hyb_record
+            except:
+                print('For %s counter iteration: %i ...' % (str(self), self.counter))
+                raise
+        else:
+            ret_obj = (next_hyb_record, next_fold_record)
+        return ret_obj
 
 
 class CtFile(object):
@@ -2671,52 +2693,57 @@ class CtFile(object):
 
 class HybCtIter(object):
     """
-    This class provides an iterator to iterate through a HybFile and CtFile simultaneously,
-    returning a tuple of hyb_record, fold_record instances on each iteration.
+    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`CtFile` Object.
+
+    This class provides an iterator to iterate through a :class:`HybFile` and :class:`CtFile`
+    simultaneously.
+    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
+    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
+    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
+    Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
+    containing the read information.
+
+    Args:
+        hybfile_handle (HybFile) : HybFile object for iteration
+        ctfile_handle (CtFile) : CtFile object for iteration
+        combine (bool) : Return a combined :class:`HybRecord` object.
+
+    Returns:
+        | Returns a combined :class:`HybRecord` object if "combine" is True.
+        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
+
+    Todo:
+        Add option to confirm match of HybRecord and FoldRecord Entries.
     """
+
     # HybCtIter : Public Methods
-    def __init__(self, hybfile_handle, ctfile_handle):
+    def __init__(self, hybfile_handle, ctfile_handle, combine=False):
+        """Please see :class:`HybCtIter` for initialization information."""
         self.hybfile_handle = hybfile_handle
         self.ctfile_handle = ctfile_handle
         self.counter = 0
+        self.combine = combine
 
     # HybCtIter : Public Methods
     def __iter__(self):
+        """Return an iterator object."""
         return self
 
     # HybCtIter : Public Methods
     def __next__(self):
+        """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
-        next_ct_record = next(self.ctfile_handle)
-        return (next_hyb_record, next_ct_record)
+        next_fold_record = next(self.ctfile_handle)
+        if self.combine:
+            try:
+                next_hyb_record.set_fold_record(next_fold_record)
+                ret_obj = next_hyb_record
+            except:
+                print('For %s counter iteration: %i ...' % (str(self), self.counter))
+                raise
+        else:
+            ret_obj = (next_hyb_record, next_fold_record)
+        return ret_obj
 
 
-class HybCtCmbIter(object):
-    """
-    This class provides an iterator to iterate through a HybFile and CtFile simultaneously.
-    It is presumed that each respective hyb entry corresponds to an aligned ct entry.
-    Each FoldRecord will be added to the corresponding HybRecord.
-    Only the HybRecord entry will then be returned, containing the associated FoldRecord entry.
-    """
-    # HybCtCmbIter : Public Methods
-    def __init__(self, hybfile_handle, ctfile_handle):
-        self.hybfile_handle = hybfile_handle
-        self.ctfile_handle = ctfile_handle
-        self.counter = 0
-
-    # HybCtCmbIter : Public Methods
-    def __iter__(self):
-        return self
-
-    # HybCtCmbIter : Public Methods
-    def __next__(self):
-        self.counter += 1
-        next_hyb_record = next(self.hybfile_handle)
-        next_ct_record = next(self.ctfile_handle)
-        try:
-            next_hyb_record.set_fold_record(next_viennad_record)
-        except StopIteration:
-            print('For %s counter iteration: %i ...' % (str(self), self.counter))
-            raise
-        return next_hyb_record

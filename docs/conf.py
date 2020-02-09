@@ -34,6 +34,7 @@ release = hybkit.__about__.__version__
 extensions = [
     'sphinx.ext.autodoc', 
     'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
     ]
 
 # add_module_names
