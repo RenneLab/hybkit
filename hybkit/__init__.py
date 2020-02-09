@@ -4,7 +4,9 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Classes and Methods for manipulating data in the ".hyb" genomic sequence format.
+This module contains classes and methods for reading, writing, and manipulating data 
+in the ".hyb" genomic sequence format. This includes:
+    HybRecord: Primary class for storage of records in ".hyb" format
 
 Todo:
     Expand Definition of class.
