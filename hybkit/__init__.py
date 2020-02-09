@@ -832,7 +832,7 @@ class HybRecord(object):
     # Set object of all allowed properties for the ".has_property()" method.
     PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES | _TARGET_PROPERTIES
 
-    # HybRecord : Public Methods : has_property
+    # HybRecord : Public Methods : Record Properties
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
         """Check if HybRecord has property of prop_type defined in list of allowed properties
         stored in record.PROPERTIES. If query property has a comparator, provide this
@@ -957,7 +957,11 @@ class HybRecord(object):
             elif prop_type == 'target_3p_utr':
                 ret_val = (self._get_flag('target_reg') == '3pUTR')
         return ret_val         
-                 
+    
+    # HybRecord : Public Methods : Record Properties
+    prop = has_property
+    """ Convenience Method for :method:`has_property`"""
+
 
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False):
