@@ -8,6 +8,10 @@ Welcome to hybkit's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   source/hybkit
+   source/hybkit.analysis
+   source/hybkit.plot
+
 
 Indices and tables
 ==================

@@ -7,24 +7,40 @@
 This module contains classes and methods for reading, writing, and manipulating data 
 in the ".hyb" genomic sequence format. This module includes two classes for storage of 
 chimeric sequence information and associated fold-information:
-    * :class:`HybRecord` Class for storage of records in ".hyb" format
-    * :class:`FoldRecord` Class for storage of predicted folding formation 
-      hyb sequences
+
++---------------------+----------------------------------------------------------------------+
+| :class:`HybRecord`  | Class for storage of records in ".hyb" format                        |
++---------------------+----------------------------------------------------------------------+
+| :class:`FoldRecord` | Class for storage of predicted folding information for hyb sequences |
++---------------------+----------------------------------------------------------------------+
     
 It also includes classes for reading, writing, and iterating over files containing that 
 information:
-    * :class:`HybFile` Class for reading a ".hyb"-format file containing chimeric
-      genomic sequence information.
-    * :class:`ViennaFile` Class for reading a ".vienna"-format file containing 
-      predicted folding information for a hyb sequence
-    * :class:`ViennadFile` Class for reading a ".viennad"-format file containing 
-      predicted folding information for a hyb sequence
-    * :class:`CtFile` Class for reading a ".ct"-format file containing 
-      predicted folding information for a hyb sequence
-    * :class:`HybViennaIter` Class for simultaneous iteration over ".hyb" and ".vienna" files.
-    * :class:`HybViennadIter` Class for simultaneous iteration over ".hyb" and ".viennad" files.
-    * :class:`HybCtIter` Class for simultaneous iteration over".hyb" and ".ct" files.
 
++-------------------------+------------------------------------------------------------------+
+| :class:`HybFile`        | Class for reading and writing ".hyb"-format files                |
+|                         | containing chimeric genomic sequence information.                |
++-------------------------+------------------------------------------------------------------+
+|                         | Class for reading and writing ".vienna"-format files             |
+| :class:`ViennaFile`     | containing predicted folding information for a hyb               |
+|                         | sequence                                                         |
++-------------------------+------------------------------------------------------------------+
+| :class:`ViennadFile`    | Class for reading and writing ".viennad"-format                  |
+|                         | files containing predicted folding information for a             |
+|                         | hyb sequence                                                     |
++-------------------------+------------------------------------------------------------------+
+| :class:`CtFile`         | Class for reading ".ct"-format files containing                  |
+|                         | predicted folding information for a hyb sequence                 |
++-------------------------+------------------------------------------------------------------+
+| :class:`HybViennaIter`  | Class for simultaneous iteration over ".hyb" and                 |
+|                         | ".vienna" files.                                                 |
++-------------------------+------------------------------------------------------------------+
+| :class:`HybViennadIter` | Class for simultaneous iteration over ".hyb" and                 |
+|                         | ".viennad" files.                                                |
++-------------------------+------------------------------------------------------------------+
+| :class:`HybCtIter`      | Class for simultaneous iteration over ".hyb" and                 |
+|                         | ".ct" files.                                                     |
++-------------------------+------------------------------------------------------------------+
 
 Todo:
     Expand Definition of class.
@@ -52,31 +68,91 @@ import hybkit.analysis
 import hybkit.plot
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__,\
                              __email__, __license__, __maintainer__, __status__, __version__
 
 class HybRecord(object):
-    """Class for storing and analayzing information about a chimeric or hybrid 
-    sequence read from a .hyb format file.  
+    """Class for storing and analyzing chimeric hybrid genomics reads in ".hyb" format.
 
-    A minimum amount of data necessary 
-    for a HybRecord object is the genomic sequence and its
-    corresponding identifier. The .hyb file format is specified in
-        "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
-        (crosslinking, ligation and sequencing of hybrids) data." 
-        Methods 65.3 (2014): 263-273."
-    and consists of 15-16 columns separated by tabs, briefly described as: 
-    "id, sequence, binding_energy, seg1_name, seg1_read_start, seg1_read_end, 
-     seg1_ref_start, seg1_ref_end, seg1_map_score, seg2_read_start, seg2_read_end,
-     seg2_ref_start, seg2_ref_end, seg2_map_score, [flag1=val1; flag2=val2;flag3=val3...]"
+    Hyb format entries are a GFF-related file format described by Travis, et al. (see `References`_)
+    that contain information about a genomic sequence read identified to be a chimera by 
+    anlaysis softare. The line contains 15 or 16 columns separated by tabs ("\\t") and provides
+    information on each of the respective identified components. An example .hyb format line 
+    (courtesy of Gay et al.)::
+ 
+        2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
+
+    These columns are respectively described in hybkit as:
+
+         id, seq, energy, [seg1\_]ref, [seg1\_]read_start, [seg1\_]read_end, [seg1\_]ref_start, 
+         [seg1\_]ref_end, [seg1\_]score, [seg2\_]read_start, [seg2\_]read_end, [seg2\_]ref_start, 
+         [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
+
+    A minimum amount of data necessary for a HybRecord object is the genomic sequence and its
+    corresponding identifier. 
+    
+    Examples::
+
+        hyb_record_1 = hybkit.HybRecord('1_100', 'ACTG')
+        hyb_record_2 = hybkit.HybRecord('2_107', 'CTAG', '-7.3')
+
+    Details about segments are provided via dict objects with the keys
+    specific to each segment. Data can be provided either as strings or 
+    as floats/integers (where relevant).
+    For example, to create a HybRecord object representing the example line given above:: 
+
+        seg1_info = {'ref': 'MIMAT0000078_MirBase_miR-23a_microRNA',
+                     'read_start': '1',
+                     'read_end': '21',
+                     'ref_start': '1',
+                     'ref_end': '21',
+                     'score': '0.0027'}
+        seg2_info = {'ref': 'ENSG00000188229_ENST00000340384_TUBB2C_mRNA',
+                     'read_start': 23,
+                     'read_end': 49,
+                     'ref_start': 1181,
+                     'ref_end': 1207,
+                     'score': 1.2e-06}
+        seq_id = '2407_718' 
+        seq = 'ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC'
+        energy = None
+        
+        hyb_record = hybkit.HybRecord(seq_id, seq, energy, seg1_info, seg2_info)
+        # OR
+        hyb_record = hybkit.HybRecord(seq_id, seq, seg1_info=seg1_info, seg2_info=seg2_info)
+
+    Though the preferred method for reading hyb-records from lines is via 
+    the :func:`HybRecord.from_line` constructor::
+
+        # line = "2407_718\tATC..."
+        hyb_record = hybkit.HybRecord.from_line(line)
+
+    This constructor allows convenient reading of ".hyb" files using the 
+    :class:`HybFile` file wrapper class described below.
+    For example, to print all hybrid identifiers in a ".hyb" file::
+
+        with hybkit.HybFile('path/to/file.hyb', 'r') as hyb_file:
+            for hyb_record in hyb_file:
+                print(hyb_record.id)
+
+    .. _References:
+    References:
+        #. "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
+           (crosslinking, ligation and sequencing of hybrids) data." 
+           Methods 65.3 (2014): 263-273."
+        #. Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of 
+           hybrids (qCLASH) identifies Kaposi's Sarcoma-associated herpesvirus microRNA 
+           targets in endothelial cells." Journal of virology 92.8 (2018): e02138-17.
+
+
     """
 
     # HybRecord : Class-Level Constants
     # Columns 1-3 defining parameters of the overall hybrid, defined by the Hyb format
     HYBRID_COLUMNS = [
-                      'id',      # str, Hybrid read identifier, ex: "1257_12"
-                      'seq',     # str, Hybrid nucleotide sequence, ex: "ATCGGCTAATCGGTCA..."
-                      'energy',  # str(of float), Intra-hybrid folding energy, ex: "-11.33"
+                      'id',      #: str, Hybrid read identifier, ex: "1257_12"
+                      'seq',     #: str, Hybrid nucleotide sequence, ex: "ATCGGCTAATCGGTCA..."
+                      'energy',  #: str(of float), Intra-hybrid folding energy, ex: "-11.33"
                      ]
     # Columns 4-9 and 10-15, reespectively, defining parameters of each respective segment mapping,
     # defined by the Hyb format

@@ -4,21 +4,12 @@ hybkit package
 .. automodule:: hybkit
    :members:
    :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
 
-hybkit.analysis module
-----------------------
+.. toctree::
 
-.. automodule:: hybkit.analysis
-   :members:
-   :undoc-members:
-
-hybkit.plot module
-------------------
-
-.. automodule:: hybkit.plot
-   :members:
-   :undoc-members:
-
+   hybkit.analysis
+   hybkit.plot
