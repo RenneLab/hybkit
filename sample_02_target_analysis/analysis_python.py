@@ -127,11 +127,11 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
                                         counts_dict,
                                         target_type_counts_dict,
                                         name=in_file_label,
-                                        multi_files=False,    # Default
+                                        multi_files=False,   # Non-Default
                                         sep=',',             # Default
                                         file_suffix='.csv',  # Default
                                         spacer_line=True,    # Default
-                                        make_plots=True,     # Default
+                                        make_plots=False,    # Non-Default
                                         max_mirna=25)        # Default is 10
 
 
