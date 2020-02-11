@@ -55,7 +55,7 @@ Todo:
     Implement all sample analyses with bash workflows and individual scripts.
     Implement all sample analyses with nextflow workflows and individual scripts.
     Make decision and clean "extra" scripts.
-    Add hybkit specification page.
+    Fill hybkit specification page.
 
 """
 
@@ -78,9 +78,9 @@ class HybRecord(object):
 
     Hyb format entries are a GFF-related file format described by Travis, et al. (see `References`_)
     that contain information about a genomic sequence read identified to be a chimera by 
-    anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\t") and provides
+    anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     information on each of the respective identified components. An example .hyb format line 
-    (courtesy of Gay et al. `References`_)::
+    (courtesy of Gay et al. [`References`_])::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -93,10 +93,11 @@ class HybRecord(object):
     A minimum amount of data necessary for a HybRecord object is the genomic sequence and its
     corresponding identifier. 
     
-    Examples::
+    Examples:
+        ::
 
-        hyb_record_1 = hybkit.HybRecord('1_100', 'ACTG')
-        hyb_record_2 = hybkit.HybRecord('2_107', 'CTAG', '-7.3')
+            hyb_record_1 = hybkit.HybRecord('1_100', 'ACTG')
+            hyb_record_2 = hybkit.HybRecord('2_107', 'CTAG', '-7.3')
 
     Details about segments are provided via dict objects with the keys
     specific to each segment. Data can be provided either as strings or 
@@ -158,10 +159,9 @@ class HybRecord(object):
             on record initialization.
         target_region_analysis (bool, optional): Perform 
             :func:`target_region_analysis` on record initialization
-         
-    .. _References:
+
+    .. _References:     
     References:
-       
         #. "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
            (crosslinking, ligation and sequencing of hybrids) data." 
            Methods 65.3 (2014): 263-273."
@@ -231,7 +231,7 @@ class HybRecord(object):
                    ]
 
     #: Flags defined by the hybkit package. Flags 1-4 are utilized by the Hyb software package.
-    #: For information on flags, see the :any:`Flags`_ portion of the :any:`hybkit Specification`_.
+    #: For information on flags, see the :any:`Flags` portion of the :any:`hybkit Specification`.
     ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
 
     #: Default miRNA types for use in :func:`mirna_analysis`.
@@ -251,6 +251,8 @@ class HybRecord(object):
     #   multiple hyb records into the same entry.
     DEFAULTS['allow_fold_record_mismatch'] = True   # Allow mismatch in self.fold_record sequence
     DEFAULTS['warn_fold_record_mismatch'] = False   # Warn if mismatch, self.fold_record sequence
+
+    DEFAULTS['allow_unknown_seg_types'] = False     # Allow unknown in self.find_seg_types
 
     DEFAULTS['allow_unknown_regions'] = False
     DEFAULTS['warn_unknown_regions'] = True
@@ -519,13 +521,20 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_types(self, allow_unknown=False):
         """Find the types of each segment using the method currently set for the class.
-        The default supplied method is HybRecord.find_seg_type_hyb, and works with alignemnt
+
+        The default supplied method is :func:`find_seg_type_hyb`, and works with alignemnt
         mapping identifiers in the format of the reference database provided by the Hyb
         Software Package. Custom methods with more complex behavior can be supplied via the
         "set_find_method" method.
-        If allow_unknown is False, an error will be raised if a segment type cannot be identified.
-        If allow_unknown is True, unidentified segments will be designated as "unknown".
+
+        Args:
+            allow_unknown (bool, optional): If True, allow segment types that cannot be
+                identified and set as "unknown. Otherwise raise an error.
+                If None, uses setting in :attr:`settings` : allow_unknown_seg_types.
         """
+        if allow_unknown is None:
+            allow_unknown = self.settings['allow_unknown_seg_types']
+        
         types = []
         for seg_info in [self.seg1_info, self.seg2_info]:
             seg_type = self.find_type_method(seg_info, self.find_type_params)
@@ -543,12 +552,18 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_hyb(self, seg_info, find_type_params={}):
-        """Return the type of the provided segment, or return None if the segment cannot be
-        identified. This method works with sequence / alignment mapping identifiers
+        """Return the type of the provided segment, or None if segment cannot be identified.
+
+        This method works with sequence / alignment mapping identifiers
         in the format of the reference database provided by the Hyb Software Package,
         specifically identifiers of the format: "AAAA_BBBB_CCCC_DDDD" This method returns
         the fourth component of the identifier, split by "_", as the identfied sequence.
-        For Example, "MIMAT0000076_MirBase_miR-21_microRNA" is identified as "microRNA".
+
+        Example:
+            ::
+
+                "MIMAT0000076_MirBase_miR-21_microRNA"  --->  "microRNA".
+
         This method does not utilize the find_type_params arg.
         """
         split_id = seg_info['ref'].split('_')
@@ -564,24 +579,32 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     def find_seg_type_string_match(self, seg_info, find_type_params={}, check_all=False):
-        """Return the type of the provided segment, or return None if the segment cannot be
-        identified.
+        """Return the type of the provided segment, or None if the segment cannot be identified.
+        
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "prefix", "contains", "suffix", and
         "matches". The required find_type_params dict should contain a key for each desired
         search type, with a list of 2-tuples for each search-string with assigned-type.
-        For example:
-        find_type_params = {'suffix': [('_miR', 'microRNA'),
-                                       ('_trans', 'mRNA')   ]}
-        This dict can be generated with the associated make_string_match_parameters()
-        method and an associated csv legend file with format:
+        Example:
+            ::
+                find_type_params = {'suffix': [('_miR', 'microRNA'),
+                                               ('_trans', 'mRNA')   ]}
+
+        This dict can be generated with the associated :func:`make_string_match_parameters`
+        method and an associated csv legend file with format::
+
             #commentline
             #search_type,search_string,seg_type
             suffix,_miR,microRNA
             suffix,_trans,mRNA
-        If check_all is provided as true, the method will continue checking search oftens after
-        an option has been found, to ensure that no options conflict.
+
+        Args:
+            check_all (bool, optional): If true, the method will continue checking search
+                options after an option has been found, to ensure that no options conflict
+                (more sure method). If False, it will stop after the first match is found 
+                (faster method).
         """
+
         seg_name = seg_info['ref']
         found_types = []
         check_done = False
@@ -636,11 +659,14 @@ class HybRecord(object):
         This method checks to see if the identifer of the segment is present in a list provided 
         in find_type_params. find_type_params should be formatted as a dict with keys as 
         sequence identifier names, and the corresponding type as the respective values.
-        For example:
-        find_type_params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
-                            'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
-        This dict can be generated with the associated make_seg_type_id_map()
-        method.
+
+        Example:
+            ::
+
+                find_type_params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
+                                    'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
+
+        This dict can be generated with the associated :func:`make_seg_type_id_map` method.
         """
         seg_name = seg_info['ref']
         if seg_name in find_type_params:
@@ -842,9 +868,10 @@ class HybRecord(object):
         Required keys are cdna_coding_start, cdna_coding_end
         Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
         Example:
-           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
-                                'cdna_coding_start':  'cdna_coding_end':,
-                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+           ::
+               {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
+                                    'cdna_coding_start':  'cdna_coding_end':,
+                                    '3_utr_start':'45329242', '3_utr_end':'45329305'}}
         This dict can be set at the class level using 
         ".make_region_info()', with ".set_region_info()", or with
         ".make_set_region_info()", or can be supplied directly to this method.         
@@ -1119,7 +1146,7 @@ class HybRecord(object):
     
     # HybRecord : Public Methods : Record Properties
     prop = has_property
-    """ Convenience Method for :method:`has_property`"""
+    """ Convenience Method for :func:`has_property`"""
 
 
     # HybRecord : Public Methods : Record Parsing
@@ -1205,16 +1232,19 @@ class HybRecord(object):
     @classmethod
     def make_region_info(cls, region_csv_name, sep=','):
         """
-        Make a dict containing information on a coding transcript utr regions from an
-        input csv file. The input csv must contain a header line, and must have the columns:
-        Required keys are identifier, cdna_coding_start, cdna_coding_end
-        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
-        Example return dict object:
-           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
-                                'cdna_coding_start':  'cdna_coding_end':,
-                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
-        This dict can then be passed to ".set_region_info()" or supplied directly to
-        the ".target_region_analysis()" method.
+        Return dict with information on coding transcript utr regions from an input csv.
+
+        The input csv must contain a header line, and must have the columns::
+
+            identifier, cdna_coding_start, cdna_coding_end
+
+        Example return dict object::
+
+           {'ENST00000372098': {'cdna_coding_start':'45340255',
+                                'cdna_coding_end':'45340388'}
+
+        The return dict can then be passed to :func:`set_region_info` or supplied directly to
+        the :func:`target_region_analysis` method.
         """
 
         data_keys = ['cdna_coding_start', 'cdna_coding_end']
@@ -1288,16 +1318,15 @@ class HybRecord(object):
 
     @classmethod
     def set_region_info(cls, region_info_dict):
-        """
-        Set the class-level reference dict object with information on coding transcript utr 
-        regions. This dict must have transcript identifiers as keys, with values of dicts with
-        defined keys of: 
-        Required keys are cdna_coding_start, cdna_coding_end
-        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
-        Example dict format:
-           {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
-                                'cdna_coding_start':  'cdna_coding_end':,
-                                '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+        """Set :attr:`region_info_dict` with information on coding transcript utr regions. 
+
+        This dict must have transcript identifiers as keys, with values of dicts with 
+        containing: cdna_coding_start, cdna_coding_end
+        Example dict format::
+
+           {'ENST00000372098': {'cdna_coding_start': '32577',
+                                'cdna_coding_end': '32677'}}
+
         """
 
         cls.target_region_info = region_info_dict
@@ -1394,19 +1423,24 @@ class HybRecord(object):
     def make_string_match_parameters(
             legend_file=os.path.join(hybkit.__about__.code_dir, 'find_type_string_match.csv')
             ):
-        """
-        Read csv file provided in legend_file, and return a dict of search parameters
-        for use with the find_seg_type_string_match method.
-        The my_legend.csv file should have the format:
+        """Read csv and return a dict of search parameters for :func:`find_seg_type_string_match`.
+
+        The my_legend.csv file should have the format::
+
             #commentline
             #search_type,search_string,seg_type
             suffix,_miR,microRNA
             suffix,_trans,mRNA
-        search_type options include "prefix", "contains", "suffix", and "matches"
+
+        Search_type options include "prefix", "contains", "suffix", and "matches"
         The produced dict object contains a key for each search type, with a list of
-        2-tuples for each search-string and associated segment-type. For example:
-          {'suffix': [('_miR', 'microRNA'),
-                      ('_trans', 'mRNA')   ]}
+        2-tuples for each search-string and associated segment-type. 
+
+        For example::
+
+            {'suffix': [('_miR', 'microRNA'),
+                        ('_trans', 'mRNA')   ]}
+
         """
 
         ALLOWED_SEARCH_TYPES = {'prefix', 'contains', 'suffix', 'matches'}
@@ -1447,22 +1481,28 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_seg_type_id_map(mapped_id_files=None, type_file_pairs=None):
-        """
-        Read file(s) provided and return a mapping of sequence identifiers to types 
+        """Read file(s) provided and return a mapping of sequence identifiers to types 
         for use with the find_seg_type_from_id_map method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
         or a list/tuple of one or more pairs of file lists and file types 
         passed to type_file_pairs.
-        Files listed in the mapped_id_files argument should have the format: 
+        Files listed in the mapped_id_files argument should have the format:: 
+
             #commentline
             #seg_id,seg_type
             seg1_unique_id,seg1_type
             seg2_unique_id,seg2_type
-        Entries in the list/tuple passed to type_file_pairs should have the format:
-            (seg1_type, file1_name)
-            Ex: [(seg1_type, file1_name), (seg2_type, file2_name),]
-            The first entry in each (non-commented, non-blank) file line will be read and
-            added to the mapping dictionary mapped to the provided seg_type.
+
+        Entries in the list/tuple passed to type_file_pairs should have the format: 
+        (seg1_type, file1_name)
+
+        Example:
+            ::
+
+                [(seg1_type, file1_name), (seg2_type, file2_name),]
+
+        The first entry in each (non-commented, non-blank) file line will be read and
+        added to the mapping dictionary mapped to the provided seg_type.
         """
 
         return_dict = {}
@@ -1816,33 +1856,42 @@ class HybFile(object):
 class FoldRecord(object):
     """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
+    
     This class supports:
-        The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
-        Example::
 
-             34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-...
-            TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
-            .....((((((.((((((......)))))).))))))   (-11.1)
+    * | The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
 
-        The Viennad file format utilizied in the Hyb Software package
-        Example::
+      Example:
+          ::
 
-            34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-34-...
-            TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
-            TAGCTTATCAGACTGATGT------------------   miR-21_microRNA 1       19
-            -------------------TAGCTTATCAGACTGATG   miR-21_microRNA 1       18
-            .....((((((.((((((......)))))).))))))   (-11.1)
-            [space-line]
+              34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-...
+              TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
+              .....((((((.((((((......)))))).))))))   (-11.1)
 
-        The Ct file format utilized by the UNAFold Software Package.
-        Example:
+    * | The Viennad file format utilizied in the Hyb Software package
 
-            41	dG = -8	dH = -93.9	seq1_name-seq2_name
-            1	A	0	2	0	1	0	0
-            2	G	1	3	0	2	0	0
-            ...
-            40	G	39	41	11	17	39	41
-            41	T	40	0	10	18	40	0
+      Example:
+          ::
+
+              34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-34-...
+              TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
+              TAGCTTATCAGACTGATGT------------------   miR-21_microRNA 1       19
+              -------------------TAGCTTATCAGACTGATG   miR-21_microRNA 1       18
+              .....((((((.((((((......)))))).))))))   (-11.1)
+              [space-line]
+
+    * | The Ct file format utilized by the UNAFold Software Package.
+
+      Example:
+          ::
+
+              41	dG = -8	dH = -93.9	seq1_name-seq2_name
+              1	A	0	2	0	1	0	0
+              2	G	1	3	0	2	0	0
+              ...
+              40	G	39	41	11	17	39	41
+              41	T	40	0	10	18	40	0
+
 
     A minimum amount of data necessary for a FoldRecord object is a sequence identifier,
     a genomic sequence, and its fold representaiton.
