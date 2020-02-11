@@ -1818,12 +1818,15 @@ class FoldRecord(object):
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     This class supports:
         The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
-        ex: 34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-...
+        Example::
+
+             34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-...
             TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
             .....((((((.((((((......)))))).))))))   (-11.1)
 
         The Viennad file format utilizied in the Hyb Software package
-        ex:
+        Example::
+
             34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-34-...
             TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
             TAGCTTATCAGACTGATGT------------------   miR-21_microRNA 1       19
@@ -1832,7 +1835,8 @@ class FoldRecord(object):
             [space-line]
 
         The Ct file format utilized by the UNAFold Software Package.
-        ex:
+        Example:
+
             41	dG = -8	dH = -93.9	seq1_name-seq2_name
             1	A	0	2	0	1	0	0
             2	G	1	3	0	2	0	0
