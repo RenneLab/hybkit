@@ -11,7 +11,8 @@ chimeric sequence information and associated fold-information:
 +---------------------+----------------------------------------------------------------------+
 | :class:`HybRecord`  | Class for storage of records in ".hyb" format                        |
 +---------------------+----------------------------------------------------------------------+
-| :class:`FoldRecord` | Class for storage of predicted folding information for hyb sequences |
+| :class:`FoldRecord` | Class for storage of predicted folding information for hyb           |
+|                     | chimeric sequence reads                                              |
 +---------------------+----------------------------------------------------------------------+
     
 It also includes classes for reading, writing, and iterating over files containing that 
@@ -43,7 +44,6 @@ information:
 +-------------------------+------------------------------------------------------------------+
 
 Todo:
-    Expand Definition of class.
     Check hybrecord/foldrecord match settings.
     Add Hybrecord.to_csv_line()
     Add Hybrecord.to_csv_header()
@@ -55,6 +55,8 @@ Todo:
     Implement all sample analyses with bash workflows and individual scripts.
     Implement all sample analyses with nextflow workflows and individual scripts.
     Make decision and clean "extra" scripts.
+    Add hybkit specification page.
+
 """
 
 import os
@@ -76,9 +78,9 @@ class HybRecord(object):
 
     Hyb format entries are a GFF-related file format described by Travis, et al. (see `References`_)
     that contain information about a genomic sequence read identified to be a chimera by 
-    anlaysis softare. The line contains 15 or 16 columns separated by tabs ("\\t") and provides
+    anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\t") and provides
     information on each of the respective identified components. An example .hyb format line 
-    (courtesy of Gay et al.)::
+    (courtesy of Gay et al. `References`_)::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -128,15 +130,38 @@ class HybRecord(object):
         hyb_record = hybkit.HybRecord.from_line(line)
 
     This constructor allows convenient reading of ".hyb" files using the 
-    :class:`HybFile` file wrapper class described below.
+    :class:`HybFile` wrapper class described below.
     For example, to print all hybrid identifiers in a ".hyb" file::
 
         with hybkit.HybFile('path/to/file.hyb', 'r') as hyb_file:
             for hyb_record in hyb_file:
                 print(hyb_record.id)
 
+    Args:
+        id (str): Identifier for the hyb record
+        seq (str): Nucleotide sequence of the hyb record
+        energy (str or float, optional): Predicted energy of record folding in kcal/mol
+        seg1_info (dict, optional): Information on segment 1 of the record, containing possible:
+            keys: ('ref', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+        seg2_info (dict, optional): Information on segment 2 of the record, containing possible:
+            keys: ('ref', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+        flags (dict, optional): Dict with keys of flags for the record and their associated values.
+            By default flags must be defined in :attr:`ALL_FLAGS` but custom allowed 
+            flags can be added via :func:`set_custom_flags`.
+            This setting can also be disabled by setting 'allow_undefined_flags' 
+            to True in :attr:`settings`.
+        fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
+            as the provided FoldRecord object using :func:`set_fold_record` on initializtaion.
+        find_seg_types (bool, optional): Perform :func:`find_seg_types` analysis 
+            on record initialization.
+        mirna_analysis (bool, optional): Perform :func:`mirna_analysis` 
+            on record initialization.
+        target_region_analysis (bool, optional): Perform 
+            :func:`target_region_analysis` on record initialization
+         
     .. _References:
     References:
+       
         #. "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
            (crosslinking, ligation and sequencing of hybrids) data." 
            Methods 65.3 (2014): 263-273."
@@ -148,14 +173,15 @@ class HybRecord(object):
     """
 
     # HybRecord : Class-Level Constants
-    # Columns 1-3 defining parameters of the overall hybrid, defined by the Hyb format
+    #: Record columns 1-3 defining parameters of the overall hybrid, defined by the Hyb format
     HYBRID_COLUMNS = [
                       'id',      #: str, Hybrid read identifier, ex: "1257_12"
                       'seq',     #: str, Hybrid nucleotide sequence, ex: "ATCGGCTAATCGGTCA..."
                       'energy',  #: str(of float), Intra-hybrid folding energy, ex: "-11.33"
                      ]
-    # Columns 4-9 and 10-15, reespectively, defining parameters of each respective segment mapping,
-    # defined by the Hyb format
+
+    #: Record columns 4-9 and 10-15, respectively, defining parameters of each 
+    #: respective segment mapping, defined by the Hyb format
     SEGMENT_COLUMNS = [
                        'ref',         # str, Mapping Reference Identity: ex:
                                       #   "MIMAT0000076_MirBase_miR-21_microRNA"
@@ -167,10 +193,11 @@ class HybRecord(object):
                                       #   or mapping alignment score, depending on analysis
                                       #   implementation type.
                       ]
+ 
     # Arbitrary details included in column 16 of the hyb format in the form:
     #   “feature1=value1; feature2=value2;..."
     #   Flags utilized in the Hyb software package
-    HYB_FLAGS = [
+    _HYB_FLAGS = [
                  'count_total',            # str(int), total represented hybrids
                  'count_last_clustering',  # str(int), total represented hybrids at last clustring
                  'two_way_merged',         # "0" or "1", boolean representation of whether
@@ -179,18 +206,18 @@ class HybRecord(object):
                                            #   merged into this hybrid entry.
                 ]
     # Additional flag specifications utilized by hybkit
-    HYBKIT_FLAGS = [
+    _HYBKIT_FLAGS = [
                     'read_count',   # str(int), number of sequence reads represented by record
                                     #   if merged record, represents total for all merged entries
                     'orient',       # str, orientation of strand. Options:
                                     #   "F" (Forward), "IF" (Inferred Forward),
                                     #   "R" (Reverse), "IR" (Inferred Reverse),
-                                    #   "U" (Unknown), or "C" (Conflicting)
-                    'seg1_type',    # str, assigned "type" of segment 1, ex: "miRNA" or "mRNA"
-                    'seg2_type',    # str, assigned "type" of segment 2, ex: "miRNA" or "mRNA"
+                                    #   "U" (Unknown), or "IC" (Inferred Conflicting)
+                    'seg1_type',    # str, assigned type of segment 1, ex: "miRNA" or "mRNA"
+                    'seg2_type',    # str, assigned type of segment 2, ex: "miRNA" or "mRNA"
                     'seg1_det',     # str, arbitrary detail about segment 1
                     'seg2_det',     # str, arbitrary detail about segment 2
-                    'miRNA_seg',    # str, indicates which (if any) mapping is a miRNA
+                    'miRNA_seg',    # str, indicates which (if any) segment mapping is a miRNA
                                     #   options are "N" (none), "3p" (seg1), "5p" (seg2),
                                     #   "B" (both), or "U" (unknown)
                     'target_reg',   # str, assigned region of the miRNA target.
@@ -199,20 +226,21 @@ class HybRecord(object):
                     'ext',          # int, "0" or "1", boolean representation of whether
                                     #   record sequences were bioinformatically extended as is
                                     #   performed by the Hyb software package.
-                    'source',       # str, label for sequence source, when combining records 
-                                    #   from different sources.
+                    'source',       # str, label for sequence source id (eg. file), when 
+                                    #   combining records from different sources.
                    ]
 
-    # miRNA Types for use in ".mirna_analysis" function
+    #: Flags defined by the hybkit package. Flags 1-4 are utilized by the Hyb software package.
+    #: For information on flags, see the :any:`Flags`_ portion of the :any:`hybkit Specification`_.
+    ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
+
+    #: Default miRNA types for use in :func:`mirna_analysis`.
     MIRNA_TYPES = {'miRNA', 'microRNA'}
 
-    # Coding types for use in the target_region_analysis function
+    #: Default coding sequence types for use in the :func:`target_region_analysis`.
     CODING_TYPES = {'mRNA'}
 
-
-    # HybRecord : Class-Level Default Settings:
-    # These settings can be changed in a script to change the analysis-specific behavior
-    #   of the class.
+    #: Class-level default settings, copied into :attr:`settings` at runtime.
     DEFAULTS = {}
     DEFAULTS['reorder_flags'] = True           # Reorder flags to default order when writing
     DEFAULTS['allow_undefined_flags'] = False  # Allow undefined flags
@@ -230,23 +258,39 @@ class HybRecord(object):
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
     DEFAULTS['placeholder'] = '.'
 
-    # HybRecord : Class-Level Variables
-    custom_flags = []
-    all_flags = HYB_FLAGS + HYBKIT_FLAGS
-    find_type_method = None             # Will be populated after method definition
-    find_type_params = {}               # May be populated during use.
-    target_region_info = {}             # May be populated during use.
+    #: Dict of information required for use by :func:`find_seg_types`. 
+    #: Set with the specific information required by the selected method for use by default.
+    #: Currently supported paramater constructors:
+    #:
+    #:     :func:`make_string_match_parameters` (for :func:`find_seg_type_string_match`)
+    #:     :func:`make_seg_type_id_map` (for :func:`find_seg_type_from_id_map`)
+    find_type_params = {}
 
-    # set class initial settings to defaults.
+    #: Dict of information required for use by :func:`target_region_analysis`.
+    #: Make dict using :func:`make_region_info` then set via :func:`set_region_info`,
+    #: or do both simultaneously with :func:`make_set_region_info`. 
+    target_region_info = {}
+
+    #: Modifiable settings during usage. Copied at runtime from :attr:`DEFAULTS`.
     settings = copy.deepcopy(DEFAULTS)
 
+    #: Custom allowed flags:
+    _custom_flags = []
+
+    #: Set of allowed flags for faster checking.
+    _flagset = set(ALL_FLAGS + _custom_flags)
+
+
     # HybRecord : Public Methods : Initialization
-    def __init__(self, hyb_id, seq, energy=None,
+    def __init__(self, id, seq, energy=None,
                  seg1_info={}, seg2_info={}, flags={},
                  read_count=None,
+                 fold_record=None,
                  find_seg_types=False,
-                 fold_record=None):
-        self.id = hyb_id
+                 mirna_analysis=False,
+                 target_region_analysis=False,
+                 ):
+        self.id = id
         self.seq = seq
 
         if energy is not None:
@@ -258,22 +302,28 @@ class HybRecord(object):
         self.seg2_info = self._make_seg_info_dict(seg2_info)
         self.flags = self._make_flags_dict(flags)
 
+        self.mirna_details = None  # Placeholder variable for mirna_analysis
+        self.mirna_info = None     # Placeholder variable for mirna_analysis
+        self.target_info = None    # Placeholder variable for mirna_analysis
+        self.fold_seq_match = None  # Placeholder to be filled during set_fold_record()
+
         if read_count is not None:
             if read_count not in flags:
-                self.set_flag('read_count', read_count)
+                self.set_flag('read_count', int(read_count))
 
-        if find_seg_types:
-            self.find_seg_types()
-
-        self.fold_seq_match = None  # Placeholder to be filled during set_fold_record()
         if fold_record is not None:
             self.set_fold_record(fold_record)
         else:
             self.fold_record = None 
 
-        self.mirna_details = None  # Placeholder variable for mirna_analysis
-        self.mirna_info = None     # Placeholder variable for mirna_analysis
-        self.target_info = None    # Placeholder variable for mirna_analysis
+        if find_seg_types:
+            self.find_seg_types()
+
+        if mirna_analysis:
+            self.mirna_analysis()
+
+        if target_region_analysis:
+            self.target_region_analysis() 
 
         self._post_init_tasks()    # Method stub to enable convenient subclassing
 
@@ -311,15 +361,20 @@ class HybRecord(object):
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
         """Set the value of self.flags: flag_key to value flag_val.
-        allow_undefined_flags allows the inclusion of flags not defined in hybkit.
-        If argument is provided to the method, it overrides default behavior.
-        Otherwise, the method falls back to the object-defaults.
+
+        Args:
+            flag_key (str): Key for flag to set.
+            flag_val (any): Value for flag to set.
+            allow_undefined_flags (bool or None, optional): Allow inclusion of flags not  
+                defined in :attr:`ALL_FLAGS` or by :func:`set_custom_flags`.
+                If None, uses setting in :attr:`settings` : allow_undefined_flags.
         """
 
         if allow_undefined_flags is None:
             allow_undefined_flags = self.settings['allow_undefined_flags']
 
-        if not allow_undefined_flags and flag_key not in self.all_flags:
+        if (not allow_undefined_flags and 
+            flag_key not in self._flagset):
             message = 'Flag "%s" is not defined. Please check flag key' % flag_key
             message += ' or run with: "allow_undefined_flags=True"'
             print(message)
@@ -329,9 +384,10 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg1_type(self, require=False):
-        """If the "seg1_type" flag is defined, return it. 
-        If require is provided as True, raise an error if the seg1_type is not defined.
-        Otherwise return "None"
+        """Return the "seg1_type" flag if defined, or return None.
+
+        Args:
+            require (bool, optional): If True, raise an error if seg1_type is not defined.
         """
         if require:
             return self._get_flag('seg1_type')
@@ -340,9 +396,10 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg2_type(self, require=False):
-        """If the "seg2_type" flag is defined, return it.
-        If require is provided as True, raise an error if the seg2_type flag is not defined.
-        Otherwise return "None"
+        """Return the "seg2_type" flag if defined, or return None.
+
+        Args:
+            require (bool, optional): If True, raise an error if seg2_type is not defined.
         """
         if require:
             return self._get_flag('seg2_type')
@@ -351,9 +408,10 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types(self, require=False):
-        """If the "seg1_type" and "seg2_type" flags are defined, return a tuple with both values.
-        If require is provided as True, raise an error if either of the seg1_type or seg2_type 
-        flags are not defined. Otherwise return "None" for each undefined flag.
+        """Return a tuple of the ("seg1_type", "seg2_type") flags where defined, or None.
+
+        Args:
+            require (bool, optional): If True, raise an error if either flag is not defined.
         """
         if require:
             return (self._get_flag('seg1_type'), self._get_flag('seg2_type'))
@@ -362,71 +420,96 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def seg_types_sorted(self, require=False):
-        """If the "seg1_type" and "seg2_type" flags are defined, return a tuple of both values
-        sorted alphabetically. 
-        If require is provided as True, raise an error if either of the seg1_type or seg2_type
-        flags are not defined. Otherwise return "None" for each undefined flag. 
+        """Return a sorted tuple of the ("seg1_type", "seg2_type") flags where defined, or None.
+
+        Args:
+            require (bool, optional): If True, raise an error if either flag is not defined.
         """
         return sorted(self.seg_types(require=require))
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg1_type(self, seg1_type):
-        """Set "seg1_type" flag in flags."""
+        """Set the "seg1_type" flag in :attr:`flags`."""
         self.set_flag('seg1_type', seg1_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg2_type(self, seg2_type):
-        """Set "seg2_type" flag in flags."""
+        """Set the "seg2_type" flag in :attr:`flags`."""
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg_types(self, seg1_type, seg2_type):
-        """Set "seg1_type" and "seg2_type" flags in flags."""
+        """Set the "seg1_type" and "seg2_type" flags in :attr:`flags`."""
         self.set_flag('seg1_type', seg1_type)
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : read_count
-    def read_count(self, require=False):
-        """If the "read_count" flag is defined, return it in integer form.
-        If require is provided as True, raise an error if the read_count flag is not defined.
-        Otherwise return "None"
+    def read_count(self, require=False, as_int=False):
+        """Return a the "read_count" flag if defined, otherwise return None.
+
+        Args:
+            require (bool, optional): If True, raise an error if the "read_count" flag 
+                is not defined.
+            as_int (bool, optional): If True, return the value as an int (instead of str).
         """
+        
         if require:
-            return int(self._get_flag('read_count'))
+            ret_val = self._get_flag('read_count')
         else:
             ret_val = self._get_flag_or_none('read_count')
-            if ret_val is None:
-                return None
-            else:
-                return int(ret_val)
+        
+        if ret_val is None:
+            return ret_val
+        elif as_int:
+            return int(ret_val)
+        else:
+            return ret_val
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def set_read_count(self, read_count):
-        """Set "read_count" flag in flags."""
+        """Set the "read_count" flag in :attr:`flags` as a str."""
         self.set_flag('read_count', str(read_count))
 
     # HybRecord : Public Methods : Flag_Info : record_count
-    def record_count(self, require=False):
-        """If the "count_total" flag is defined, return it as an int.
-        If require is provided as True, raise an error if the count_total is not defined.
-        Otherwise return 1, indicating that the record contains only itself.
+    def record_count(self, require=False, as_int=False):
+        """If the "count_total" flag is defined, return it, otherwise return '1' (this record).
+
+        Args:
+            require (bool, optional): If True, raise an error if the "read_count" flag 
+                is not defined.
+            as_int (bool, optional): If True, return the value as an int (instead of str).
         """
         if require:
-            return int(self._get_flag('count_total'))
+            ret_val = self._get_flag('count_total')
         else:
             ret_val = self._get_flag_or_none('count_total')
-            if ret_val is None:
-                ret_val = 1
+
+        if ret_val is None:
+            ret_val = '1'
+        if as_int:
+            return int(ret_val)
+        else:
             return ret_val
 
     # HybRecord : Public Methods : Flag_Info : record_count
     count_total = record_count
+    """ Convenience method for :func:`record_count`."""
 
+    # HybRecord : Public Methods : Flag_Info
     def count(self, count_mode):
+        """Return either the :func:`read_count` or :func:`record_count`.
+
+        Args:
+            count_mode (str) : Mode for returned count: one of : {'read', 'record'}
+                If 'read', require the 'read_count' flag to be defined.
+                If 'record', return '1' if the 'count_total' flag is not defined.
+            as_int (bool, optional): If True, return the value as an int (instead of str).
+        """
+
         if count_mode in {'read', 'read_count'}:
-            return self.read_count(require=True)
+            return self.read_count(require=True, as_int=as_int)
         elif count_mode in {'record', 'record_count', 'total', 'count_total'}:
-            return self.record_count(require=False)
+            return self.record_count(require=False, as_int=as_int)
         else:
             message = 'Unrecognized Count Mode: "%s"\n' % count_mode
             message += 'Allowed options are: %s' % ', '.join(['read', 'record'])
@@ -1233,12 +1316,20 @@ class HybRecord(object):
     @classmethod
     def set_custom_flags(cls, custom_flags):
         """
-        Set the class-level HybRecord.custom_flags variable, (and update the
-        HybRecord.all_flags variable) to allow custom flags in your Hyb file without
-        causing an exception.
+        Set the custom flags allowed by instances of HybRecord.
+
+        Args:
+            custom_flags (iterable): List or tuple of flags to allow.
         """
-        cls.custom_flags = custom_flags
-        cls.all_flags = HYB_FLAGS + HYBKIT_FLAGS + cls.custom_flags
+        cls._custom_flags = list(custom_flags)
+        cls._flagset = set(cls.ALL_FLAGS + cls._custom_flags)
+
+
+    # HybRecord : Public Classmethods : flags
+    @classmethod
+    def list_custom_flags(cls):
+        """List the class-level allowed custom flags."""
+        return cls._custom_flags[:]
 
     # HybRecord : Public Classmethods : Record Construction
     @classmethod
@@ -1475,7 +1566,7 @@ class HybRecord(object):
             return None
 
     # HybRecord : Private Methods : flags
-    def _make_flag_string(self, use_all_flags=False):
+    def _make_flag_string(self):
         flag_string = ''
         for flag in self._get_flag_keys():
             flag_string += ('%s=%s;' % (flag, str(self.flags[flag])))
@@ -1498,11 +1589,11 @@ class HybRecord(object):
     # HybRecord : Private Methods : flags
     def _get_ordered_flag_keys(self):
         return_list = []
-        for flag in self.all_flags:
+        for flag in self.ALL_FLAGS + self._custom_flags:
             if flag in self.flags:
                 return_list.append(flag)
         for flag in self.flags:
-            if flag not in self.all_flags:
+            if flag not in self._flagset:
                 return_list.append(flag)
         return return_list
 
@@ -1516,15 +1607,17 @@ class HybRecord(object):
 
         if not isinstance(flag_obj, dict):
             message = '"flag_obj" argument must be a dict obj. Defined keys are:'
-            message += self.all_flags.join(', ')
+            message += (self.ALL_FLAGS + self._custom_flags).join(', ')
             print(message)
             raise Exception(message)
 
         if not allow_undefined_flags:
             for flag in flag_obj:
-                if flag not in self.all_flags:
+                if flag not in self._flagset:
                     message = 'Flag "%s" is not defined. Please check flag key' % flag
-                    message += ' or run with: "allow_undefined_flags=True"'
+                    message += ' or run with: "allow_undefined_flags=True"\n'
+                    message += 'Defined Flags are: '
+                    message += ', '.join(self.ALL_FLAGS + self._custom_flags)
                     print(message)
                     raise Exception(message)
         return flag_obj
@@ -1550,7 +1643,8 @@ class HybRecord(object):
                     try:
                         return_dict[column] = column_type(seg_info_obj[column])
                     except TypeError:
-                        message = 'Entry "%s" for column: %s' % (seg_info_obj[column], column)
+                        message = 'Error in setting seg_info_dict.\n'
+                        message += 'Entry "%s" for column: %s' % (seg_info_obj[column], column)
                         message += 'could not be converted to type: %s' % str(column_type)
                         print(message)
                         raise
@@ -1608,8 +1702,10 @@ class HybRecord(object):
         flag_pairs = [flag_pair.split('=') for flag_pair in flag_string.split(';')]
         flags = {}
         for flag_key, flag_value in flag_pairs:
-            if not allow_undefined_flags and flag_key not in cls.all_flags:
-                message = 'Problem: Unidefined Flag: %s' % flag_key
+            if not allow_undefined_flags and flag_key not in cls._flagset:
+                message = 'Problem: Unidefined Flag: %s\n' % flag_key
+                message += 'Defined Flags: '
+                message += ', '.join(self.ALL_FLAGS + self._custom_flags)
                 print(message)
                 raise Exception(message)
             flags[flag_key] = flag_value

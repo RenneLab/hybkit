@@ -1,21 +1,17 @@
 
-Welcome to hybkit's documentation!
+hybkit Documentation
 ==================================
 
 .. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
+   self
+   source/specification
    source/hybkit
    source/hybkit.analysis
    source/hybkit.plot
+   source/indices
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

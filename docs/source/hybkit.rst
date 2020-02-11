@@ -1,15 +1,15 @@
-hybkit package
+hybkit Module
 ==============
+
+
 
 .. automodule:: hybkit
    :members:
    :undoc-members:
-   :show-inheritance:
 
-Submodules
-----------
 
-.. toctree::
+.. autosummary::
+   :toctree: 
+   :nosignatures:
 
-   hybkit.analysis
-   hybkit.plot
+
