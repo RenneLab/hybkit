@@ -1,7 +1,6 @@
-hybkit.plot module
+hybkit.plot Module
 ==================
 
 .. automodule:: hybkit.plot
    :members:
    :undoc-members:
-   :show-inheritance:

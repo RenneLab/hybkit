@@ -75,7 +75,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
      hybkit.ViennadFile.open(input_viennad_name, 'r') as input_viennad,\
      hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
 
-    for hyb_record in hybkit.HybViennadIter(input_hyb, input_viennad, combine=True)
+    for hyb_record in hybkit.HybViennadIter(input_hyb, input_viennad, combine=True):
         #print(hyb_record)
 
         hyb_record.find_seg_types()
