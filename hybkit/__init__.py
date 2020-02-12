@@ -952,7 +952,7 @@ class HybRecord(object):
                 check_info = self.seg1_type()
             elif check_attr == 'seg2_type':
                 check_info = self.seg2_type()
-            elif check_attr == 'seg_types':
+            elif check_attr == 'seg_type':
                 check_info = self.seg_types()
                 multi_check = True
 
@@ -1340,7 +1340,7 @@ class HybRecord(object):
                 seg_type = split_line[2]
                 if search_type not in ALLOWED_SEARCH_TYPES:
                     message = 'Read Search type: "%s"\n' % search_type
-                    message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES.keys())
+                    message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES)
                     message += '\nFor legend line: \n%s\n' % (str(line))
                     print(message)
                     raise Exception(message)
@@ -2008,12 +2008,14 @@ class FoldRecord(object):
         if warn_bad is None:
             warn_bad = cls.settings['warn_bad']
 
+        fail_ret_val = (None, ''.join(record_lines))
+
         if len(record_lines) not in {5, 6}:
             if skip_bad:
                 if warn_bad:
                     message = 'WARNING: Improperly Viennad: Wrong-Line-Number'
                     print(message)
-                return (None, ''.join(record_lines))
+                return fail_ret_val
             else:
                 message = 'Provided Viennad Record Lines:\n'
                 message += '\n'.join([line.rstrip() for line in record_lines])
@@ -2033,6 +2035,21 @@ class FoldRecord(object):
             message += 'name<tab>refstart<tab>refend" format.'
             print(message)
             raise Exception(message)
+
+        if len(line_3_split) < 2:
+           if skip_bad:
+                if warn_bad:
+                    message = 'WARNING: Improper Viennad: Line 3 is < 2 items.'
+                return fail_ret_val
+           else:
+                message = 'Provided Vienna Record Line 3:\n'
+                message += line_3.rstrip() + '\n'
+                message += str(line_3_split) + '\n'
+                message += '\n  Does not meet the minimal does not have required "ACTG---<tab>'
+                message += 'name<tab>refstart<tab>refend" format.'
+                print(message)
+                raise Exception(message)
+
         seg1_fold_info = {
                           'highlight': line_3_split[0],
                           'ref': line_3_split[1],
@@ -2054,6 +2071,20 @@ class FoldRecord(object):
             message += 'name<tab>refstart<tab>refend" format.'
             print(message)
             raise Exception(message)
+
+        if len(line_4_split) < 2:
+           if skip_bad:
+                if warn_bad:
+                    message = 'WARNING: Improper Viennad: Line 4 is < 2 items.'
+                return fail_ret_val
+           else:
+                message = 'Provided Vienna Record Line 4:\n'
+                message += line_4.rstrip() + '\n'
+                message += str(line_4_split) + '\n'
+                message += '\n  Does not meet the minimal does not have required "ACTG---<tab>'
+                message += 'name<tab>refstart<tab>refend" format.'
+                print(message)
+                raise Exception(message)
 
         seg2_fold_info = {
                           'highlight': line_4_split[0],
@@ -2080,7 +2111,7 @@ class FoldRecord(object):
             if skip_bad:
                 if warn_bad:
                     print(message)
-                return (None, ''.join(record_lines))
+                return fail_ret_val
             else:
                 print(message)
                 raise Exception(message)
