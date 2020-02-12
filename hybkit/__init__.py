@@ -253,6 +253,7 @@ class HybRecord(object):
     DEFAULTS['warn_fold_record_mismatch'] = False   # Warn if mismatch, self.fold_record sequence
 
     DEFAULTS['allow_unknown_seg_types'] = False     # Allow unknown in self.find_seg_types
+    DEFAULTS['check_complete_seg_types'] = False    # False, so break after found first seg type.
 
     DEFAULTS['allow_unknown_regions'] = False
     DEFAULTS['warn_unknown_regions'] = True
@@ -519,25 +520,32 @@ class HybRecord(object):
             raise Exception(message)
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
-    def find_seg_types(self, allow_unknown=False):
+    def find_seg_types(self, allow_unknown=None, check_complete=None):
         """Find the types of each segment using the method currently set for the class.
 
-        The default supplied method is :func:`find_seg_type_hyb`, and works with alignemnt
-        mapping identifiers in the format of the reference database provided by the Hyb
-        Software Package. Custom methods with more complex behavior can be supplied via the
-        "set_find_method" method.
+        This method sequentually provides each seg_info_dict to the method set as 
+        :func:`find_type_method` by :func:`set_find_type_method`.
+        The default supplied method is :func:`find_seg_type_hyb`.
 
         Args:
             allow_unknown (bool, optional): If True, allow segment types that cannot be
                 identified and set as "unknown. Otherwise raise an error.
                 If None, uses setting in :attr:`settings` : allow_unknown_seg_types.
+            check_complete (bool, optional): If True, check every possibility for the 
+                type of a given segment, instead of stopping after finding the first
+                type.
+                If None, uses setting in :attr:`settings` : check_complete_seg_types.
         """
+
         if allow_unknown is None:
             allow_unknown = self.settings['allow_unknown_seg_types']
         
+        if check_complete is None:
+            check_complete = self.settings['check_complete']
+
         types = []
         for seg_info in [self.seg1_info, self.seg2_info]:
-            seg_type = self.find_type_method(seg_info, self.find_type_params)
+            seg_type = self.find_type_method(seg_info, self.find_type_params, check_complete)
             if seg_type is None:
                 if allow_unknown:
                     types.append('unknown')
@@ -550,155 +558,33 @@ class HybRecord(object):
                 types.append(seg_type)
         self.set_seg_types(types[0], types[1])
 
-    # HybRecord : Public Methods : Flag_Info : find_seg_type
-    def find_seg_type_hyb(self, seg_info, find_type_params={}):
-        """Return the type of the provided segment, or None if segment cannot be identified.
-
-        This method works with sequence / alignment mapping identifiers
-        in the format of the reference database provided by the Hyb Software Package,
-        specifically identifiers of the format: "AAAA_BBBB_CCCC_DDDD" This method returns
-        the fourth component of the identifier, split by "_", as the identfied sequence.
-
-        Example:
-            ::
-
-                "MIMAT0000076_MirBase_miR-21_microRNA"  --->  "microRNA".
-
-        This method does not utilize the find_type_params arg.
-        """
-        split_id = seg_info['ref'].split('_')
-        if len(split_id) != 4:
-            return None
-        elif not bool(split_id[3]):
-            return None
-        else:
-            return split_id[-1]
-
-    # Set find_seg_type_method as the defulat seg_type finding method.
-    find_type_method = find_seg_type_hyb
-
-    # HybRecord : Public Methods : Flag_Info : find_seg_type
-    def find_seg_type_string_match(self, seg_info, find_type_params={}, check_all=False):
-        """Return the type of the provided segment, or None if the segment cannot be identified.
-        
-        This method attempts to find a string matching a specific pattern within the identifier
-        of the aligned segment. Search options include "prefix", "contains", "suffix", and
-        "matches". The required find_type_params dict should contain a key for each desired
-        search type, with a list of 2-tuples for each search-string with assigned-type.
-        Example:
-            ::
-                find_type_params = {'suffix': [('_miR', 'microRNA'),
-                                               ('_trans', 'mRNA')   ]}
-
-        This dict can be generated with the associated :func:`make_string_match_parameters`
-        method and an associated csv legend file with format::
-
-            #commentline
-            #search_type,search_string,seg_type
-            suffix,_miR,microRNA
-            suffix,_trans,mRNA
-
-        Args:
-            check_all (bool, optional): If true, the method will continue checking search
-                options after an option has been found, to ensure that no options conflict
-                (more sure method). If False, it will stop after the first match is found 
-                (faster method).
-        """
-
-        seg_name = seg_info['ref']
-        found_types = []
-        check_done = False
-        if not check_done and 'prefix' in find_type_params:
-            for search_string, search_type in find_type_params['prefix']:
-                if seg_name.startswith(search_string):
-                    found_types.append(search_type)
-                    if not check_all:
-                        check_done = True
-                        break
-        if not check_done and 'contains' in find_type_params:
-            for search_string, search_type in find_type_params['contains']:
-                if search_string in seg_name:
-                    found_types.append(search_type)
-                    if not check_all:
-                        check_done = True
-                        break
-        if not check_done and 'suffix' in find_type_params:
-            for search_string, search_type in find_type_params['suffix']:
-                if seg_name.endswith(search_string):
-                    found_types.append(search_type)
-                    if not check_all:
-                        check_done = True
-                        break
-        if not check_done and 'matches' in find_type_params:
-            for search_string, search_type in find_type_params['matches']:
-                if search_string == seg_name:
-                    found_types.append(search_type)
-                    if not check_all:
-                        check_done = True
-                        break
-
-        if not found_types:
-            return None
-        elif len(found_types) == 1:
-            return found_types[0]
-        elif len(found_types) > 1:
-            # If multiple types found, check if they are the same.
-            if all(((found_type == found_types[0]) for found_type in found_types)):
-                return found_types[0]
-            else:
-                message = 'Multiple sequence types found for item: %s' % seg_name
-                message += '  ' + ', '.join(found_types)
-                print(message)
-                raise Exception(message)
-
-
-    # HybRecord : Public Methods : Flag_Info : find_seg_type
-    def find_seg_type_from_id_map(self, seg_info, find_type_params={}):
-        """Return the type of the provided segment, or return None if the segment cannot be
-        identified.
-        This method checks to see if the identifer of the segment is present in a list provided 
-        in find_type_params. find_type_params should be formatted as a dict with keys as 
-        sequence identifier names, and the corresponding type as the respective values.
-
-        Example:
-            ::
-
-                find_type_params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
-                                    'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
-
-        This dict can be generated with the associated :func:`make_seg_type_id_map` method.
-        """
-        seg_name = seg_info['ref']
-        if seg_name in find_type_params:
-            return find_type_params[seg_name]
-        else:
-            return None        
-
-    # HybRecord : Public Methods : Flag_Info : find_seg_type
-    # Populate the list of builtin methods available to assign segment types
-    find_type_methods = {'hyb': find_seg_type_hyb,
-                         'string_match': find_seg_type_string_match,
-                         'id_map': find_seg_type_from_id_map}
-
     # HybRecord : Public Methods : fold_record
     def check_fold_seq_match(self, fold_record):
-        """Return True if the sequence (".seq") attribute of a FoldRecord instance matches the
-        sequence (".seq") attribute of this instance.
-        """
-        return (self.seq == fold_record.seq)
+        """Return True if record :attr:`seq` value matches fold_record. :attr:`FoldRecord.seq`"""
+        if not isinstance(fold_record, FoldRecord):
+            return False
+        else:
+            return (self.seq == fold_record.seq)
 
     # HybRecord : Public Methods : fold_record
     def set_fold_record(self, fold_record,
                         allow_fold_record_mismatch=None,
                         warn_fold_record_mismatch=None):
-        """Check to ensure that fold_record argument is an instance of FoldRecord, and that
+        """
+        Check and set provided fold_record (:class:`FoldRecord`) as :attr:`fold_record`.
+         
+        Check to ensure that fold_record argument is an instance of FoldRecord, and that
         it has a matching sequence to this HybRecord, then set it as self.fold_record.
-        allow_fold_record_mismatch allows mismatches between the HybRecord sequence
-        and the FoldRecord sequence.
-        warn_fold_record_mismatch prints a warning when there is a mismatch between the
-        HybRecord sequence and hte FoldRecord sequence.
-        If either argument is provided to the method, it overrides default behavior.
-        Otherwise, the method falls back to the class default setting.
+        Set :attr:`fold_seq_match` as True if sequence matches, otherwise set as False.
+
+        Args:
+            fold_record (FoldRecord): :attr:`FoldRecord` instance to set as :attr:`fold_record`.
+            allow_fold_record_mismatch (bool, optional): Allow mismatches between 
+                HybRecord sequence and the FoldRecord sequence.
+                If None, uses setting in :attr:`settings` : allow_fold_record_mismatch.
+            warn_fold_record_mismatch (bool, optional): Warn for mismatches between 
+                HybRecord sequence and the FoldRecord sequence.
+                If None, uses setting in :attr:`settings` : warn_fold_record_mismatch.
         """
         if allow_fold_record_mismatch is None:
             allow_fold_record_mismatch = self.settings['allow_fold_record_mismatch']
@@ -854,7 +740,9 @@ class HybRecord(object):
 
     def target_region_analysis(self, region_info=None, coding_types=None,
                                allow_unknown_regions=None, warn_unknown_regions=None):
-        """If the record contains an identified mirna and coding target, 
+        """
+        If the record contains an identified mirna and coding target.
+ 
         find the region in which the targeted sequence resides and store the results in the 
         "target_reg" flag and miRNA_analysis dict.
         This analysis requries the seg1_type and seg2_type flags to be populated, which
@@ -866,12 +754,16 @@ class HybRecord(object):
         The region_info dict should contain keys of transcript identifiers with values as a 
         dict containing containing transcript region information.
         Required keys are cdna_coding_start, cdna_coding_end
-        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end
+        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end.
+
         Example:
-           ::
-               {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
-                                    'cdna_coding_start':  'cdna_coding_end':,
-                                    '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+            ::
+                {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
+                                     'cdna_coding_start':  'cdna_coding_end':,
+                                     '3_utr_start':'45329242', '3_utr_end':'45329305'}}
+
+
+
         This dict can be set at the class level using 
         ".make_region_info()', with ".set_region_info()", or with
         ".make_set_region_info()", or can be supplied directly to this method.         
@@ -1420,6 +1312,117 @@ class HybRecord(object):
 
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
+    def find_seg_type_hyb(seg_info, find_type_params={}, check_complete=False):
+        """Return the type of the provided segment, or None if segment cannot be identified.
+
+        This method works with sequence / alignment mapping identifiers
+        in the format of the reference database provided by the Hyb Software Package,
+        specifically identifiers of the format:: 
+
+            <gene_id>_<transcript_id>_<gene_name>_<seg_type>
+
+        This method returns the fourth component of the identifier, 
+        split by "_", as the identfied sequence type.
+
+        Example:
+            ::
+
+                "MIMAT0000076_MirBase_miR-21_microRNA"  --->  "microRNA".
+
+        Args:
+            seg_info (dict): :attr:seg_info from hyb_record
+            find_type_params (dict, optional): Unused in this method.
+            check_complete (bool, optional): Unused in this method.
+
+        """
+        split_id = seg_info['ref'].split('_')
+        if len(split_id) != 4:
+            return None
+        elif not bool(split_id[3]):
+            return None
+        else:
+            return split_id[-1]
+
+
+    # HybRecord : Public Staticmethods : find_seg_type
+    @staticmethod
+    def find_seg_type_string_match(seg_info, find_type_params={}, check_complete=False):
+        """Return the type of the provided segment, or None if the segment cannot be identified.
+        
+        This method attempts to find a string matching a specific pattern within the identifier
+        of the aligned segment. Search options include "prefix", "contains", "suffix", and
+        "matches". The required find_type_params dict should contain a key for each desired
+        search type, with a list of 2-tuples for each search-string with assigned-type.
+
+        Example:
+            ::
+
+                find_type_params = {'suffix': [('_miR', 'microRNA'),
+                                               ('_trans', 'mRNA')   ]}
+
+        This dict can be generated with the associated :func:`make_string_match_parameters`
+        method and an associated csv legend file with format::
+
+            #commentline
+            #search_type,search_string,seg_type
+            suffix,_miR,microRNA
+            suffix,_trans,mRNA
+
+        Args:
+            check_all (bool, optional): If true, the method will continue checking search
+                options after an option has been found, to ensure that no options conflict
+                (more sure method). If False, it will stop after the first match is found 
+                (faster method).
+        """
+
+        seg_name = seg_info['ref']
+        found_types = []
+        check_done = False
+        if not check_done and 'prefix' in find_type_params:
+            for search_string, search_type in find_type_params['prefix']:
+                if seg_name.startswith(search_string):
+                    found_types.append(search_type)
+                    if not check_all:
+                        check_done = True
+                        break
+        if not check_done and 'contains' in find_type_params:
+            for search_string, search_type in find_type_params['contains']:
+                if search_string in seg_name:
+                    found_types.append(search_type)
+                    if not check_all:
+                        check_done = True
+                        break
+        if not check_done and 'suffix' in find_type_params:
+            for search_string, search_type in find_type_params['suffix']:
+                if seg_name.endswith(search_string):
+                    found_types.append(search_type)
+                    if not check_all:
+                        check_done = True
+                        break
+        if not check_done and 'matches' in find_type_params:
+            for search_string, search_type in find_type_params['matches']:
+                if search_string == seg_name:
+                    found_types.append(search_type)
+                    if not check_all:
+                        check_done = True
+                        break
+
+        if not found_types:
+            return None
+        elif len(found_types) == 1:
+            return found_types[0]
+        elif len(found_types) > 1:
+            # If multiple types found, check if they are the same.
+            if all(((found_type == found_types[0]) for found_type in found_types)):
+                return found_types[0]
+            else:
+                message = 'Multiple sequence types found for item: %s' % seg_name
+                message += '  ' + ', '.join(found_types)
+                print(message)
+                raise Exception(message)
+
+    # HybRecord : Public Staticmethods : find_seg_type
+    @staticmethod
     def make_string_match_parameters(
             legend_file=os.path.join(hybkit.__about__.code_dir, 'find_type_string_match.csv')
             ):
@@ -1477,6 +1480,28 @@ class HybRecord(object):
 
         return return_dict
 
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    @staticmethod
+    def find_seg_type_from_id_map(seg_info, find_type_params={}):
+        """Return the type of the provided segment, or return None if the segment cannot be
+        identified.
+        This method checks to see if the identifer of the segment is present in a list provided 
+        in find_type_params. find_type_params should be formatted as a dict with keys as 
+        sequence identifier names, and the corresponding type as the respective values.
+
+        Example:
+            ::
+
+                find_type_params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
+                                    'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
+
+        This dict can be generated with the associated :func:`make_seg_type_id_map` method.
+        """
+        seg_name = seg_info['ref']
+        if seg_name in find_type_params:
+            return find_type_params[seg_name]
+        else:
+            return None        
 
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
@@ -1570,6 +1595,24 @@ class HybRecord(object):
                             return_dict[seq_id] = seg_type
     
         return return_dict
+
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    find_type_method = find_seg_type_hyb
+    """find_type_method is set by default to :func:`find_seg_type_hyb`"""
+
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    #:   Dict of provided methods available to assign segment types
+    #:   
+    #:     ============== ==================================
+    #:     'hyb'          :func:`find_seg_type_hyb`
+    #:     'string_match' :func:`find_seg_type_string_match`
+    #:     'id_map'       :func:`find_seg_type_id_map`
+    #:     ============== ==================================
+    find_type_methods = {'hyb': find_seg_type_hyb,
+                         'string_match': find_seg_type_string_match,
+                         'id_map': find_seg_type_from_id_map}
+
+
 
     # HybRecord : Private Methods : Initialization
     def _post_init_tasks(self):
