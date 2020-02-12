@@ -5,7 +5,9 @@
 
 """
 This module contains classes and methods for reading, writing, and manipulating data 
-in the ".hyb" genomic sequence format. This module includes two classes for storage of 
+in the ".hyb" genomic sequence format.
+
+This includes two classes for storage of 
 chimeric sequence information and associated fold-information:
 
 +---------------------+----------------------------------------------------------------------+
@@ -332,7 +334,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_id(self):
-        """Return a copy of the id for segment 1 (5p), or None if not defined."""
+        """Return a copy of the id for segment 1 (:abbr:`5p (5-Prime)`), or None if not defined."""
         if 'ref' in self.seg1_info:
             return self.seg1_info['ref']
         else:
@@ -340,7 +342,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg2_id(self):
-        """Return a copy of the id for segment 2 (3p), or None if not defined."""
+        """Return a copy of the id for segment 2 (|3p|), or None if not defined."""
         if 'ref' in self.seg2_info:
             return self.seg2_info['ref']
         else:
@@ -348,17 +350,17 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg_ids(self):
-        """Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined."""
+        """Return a tuple of the ids of segment 1 (|5p|) segment 2 (|3p|), or None if not defined."""
         return (self.seg1_id(), self.seg2_id())
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_info(self):
-        """Return a copy of the info dict object for segment 1 (5p)."""
+        """Return a copy of the info dict object for segment 1 (|5p|)."""
         return self.seg1_info.copy()
 
     # HybRecord : Public Methods : Segment_Info
     def seg2_info(self):
-        """Return a copy of the info dict object for segment 2 (3p)."""
+        """Return a copy of the info dict object for segment 2 (|3p|)."""
         return self.seg2_info.copy()
 
     # HybRecord : Public Methods : flags
@@ -1966,7 +1968,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg1_id(self):
-        """Return a copy of the id for segment 1 (5p), or None if not defined."""
+        """Return a copy of the id for segment 1 (|5p|), or None if not defined."""
         if 'ref' in self.seg1_fold_info:
             return self.seg1_fold_info['ref']
         else:
@@ -1974,7 +1976,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg2_id(self):
-        """Return a copy of the id for segment 2 (3p), or None if not defined."""
+        """Return a copy of the id for segment 2 (|3p|), or None if not defined."""
         if 'ref' in self.seg2_fold_info:
             return self.seg2_fold_info['ref']
         else:
@@ -1982,17 +1984,17 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg_ids(self):
-        """Return a tuple of the ids of segment 1 (5p) and segment 2 (3p), or None if not defined."""
+        """Return a tuple of the ids of segment 1 (|5p|) and segment 2 (|3p|), or None if not defined."""
         return (self.seg1_id(), self.seg2_id())
 
     # FoldRecord : Public Methods : seg_info
     def seg1_info(self):
-        """Return a copy of the info dict object for segment 1 (5p)."""
+        """Return a copy of the info dict object for segment 1 (|5p|)."""
         return self.seg1_fold_info.copy()
 
     # FoldRecord : Public Methods : seg_info
     def seg2_info(self):
-        """Return a copy of the info dict object for segment 2 (3p)."""
+        """Return a copy of the info dict object for segment 2 (|3p|)."""
         return self.seg2_fold_info.copy()
 
     # FoldRecord : Public Methods : seg_info
