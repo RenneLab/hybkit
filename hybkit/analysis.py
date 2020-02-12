@@ -585,7 +585,7 @@ def process_mirna_folds(analysis_dict):
     """Process results of mirna fold analysis."""
     total_count = analysis_dict['all_folds']
     if total_count == 0:
-        message = 'Problem with mirna fold analysis, total mirna countted is 0.'
+        message = 'Problem with mirna fold analysis, total mirna counted is 0.'
         print(message)
         raise Exception(message)
     test_sums = [(('all_mirna', 'no_mirna'), 'all_evaluated'),
