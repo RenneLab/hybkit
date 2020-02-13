@@ -19,6 +19,11 @@ suffix,_mRNA,mRNA
 suffix,_mtrRNA,mitoch_rRNA
 suffix,_tRNA,tRNA
 suffix,_snoRNA,snoRNA
-
+suffix,_miscRNA,miscRNA
+suffix,_pr-tr,pr-tr
+suffix,_snRNA,snRNA
+suffix,_lincRNA,lincRNA
+suffix,_Trec,Trec
+suffix,_Ig,Ig
 #custom
 prefix,kshv-miR,kshv_microRNA

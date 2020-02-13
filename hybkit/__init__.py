@@ -258,6 +258,9 @@ class HybRecord(object):
     DEFAULTS['allow_unknown_regions'] = False
     DEFAULTS['warn_unknown_regions'] = True
 
+    DEFAULTS['check_complete'] = False              # Continue find_types check after finding 
+                                                    # the first option.
+
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
     DEFAULTS['placeholder'] = '.'
 
@@ -1369,7 +1372,7 @@ class HybRecord(object):
             suffix,_trans,mRNA
 
         Args:
-            check_all (bool, optional): If true, the method will continue checking search
+            check_complete (bool, optional): If true, the method will continue checking search
                 options after an option has been found, to ensure that no options conflict
                 (more sure method). If False, it will stop after the first match is found 
                 (faster method).
@@ -1382,28 +1385,28 @@ class HybRecord(object):
             for search_string, search_type in find_type_params['prefix']:
                 if seg_name.startswith(search_string):
                     found_types.append(search_type)
-                    if not check_all:
+                    if not check_complete:
                         check_done = True
                         break
         if not check_done and 'contains' in find_type_params:
             for search_string, search_type in find_type_params['contains']:
                 if search_string in seg_name:
                     found_types.append(search_type)
-                    if not check_all:
+                    if not check_complete:
                         check_done = True
                         break
         if not check_done and 'suffix' in find_type_params:
             for search_string, search_type in find_type_params['suffix']:
                 if seg_name.endswith(search_string):
                     found_types.append(search_type)
-                    if not check_all:
+                    if not check_complete:
                         check_done = True
                         break
         if not check_done and 'matches' in find_type_params:
             for search_string, search_type in find_type_params['matches']:
                 if search_string == seg_name:
                     found_types.append(search_type)
-                    if not check_all:
+                    if not check_complete:
                         check_done = True
                         break
 
