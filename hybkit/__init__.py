@@ -526,7 +526,8 @@ class HybRecord(object):
         """Find the types of each segment using the method currently set for the class.
 
         This method sequentually provides each seg_info_dict to the method set as 
-        :func:`find_type_method` by :func:`set_find_type_method`.
+        :func:`find_type_method` by :func:`select_find_type_method`
+        (or by :func:`set_find_type_method` for custom methods).
         The default supplied method is :func:`find_seg_type_hyb`.
 
         Args:
@@ -562,7 +563,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : fold_record
     def check_fold_seq_match(self, fold_record):
-        """Return True if record :attr:`seq` value matches fold_record. :attr:`FoldRecord.seq`"""
+        """Return True if record :attr:`seq` value matches fold_record. :attr:`~FoldRecord.seq`"""
         if not isinstance(fold_record, FoldRecord):
             return False
         else:
@@ -648,15 +649,15 @@ class HybRecord(object):
     def mirna_analysis(self, mirna_types=None):
         """Analyze and store miRNA properties from other properties in the hyb record.
 
-        Perform an analysis of miRNA properties within the sequence record, and store
-        the results in the miRNA_seg flag, and in the miRNA_analysis dict.
-        This analysis requries the seg1_type and seg2_type flags to be populated, which
-        can be performed by the ".find_seg_types()" method.
-        If mirna_types is provided, miRNA types will be assigned using this list of types.
-        Otherwise it will be assigned using the entries in HybRecord.MIRNA_TYPES .
-        # If allow_mirna_dimers is provided as True, entries where seg1_type and seg2_type are
-        # both identified as a miRNA will be included in miRNA analyses, where they would
-        # otherwise be excluded to prevent ambiguity.
+        Perform an analysis of miRNA properties within the sequence record, set the 
+        :ref:`mirna_seg` flag, and also store the results in the :attr:`miRNA_analysis` dict.
+        This analysis requries the :ref:`seg1_type` and :ref:`seg2_type` flags to be populated,
+        which can be performed by the :func:`find_seg_types` method.
+
+        Args:
+            mirna_types (list, tuple, or set, optional): Iterable of strings of "types" to be 
+                considered as miRNA. Otherwise, the default types are used 
+                from :attr:`MIRNA_TYPES`.
         """
 
         if mirna_types is None:
@@ -743,32 +744,48 @@ class HybRecord(object):
     def target_region_analysis(self, region_info=None, coding_types=None,
                                allow_unknown_regions=None, warn_unknown_regions=None):
         """
-        If the record contains an identified mirna and coding target.
- 
+        For miRNA/coding-target pairs, find the region of the coding transcript targeted.
+
+        If the record contains an identified mirna and identified coding target, 
         find the region in which the targeted sequence resides and store the results in the 
         "target_reg" flag and miRNA_analysis dict.
-        This analysis requries the seg1_type and seg2_type flags to be populated, which
-        can be performed by the ".find_seg_types()" method. It also requires ".mirna_analysis()"
-        to have been performed. If the miRNA_seg flag is one of "3p" or "5p", the target type
-        will be checked for membership in the coding types arguement if provided, and 
-        default HybRecord.CODING_TYPES if not. if both are true, then the analysis 
-        will be performed. 
-        The region_info dict should contain keys of transcript identifiers with values as a 
+        This analysis requries the :ref:`seg1_type`, :ref`seg2_type`, and :ref:`mirna_seg`
+        flags to be populated. This can be performed by sequentially using the 
+        :func:`find_seg_types` and :func:`mirna_analysis` methods.
+        If the :ref:`miRNA_seg` flag is in {"3p" or "5p"} (the record contains a mirna but
+        is not a mirna dimer),
+        The target will be checked if it is a coding type. If the target is a coding type, 
+        the analysis will be performed and the :ref:`target_reg` flag will be set.
+        The analysis requires a dict containing region 
+        information that can be made using the :func:`make_region_info` method. This dict 
+        should contain keys of transcript identifiers with values as a 
         dict containing containing transcript region information.
-        Required keys are cdna_coding_start, cdna_coding_end
-        Optional keys are 5_utr_start, 5_utr_end, 3_utr_start, 3_utr_end.
 
         Example:
             ::
-                {'ENST00000372098': {'5_utr_start':'45340255', '5_utr_end':'45340388',
-                                     'cdna_coding_start':  'cdna_coding_end':,
-                                     '3_utr_start':'45329242', '3_utr_end':'45329305'}}
 
+                region_info = {'ENST00000372098': {'cdna_coding_start':'45340255',
+                                                   'cdna_coding_end':'45340388'}}
 
+ 
+        This can then either be provided directly to the "region_info" argument of this
+        method, or can be provided to the class via :func:`make_region_info`.
+        Both construction and setting the dict to the class together can be done using 
+        :func:`make_set_region_info`.
 
-        This dict can be set at the class level using 
-        ".make_region_info()', with ".set_region_info()", or with
-        ".make_set_region_info()", or can be supplied directly to this method.         
+        Args:
+            region_info (dict, optional): Transcript coding/utr region information.
+                If None, uses class: :attr:`target_region_info` dict.
+            coding_types (iterable, optional): Iterable of strings representing sequence
+                types to be recognized as coding.
+                If None, uses :attr:`CODING_TYPES`.
+            allow_unknown_regions (bool, optional):
+                Allow missing identifiers in analysis by skipping sequences instead of 
+                raising an error.
+                If None, uses setting in :attr:`settings` : allow_unknown_regions.
+            allow_unknown_regions (bool, optional):
+                Warn for missing identifiers in analysis by printing a message.
+                If None, uses setting in :attr:`settings` : allow_undefined_flags.
         """
 
         if coding_types is None:
@@ -877,47 +894,57 @@ class HybRecord(object):
             self.mirna_details['target_reg'] = None
             self.set_flag('target_reg', 'N')
 
-        
-
-    # TODO move to "constants section"
-    # Set object of string-comparison properties for the ".has_property()" method.
-    _STR_PROPERTIES = {
-        'id', 'id_prefix', 'id_suffix', 'id_contains',
-        'seg', 'seg_prefix', 'seg_suffix', 'seg_contains',
-        'seg1', 'seg1_prefix', 'seg1_suffix', 'seg1_contains',
-        'seg2', 'seg2_prefix', 'seg2_suffix', 'seg2_contains',
-        'seq', 'seq_prefix', 'seq_suffix', 'seq_contains',
-        'seg_type', 'seg_type_prefix', 'seg_type_suffix', 'seg_type_contains',
-        'seg1_type', 'seg1_type_prefix', 'seg1_type_suffix', 'seg1_type_contains',
-        'seg2_type', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
-    }
-    # Set object of non-sstring-comparison properties for the ".has_property()" method.
-    _HAS_PROPERTIES = {
-        'has_seg1_type', 'has_seg2_type', 'has_seg_types',
-        'has_mirna_details', 'has_fold_record', 'has_mirna_seg', 'has_mirna_fold',
-    }
-    # Set object of miRNA-analysis properties for the ".has_property()" method.
-    _MIRNA_PROPERTIES = {
-        'has_mirna', 'has_mirna_dimer', 'has_mirna_not_dimer',
-        '3p_mirna', '5p_mirna',
-        '3p_target', '5p_target',
-    }
-    # Set object of miRNA-analysis properties for the ".has_property()" method.
-    _TARGET_PROPERTIES = {
-        'has_target',
-        'target_3p_utr', 'target_coding', 'target_5p_utr',
-    }
-    
-
-    # Set object of all allowed properties for the ".has_property()" method.
-    PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES | _TARGET_PROPERTIES
-
     # HybRecord : Public Methods : Record Properties
     def has_property(self, prop_type, prop_compare=None, allow_unknown=False):
-        """Check if HybRecord has property of prop_type defined in list of allowed properties
-        stored in record.PROPERTIES. If query property has a comparator, provide this
-        in prop_compare.
-        If allow_unknown is False, an error will be raised if the requested property is undefined.
+        """
+        Check if HybRecord has property of "prop_type", with detail "prop_compare". 
+ 
+        Check property against list of allowed properties in :attr:`PROPERTIES`.
+        If query property has a comparator, provide this in prop_compare.
+        
+        Args:
+            allow_unknown (bool, optional): If True, allow undefined properties to be checked
+                and provide return value False.
+
+        Examples:
+            General Record Properties::
+
+                # hyb_record = hybkit.HybRecord(id, seq....)
+                is_id = hyb_record.has_property('id', 'target_identifier')
+                seq_is_ATCG = hyb_record.has_peroperty('seq', 'ATCG')
+                seq_endswith_ATCG = hyb_record.has_property('seq_suffix', 'ATCG')
+                
+            Record Type Properties::
+
+                # hyb_record = hybkit.HybRecord(id, seq....)
+                has_seg_types = hyb_record.has_property('has_seg_types')  # -> False
+                hyb_record.find_types()
+                has_seg_types = hyb_record.has_property('has_seg_types')  # -> True
+                # Requires Type Analysis
+                is_5p_mrna = hyb_record.has_property('seg1_type', 'mRNA') 
+                has_mRNA = hyb_record.has_property('seg_type_contains', 'mRNA')
+
+            miRNA Properties::
+
+                # hyb_record = hybkit.HybRecord(id, seq....)
+                # hyb_record.find_types()
+                mirna_analyzed = hyb_record.has_property('has_mirna_seg')  # -> False
+                hyb_record.mirna_analysis()
+                mirna_analyzed = hyb_record.has_property('has_mirna_seg')  # -> True
+                # Requires mirna analysis
+                has_mirna = hyb_record.has_property('has_mirna')  # Requires miRNA Analysis
+                has_5p_mirna = hyb_record.has_property('5p_mirna')
+                
+            Target Region Properties::
+
+                # hyb_record = hybkit.HybRecord(id, seq....)
+                # hyb_record.find_types()
+                # hyb_record.mirna_analysis()
+                targets_analyzed = hyb_record.has_property('has_target_reg')  # -> False
+                hyb_record.target_region_analysis()
+                targets_analyzed = hyb_record.has_property('has_target_reg')  # -> True
+                has_coding_target = hyb_record.has_property('target_coding') 
+               
         """
 
         if prop_type not in self.PROPERTIES:
@@ -1005,6 +1032,8 @@ class HybRecord(object):
                 if self.mirna_details is not None:
                     if 'mirna_fold' in self.mirna_details:
                         datum = self.mirna_details['mirna_fold']
+            elif prop_type == 'has_target_reg':
+                datum = self._get_flag_or_none('target_reg')
             ret_val = bool(datum)
 
         # Check mirna-specific properties (requires mirna-analysis)
@@ -1044,8 +1073,15 @@ class HybRecord(object):
 
 
     # HybRecord : Public Methods : Record Parsing
-    def to_line(self, newline=False):
-        """Return a Hyb-format string representation of the Hyb record."""
+    def to_line(self, newline=False, sep='\t'):
+        """
+        Return a hyb-format string representation of the Hyb record.
+
+        Args:
+            newline (bool, optional): If True, end the returned string with a newline.
+            sep (str, optional): Default: "\\\\t", Provide a different separator (like ",") 
+                for separation of columns.
+        """
         line_items = []
         for item_key in self.HYBRID_COLUMNS:
             line_items.append(getattr(self, item_key, '.'))
@@ -1061,7 +1097,7 @@ class HybRecord(object):
         if flag_string:
             line_items.append(flag_string)
 
-        ret_string = '\t'.join((str(x) for x in line_items))
+        ret_string = sep.join((str(x) for x in line_items))
         if newline:
             ret_string += '\n'
         return ret_string
@@ -1099,13 +1135,26 @@ class HybRecord(object):
     # HybRecord : Public Classmethods : find_type_method
     @classmethod
     def set_find_type_method(cls, find_method, find_params={}):
-        """Set the class-level custom method for segment assignemnt to callable method
-        in find_method, that has the form: "def my_method(self, seg_info, find_params)".
+        """
+        Set the method for use to find seg types with :func:`find_seg_types`.
+        
+        This method is for providing a custom function. To use the included functions, 
+        use :func:`select_find_type_method`.
+        Functions provided to this method must have the signature::
+
+            seg_type = custom_method(self, seg_info, find_params)
+        
         This method should return the string of the assigned segment type if found, or a
         None object if the type cannot be found.
         It can also take a dictionary in the "find_params" argument that specifies
         additional or dynamic search properties, as desired.
+
+        Args:
+            find_method (method): Method to set for use by :func:`find_seg_types`.
+            find_params (dict, optional): Dict of custom parameters to set for use by
+                :func:`find_seg_types`.
         """
+
         cls.find_type_method = types.MethodType(find_method, cls)
         cls.find_type_params = find_params
 
@@ -1113,10 +1162,16 @@ class HybRecord(object):
     @classmethod
     def select_find_type_method(cls, find_method_name, find_params={}):
         """
-        Set the class-level custom method for segment assignemnt to callable method
-        in find_method, that has the form: "def my_method(self, seg_info, find_params)".
-        Select this method from the methods available in HybRecord.find_type_methods.
+        Select method to use with :func:`find_seg_types`.
+
+        Available methods are listed in :attr:`find_type_methods`.
+
+        Args:
+            find_method_name (str): Method opttion from :attr:`find_seg_types` to select
+                for use by the :func:`find_seg_types` method.
+            find_params (dict, optional): Dict object of parameters to use by selected method.
         """
+
         if find_method_name not in cls.find_type_methods:
             message = 'Selected find_seg_type_method: %s is not defined.\n' % find_method_name
             message += 'Allowed Options:' + ', '.join(cls.find_type_methods.keys())
@@ -1130,15 +1185,20 @@ class HybRecord(object):
 
         The input csv must contain a header line, and must have the columns::
 
-            identifier, cdna_coding_start, cdna_coding_end
+            identifier,cdna_coding_start,cdna_coding_end
 
-        Example return dict object::
+        Example:
+            Example return dict object::
 
-           {'ENST00000372098': {'cdna_coding_start':'45340255',
-                                'cdna_coding_end':'45340388'}
+                region_info = {'ENST00000372098': {'cdna_coding_start':'45340255',
+                                                   'cdna_coding_end':'45340388'}}
 
         The return dict can then be passed to :func:`set_region_info` or supplied directly to
         the :func:`target_region_analysis` method.
+
+        Args:
+            region_csv_name (str): String of path to csv file to read information from.
+            sep (str, optional): Separator for columns of input delimited file. (Default: ',')
         """
 
         data_keys = ['cdna_coding_start', 'cdna_coding_end']
@@ -1212,25 +1272,31 @@ class HybRecord(object):
 
     @classmethod
     def set_region_info(cls, region_info_dict):
-        """Set :attr:`region_info_dict` with information on coding transcript utr regions. 
+        """Set :attr:`region_info_dict` with information on coding transcript UTR regions. 
 
         This dict must have transcript identifiers as keys, with values of dicts with 
         containing: cdna_coding_start, cdna_coding_end
-        Example dict format::
 
-           {'ENST00000372098': {'cdna_coding_start': '32577',
-                                'cdna_coding_end': '32677'}}
+        Example:
+           ::
 
+                region_info = {'ENST00000372098': {'cdna_coding_start':'45340255',
+                                                   'cdna_coding_end':'45340388'}}
+
+        Args:
+            region_info_dict (dict): Dict of region information to set as 
+                :attr:`target_region_info`.
         """
-
         cls.target_region_info = region_info_dict
     
     @classmethod
     def make_set_region_info(cls, region_csv_name, sep=','):
         """
-        Convenience wrapper, sequentially callse ".make_region_info()" followed by 
-        ".set_region_info()" to set the HybRecord.target_region_info class dict object 
-        required for target_region_analysis. 
+        Convenience wrapper for calling :func:`make_region_info` then :func:`set_region_info`.
+
+        Args:
+            region_csv_name (str): String of path to csv file to read information from.
+            sep (str, optional): Separator for columns of input delimited file. (Default: ',')
         """
         region_info = cls.make_region_info(region_csv_name, sep=sep)
         cls.set_region_info(region_info)
@@ -1258,15 +1324,25 @@ class HybRecord(object):
     @classmethod
     def from_line(cls, line, hybformat_id=False, hybformat_ref=False):
         """
-        Takes as input a line in .hyb format and returns a HybRecord object containing the 
-        line's data.
+        Construct a HybRecord instance from a line in ".hyb" format.
+
         The Hyb Software Package contains further information in the "id" field of the
         line that can be used to infer read counts represented by the hyb record.
-        If hybformat_id is provided as True, this extra information will be read.
-        The Hyb Software Package also utilizes a database by default that contains 
-        further information in the names of each respective reference sequence. 
-        If hybformat_ref is provided as True, this extra information will be read.
+        Additionally, the Hyb Software Package also utilizes a database by default that contains 
+        further information in the names of each respective reference sequence.
+
+        Args:
+            line (str): Hyb-format line containing record information.
+            hybformat_id (bool, optional): Read count information from identifier in
+                "<id>_<count>" format. (Default: False)
+            hybformat_ref (bool, optional): Read additional record information from 
+                identifier in "<gene_id>_<transcript_id>_<gene_name>_<seg_type>" format.
+                (Default: False)
+
+        Returns:
+            :class:`HybRecord` instance containing record information.
         """
+
         line_items = line.strip().split('\t')
         # print(line_items)
         hyb_id = line_items[0]
@@ -1371,12 +1447,11 @@ class HybRecord(object):
             suffix,_trans,mRNA
 
         Args:
-            check_all (bool, optional): If true, the method will continue checking search
+            check_complete (bool, optional): If True, the method will continue checking search
                 options after an option has been found, to ensure that no options conflict
                 (more sure method). If False, it will stop after the first match is found 
-                (faster method).
+                (faster method). (Default: False)
         """
-
         seg_name = seg_info['ref']
         found_types = []
         check_done = False
@@ -1535,15 +1610,15 @@ class HybRecord(object):
         return_dict = {}
         if not any((arg is not None for arg in (mapped_id_files, type_file_pairs))):
             message = 'make_seg_type_id_map function requires either a mapped_id_files '
-            message += 'or type_file_pairs arguement.'
+            message += 'or type_file_pairs argument.'
             print(message)
             raise Exception(message)
-        for arguement in mapped_id_files, type_file_pairs:
-            if ((arguement is not None) and not any((isinstance(arguement, allowed_type) 
+        for argument in mapped_id_files, type_file_pairs:
+            if ((argument is not None) and not any((isinstance(argument, allowed_type) 
                                                      for allowed_type in (list, tuple)))):
-                message = 'arguements passed to mapped_id_files and type_file_pairs must be '
+                message = 'arguments passed to mapped_id_files and type_file_pairs must be '
                 message += 'provided as a list or tuple.\n  Current passed aruement: '
-                message += str(arguement)
+                message += str(argument)
                 print(message)
                 raise Exception(message)
 
@@ -1615,6 +1690,38 @@ class HybRecord(object):
                          'id_map': find_seg_type_from_id_map}
 
 
+    # HybRecord : Private Constants
+    # Set object of string-comparison properties for the ".has_property()" method.
+    _STR_PROPERTIES = {
+        'id', 'id_prefix', 'id_suffix', 'id_contains',
+        'seg', 'seg_prefix', 'seg_suffix', 'seg_contains',
+        'seg1', 'seg1_prefix', 'seg1_suffix', 'seg1_contains',
+        'seg2', 'seg2_prefix', 'seg2_suffix', 'seg2_contains',
+        'seq', 'seq_prefix', 'seq_suffix', 'seq_contains',
+        'seg_type', 'seg_type_prefix', 'seg_type_suffix', 'seg_type_contains',
+        'seg1_type', 'seg1_type_prefix', 'seg1_type_suffix', 'seg1_type_contains',
+        'seg2_type', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
+    }
+    # Set object of non-sstring-comparison properties for the ".has_property()" method.
+    _HAS_PROPERTIES = {
+        'has_seg1_type', 'has_seg2_type', 'has_seg_types',
+        'has_mirna_details', 'has_fold_record', 'has_mirna_seg', 'has_mirna_fold',
+        'has_target_reg',
+    }
+    # Set object of miRNA-analysis properties for the ".has_property()" method.
+    _MIRNA_PROPERTIES = {
+        'has_mirna', 'has_mirna_dimer', 'has_mirna_not_dimer',
+        '3p_mirna', '5p_mirna',
+        '3p_target', '5p_target',
+    }
+    # Set object of miRNA-analysis properties for the ".has_property()" method.
+    _TARGET_PROPERTIES = {
+        'has_target',
+        'target_3p_utr', 'target_coding', 'target_5p_utr',
+    }
+
+    # Set object of all allowed properties for the ".has_property()" method.
+    PROPERTIES = _STR_PROPERTIES | _HAS_PROPERTIES | _MIRNA_PROPERTIES | _TARGET_PROPERTIES
 
     # HybRecord : Private Methods : Initialization
     def _post_init_tasks(self):
