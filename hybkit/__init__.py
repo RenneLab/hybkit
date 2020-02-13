@@ -35,14 +35,8 @@ information:
 | :class:`CtFile`         | Class for reading ".ct"-format files containing                  |
 |                         | predicted folding information for a hyb sequence                 |
 +-------------------------+------------------------------------------------------------------+
-| :class:`HybViennaIter`  | Class for simultaneous iteration over ".hyb" and                 |
-|                         | ".vienna" files.                                                 |
-+-------------------------+------------------------------------------------------------------+
-| :class:`HybViennadIter` | Class for simultaneous iteration over ".hyb" and                 |
-|                         | ".viennad" files.                                                |
-+-------------------------+------------------------------------------------------------------+
-| :class:`HybCtIter`      | Class for simultaneous iteration over ".hyb" and                 |
-|                         | ".ct" files.                                                     |
+| :class:`HybFoldIter`    | Class for simultaneous iteration over a :class:`HybFile` and a   |
+|                         | :class:`ViennaFile`, :class:`ViennadFile`, or :class:`CtFile`.   |
 +-------------------------+------------------------------------------------------------------+
 
 Todo:
@@ -504,7 +498,7 @@ class HybRecord(object):
     """ Convenience method for :func:`record_count`."""
 
     # HybRecord : Public Methods : Flag_Info
-    def count(self, count_mode):
+    def count(self, count_mode, as_int=False):
         """Return either the :func:`read_count` or :func:`record_count`.
 
         Args:
@@ -2707,42 +2701,120 @@ class FoldRecord(object):
         return ret_string
 
 
-class ViennaFile(object):
+class FoldFile(object):
     """
-    File-object wrapper that provides abiltity to return sets of three file lines as
-    FoldRecord entries.
+    Base class for file-object wrappers that return file lines as FoldRecord objects.
+
     The Hyb Software Package contains further information in the "name" field of the
-    vienna record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.ViennaFile.settings["hybformat_file"] = True to read this
+    viennad record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
     extra information.
     """
-
-    # ViennaFile : Class-Level Constants
+    #: Class-level default settings, copied into :attr:`settings` at runtime.
     DEFAULTS = {}
     DEFAULTS['hybformat_file'] = False
 
-    # ViennaFile : Class-Level Variables
+    #: Modifiable settings during usage. Copied at runtime from :attr:`DEFAULTS`.
     settings = copy.deepcopy(DEFAULTS)
 
-    # ViennaFile : Public Methods : Initialization / Closing
+    # FoldFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
         """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
 
-    # ViennaFile : Public Methods : Initialization / Closing
+    # FoldFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
         """Open "with" syntax."""
         return self
 
-    # ViennaFile : Public Methods : Initialization / Closing
+    # FoldFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
         """Close "with" syntax"""
         self.close()
 
-    # ViennaFile : Public Methods : Initialization / Closing
+    # FoldFile : Public Methods : Initialization / Closing
     def __iter__(self):
         """Return an iterator."""
         return self
+
+    # FoldFile : Public Methods : Reading
+    def __next__(self):
+        """Stub method to be replaced by subclasses."""
+        message = 'FoldFile is a base class and is not meant to be used directly.' 
+        print(message)
+        raise NotImplementedError(message)
+
+    # FoldFile : Public Methods : Reading
+    def close(self):
+        """Close the file handle."""
+        self.fh.close()
+
+    # FoldFile : Public Methods : Reading
+    def read_record(self):
+        """Return next :class:`FoldRecord` based on the appropriate file type."""
+        return next(self)
+
+    # FoldFile : Public Methods : Reading
+    def read_records(self):
+        """Return list of all :class:`FoldRecord objects based on the appropriate file type."""
+        records = []
+        for record in self:
+            records.append(record)
+        return records
+
+    # FoldFile : Public Methods : Writing
+    def write_record(self, write_record):
+        """
+        Write a FoldRecord object as the appropriate record/file type.
+
+        Unlike the file.write() method, this method will add a newline to the
+        end of each written record line.
+        """
+        self._ensure_FoldRecord(write_record)
+        record_string = self._to_record_string(write_record, newline=True)
+        self.fh.write(record_string)
+
+    # FoldFile : Public Methods : Writing
+    def write_records(self, write_records):
+        """
+        Write a sequence of FoldRecord objects as the appropraite record/file type.
+        
+        Unlike the file.writelines() method, this method will add a newline to the
+        end of each written record line.
+        """
+        for write_record in write_records:
+            self.write_record(write_record)
+
+    # FoldFile : Public Classmethods : Initialization
+    @classmethod
+    def open(cls, *args, **kwargs):
+        """Return a new FoldFile object."""
+        return cls(*args, **kwargs)
+
+    # FoldFile : Private Methods
+    def _ensure_FoldRecord(self, record):
+        if not isinstance(record, FoldRecord):
+            message = 'Item: "%s" is not a FoldRecord object.' % record
+            print(message)
+            raise Exception(message)
+
+    # FoldFile : Private Methods
+    def _to_record_string(self, write_record, newline):
+        """Stub method to be replaced by subclasses."""
+        message = 'FoldFile is a base class and is not meant to be used directly.'
+        print(message)
+        raise NotImplementedError(message)
+
+
+class ViennaFile(FoldFile):
+    """
+    Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects.
+
+    The Hyb Software Package contains further information in the "name" field of the
+    viennad record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.ViennaFile.settings['hybformat_file'] = True to read this
+    extra information.
+    """
 
     # ViennaFile : Public Methods : Reading
     def __next__(self):
@@ -2753,149 +2825,20 @@ class ViennaFile(object):
         return FoldRecord.from_vienna_lines((line_1, line_2, line_3), 
                                             self.settings['hybformat_file'])
 
-    # ViennaFile : Public Methods : Reading
-    def close(self):
-        """Close the file."""
-        self.fh.close()
+    # ViennaFile : Private Methods
+    def _to_record_string(self, write_record, newline):
+        """Return a :class:`Fold Record` as a Vienna-format string."""
+        return write_record.to_vienna_string(newline=newline)
 
-    # ViennaFile : Public Methods : Reading
-    def read_record(self):
-        """Return next three line of vienna file as FoldRecord object."""
-        return next(self)
-
-    # ViennaFile : Public Methods : Reading
-    def read_records(self):
-        """Return list of vienna records in vienna file as FoldRecord objects."""
-        records = []
-        for record in self:
-            records.append(record)
-        return records
-
-    # ViennaFile : Public Methods : Writing
-    def write_record(self, write_record):
-        """
-        Write a FoldRecord object to file as a vienna-format string.
-        Unlike the file.write() method, this method will add a newline to the
-        end of each written record line.
-        """
-        self._ensure_FoldRecord(write_record)
-        record_string = write_record.to_vienna_string(newline=True)
-        self.fh.write(record_string)
-
-    # ViennaFile : Public Methods : Writing
-    def write_records(self, write_records):
-        """
-        Write a sequence of FoldRecord objects as vienna-format lines to the vienna file.
-        Unlike the file.writelines() method, this method will add a newline to the
-        end of each written record line.
-        """
-        for write_record in write_records:
-            self.write_record(write_record)
-
-    # ViennaFile : Public Classmethods : Initialization
-    @classmethod
-    def open(cls, *args, **kwargs):
-        """Return a new ViennaFile object."""
-        return cls(*args, **kwargs)
-
-    # ViennaFile : Private Methods : Writing
-    def _ensure_FoldRecord(self, record):
-        if not isinstance(record, FoldRecord):
-            message = 'Item: "%s" is not a FoldRecord object.' % record
-            print(message)
-            raise Exception(message)
-
-
-class HybViennaIter(object):
+class ViennadFile(FoldFile):
     """
-    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`ViennaFile` Object.
+    Viennad file wrapper that returns ".viennad" file lines as FoldRecord objects.
 
-    This class provides an iterator to iterate through a :class:`HybFile` and :class:`ViennaFile`
-    simultaneously.
-    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
-    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
-    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
-    Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
-    containing the read information.
-
-    Args:
-        hybfile_handle (HybFile) : HybFile object for iteration
-        viennafile_handle (ViennaFile) : ViennaFile object for iteration
-        combine (bool) : Return a combined :class:`HybRecord` object.
-
-    Returns:
-        | Returns a combined :class:`HybRecord` object if "combine" is True.
-        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
-
-    Todo:
-        Add option to confirm match of HybRecord and FoldRecord Entries.
-    """
-    # HybViennaIter : Public Methods
-    def __init__(self, hybfile_handle, viennafile_handle, combine=False):
-        """Please see :class:`HybViennaIter` for initialization information."""
-        self.hybfile_handle = hybfile_handle
-        self.viennafile_handle = viennafile_handle
-        self.counter = 0
-        self.combine = combine
-
-    # HybViennaIter : Public Methods
-    def __iter__(self):
-        """Return an iterator object."""
-        return self
-
-    # HybViennaIter : Public Methods
-    def __next__(self):
-        """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
-        self.counter += 1
-        next_hyb_record = next(self.hybfile_handle)
-        next_fold_record = next(self.viennafile_handle)
-        if self.combine:
-            try:
-                next_hyb_record.set_fold_record(next_fold_record)
-                ret_obj = next_hyb_record
-            except:
-                print('For %s counter iteration: %i ...' % (str(self), self.counter))
-                raise
-        else:
-            ret_obj = (next_hyb_record, next_fold_record)
-        return ret_obj
-
-
-class ViennadFile(object):
-    """
-    File-object wrapper that provides abiltity to return sets of six viennad file lines as
-    FoldRecord entries.
     The Hyb Software Package contains further information in the "name" field of the
     viennad record that can be used to infer further information about the fold divisions.
     Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
     extra information.
     """
-    # ViennadFile : Class-Level Constants
-    DEFAULTS = {}
-    DEFAULTS['hybformat_file'] = False
-
-    # ViennadFile : Class-Level Variables
-    settings = copy.deepcopy(DEFAULTS)
-
-    # ViennadFile : Public Methods : Initialization / Closing
-    def __init__(self, *args, **kwargs):
-        """Wrapper for open() function that stores resulting file."""
-        self.fh = open(*args, **kwargs)
-
-    # ViennadFile : Public Methods : Initialization / Closing
-    def __enter__(self, *args, **kwargs):
-        """Open "with" syntax."""
-        return self
-
-    # ViennadFile : Public Methods : Initialization / Closing
-    def __exit__(self, type, value, traceback):
-        """Close "with" syntax"""
-        self.close()
-
-    # ViennadFile : Public Methods : Initialization / Closing
-    def __iter__(self):
-        """Return an iterator."""
-        return self
 
     # ViennadFile : Public Methods : Reading
     def __next__(self):
@@ -2911,101 +2854,106 @@ class ViennadFile(object):
         line_6 = next(self.fh)
         return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6),
                                              hybformat_file=self.settings['hybformat_file'])
-
-    # ViennadFile : Public Methods : Reading
-    def close(self):
-        """Close the file."""
-        self.fh.close()
-
-    # ViennadFile : Public Methods : Reading
-    def read_record(self):
-        """Return next six lines of viennad file as FoldRecord object."""
-        return next(self)
-
-    # ViennadFile : Public Methods : Reading
-    def read_records(self):
-        """Return list of viennad records in viennad file as FoldRecord objects."""
-        records = []
-        for record in self:
-            records.append(record)
-        return records
-
-    # ViennadFile : Public Methods : Writing
-    def write_record(self, write_record):
-        """
-        Write a FoldRecord object to file as a viennad-format string.
-        Unlike the file.write() method, this method will add a newline to the
-        end of each written record line.
-        """
-        self._ensure_FoldRecord(write_record)
-        record_string = write_record.to_viennad_string(newline=True)
-        self.fh.write(record_string)
-
-    # ViennadFile : Public Methods : Writing
-    def write_records(self, write_records):
-        """
-        Write a sequence of FoldRecord objects as viennad-format lines to the viennad file.
-        Unlike the file.writelines() method, this method will add a newline to the
-        end of each written record line.
-        """
-        for write_record in write_records:
-            self.write_record(write_record)
-
-    # ViennadFile : Public Classmethods : Initialization
-    @classmethod
-    def open(cls, *args, **kwargs):
-        """Return a new ViennadFile object."""
-        return cls(*args, **kwargs)
-
     # ViennadFile : Private Methods
-    def _ensure_FoldRecord(self, record):
-        if not isinstance(record, FoldRecord):
-            message = 'Item: "%s" is not a FoldRecord object.' % record
-            print(message)
-            raise Exception(message)
+    def _to_record_string(self, write_record, newline):
+        """Return a :class:`Fold Record` as a Viennad-format string."""
+        return write_record.to_viennad_string(newline=newline)
 
 
-class HybViennadIter(object):
+class CtFile(FoldFile):
     """
-    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`ViennadFile` Object.
+    Ct file wrapper that returns ".ct" file lines as FoldRecord objects.
 
-    This class provides an iterator to iterate through a :class:`HybFile` and :class:`ViennadFile`
-    simultaneously.
-    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
-    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
-    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
+    The Hyb Software Package contains further information in the "name" field of the
+    viennad record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.CtFile.settings['hybformat_file'] = True to read this
+    extra information.
+    """
+
+    # CtFile : Public Methods
+    def __next__(self):
+        """
+        Return the next ct record as a :class:`FoldRecord` object.
+ 
+        Call next(self.fh) to return the first line of the next entry.
+        Determine the expected number of following lines in the entry, and read that number
+        of lines further. Return lines as a FoldRecord object.
+        """
+        header = next(self.fh)
+        record_lines = [header]
+        expected_line_num = int(header.strip().split()[0])
+        for i in range(expected_line_num):
+            record_lines.append(next(self.fh))
+        ret_record = FoldRecord.from_ct_lines(record_lines, 
+                                              hybformat_file=self.settings['hybformat_file'])
+        return ret_record
+
+    # CtFile : Private Methods
+    def _to_record_string(self, write_record, newline):
+        """Return a :class:`Fold Record` as a Viennad-format string."""
+        message = 'No write_record is implmeneted for ct files, as the FoldRecord '
+        message += 'object does not contain the complete set of ct record information.'
+        print(message)
+        raise NotImplementedError(message)
+
+
+class HybFoldIter(object):
+    """
+    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`FoldFile` object.
+
+    This class provides an iterator to iterate through a :class:`HybFile` and a 
+    :class:`ViennaFile`, :class:`ViennadFile`, or :class:`CtFile` simultaneously.
+    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` in the respective
+    files are matching (though users are encouraged to inspect this themselves).
+    If the "combine" argument is provided as true, the obtained :class:`FoldRecord` will 
+    be set as :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
     Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
-    containing the read information.
+    containing the obtained information.
 
     Args:
         hybfile_handle (HybFile) : HybFile object for iteration
-        viennadfile_handle (ViennadFile) : ViennadFile object for iteration
+        foldfile_handle (FoldFile) : FoldFile object for iteration
         combine (bool) : Return a combined :class:`HybRecord` object.
 
     Returns:
-        | Returns a combined :class:`HybRecord` object if "combine" is True.
-        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
+        | Each next() call returns a combined :class:`HybRecord` object if "combine" is True.
+        | Otherwise returns a tuple of (:class:`HybRecord`, :class:`FoldRecord`) 
+          if "combine" is False.
 
     Todo:
         Add option to confirm match of HybRecord and FoldRecord Entries.
     """
-
-    # HybViennaIter : Public Methods
-    def __init__(self, hybfile_handle, viennadfile_handle, combine=False):
-        """Please see :class:`HybViennadIter` for initialization information."""
+    # HybFoldIter : Public Methods
+    def __init__(self, hybfile_handle, foldfile_handle, combine=False):
+        """Please see :class:`HybFoldIter` for initialization information."""
         self.hybfile_handle = hybfile_handle
-        self.viennadfile_handle = viennadfile_handle
+        self.foldfile_handle = foldfile_handle
         self.counter = 0
         self.combine = combine
 
-    # HybViennaIter : Public Methods
+    # HybFoldIter : Public Methods
     def __iter__(self):
         """Return an iterator object."""
         return self
 
-    # HybViennaIter : Public Methods
+    # HybFoldIter : Public Methods
     def __next__(self):
         """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
+        self.counter += 1
+        next_hyb_record = next(self.hybfile_handle)
+        next_fold_record = next(self.foldfile_handle)
+        if self.combine:
+            try:
+                next_hyb_record.set_fold_record(next_fold_record)
+                ret_obj = next_hyb_record
+            except:
+                print('For %s counter iteration: %i ...' % (str(self), self.counter))
+                raise
+        else:
+            ret_obj = (next_hyb_record, next_fold_record)
+        return ret_obj
+
+
         self.counter += 1
         next_hyb_record = next(self.hybfile_handle)
         next_fold_record = next(self.viennadfile_handle)
@@ -3019,146 +2967,3 @@ class HybViennadIter(object):
         else:
             ret_obj = (next_hyb_record, next_fold_record)
         return ret_obj
-
-
-class CtFile(object):
-    """
-    File-object wrapper that provides abiltity to return sets of ct file lines as
-    FoldRecord entries.
-    The Hyb Software Package contains further information in the "name" field of the
-    ct record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.CtFile.settings['hybformat_file'] = True to read this
-    extra information.
-    """
-    # ViennaFile : Class-Level Constants
-    DEFAULTS = {}
-    DEFAULTS['hybformat_file'] = False
-
-    # ViennaFile : Class-Level Variables
-    settings = copy.deepcopy(DEFAULTS)
-
-    # CtFile : Public Methods : Initialization / Closing
-    def __init__(self, *args, **kwargs):
-        """Wrapper for open() function that stores resulting file."""
-        self.fh = open(*args, **kwargs)
-
-    # CtFile : Public Methods : Initialization / Closing
-    def __enter__(self, *args, **kwargs):
-        """Open "with" syntax."""
-        return self
-
-    # CtFile : Public Methods : Initialization / Closing
-    def __exit__(self, type, value, traceback):
-        """Close "with" syntax"""
-        self.close()
-
-    # CtFile : Public Methods : Initialization / Closing
-    def __iter__(self):
-        """Return an iterator."""
-        return self
-
-    # CtFile : Public Methods
-    def __next__(self):
-        """
-        Call return the first line of the next entry.
-        Read the expected number of following lines in the entry, and read that number
-        lines further. Return lines as FoldRecord object.
-        """
-        header = next(self.fh)
-        record_lines = [header]
-        expected_line_num = int(header.strip().split()[0])
-        for i in range(expected_line_num):
-            record_lines.append(next(self.fh))
-        ret_record = FoldRecord.from_ct_lines(record_lines, 
-                                              hybformat_file=self.settings['hybformat_file'])
-        return ret_record
-
-    # CtFile : Public Methods : Reading
-    def close(self):
-        """Close the file."""
-        self.fh.close()
-
-    # CtFile : Public Methods
-    def read_record(self):
-        """Return next lines of ct file as FoldRecord object."""
-        return next(self)
-
-    # CtFile : Public Methods
-    def read_records(self):
-        """Return list of records in ct file as FoldRecord objects."""
-        records = []
-        for record in self:
-            records.append(record)
-        return records
-
-    # No write_record method is implmeneted for ct files, as the FoldRecord object does not
-    #   contain the complete set of ct record information.
-    # def write_record(self, write_record):
-
-    # No write_records method is implmeneted for ct files, as the FoldRecord object does not
-    #   contain the complete set of ct record information.
-    # def write_records(self, write_records):
-
-    # CtFile : Public Classmethods : Initialization
-    @classmethod
-    def open(cls, *args, **kwargs):
-        """Return a new CtFile object."""
-        return cls(*args, **kwargs)
-
-
-class HybCtIter(object):
-    """
-    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`CtFile` Object.
-
-    This class provides an iterator to iterate through a :class:`HybFile` and :class:`CtFile`
-    simultaneously.
-    It is assumed that each :class:`HybRecord` and :class:`FoldRecord` are matching.
-    If the "combine" argument is provided as true, the read :class:`FoldRecord` will be set as 
-    :attr:`.HybRecord.fold_record` of the returned :class:`HybRecord` object.
-    Otherwise, each iteration will produce a tuple (:class:`HybRecord`, :class:`FoldRecord`) 
-    containing the read information.
-
-    Args:
-        hybfile_handle (HybFile) : HybFile object for iteration
-        ctfile_handle (CtFile) : CtFile object for iteration
-        combine (bool) : Return a combined :class:`HybRecord` object.
-
-    Returns:
-        | Returns a combined :class:`HybRecord` object if "combine" is True.
-        | Returns tuple of (:class:`HybRecord`, :class:`FoldRecord`) if "combine" is False.
-
-    Todo:
-        Add option to confirm match of HybRecord and FoldRecord Entries.
-    """
-
-    # HybCtIter : Public Methods
-    def __init__(self, hybfile_handle, ctfile_handle, combine=False):
-        """Please see :class:`HybCtIter` for initialization information."""
-        self.hybfile_handle = hybfile_handle
-        self.ctfile_handle = ctfile_handle
-        self.counter = 0
-        self.combine = combine
-
-    # HybCtIter : Public Methods
-    def __iter__(self):
-        """Return an iterator object."""
-        return self
-
-    # HybCtIter : Public Methods
-    def __next__(self):
-        """Read and return :class:`HybRecord` or (:class:`HybRecord`, :class:`FoldRecord`)"""
-        self.counter += 1
-        next_hyb_record = next(self.hybfile_handle)
-        next_fold_record = next(self.ctfile_handle)
-        if self.combine:
-            try:
-                next_hyb_record.set_fold_record(next_fold_record)
-                ret_obj = next_hyb_record
-            except:
-                print('For %s counter iteration: %i ...' % (str(self), self.counter))
-                raise
-        else:
-            ret_obj = (next_hyb_record, next_fold_record)
-        return ret_obj
-
-

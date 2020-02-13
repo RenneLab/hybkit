@@ -540,7 +540,7 @@ def running_mirna_folds(record, analysis_dict,
     considering the 5p miRNA as the "miRNA" in the hybrid.
     """
     record._ensure_mirna_analysis()
-    count = record.count(count_mode)
+    count = record.count(count_mode, as_int=True)
 
     analysis_dict['all_evaluated'] += count
 

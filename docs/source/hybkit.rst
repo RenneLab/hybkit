@@ -31,6 +31,7 @@ ViennaFile Class
 .. autoclass:: hybkit.ViennaFile
    :members:
    :undoc-members:
+   :inherited-members:
 
 ViennadFile Class
 -----------------
@@ -38,6 +39,7 @@ ViennadFile Class
 .. autoclass:: hybkit.ViennadFile
    :members:
    :undoc-members:
+   :inherited-members:
 
 CtFile Class
 ------------
@@ -45,25 +47,14 @@ CtFile Class
 .. autoclass:: hybkit.CtFile
    :members:
    :undoc-members:
+   :inherited-members:
 
-HybViennaIter Class
+HybFoldIter Class
 -------------------
 
-.. autoclass:: hybkit.HybViennaIter
+.. autoclass:: hybkit.HybFoldIter
    :members:
    :undoc-members:
+   :inherited-members:
 
-HybViennadIter Class
---------------------
-
-.. autoclass:: hybkit.HybViennadIter
-   :members:
-   :undoc-members:
-
-HybCtIter Class
----------------
-
-.. autoclass:: hybkit.HybCtIter
-   :members:
-   :undoc-members:
 

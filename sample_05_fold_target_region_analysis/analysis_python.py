@@ -95,7 +95,7 @@ in_file_label = os.path.basename(input_hyb_name).replace('.hyb', '')
 with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
      hybkit.ViennadFile.open(input_viennad_name, 'r') as input_viennad:
 
-    for hyb_record in hybkit.HybViennadIter(input_hyb, input_viennad, combine=True):
+    for hyb_record in hybkit.HybFoldIter(input_hyb, input_viennad, combine=True):
         if SHORT_CHECK: # DEBUG
             if count > 10000:
                 break
