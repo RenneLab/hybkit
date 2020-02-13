@@ -70,3 +70,11 @@ html_context = {
         ],
      }
 
+# Define custom variables
+rst_epilog = (
+"""
+.. |3p| replace:: %s
+.. |5p| replace:: %s
+""" % (':abbr:`3p (3-Prime)`', ':abbr:`5p (5-Prime)`')
+)
+
