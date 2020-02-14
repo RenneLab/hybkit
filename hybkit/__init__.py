@@ -1557,8 +1557,8 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : find_seg_type
     @staticmethod
     def find_seg_type_from_id_map(seg_info, find_type_params={}):
-        """Return the type of the provided segment, or return None if the segment cannot be
-        identified.
+        """Return the type of the provided segment or None if it cannot be identified.
+
         This method checks to see if the identifer of the segment is present in a list provided 
         in find_type_params. find_type_params should be formatted as a dict with keys as 
         sequence identifier names, and the corresponding type as the respective values.
@@ -1570,6 +1570,13 @@ class HybRecord(object):
                                     'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
 
         This dict can be generated with the associated :func:`make_seg_type_id_map` method.
+
+        Args:
+            find_type_params (dict): Dict of mapping of sequence identifiers to sequence types.
+     
+        Returns:
+           str: Identified sequence type, or None if it cannot be found.
+
         """
         seg_name = seg_info['ref']
         if seg_name in find_type_params:
@@ -1580,8 +1587,11 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_seg_type_id_map(mapped_id_files=None, type_file_pairs=None):
-        """Read file(s) provided and return a mapping of sequence identifiers to types 
-        for use with the find_seg_type_from_id_map method.
+        """
+        Read file(s) into a mapping of sequence identifiers.
+
+        This method reads one or more files into a dict for use with the 
+        :method:`find_seg_type_from_id_map` method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
         or a list/tuple of one or more pairs of file lists and file types 
         passed to type_file_pairs.
@@ -1602,6 +1612,13 @@ class HybRecord(object):
 
         The first entry in each (non-commented, non-blank) file line will be read and
         added to the mapping dictionary mapped to the provided seg_type.
+
+        Args:
+            mapped_id_files (list or tuple, optional) Iterable object containing strings of paths
+                to files containing id/type mapping information.
+            type_file_pairs (list or tuple, optional) Iterable object containing 2-tuple pairs
+                containing id/type mapping information.
+     
         """
 
         return_dict = {}
