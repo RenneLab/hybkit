@@ -494,10 +494,6 @@ class HybRecord(object):
         else:
             return ret_val
 
-    # HybRecord : Public Methods : Flag_Info : record_count
-    count_total = record_count
-    """ Convenience method for :func:`record_count`."""
-
     # HybRecord : Public Methods : Flag_Info
     def count(self, count_mode, as_int=False):
         """Return either the :func:`read_count` or :func:`record_count`.
@@ -1922,9 +1918,15 @@ class HybRecord(object):
 class HybFile(object):
     """
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
+
+    The Hyb Software Package contains further information in the "name" field of the
+    viennad record that can be used to infer further information about the fold divisions.
+    Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
+    extra information.
     """
 
     # HybFile : Class-Level Constants:
+    #: Class-level default settings, copied into :attr:`settings` at runtime.
     DEFAULTS = {}
     # The Hyb Software Package places further information in the "id" field of the
     #   hybrid record that can be used to infer the number of contained read counts.
@@ -1937,7 +1939,7 @@ class HybFile(object):
     #   extra information.
     DEFAULTS['hybformat_ref'] = False
 
-    # HybFile : Class-Level variables:
+    #: Modifiable settings during usage. Copied at runtime from :attr:`DEFAULTS`.
     settings = copy.deepcopy(DEFAULTS)
 
     # HybFile : Public Methods : Initialization / Closing
@@ -1989,6 +1991,7 @@ class HybFile(object):
     def write_record(self, write_record):
         """
         Write a HybRecord object to file as a Hyb-format string.
+
         Unlike the file.write() method, this method will add a newline to the
         end of each written record line.
         """
@@ -2000,6 +2003,7 @@ class HybFile(object):
     def write_records(self, write_records):
         """
         Write a sequence of HybRecord objects as hyb-format lines to the Hyb file.
+
         Unlike the file.writelines() method, this method will add a newline to the
         end of each written record line.
         """
@@ -2013,6 +2017,7 @@ class HybFile(object):
         return cls(*args, **kwargs)
 
     # HybFile : Private Methods
+    # Check if provided argument ("record") is an instance of HybRecord.
     def _ensure_HybRecord(self, record):
         if not isinstance(record, HybRecord):
             message = 'Item: "%s" is not a HybRecord object.' % record
@@ -2024,7 +2029,8 @@ class FoldRecord(object):
     """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     
-    This class supports:
+    This class supports the following file types:
+    (Data courtesy of Gay et al. [see :ref:`References`])
 
     * | The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
 
@@ -2065,7 +2071,7 @@ class FoldRecord(object):
     """
 
     # FoldRecord : Class-Level Constants
-    # Default settings:
+    #: Class-level default settings, copied into :attr:`settings` at runtime.
     DEFAULTS = {}
     DEFAULTS['skip_bad'] = False
     DEFAULTS['warn_bad'] = True
@@ -2073,17 +2079,20 @@ class FoldRecord(object):
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
     DEFAULTS['placeholder'] = '.'
 
-    # FoldRecord : Class-Level Settings
+    #: Modifiable settings during usage. Copied at runtime from :attr:`DEFAULTS`.
     settings = copy.deepcopy(DEFAULTS)
 
     # FoldRecord : Public Methods : Initialization
     def __init__(self, id, seq, fold, energy,
                  seg1_fold_info={},
                  seg2_fold_info={}):
-        self.id = id          # Sequence Name (often seg1name-seg2name)
-        self.seq = seq        # Genomic Sequence
-        self.fold = fold      # Fold Representation, consisting of '(', '.', and ')' characters
-        self.energy = energy  # Predicted energy of folding
+        self.id = id          #: Sequence Identifier (often seg1name-seg2name)
+        self.seq = seq        #: Genomic Sequence
+        self.fold = fold      #: Fold Representation, str of '(', '.', and ')' characters
+        self.energy = energy  #: Predicted energy of folding
+
+        seg1_fold_info = {}   #: Information on segment 1
+        seg2_fold_info = {}   #: Information on segment 2
 
         self.set_seg1_fold_info(seg1_fold_info)
         self.set_seg2_fold_info(seg2_fold_info)
@@ -2106,7 +2115,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : seg_info
     def seg_ids(self):
-        """Return a tuple of the ids of segment 1 (|5p|) and segment 2 (|3p|), or None if not defined."""
+        """Return a tuple of the ids of segment 1 (|5p|) segment 2 (|3p|), or a tuple of None."""
         return (self.seg1_id(), self.seg2_id())
 
     # FoldRecord : Public Methods : seg_info
@@ -2125,7 +2134,7 @@ class FoldRecord(object):
         Return a copy of the detail for seg1 provided in by the key in "detail" parameter,
         or if it does not exist return None.
         """
-        return self._get_segN_detail(1, detail)
+        return self._get_seg_detail(1, detail)
 
     # FoldRecord : Public Methods : seg_info
     def seg2_detail(self, detail):
@@ -2133,25 +2142,30 @@ class FoldRecord(object):
         Return a copy of the detail for seg2 provided in by the key in "detail" parameter,
         or if it does not exist return None.
         """
-        return self._get_segN_detail(2, detail)
+        return self._get_seg_detail(2, detail)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg1_fold_info(self, seg_info_obj):
         """Set folding information for segment 1"""
-        self._set_segN_fold_info(1, seg_info_obj)
+        self._set_seg_fold_info(1, seg_info_obj)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg2_fold_info(self, seg_info_obj):
         """Set folding information for segment 2"""
-        self._set_segN_fold_info(2, seg_info_obj)
-
-    # FoldRecord : Public Methods : seg_info
-    def set_segs_fold_info_from_hybrecord(self, hybrecord):
-        raise NotImplementedError
+        self._set_seg_fold_info(2, seg_info_obj)
 
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_lines(self, newline=False):
-        """Return a list of lines for the record in vienna format."""
+        """
+        Return a list of lines for the record in vienna format. See (:ref:`Vienna File Format`).
+
+        Args:
+            newline (bool, optional): If True, add newline character to the end of each
+                returned line. (Default: False)
+
+        References:
+            http://unafold.rna.albany.edu/doc/formats.php#VIENNA
+        """
         ret_lines = []
         suffix = ''
         if newline:
@@ -2171,7 +2185,16 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_string(self, newline=False):
-        """return a 3-line string for the record in vienna format."""
+        """
+        Return a 3-line string for the record in vienna format. See (:ref:`Vienna File Format`).
+
+        Args:
+            newline (bool, optional): If True, terminate the returned string with a newline
+                character. (Default: False)
+
+        References:
+            http://unafold.rna.albany.edu/doc/formats.php#VIENNA
+        """
         if newline:
             suffix = '\n'
         else:
@@ -2180,7 +2203,15 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Viennad
     def to_viennad_lines(self, newline=False):
-        """Return a list of lines for the record in viennad format."""
+        """
+        Return a list of lines for the record in viennad format. 
+
+        For an example of the Viennad format, see the documentation for :class:`FoldRecord`.
+
+        Args:
+            newline (bool, optional): If True, add newline character to the end of each
+                returned line. (Default: False)
+        """
         ret_lines = []
         if not newline:
             suffix = ''
@@ -2218,7 +2249,15 @@ class FoldRecord(object):
 
     # FoldRecord : Public Methods : Parsing : Viennad
     def to_viennad_string(self, newline=False):
-        """return a 6-line string for the record in viennad format."""
+        """
+        Return a six-line string representation for the record in viennad format. 
+
+        For an example of the Viennad format, see the documentation for :class:`FoldRecord`.
+
+        Args:
+            newline (bool, optional): If True, add newline character to the end of the string.
+                (Default: False)
+        """
         if newline:
             suffix = '\n'
         else:
@@ -2228,6 +2267,8 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : hyb_record
     def check_hyb_record_match(self, hyb_record):
         """
+        Check whether this record's :attr:`seq` attribute matches provided :attr:`HybRecord.seq`.
+
         Return True if the sequence (".seq") attribute of a HybRecord instance matches the
         sequence (".seq") attribute of this instance.
         """
@@ -2235,22 +2276,22 @@ class FoldRecord(object):
 
     # FoldRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
+        """Return True if two records have matching sequences and identifiers."""
         return (self.id == other.id and self.seq == other.seq)
-
-    # FoldRecord : Public MagicMethods : Comparison
-    def __neq__(self, other):
-        return (self.id != other.id or self.seq != other.seq)
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __hash__(self):
+        """Return a hash of the record ".id" attribute"""       
         return hash(self.id)
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __bool__(self):
+        """Return True wherever the class is defined."""
         return True
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __len__(self):
+        """Return the length of the genomic sequence"""
         return len(self.seq)
 
     # FoldRecord : Public MagicMethods : Printing
@@ -2262,12 +2303,16 @@ class FoldRecord(object):
     @classmethod
     def from_vienna_lines(cls, record_lines, hybformat_file=False):
         """
-        Create a FoldRecord entry from a list of 3 strings corresponding to lines in the
-        Vienna format.
+        Construct instance from a list of 3 strings of Vienna-format lines.
+
         The Hyb Software Package contains further information in the "name" field of the
         vienna record that can be used to infer further information about the fold divisions.
-        If hybformat_file is provided as True, this extra information will be read.
-        extra information.
+
+        Args:
+            record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
+                vienna-format record.
+            hybformat_file (bool, optional): If True, extra information stored in the 
+                record identifier by Hyb will be parsed.
         """
 
         if len(record_lines) != 3:
@@ -2304,21 +2349,45 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
-    def from_vienna_string(cls, record_string):
+    def from_vienna_string(cls, record_string, hybformat_file=False):
         """
-        Create a FoldRecord entry from a string containing 3 lines corresponding to lines in the
-        Vienna format.
+        Construct instance from a string representing 3 Vienna-format lines.
+
+        The Hyb Software Package contains further information in the "name" field of the
+        vienna record that can be used to infer further information about the fold divisions.
+
+        Args:
+            record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
+                vienna-format record.
+            hybformat_file (bool, optional): If True, extra information stored in the 
+                record identifier by Hyb will be parsed.
         """
         lines = record_string.strip().split('\n')
-        return cls.from_vienna_lines(lines)
+        return cls.from_vienna_lines(lines, hybformat_file=hybformat_file)
 
     # FoldRecord : Public Classmethods : Construction : Viennad
     @classmethod
     def from_viennad_lines(cls, record_lines, hybformat_file=False, skip_bad=None, warn_bad=None):
         """
-        Create a FoldRecord entry from a list of 5 or 6 strings corresponding to lines in the
-        Viennad format.
+        Construct instance from a list of 5 or 6 strings of Viennad-format lines.
+
+        The Hyb Software Package contains further information in the "name" field of the
+        vienna record that can be used to infer further information about the fold divisions.
+
+        Args:
+            record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
+                vienna-format record.
+            hybformat_file (bool, optional): If True, extra information stored in the 
+                record identifier by Hyb will be parsed.
+            skip_bad (bool, optional: If True, return None when parsing badly-formatted entries
+                instead of raising an error. 
+                If None, uses setting in :attr:`settings` : skip_bad.
+            skip_bad (bool, optional: If True, print a warning message when attempting to parse
+                badly-formatted entries.
+                If None, uses setting in :attr:`settings` : warn_bad.
+
         """
+
         if skip_bad is None:
             skip_bad = cls.settings['skip_bad']
         if warn_bad is None:
@@ -2580,7 +2649,7 @@ class FoldRecord(object):
         raise NotImplementedError
 
     # FoldRecord : Private Methods : seg_info
-    def _set_segN_fold_info(self, seg, seg_info_obj={}):
+    def _set_seg_fold_info(self, seg, seg_info_obj={}):
         # Create a dictionary with segment fold information.
         return_dict = {}
         segment_param_types = {'ref': str,
@@ -2614,7 +2683,7 @@ class FoldRecord(object):
             raise Exception('Unidentified value "%s" for seg argument' % str(seg))
 
     # FoldRecord : Private Methods : seg_info
-    def _get_segN_detail(self, seg, detail):
+    def _get_seg_detail(self, seg, detail):
         if seg == 1:
             seg_dict = self.seg1_fold_info
         elif seg == 2:
@@ -2725,7 +2794,7 @@ class FoldFile(object):
 
     The Hyb Software Package contains further information in the "name" field of the
     viennad record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
+    Set this value to True with :attr:`settings` ['hybformat_file'] = True to read this
     extra information.
     """
     #: Class-level default settings, copied into :attr:`settings` at runtime.
@@ -2774,7 +2843,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Reading
     def read_records(self):
-        """Return list of all :class:`FoldRecord objects based on the appropriate file type."""
+        """Return list of all :class:`FoldRecord` objects based on the appropriate file type."""
         records = []
         for record in self:
             records.append(record)
