@@ -72,7 +72,8 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 class HybRecord(object):
     """Class for storing and analyzing chimeric hybrid genomics reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by Travis, et al. (see `References`_)
+    Hyb format entries are a GFF-related file format described by Travis, et al. 
+    (see `References`_)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     information on each of the respective identified components. An example .hyb format line 
