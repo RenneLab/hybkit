@@ -73,11 +73,11 @@ class HybRecord(object):
     """Class for storing and analyzing chimeric hybrid genomics reads in ".hyb" format.
 
     Hyb format entries are a GFF-related file format described by Travis, et al. 
-    (see `References`_)
+    (see :ref:`References`)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     information on each of the respective identified components. An example .hyb format line 
-    (courtesy of Gay et al. [`References`_])::
+    (courtesy of Gay et al. [:ref:`References`])::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -138,7 +138,7 @@ class HybRecord(object):
     Args:
         id (str): Identifier for the hyb record
         seq (str): Nucleotide sequence of the hyb record
-        energy (str or float, optional): Predicted energy of record folding in kcal/mol
+        energy (str, optional): Predicted energy of record folding in kcal/mol
         seg1_info (dict, optional): Information on segment 1 of the record, containing possible:
             keys: ('ref', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         seg2_info (dict, optional): Information on segment 2 of the record, containing possible:
@@ -156,6 +156,36 @@ class HybRecord(object):
             on record initialization.
         target_region_analysis (bool, optional): Perform 
             :func:`target_region_analysis` on record initialization
+
+    .. _HybRecord-Attributes:
+
+    Attributes:
+        id (str): Identifier for the hyb record (often "<read-num>_<read-count>")
+        seq (str): Nucleotide sequence of the hyb record
+        energy (str or None): Predicted energy of folding
+        seg1_info (dict): Information on segment 1, contains keys: 
+            'ref' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int), 
+            'ref_end' (int), and 'score' (float).
+        seg2_info (dict): Information on segment 2, contains keys:
+            'ref' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int), 
+            'ref_end' (int), and 'score' (float).
+        flags (dict): Dict of flags with possible keys and values as defined in
+            the :ref:`Flags` section of the :ref:`Hybkit Specification`.
+        mirna_details (dict or None): Dict of details on hybrid characteristics related
+            to miRNA filled during :func:`mirna_analysis`.
+        mirna_info (dict or None): Link to appropriate seg1_info or seg2_info dict 
+            corresponding to a record's miRNA (if present), assigned during 
+            :func:`mirna_analysis`.
+        target_info (dict or None): Link to appropriate seg1_info or seg2_info dict 
+            corresponding to a record's target of a miRNA (if present), assigned during 
+            :func:`mirna_analysis`.
+        fold_record (FoldRecord): Information on the predicted folding of this hybrid sequence,
+            set by :func:`set_fold_record`.
+        fold_seq_match (bool or None): Set to True if the sequence contained within a fold
+            record exactly matches the sequence in (this) :class:`HybRecord`, when the 
+            :attr:`fold_record` attribute is set via :func:`set_fold_record`.   
+
+
 
     .. _References:     
     References:
@@ -332,7 +362,11 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg1_id(self):
-        """Return a copy of the id for segment 1 (:abbr:`5p (5-Prime)`), or None if not defined."""
+        """
+        Return a copy of the id for segment 1 (:abbr:`5p (5-Prime)`), or None if not defined.
+
+        Specifically returns the 'ref' key of the :obj:`seg1_info` attribute.
+        """
         if 'ref' in self.seg1_info:
             return self.seg1_info['ref']
         else:
@@ -340,7 +374,11 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Segment_Info
     def seg2_id(self):
-        """Return a copy of the id for segment 2 (|3p|), or None if not defined."""
+        """
+        Return a copy of the id for segment 2 (|3p|), or None if not defined.
+
+        Specifically returns the 'ref' key of the :obj:`seg2_info` attribute.
+        """
         if 'ref' in self.seg2_info:
             return self.seg2_info['ref']
         else:
@@ -350,16 +388,6 @@ class HybRecord(object):
     def seg_ids(self):
         """Return a tuple of the ids of segment 1 (|5p|) segment 2 (|3p|), or tuple of None."""
         return (self.seg1_id(), self.seg2_id())
-
-    # HybRecord : Public Methods : Segment_Info
-    def seg1_info(self):
-        """Return a copy of the info dict object for segment 1 (|5p|)."""
-        return self.seg1_info.copy()
-
-    # HybRecord : Public Methods : Segment_Info
-    def seg2_info(self):
-        """Return a copy of the info dict object for segment 2 (|3p|)."""
-        return self.seg2_info.copy()
 
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
@@ -432,23 +460,24 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg1_type(self, seg1_type):
-        """Set the "seg1_type" flag in :attr:`flags`."""
+        """Set the "seg1_type" flag in :obj:`flags`."""
         self.set_flag('seg1_type', seg1_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg2_type(self, seg2_type):
-        """Set the "seg2_type" flag in :attr:`flags`."""
+        """Set the "seg2_type" flag in :obj:`flags`."""
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def set_seg_types(self, seg1_type, seg2_type):
-        """Set the "seg1_type" and "seg2_type" flags in :attr:`flags`."""
+        """Set the "seg1_type" and "seg2_type" flags in :obj:`flags`."""
         self.set_flag('seg1_type', seg1_type)
         self.set_flag('seg2_type', seg2_type)
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def read_count(self, require=False, as_int=False):
-        """Return a the "read_count" flag if defined, otherwise return None.
+        """Return the "read_count" flag if defined, otherwise return None.
+
 
         Args:
             require (bool, optional): If True, raise an error if the "read_count" flag 
@@ -470,7 +499,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : read_count
     def set_read_count(self, read_count):
-        """Set the "read_count" flag in :attr:`flags` as a str."""
+        """Set the "read_count" flag in :obj:`flags` as a str."""
         self.set_flag('read_count', str(read_count))
 
     # HybRecord : Public Methods : Flag_Info : record_count
@@ -1588,7 +1617,7 @@ class HybRecord(object):
         Read file(s) into a mapping of sequence identifiers.
 
         This method reads one or more files into a dict for use with the 
-        :method:`find_seg_type_from_id_map` method.
+        :func:`find_seg_type_from_id_map` method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
         or a list/tuple of one or more pairs of file lists and file types 
         passed to type_file_pairs.
@@ -2077,9 +2106,19 @@ class FoldRecord(object):
         seg1_fold_info (dict, optional): Information about first portion (|5p|) of fold record.
         seg2_fold_info (dict, optional): Information about second portion (|3p|) for fold record.
 
+    .. _FoldRecord-Attributes:
+
     Attributes:
-        
-   
+        id (str): Sequence Identifier (often seg1name-seg2name)
+        seq (str): Genomic Sequence
+        fold (str): Fold Representation, '(', '.', and ')' characters
+        energy (float or None): Predicted energy of folding
+        seg1_fold_info (dict): Information on segment 1, contains keys: 'ref' (str),
+            'ref_short' (str), 'ref_start' (int), 'ref_end' (int), 'highlight' (str),
+            and 'seg_fold' (str).
+        seg2_fold_info (dict): Information on segment 2, contains keys: 'ref' (str),
+            'ref_short' (str), 'ref_start' (int), 'ref_end' (int), 'highlight' (str),
+            and 'seg_fold' (str).
     """
 
     # FoldRecord : Class-Level Constants
@@ -2101,7 +2140,7 @@ class FoldRecord(object):
         self.id = id          # Sequence Identifier (often seg1name-seg2name)
         self.seq = seq        # Genomic Sequence
         self.fold = fold      # Fold Representation, str of '(', '.', and ')' characters
-        self.energy = energy  # Predicted energy of folding
+        self.energy = float(energy)  # Predicted energy of folding
 
         seg1_fold_info = {}   # Information on segment 1
         seg2_fold_info = {}   # Information on segment 2
@@ -2131,39 +2170,45 @@ class FoldRecord(object):
         return (self.seg1_id(), self.seg2_id())
 
     # FoldRecord : Public Methods : seg_info
-    def seg1_info(self):
-        """Return a copy of the info dict object for segment 1 (|5p|)."""
-        return self.seg1_fold_info.copy()
-
-    # FoldRecord : Public Methods : seg_info
-    def seg2_info(self):
-        """Return a copy of the info dict object for segment 2 (|3p|)."""
-        return self.seg2_fold_info.copy()
-
-    # FoldRecord : Public Methods : seg_info
     def seg1_detail(self, detail):
         """
-        Return a copy of the detail for seg1 provided in by the key in "detail" parameter,
-        or if it does not exist return None.
+        Return a detail for seg1, or if it does not exist return None.
+
+        Args:
+            detail (str): 'Key for information from seg1_info_dict to return.
         """
         return self._get_seg_detail(1, detail)
 
     # FoldRecord : Public Methods : seg_info
     def seg2_detail(self, detail):
         """
-        Return a copy of the detail for seg2 provided in by the key in "detail" parameter,
-        or if it does not exist return None.
+        Return a detail for seg2, or if it does not exist return None.
+
+        Args:
+            detail (str): 'Key for information from seg2_info_dict to return.
         """
         return self._get_seg_detail(2, detail)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg1_fold_info(self, seg_info_obj):
-        """Set folding information for segment 1"""
+        """
+        Set fold information for segment 1.
+
+        Args:
+            seg_info_obj (dict): Dict object with keys as specified for 
+                :attr:`seg1_info_obj` in :ref:`Attributes <FoldRecord-Attributes>`.
+        """
         self._set_seg_fold_info(1, seg_info_obj)
 
     # FoldRecord : Public Methods : seg_info
     def set_seg2_fold_info(self, seg_info_obj):
-        """Set folding information for segment 2"""
+        """
+        Set fold information for segment 2.
+
+        Args:
+            seg_info_obj (dict): Dict object with keys as specified for 
+                :attr:`seg2_info_obj` in :ref:`Attributes <FoldRecord-Attributes>`.
+        """
         self._set_seg_fold_info(2, seg_info_obj)
 
     # FoldRecord : Public Methods : Parsing : Vienna
@@ -3012,7 +3057,8 @@ class HybFoldIter(object):
     Args:
         hybfile_handle (HybFile) : HybFile object for iteration
         foldfile_handle (FoldFile) : FoldFile object for iteration
-        combine (bool) : Return a combined :class:`HybRecord` object.
+        combine (bool) : Return a combined :class:`HybRecord` object containing the obtained
+            :class:`FoldRecord` object as :obj:`HybRecord.fold_record`.
 
     Returns:
         | Each next() call returns a combined :class:`HybRecord` object if "combine" is True.

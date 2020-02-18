@@ -92,14 +92,14 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
         hyb_record.mirna_analysis(mirna_types=mirna_types)
 
         # Perform target-analysis of mirna within kshv-associated data.
-        hybkit.analysis.running_mirna_targets(hyb_record, target_dict,
-                                              count_mode=count_mode, 
-                                              double_count_duplexes=True, # Includes mirna duplexes
-                                              # Limits output to KSHV miRNA:
-                                              mirna_contains='kshv')
+        hybkit.analysis.running_mirna_target(hyb_record, target_dict,
+                                             count_mode=count_mode, 
+                                             double_count_duplexes=True, # Includes mirna duplexes
+                                             # Limits output to KSHV miRNA:
+                                             mirna_contains='kshv')
         
     # Process and sort dictionary of miRNA and targets
-    results = hybkit.analysis.process_mirna_targets(target_dict)
+    results = hybkit.analysis.process_mirna_target(target_dict)
     (sorted_target_dict,       # Contains same data as target_dict, but with keys sorted by count
      counts_dict,              # dict with keys: mirna_id, values: total mirna-specific hybrids
      target_type_counts_dict,  # dict with keys: mirna_id, values: dict of targeted type counts
@@ -110,29 +110,29 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb','')
     print('Writing Analysis Files to Name Base:\n    %s' % analysis_basename)
-    hybkit.analysis.write_mirna_targets(analysis_basename, 
-                                        sorted_target_dict,
-                                        counts_dict,
-                                        target_type_counts_dict,
-                                        name=in_file_label,
-                                        multi_files=True,    # Default
-                                        sep=',',             # Default
-                                        file_suffix='.csv',  # Default
-                                        spacer_line=True,    # Default
-                                        make_plots=True,     # Default
-                                        max_mirna=25)        # Default is 10
+    hybkit.analysis.write_mirna_target(analysis_basename, 
+                                       sorted_target_dict,
+                                       counts_dict,
+                                       target_type_counts_dict,
+                                       name=in_file_label,
+                                       multi_files=True,    # Default
+                                       sep=',',             # Default
+                                       file_suffix='.csv',  # Default
+                                       spacer_line=True,    # Default
+                                       make_plots=True,     # Default
+                                       max_mirna=25)        # Default is 10
 
-    hybkit.analysis.write_mirna_targets(analysis_basename,
-                                        sorted_target_dict,
-                                        counts_dict,
-                                        target_type_counts_dict,
-                                        name=in_file_label,
-                                        multi_files=False,   # Non-Default
-                                        sep=',',             # Default
-                                        file_suffix='.csv',  # Default
-                                        spacer_line=True,    # Default
-                                        make_plots=False,    # Non-Default
-                                        max_mirna=25)        # Default is 10
+    hybkit.analysis.write_mirna_target(analysis_basename,
+                                       sorted_target_dict,
+                                       counts_dict,
+                                       target_type_counts_dict,
+                                       name=in_file_label,
+                                       multi_files=False,   # Non-Default
+                                       sep=',',             # Default
+                                       file_suffix='.csv',  # Default
+                                       spacer_line=True,    # Default
+                                       make_plots=False,    # Non-Default
+                                       max_mirna=25)        # Default is 10
 
 
 

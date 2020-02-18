@@ -66,7 +66,7 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
 
 # Initialize Two Sets of Analysis Dict Objects
-analysis_dict = hybkit.analysis.full_analysis_dict()
+analysis_dict = hybkit.analysis.summary_analysis_dict()
 analysis_dicts = []
 
 # Iterate over each input file, find the segment types, and save the output 
@@ -101,9 +101,9 @@ for in_file_path in input_files:
             hyb_record.mirna_analysis()
 
             # Add mirna_analysis details to mirna_analysis_dict, using record numbers for counts
-            hybkit.analysis.running_full(hyb_record,
-                                         analysis_dict, 
-                                         count_mode=count_mode)
+            hybkit.analysis.running_summary(hyb_record,
+                                            analysis_dict, 
+                                            count_mode=count_mode)
 
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)
@@ -111,24 +111,24 @@ for in_file_path in input_files:
     # Write mirna_analysis for input file to outputs. 
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
-    hybkit.analysis.write_full(analysis_file_basename, 
-                               analysis_dict, 
-                               multi_files=True, 
-                               name=in_file_label)
-
+    hybkit.analysis.write_summary(analysis_file_basename, 
+                                  analysis_dict, 
+                                  multi_files=True, 
+                                  name=in_file_label)
+   
     analysis_dicts.append(analysis_dict)
 
     sys.stdout.flush()  # DEBUG
     if ONE_CHECK:
         break  # DEBUG
 
-combined_analysis_dict = hybkit.analysis.combine_full_dicts(analysis_dicts) 
+combined_analysis_dict = hybkit.analysis.combine_summary_dicts(analysis_dicts) 
 combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
 print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
-hybkit.analysis.write_full(combined_analysis_file_basename, 
-                           combined_analysis_dict, 
-                           multi_files=True,
-                           name='Combined')
-
+hybkit.analysis.write_summary(combined_analysis_file_basename, 
+                              combined_analysis_dict, 
+                              multi_files=True,
+                              name='Combined')
+  
 print('Time taken: %s' % str(datetime.datetime.now() - start_time)) # DEBUG
 sys.stdout.flush()  # DEBUG

@@ -1,0 +1,31 @@
+# Daniel B. Stribling
+# Renne Lab, University of Florida
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
+# 
+# Default legend for the make_string_match_parameters function, for use with 
+# the find_seg_type_string_match function in the string_match for the find_type.py module.
+#
+# Notes:
+# Spaces are included in search terms.
+# Commas are reserved and separate entries
+# Each line should contain: "search_type,search_string,seg_type"
+# Allowed search types are: "prefix", "contains", "suffix", and "matches"
+
+# Hyb Software Reference Search Terms:
+suffix,_microRNA,miRNA
+suffix,_pseudo,pseudogene
+suffix,_rRNA,rRNA
+suffix,_mRNA,mRNA
+suffix,_mtrRNA,mitoch_rRNA
+suffix,_tRNA,tRNA
+suffix,_snoRNA,snoRNA
+suffix,_miscRNA,miscRNA
+suffix,_snRNA,snRNA
+suffix,_pr-tr,pr-tr
+suffix,_lincRNA,lincRNA
+suffix,_Ig,Ig
+suffix,_Trec,Trec
+
+
+#custom
+prefix,kshv-miR,kshv_microRNA
