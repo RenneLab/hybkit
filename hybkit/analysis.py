@@ -69,9 +69,9 @@ def combine_type_dicts(analysis_dicts):
 
 # Public Methods : HybRecord Analysis
 def running_type(record, analysis_dict, 
-                  count_mode=DEFAULT_COUNT_MODE,
-                  type_sep=DEFAULT_HYBRID_TYPE_SEP, 
-                  mirna_centric_sorting=True):
+                 count_mode=DEFAULT_COUNT_MODE,
+                 type_sep=DEFAULT_HYBRID_TYPE_SEP, 
+                 mirna_centric_sorting=True):
     """Add information regarding various properties from the HybRecord object provided in
     "record" to the dictionary provided in the analysis_dict argument.
     """
@@ -80,7 +80,7 @@ def running_type(record, analysis_dict,
         print(message)
         raise Exception(message)
 
-    count = record.count(count_mode)
+    count = record.count(count_mode, as_int=True)
     seg1_type = record.seg1_type()
     seg2_type = record.seg2_type()
 
@@ -106,7 +106,7 @@ def running_type(record, analysis_dict,
 
     for seg_type in seg1_type, seg2_type:
     #    _add_count(analysis_dict['all_seg_types'], seg_type)
-        analysis_dict['all_seg_types'][seg_type] += 1
+        analysis_dict['all_seg_types'][seg_type] += count
 
 
 # Public Methods : HybRecord Type Analysis Parsing
@@ -188,7 +188,7 @@ def running_mirna_count(record, analysis_dict,
     the analysis_dict argument.
     """
     record._ensure_mirna_analysis()
-    count = record.count(count_mode)
+    count = record.count(count_mode, as_int=True)
 
     # Add mirna-analysis specific details
     if record.has_property('has_mirna_dimer'):
@@ -268,14 +268,14 @@ def combine_summary_dicts(analysis_dicts):
 
 # Public Methods : HybRecord Analysis : Full Summary Analysis
 def running_summary(record, analysis_dict,
-                 count_mode=DEFAULT_COUNT_MODE,
-                 type_sep=DEFAULT_HYBRID_TYPE_SEP,
-                 mirna_centric_sorting=True):
+                    count_mode=DEFAULT_COUNT_MODE,
+                    type_sep=DEFAULT_HYBRID_TYPE_SEP,
+                    mirna_centric_sorting=True):
     """Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     """
-    running_types(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
-    running_mirna_counts(record, analysis_dict, count_mode)
+    running_type(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
+    running_mirna_count(record, analysis_dict, count_mode)
 
 
 # Public Methods : HybRecord Analysis : Full Summary Analysis
@@ -289,9 +289,9 @@ def write_summary(file_name_base, analysis_dict,
     on file_name_base.
     """
     analyses = [
-                ('types_hybrids', _format_hybrid_type_counts),
-                ('types_segs', _format_all_seg_types),
-                ('mirna_counts', format_mirna_counts),
+                ('types_hybrids', _format_hybrid_type_count),
+                ('types_segs', _format_all_seg_type),
+                ('mirna_count', format_mirna_count),
                ]
     
     if multi_files:
@@ -308,9 +308,9 @@ def write_summary(file_name_base, analysis_dict,
             out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids', name=name)
+        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_types_hybrids', name=name)
         hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg', name=name)
-        hybkit.plot.mirna_counts(analysis_dict, file_name_base + '_mirna_counts', name=name)
+        hybkit.plot.mirna_count(analysis_dict, file_name_base + '_mirna_count', name=name)
 
 
 ### --- miRNA Target Analysis --- ###
@@ -358,7 +358,7 @@ def running_mirna_target(record, analysis_dict,
     in both orientations. If False, the 3p miRNA will be considered as the target.
     """
     record._ensure_mirna_analysis()
-    count = record.count(count_mode)
+    count = record.count(count_mode, as_int=True)
 
     check_pairs = []
     if record.has_property('has_mirna'):
@@ -706,7 +706,7 @@ def _sanitize_name(file_name):
 
 
 # Private Methods : HybRecord Type Analysis Parsing
-def _format_hybrid_type_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
+def _format_hybrid_type_count(analysis_dict, sep=DEFAULT_ENTRY_SEP):
     """Return the results of hybrid_type_counts in a list of sep-delimited lines."""
     # Sort by count in descending order
     ret_lines = ['hybrid_type' + sep + 'count']
@@ -719,7 +719,7 @@ def _format_hybrid_type_counts(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 
 
 # Private Methods : HybRecord Type Analysis Parsing
-def _format_all_seg_types(analysis_dict, sep=DEFAULT_ENTRY_SEP):
+def _format_all_seg_type(analysis_dict, sep=DEFAULT_ENTRY_SEP):
     """Return the results of all_seg_types in a list of sep-delimited lines."""
     # Sort by count in descending order
     #sorted_pairs = sorted(analysis_dict['all_seg_types'].items(),
