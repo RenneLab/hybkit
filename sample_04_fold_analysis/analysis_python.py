@@ -90,19 +90,19 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
 
         # Equivalent to 'has_mirna' and not 'has_mirna_dimer'
         if hyb_record.has_property('has_mirna_not_dimer'):
-            hybkit.analysis.running_mirna_folds(hyb_record, 
-                                                analysis_dict,
-                                                skip_no_fold_record=True)
+            hybkit.analysis.running_mirna_fold(hyb_record, 
+                                               analysis_dict,
+                                               skip_no_fold_record=True)
             out_hyb.write_record(hyb_record)
 
 
 # Write mirna_fold analysis for input file to outputs.
 print('Outputting Analyses to:\n    %s\n' % out_analysis_basename)
-analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
-hybkit.analysis.write_mirna_folds(out_analysis_basename,
-                                  analysis_dict,
-                                  multi_files=True,
-                                  name=data_label,
+analysis_dict = hybkit.analysis.process_mirna_fold(analysis_dict)
+hybkit.analysis.write_mirna_fold(out_analysis_basename,
+                                 analysis_dict,
+                                 multi_files=True,
+                                 name=data_label,
                                  )
                              
 print('Time taken: %s\n' % str(datetime.datetime.now() - start_time)) # DEBUG

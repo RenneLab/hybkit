@@ -126,9 +126,9 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
                 category = label_prefix + 'noncoding'
                 [record_analysis_dict, record_out_file, pretty_name] = output_categories[category]
 
-            hybkit.analysis.running_mirna_folds(hyb_record, 
-                                                record_analysis_dict,
-                                                skip_no_fold_record=True)
+            hybkit.analysis.running_mirna_fold(hyb_record, 
+                                               record_analysis_dict,
+                                               skip_no_fold_record=True)
             record_out_file.write_record(hyb_record)
 
 # Write mirna_fold analysis for each catetory.
@@ -137,11 +137,11 @@ for category in output_categories.keys():
     print('    Writing analyses for %s.' % category)
     analysis_name = out_base + '_' + category
     analysis_dict, out_hyb_file, pretty_name = output_categories[category]
-    analysis_dict = hybkit.analysis.process_mirna_folds(analysis_dict)
-    hybkit.analysis.write_mirna_folds(analysis_name,
-                                      analysis_dict,
-                                      multi_files=True,
-                                      name=data_label + ', ' + pretty_name
+    analysis_dict = hybkit.analysis.process_mirna_fold(analysis_dict)
+    hybkit.analysis.write_mirna_fold(analysis_name,
+                                     analysis_dict,
+                                     multi_files=True,
+                                     name=data_label + ', ' + pretty_name
                                      )
                              
 print('Time taken: %s\n' % str(datetime.datetime.now() - start_time)) # DEBUG
