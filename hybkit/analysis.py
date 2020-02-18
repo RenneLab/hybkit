@@ -148,8 +148,8 @@ def write_type(file_name_base, analysis_dict,
                 out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_counts(analysis_dict, file_name_base + '_types_hybrids', name=name)
-        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg', name=name)
+        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_types_hybrids', name=name)
+        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_types_seg', name=name)
 
 
 ### --- miRNA Count Analysis --- ###
@@ -227,7 +227,7 @@ def write_mirna_count(file_name, analysis_dict,
         out_file.write('\n'.join(format_mirna_counts(analysis_dict, sep)))
 
     if make_plots:
-        hybkit.plot.mirna_counts(analysis_dict, file_name + '_mirna_counts', name=name)
+        hybkit.plot.mirna_count(analysis_dict, file_name + '_mirna_counts', name=name)
 
 
 ### --- Full Summary Analysis --- ###
@@ -309,7 +309,7 @@ def write_summary(file_name_base, analysis_dict,
 
     if make_plots:
         hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_types_hybrids', name=name)
-        hybkit.plot.all_seg_types(analysis_dict, file_name_base + '_types_seg', name=name)
+        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_types_seg', name=name)
         hybkit.plot.mirna_count(analysis_dict, file_name_base + '_mirna_count', name=name)
 
 
@@ -481,17 +481,17 @@ def write_mirna_target(file_name_base, analysis_dict,
 
             if make_plots:
                 target_plot_name = _sanitize_name(file_name_base + '_' + mirna)
-                hybkit.plot.mirna_targets(mirna, 
-                                          analysis_dict[mirna_id], 
-                                          target_plot_name,
-                                          name=name,
-                                          )
+                hybkit.plot.mirna_target(mirna, 
+                                         analysis_dict[mirna_id], 
+                                         target_plot_name,
+                                         name=name,
+                                         )
 
                 target_type_plot_name = _sanitize_name(file_name_base + '_' + mirna + '_types')
-                hybkit.plot.mirna_target_types(mirna,
-                                               target_types_count_dict[mirna_id],
-                                               target_type_plot_name,
-                                               name=name
+                hybkit.plot.mirna_target_type(mirna,
+                                              target_types_count_dict[mirna_id],
+                                              target_type_plot_name,
+                                              name=name
                                               )
 
     else:
@@ -685,10 +685,10 @@ def write_mirna_fold(file_name_base, analysis_dict,
                 fold_base_fractions_file.write(write_lines[9] + '\n')
 
     if make_plots:
-        hybkit.plot.mirna_folds(analysis_dict, 
-                                file_name_base,
-                                name=name,
-                                )
+        hybkit.plot.mirna_fold(analysis_dict, 
+                               file_name_base,
+                               name=name,
+                               )
 
 
 # Private Methods : Utility

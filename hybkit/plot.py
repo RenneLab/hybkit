@@ -48,14 +48,14 @@ FORMAT_NAME_MAP = {'5p_mirna_hybrids':"5'_miRNA_Hybrids",
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def hybrid_type_counts(analysis_dict, plot_file_name,
-                       name=None,
-                       title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
-                       other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
-                       min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                       plot_file_type=DEFAULT_FILE_TYPE,
-                       dpi=DEFAULT_DPI,
-                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+def hybrid_type_count(analysis_dict, plot_file_name,
+                      name=None,
+                      title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
+                      other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
+                      min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
+                      plot_file_type=DEFAULT_FILE_TYPE,
+                      dpi=DEFAULT_DPI,
+                      matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -80,14 +80,14 @@ def hybrid_type_counts(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def all_seg_types(analysis_dict, plot_file_name,
-                  name=None,
-                  title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
-                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
-                  min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                  plot_file_type=DEFAULT_FILE_TYPE,
-                  dpi=DEFAULT_DPI,
-                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+def all_seg_type(analysis_dict, plot_file_name,
+                 name=None,
+                 title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
+                 other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
+                 min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
+                 plot_file_type=DEFAULT_FILE_TYPE,
+                 dpi=DEFAULT_DPI,
+                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -112,14 +112,14 @@ def all_seg_types(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def mirna_counts(analysis_dict, plot_file_name, 
-                 name=None,
-                 title=DEFAULT_MIRNA_COUNTS_TITLE,
-                 other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
-                 min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                 plot_file_type=DEFAULT_FILE_TYPE,
-                 dpi=DEFAULT_DPI,
-                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+def mirna_count(analysis_dict, plot_file_name, 
+                name=None,
+                title=DEFAULT_MIRNA_COUNTS_TITLE,
+                other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
+                min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
+                plot_file_type=DEFAULT_FILE_TYPE,
+                dpi=DEFAULT_DPI,
+                matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """Plot the results of hybrid_type_counts."""
     # Sort hybrid_type_counts counter object in descending order
     labels = []
@@ -153,7 +153,7 @@ def mirna_counts(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name, 
+def mirna_target(mirna_name, mirna_targets_dict, plot_file_name, 
                  title=None,
                  name=None,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -205,14 +205,14 @@ def mirna_targets(mirna_name, mirna_targets_dict, plot_file_name,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_target_types(mirna_name, mirna_target_type_counts_dict, plot_file_name, 
-                       title=None,
-                       name=None,
-                       other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
-                       min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
-                       plot_file_type=DEFAULT_FILE_TYPE,
-                       dpi=DEFAULT_DPI,
-                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+def mirna_target_type(mirna_name, mirna_target_type_counts_dict, plot_file_name, 
+                      title=None,
+                      name=None,
+                      other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
+                      min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
+                      plot_file_type=DEFAULT_FILE_TYPE,
+                      dpi=DEFAULT_DPI,
+                      matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """Plot the targets types of a single mirna."""
     labels = []
     counts = []
@@ -242,14 +242,14 @@ def mirna_target_types(mirna_name, mirna_target_type_counts_dict, plot_file_name
                     )
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_folds(fold_analysis_dict, plot_file_name, 
-                title=None,
-                name=None,
-                data_format=DEFAULT_LINE_DATA_FORMAT,
-                min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
-                plot_file_type=DEFAULT_FILE_TYPE,
-                dpi=DEFAULT_DPI,
-                matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+def mirna_fold(fold_analysis_dict, plot_file_name, 
+               title=None,
+               name=None,
+               data_format=DEFAULT_LINE_DATA_FORMAT,
+               min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
+               plot_file_type=DEFAULT_FILE_TYPE,
+               dpi=DEFAULT_DPI,
+               matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     """Plot the bound percentage of mirna by base."""
     labels = []
     fractions = []
