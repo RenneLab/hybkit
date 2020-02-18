@@ -2068,6 +2068,18 @@ class FoldRecord(object):
 
     A minimum amount of data necessary for a FoldRecord object is a sequence identifier,
     a genomic sequence, and its fold representaiton.
+
+    Args:
+        id (str): Identifier for record
+        seq (str): Nucleotide sequence of record.
+        fold (str): Fold representation of record.
+        energy (str or float, optional): Energy of folding for record.
+        seg1_fold_info (dict, optional): Information about first portion (|5p|) of fold record.
+        seg2_fold_info (dict, optional): Information about second portion (|3p|) for fold record.
+
+    Attributes:
+        
+   
     """
 
     # FoldRecord : Class-Level Constants
@@ -2086,13 +2098,13 @@ class FoldRecord(object):
     def __init__(self, id, seq, fold, energy,
                  seg1_fold_info={},
                  seg2_fold_info={}):
-        self.id = id          #: Sequence Identifier (often seg1name-seg2name)
-        self.seq = seq        #: Genomic Sequence
-        self.fold = fold      #: Fold Representation, str of '(', '.', and ')' characters
-        self.energy = energy  #: Predicted energy of folding
+        self.id = id          # Sequence Identifier (often seg1name-seg2name)
+        self.seq = seq        # Genomic Sequence
+        self.fold = fold      # Fold Representation, str of '(', '.', and ')' characters
+        self.energy = energy  # Predicted energy of folding
 
-        seg1_fold_info = {}   #: Information on segment 1
-        seg2_fold_info = {}   #: Information on segment 2
+        seg1_fold_info = {}   # Information on segment 1
+        seg2_fold_info = {}   # Information on segment 2
 
         self.set_seg1_fold_info(seg1_fold_info)
         self.set_seg2_fold_info(seg2_fold_info)
