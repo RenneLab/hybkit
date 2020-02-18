@@ -66,7 +66,7 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 #hybkit.HybRecord.set_find_type_params(params)
 
 # Initialize Two Sets of Analysis Dict Objects
-analysis_dict = hybkit.analysis.summary_analysis_dict()
+analysis_dict = hybkit.analysis.summary_dict()
 analysis_dicts = []
 
 # Set hybrid segment types to remove as part of quality control (QC)
