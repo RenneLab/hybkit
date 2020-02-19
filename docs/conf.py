@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
+    'sphinx.ext.intersphinx',
     ]
 
 # add_module_names
@@ -49,6 +50,11 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'setup.py']
 
+
+intersphinx_mapping = {
+                       'python': ('https://docs.python.org/3', None),
+                       #'matplotlib': ('https://readthedocs.org/projects/matplotlib/latest/', None)
+                      }
 napoleon_use_ivar = True
 
 # -- Options for HTML output -------------------------------------------------
@@ -74,8 +80,8 @@ html_context = {
 # Define custom variables
 rst_epilog = (
 """
-.. |3p| replace:: %s
-.. |5p| replace:: %s
-""" % (':abbr:`3p (3-Prime)`', ':abbr:`5p (5-Prime)`')
+.. |3p| replace:: :abbr:`3p (3-Prime)`
+.. |5p| replace:: :abbr:`5p (5-Prime)`
+"""
 )
 

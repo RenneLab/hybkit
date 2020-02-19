@@ -3,7 +3,8 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-"""Methods for analyzing HybRecord and FoldRecord Objects.
+"""
+Functions for analysis of HybRecord and FoldRecord Objects.
 
 Todo:
     Expand Documentation
@@ -38,14 +39,36 @@ DEFAULT_MAX_MIRNA = 10
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def type_dict():
-    """Create a dictionary with keys of counter objects for running type analyses."""
+    """
+    Create a dictionary with keys of counter objects for running type analyses.
+
+    Returns:
+        Dict object for type analyses::
+
+            {
+             'hybrid_type_counts':Counter(),
+             'seg1_types':Counter(),
+             'seg2_types':Counter(),
+             'all_seg_types':Counter(), 
+            }
+
+    """
     ret_dict = {key: Counter() for key in TYPE_ANALYSIS_KEYS}
     return ret_dict
 
 
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def combine_type_dicts(analysis_dicts):
-    """Combine a list/tuple of dictionaries created from running type analyses."""
+    """
+    Combine a list/tuple of dictionaries created from running type analyses.
+
+    Args:
+        analysis_dicts (list or tuple): Iterable of dict objects from the type analysis.
+
+    Returns:
+        Combined dict object with keys 'hybrid_type_counts', 'seg1_types', 
+        'seg2_types', and 'all_seg_types'
+    """
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -72,9 +95,25 @@ def running_type(record, analysis_dict,
                  count_mode=DEFAULT_COUNT_MODE,
                  type_sep=DEFAULT_HYBRID_TYPE_SEP, 
                  mirna_centric_sorting=True):
-    """Add information regarding various properties from the HybRecord object provided in
-    "record" to the dictionary provided in the analysis_dict argument.
     """
+    Add the information from a :class:`~hybkit.HybRecord` to an ongoing (running) type analysis.
+
+    This method is designed to perform the analysis during a single reading of a 
+    :class:`~hybkit.HybFile` as to minimize memory and time usage.
+    The provided dict object to analysis_dict is modified in-place.
+
+    Args:
+        record (HybRecord): Record with information to add.
+        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        count_mode (str, optional): Indicates how entries in record should be counted. 
+            Options are one of: {'read, 'record'}. 
+            See :func:`hybkit.HybRecord.count` for further details.
+        type_sep (str, optional): Separator string to place between the seg_types.
+        mirna_centric_sorting (bool, optional): Where a type contains an miRNA, 
+            place that first in the seg1_type<sep>seg2_type naming scheme. 
+            Otherwise seg1_type and seg2_type are ordered alphabetically.
+    """
+
     if not record.has_property('has_seg_types'):
         message = 'seg_type flag is required for record analysis.'
         print(message)
@@ -96,22 +135,28 @@ def running_type(record, analysis_dict,
     else:
         hybrid_type = type_sep.join(record.seg_types_sorted())
 
-    # _add_count(analysis_dict['hybrid_type_counts'], hybrid_type)
-    # _add_count(analysis_dict['seg1_types'], seg1_type)
-    # _add_count(analysis_dict['seg2_types'], seg2_type)
     # Entry Checking not necessary with counter objects.
     analysis_dict['hybrid_type_counts'][hybrid_type] += count
     analysis_dict['seg1_types'][seg1_type] += count
     analysis_dict['seg2_types'][seg2_type] += count
 
     for seg_type in seg1_type, seg2_type:
-    #    _add_count(analysis_dict['all_seg_types'], seg_type)
         analysis_dict['all_seg_types'][seg_type] += count
 
 
 # Public Methods : HybRecord Type Analysis Parsing
 def format_type(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    """Return the results of a type_analysis in a list of sep-delimited lines."""
+    """
+    Return the results of a type_analysis in a list of delimited lines.
+
+    Args:
+        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+
+    Returns:
+        list of string objects with a terminating newline character 
+        representing the results of the analysis.      
+    """
     ret_lines = []
     ret_lines += _format_hybrid_type_counts(analysis_dict, sep)
     ret_lines.append('')
@@ -126,12 +171,27 @@ def write_type(file_name_base, analysis_dict,
                 sep=DEFAULT_ENTRY_SEP, 
                 file_suffix=DEFAULT_FILE_SUFFIX,
                 make_plots=DEFAULT_MAKE_PLOTS):
-    """Write the results of the type-analysis to a file or series of files with names based
-    on file_name_base.
     """
+    Write the results of a type_analysis to a file, and create plots of the results.
+
+    Args:
+        file_name_base (str): "Base" name for output files. Final file names will be generated
+            based on each respective analysis type and provided parameters.
+        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        name (str, optional): String to add to title of plot indicating data source.
+        multi_files (bool, optional): If True, output result lines in separate files.
+            otherwise write a single delimited file containing results.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        file_suffix (str, optional): File suffix to add to delimited files.
+            Defaults to ".csv" corresponding to using the delimiter: ",".
+        make_plots (bool, optional): If True, plot results using 
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            Otherwise do not make plots.
+    """
+
     analyses = [
-                ('types_hybrids', _format_hybrid_type_counts),
-                ('types_segs', _format_all_seg_types),
+                ('type_hybrids', _format_hybrid_type_counts),
+                ('type_segs', _format_all_seg_types),
                 ]
 
     if multi_files:
@@ -148,8 +208,8 @@ def write_type(file_name_base, analysis_dict,
                 out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_types_hybrids', name=name)
-        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_types_seg', name=name)
+        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_type_hybrids', name=name)
+        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_type_seg', name=name)
 
 
 ### --- miRNA Count Analysis --- ###
@@ -389,7 +449,6 @@ def running_mirna_target(record, analysis_dict,
             #    analysis_dict[mirna] = {}
                 analysis_dict[mirna_id] = Counter()
             # Existence checking not required for counter objects.
-            # _add_count(analysis_dict[mirna], target)
             analysis_dict[mirna_id][target_id] += count
 
 
@@ -689,14 +748,6 @@ def write_mirna_fold(file_name_base, analysis_dict,
                                file_name_base,
                                name=name,
                                )
-
-
-# Private Methods : Utility
-def _add_count(count_dict, key):
-    if key not in count_dict:
-        count_dict[key] = 0
-    count_dict[key] += 1
-
 
 # Private Methods : Utility
 def _sanitize_name(file_name):
