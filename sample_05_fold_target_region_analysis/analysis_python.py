@@ -126,9 +126,9 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
                 category = label_prefix + 'noncoding'
                 [record_analysis_dict, record_out_file, pretty_name] = output_categories[category]
 
-            hybkit.analysis.running_mirna_fold(hyb_record, 
-                                               record_analysis_dict,
-                                               skip_no_fold_record=True)
+            hybkit.analysis.addto_mirna_fold(hyb_record, 
+                                             record_analysis_dict,
+                                             skip_no_fold_record=True)
             record_out_file.write_record(hyb_record)
 
 # Write mirna_fold analysis for each catetory.

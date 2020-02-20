@@ -108,11 +108,11 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
         hyb_record.mirna_analysis(mirna_types=mirna_types)
 
         # Perform target-analysis of mirna within kshv-associated data.
-        hybkit.analysis.running_mirna_target(hyb_record, target_dict, 
-                                             count_mode=count_mode,
-                                             double_count_duplexes=True, # Includes mirna duplexes
-                                             # Limits output to KSHV miRNA:
-                                             mirna_contains='kshv')
+        hybkit.analysis.addto_mirna_target(hyb_record, target_dict, 
+                                           count_mode=count_mode,
+                                           double_count_duplexes=True, # Includes mirna duplexes
+                                           # Limits output to KSHV miRNA:
+                                           mirna_contains='kshv')
         
     # Process and sort dictionary of miRNA and targets
     results = hybkit.analysis.process_mirna_target(target_dict)

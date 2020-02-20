@@ -101,9 +101,9 @@ for in_file_path in input_files:
             hyb_record.mirna_analysis()
 
             # Add mirna_analysis details to mirna_analysis_dict, using record numbers for counts
-            hybkit.analysis.running_summary(hyb_record,
-                                            analysis_dict, 
-                                            count_mode=count_mode)
+            hybkit.analysis.addto_summary(hyb_record,
+                                          analysis_dict, 
+                                          count_mode=count_mode)
 
             # Write the modified record to the output file  
             out_file.write_record(hyb_record)

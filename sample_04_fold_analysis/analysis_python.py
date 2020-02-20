@@ -90,9 +90,9 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
 
         # Equivalent to 'has_mirna' and not 'has_mirna_dimer'
         if hyb_record.has_property('has_mirna_not_dimer'):
-            hybkit.analysis.running_mirna_fold(hyb_record, 
-                                               analysis_dict,
-                                               skip_no_fold_record=True)
+            hybkit.analysis.addto_mirna_fold(hyb_record, 
+                                             analysis_dict,
+                                             skip_no_fold_record=True)
             out_hyb.write_record(hyb_record)
 
 

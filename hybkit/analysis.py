@@ -91,12 +91,12 @@ def combine_type_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis
-def running_type(record, analysis_dict, 
-                 count_mode=DEFAULT_COUNT_MODE,
-                 type_sep=DEFAULT_HYBRID_TYPE_SEP, 
-                 mirna_centric_sorting=True):
+def addto_type(record, analysis_dict, 
+               count_mode=DEFAULT_COUNT_MODE,
+               type_sep=DEFAULT_HYBRID_TYPE_SEP, 
+               mirna_centric_sorting=True):
     """
-    Add the information from a :class:`~hybkit.HybRecord` to an ongoing (running) type analysis.
+    Add the information from a :class:`~hybkit.HybRecord` to a type analysis.
 
     This method is designed to perform the analysis during a single reading of a 
     :class:`~hybkit.HybFile` as to minimize memory and time usage.
@@ -104,7 +104,7 @@ def running_type(record, analysis_dict,
 
     Args:
         record (HybRecord): Record with information to add.
-        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        analysis_dict (dict): Dict for type analysis (see :func:`type_dict`).
         count_mode (str, optional): Indicates how entries in record should be counted. 
             Options are one of: {'read, 'record'}. 
             See :func:`hybkit.HybRecord.count` for further details.
@@ -150,7 +150,7 @@ def format_type(analysis_dict, sep=DEFAULT_ENTRY_SEP):
     Return the results of a type_analysis in a list of delimited lines.
 
     Args:
-        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        analysis_dict (dict): Dict for type analysis (see :func:`type_dict`).
         sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
 
     Returns:
@@ -177,7 +177,7 @@ def write_type(file_name_base, analysis_dict,
     Args:
         file_name_base (str): "Base" name for output files. Final file names will be generated
             based on each respective analysis type and provided parameters.
-        analysis_dict (dict): Dict for type analysis created with :func:`type_dict`.
+        analysis_dict (dict): Dict for type analysis (see :func:`type_dict`).
         name (str, optional): String to add to title of plot indicating data source.
         multi_files (bool, optional): If True, output result lines in separate files.
             otherwise write a single delimited file containing results.
@@ -216,14 +216,38 @@ def write_type(file_name_base, analysis_dict,
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def mirna_count_dict():
-    """Create a dictionary with keys for running miRNA analyses."""
+    """
+    Create a dictionary with keys for running miRNA count analyses.
+
+    Returns:
+        Dict object for count analyses::
+
+            {
+             '5p_mirna_hybrids': 0,
+             '3p_mirna_hybrids': 0,
+             'mirna_dimer_hybrids': 0,
+             'all_mirna_hybrids': 0,
+             'no_mirna_hybrids': 0,
+            }
+
+    """
+
     ret_dict = {key: 0 for key in MIRNA_COUNT_ANALYSIS_KEYS}
     return ret_dict
 
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def combine_mirna_count_dicts(analysis_dicts):
-    """Combine a list of two or more dicts created from running miRNA count analyses."""
+    """
+    Combine a list/tuple of dictionaries created from running count analyses.
+
+    Args:
+        analysis_dicts (list or tuple): Iterable of dict objects from the count analysis.
+
+    Returns:
+        Combined dict object with keys '5p_mirna_hybrids', '3p_mirna_hybrids',
+            'mirna_dimer_hybrids', 'all_mirna_hybrids', and 'no_mirna_hybrids'.
+    """
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -242,11 +266,24 @@ def combine_mirna_count_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis : miRNA Count Analysis
-def running_mirna_count(record, analysis_dict,
-                        count_mode=DEFAULT_COUNT_MODE):
-    """Add information regarding various properties to the dictionary provided in
-    the analysis_dict argument.
+def addto_mirna_count(record, analysis_dict,
+                      count_mode=DEFAULT_COUNT_MODE):
     """
+    Add the information from a :class:`~hybkit.HybRecord` to a mirna_count analysis.
+
+    This method is designed to perform the analysis during a single reading of a 
+    :class:`~hybkit.HybFile` as to minimize memory and time usage.
+    The provided dict object to analysis_dict is modified in-place.
+
+    Args:
+        record (HybRecord): Record with information to add.
+        analysis_dict (dict): Dict for mirna_count analysis created with 
+            :func:`mirna_count_dict`.
+        count_mode (str, optional): Indicates how entries in record should be counted. 
+            Options are one of: {'read, 'record'}. 
+            See :func:`hybkit.HybRecord.count` for further details.
+    """
+
     record._ensure_mirna_analysis()
     count = record.count(count_mode, as_int=True)
 
@@ -266,7 +303,17 @@ def running_mirna_count(record, analysis_dict,
 
 # Public Methods : miRNA Count Analysis
 def format_mirna_count(analysis_dict, sep=DEFAULT_ENTRY_SEP):
-    """Return the results of mirna analysis in a list of sep-delimited lines."""
+    """
+    Return the results of a mirna_count analysis in a list of delimited lines.
+
+    Args:
+        analysis_dict (dict): Dict from type analysis (see :func:`mirna_count_dict`).
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+
+    Returns:
+        list of string objects with a terminating newline character 
+        representing the results of the analysis.      
+    """
     ret_lines = ['miRNA_type' + sep + 'count']
     for key in MIRNA_COUNT_ANALYSIS_KEYS:
         ret_lines.append('%s%s%i' % (key, sep, analysis_dict[key]))
@@ -274,13 +321,34 @@ def format_mirna_count(analysis_dict, sep=DEFAULT_ENTRY_SEP):
 
 
 # Public Methods : miRNA Count Analysis
-def write_mirna_count(file_name, analysis_dict,
+def write_mirna_count(file_name_base, analysis_dict,
                       name=None,
                       multi_files=DEFAULT_WRITE_MULTI_FILES, # Currently a dummy option
                       sep=DEFAULT_ENTRY_SEP,
-                      file_suffix=DEFAULT_FILE_SUFFIX):
+                      file_suffix=DEFAULT_FILE_SUFFIX,
+                      make_plots=DEFAULT_MAKE_PLOTS):
+    """
+    Write the results of a mirna_count analysis to a file, and create a plot of the results.
+
+    Args:
+        file_name_base (str): "Base" name for output files. Final file names will be generated
+            based on each respective analysis type and provided parameters.
+        analysis_dict (dict): Dict from mirna_count analysis 
+            (see :func:`mirna_count_dict`).
+        name (str, optional): String to add to title of plot indicating data source.
+        multi_files (bool, optional): Currently has no effect.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        file_suffix (str, optional): File suffix to add to delimited files.
+            Defaults to ".csv" corresponding to using the delimiter: ",".
+        make_plots (bool, optional): If True, plot results using 
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            Otherwise do not make plots.
+    """
+
+
+
     """Write the results of the mirna-analysis to the file provided in file_name."""
-    use_file_name = file_name
+    use_file_name = file_name_base
     if not use_file_name.endswith(file_suffix):
         use_file_name += file_suffix
     with open(use_file_name, 'w') as out_file:
@@ -327,15 +395,15 @@ def combine_summary_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis : Full Summary Analysis
-def running_summary(record, analysis_dict,
-                    count_mode=DEFAULT_COUNT_MODE,
-                    type_sep=DEFAULT_HYBRID_TYPE_SEP,
-                    mirna_centric_sorting=True):
+def addto_summary(record, analysis_dict,
+                  count_mode=DEFAULT_COUNT_MODE,
+                  type_sep=DEFAULT_HYBRID_TYPE_SEP,
+                  mirna_centric_sorting=True):
     """Add information regarding various properties to the dictionary provided in
     the analysis_dict argument.
     """
-    running_type(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
-    running_mirna_count(record, analysis_dict, count_mode)
+    addto_type(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
+    addto_mirna_count(record, analysis_dict, count_mode)
 
 
 # Public Methods : HybRecord Analysis : Full Summary Analysis
@@ -407,11 +475,11 @@ def combine_mirna_target_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis : miRNA Target Analysis
-def running_mirna_target(record, analysis_dict, 
-                          count_mode=DEFAULT_COUNT_MODE,
-                          double_count_duplexes=False,
-                          mirna_contains=None, mirna_matches=None,
-                          target_contains=None, target_matches=None):
+def addto_mirna_target(record, analysis_dict, 
+                       count_mode=DEFAULT_COUNT_MODE,
+                       double_count_duplexes=False,
+                       mirna_contains=None, mirna_matches=None,
+                       target_contains=None, target_matches=None):
     """Add information regarding mirna/target properties to the dictionary provided in
     the analysis_dict argument.
     If double_count_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
@@ -605,10 +673,10 @@ def combine_mirna_fold_dicts(analysis_dicts):
 
 
 # Public Methods : HybRecord Analysis : miRNA Fold Analysis
-def running_mirna_fold(record, analysis_dict, 
-                       count_mode=DEFAULT_COUNT_MODE,
-                       allow_duplexes=False,
-                       skip_no_fold_record=False):
+def addto_mirna_fold(record, analysis_dict, 
+                     count_mode=DEFAULT_COUNT_MODE,
+                     allow_duplexes=False,
+                     skip_no_fold_record=False):
     """Add miRNA fold analysis to provided dict.
 
     If allow_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
@@ -626,7 +694,7 @@ def running_mirna_fold(record, analysis_dict,
 
         if not record.has_property('has_fold_record'):
             if not skip_no_fold_record:
-                message = 'Problem performing running miRNA fold analysis for record:\n'
+                message = 'Problem performing addto miRNA fold analysis for record:\n'
                 message += '    %s\n' % str(record)
                 message += 'Record has no fold-record attribute.'
                 print(message)
@@ -643,7 +711,7 @@ def running_mirna_fold(record, analysis_dict,
             or ('(' not in mirna_fold and ')' not in mirna_fold)
             or len(mirna_fold) < 5):
             analysis_dict['no_folds'] += count
-            message = 'WARNING: running_mirna_fold: Record: %s, ' % str(record)
+            message = 'WARNING: addto_mirna_fold: Record: %s, ' % str(record)
             message += 'Bad Fold: %s' % mirna_fold
             print(message)
             return 
