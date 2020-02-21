@@ -2455,7 +2455,7 @@ class FoldRecord(object):
         if len(record_lines) not in {5, 6}:
             if skip_bad:
                 if warn_bad:
-                    message = 'WARNING: Improperly Viennad: Wrong-Line-Number'
+                    message = 'WARNING: Improper Viennad: Wrong-Line-Number'
                     print(message)
                 return fail_ret_val
             else:
@@ -2865,6 +2865,7 @@ class FoldFile(object):
     def __init__(self, *args, **kwargs):
         """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
+        self._post_init_tasks()
 
     # FoldFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
@@ -2936,6 +2937,11 @@ class FoldFile(object):
         return cls(*args, **kwargs)
 
     # FoldFile : Private Methods
+    def _post_init_tasks(self):
+        """Stub for convenient subclassing"""
+        pass
+
+    # FoldFile : Private Methods
     def _ensure_FoldRecord(self, record):
         if not isinstance(record, FoldRecord):
             message = 'Item: "%s" is not a FoldRecord object.' % record
@@ -2983,6 +2989,12 @@ class ViennadFile(FoldFile):
     Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
     extra information.
     """
+    # Add subclass-specific default settings.
+    DEFAULTS = copy.deepcopy(FoldFile.DEFAULTS)
+    DEFAULTS['parse_by_blank_line'] = False
+
+    # Add subclass-specific instance settings.
+    settings = copy.deepcopy(DEFAULTS)
 
     # ViennadFile : Public Methods : Reading
     def __next__(self):
@@ -2990,14 +3002,20 @@ class ViennadFile(FoldFile):
         Call io.FileIO __next__ method for next three six lines and return
         output as FoldRecord object.
         """
-        line_1 = next(self.fh)
-        line_2 = next(self.fh)
-        line_3 = next(self.fh)
-        line_4 = next(self.fh)
-        line_5 = next(self.fh)
-        line_6 = next(self.fh)
-        return FoldRecord.from_viennad_lines((line_1, line_2, line_3, line_4, line_5, line_6),
+        record_lines = []
+        for i in range(6):
+            record_lines.append(next(self.fh))
+            if self.settings['parse_by_blank_line'] and not bool(record_lines[-1].strip()):
+                break
+        return FoldRecord.from_viennad_lines(record_lines,
                                              hybformat_file=self.settings['hybformat_file'])
+
+    # ViennadFile : Private Methods
+    def _post_init_tasks(self):
+        """Add custom settings related to the ViennadFile Class."""
+
+
+
     # ViennadFile : Private Methods
     def _to_record_string(self, write_record, newline):
         """Return a :class:`Fold Record` as a Viennad-format string."""
