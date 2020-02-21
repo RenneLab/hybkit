@@ -673,9 +673,9 @@ class HybRecord(object):
         """Analyze and store miRNA properties from other properties in the hyb record.
 
         Perform an analysis of miRNA properties within the sequence record, set the 
-        :ref:`mirna_seg` flag, and also store the results in the :attr:`miRNA_analysis` dict.
-        This analysis requries the :ref:`seg1_type` and :ref:`seg2_type` flags to be populated,
-        which can be performed by the :func:`find_seg_types` method.
+        :ref:`mirna_seg <mirna_seg>` flag, and also store the results in the :attr:`miRNA_analysis` dict.
+        This analysis requries the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags to 
+        be populated, which can be performed by the :func:`find_seg_types` method.
 
         Args:
             mirna_types (list, tuple, or set, optional): Iterable of strings of "types" to be 
@@ -771,14 +771,14 @@ class HybRecord(object):
 
         If the record contains an identified mirna and identified coding target, 
         find the region in which the targeted sequence resides and store the results in the 
-        "target_reg" flag and miRNA_analysis dict.
-        This analysis requries the :ref:`seg1_type`, :ref`seg2_type`, and :ref:`mirna_seg`
-        flags to be populated. This can be performed by sequentially using the 
-        :func:`find_seg_types` and :func:`mirna_analysis` methods.
-        If the :ref:`miRNA_seg` flag is in {"3p" or "5p"} (the record contains a mirna but
+        :ref:`target_reg <target_reg>` flag and miRNA_analysis dict.
+        This analysis requries the :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>`, 
+        and :ref:`mirna_seg <mirna_seg>` flags to be populated. This can be performed 
+        by sequentially using the :func:`find_seg_types` and :func:`mirna_analysis` methods.
+        If the :ref:`miRNA_seg <mirna_seg>` flag is in {"3p" or "5p"} (the record contains a mirna but
         is not a mirna dimer),
         The target will be checked if it is a coding type. If the target is a coding type, 
-        the analysis will be performed and the :ref:`target_reg` flag will be set.
+        the analysis will be performed and the :ref:`target_reg <target_reg>` flag will be set.
         The analysis requires a dict containing region 
         information that can be made using the :func:`make_region_info` method. This dict 
         should contain keys of transcript identifiers with values as a 
@@ -2061,6 +2061,8 @@ class FoldRecord(object):
     This class supports the following file types:
     (Data courtesy of Gay et al. [see :ref:`References`])
 
+    .. _vienna_file_format:
+
     * | The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
 
       Example:
@@ -2214,7 +2216,9 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_lines(self, newline=False):
         """
-        Return a list of lines for the record in vienna format. See (:ref:`Vienna File Format`).
+        Return a list of lines for the record in vienna format. 
+
+        See (:ref:`Vienna File Format <vienna_file_format>`).
 
         Args:
             newline (bool, optional): If True, add newline character to the end of each
@@ -2243,7 +2247,9 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_string(self, newline=False):
         """
-        Return a 3-line string for the record in vienna format. See (:ref:`Vienna File Format`).
+        Return a 3-line string for the record in vienna format. 
+
+        See (:ref:`Vienna File Format <vienna_file_format>`).
 
         Args:
             newline (bool, optional): If True, terminate the returned string with a newline

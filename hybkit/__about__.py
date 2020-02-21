@@ -55,3 +55,4 @@ __license__ = "GPLv3"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
 __version__ = "0.1.0"
+spec_version = __version__  # Define separate specification version.

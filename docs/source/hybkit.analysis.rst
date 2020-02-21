@@ -12,7 +12,7 @@ are included in the analyzed hyb files.
 
 Before using the analysis, the :ref:`seg1_type <seg1_type>` and 
 :ref:`seg2_type <seg2_type>` flags must be set for the record, 
-as is done by :func:`HybRecord.find_seg_types`. 
+as is done by :func:`hybkit.HybRecord.find_seg_types`. 
 A count is added to 
 the analysis dict for each hybrid type (Ex: "miRNA-mRNA") with 
 segments placed in sorted order for non-redundant typing.
@@ -42,7 +42,7 @@ This includes:
 
 Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag 
 must be set for each record as can be done by sequential use of the 
-:func:`HybRecord.find_seg_types` and :func:`HybRecord.mirna_analysis` 
+:func:`hybkit.HybRecord.find_seg_types` and :func:`hybkit.HybRecord.mirna_analysis` 
 methods.
 
 .. autofunction:: mirna_count_dict

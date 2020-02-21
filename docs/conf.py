@@ -82,6 +82,7 @@ rst_epilog = (
 """
 .. |3p| replace:: :abbr:`3p (3-Prime)`
 .. |5p| replace:: :abbr:`5p (5-Prime)`
-"""
+.. |spec_version| replace:: %s
+""" % (hybkit.__about__.spec_version)
 )
 
