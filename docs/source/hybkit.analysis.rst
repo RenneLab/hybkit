@@ -51,6 +51,8 @@ Summary Analysis
 miRNA Target Analysis
 ---------------------
 
+.. autodata:: MIRNA_TARGET_DESCRIPTION
+
 .. autofunction:: mirna_target_dict
 .. autofunction:: combine_mirna_target_dicts
 .. autofunction:: addto_mirna_target
@@ -63,6 +65,8 @@ miRNA Target Analysis
 
 miRNA Fold Analysis
 -------------------
+
+.. autodata:: MIRNA_FOLD_DESCRIPTION
 
 .. autofunction:: mirna_fold_dict
 .. autofunction:: combine_mirna_fold_dicts

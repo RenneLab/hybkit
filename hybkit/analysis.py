@@ -864,15 +864,16 @@ methods. Note: The :func:`hybkit.HybRecord.mirna_analysis` method must be used o
 the record to set appropriate variables for evaluation.
 
 The analysis dict contains the keys:
-    | base_counts: A by-index count of whether a miRNA is predicted to be
+    | :obj:`base_counts`: A by-index count of whether a miRNA is predicted to be
       base-paired.
-    | base_percent: A placeholder for evaluation of bases by percentage following analysis.
-    | all_evaluated: The number of records evaluated.
-    | all_mirna: The number of records evaluated and determined to contain miRNA.
-    | no_mirna: The number of records evaluated and determined not to contain miRNA.
-    | all_folds: The number of records evaluated, determined to contain mirna, and which
+    | :obj:`base_percent`: A placeholder for evaluation of bases by percentage following analysis.
+    | :obj:`all_evaluated`: The number of records evaluated.
+    | :obj:`all_mirna`: The number of records evaluated and determined to contain miRNA.
+    | :obj:`no_mirna`: The number of records evaluated and determined not to contain miRNA.
+    | :obj:`all_folds`: The number of records evaluated, determined to contain mirna, and which
       contained a fold record.
-    | all_folds: The number of records evaluated, determined to contain mirna, and which                  did not contain a fold record.   
+    | :obj:`all_folds`: The number of records evaluated, determined to contain mirna, and which
+      did not contain a fold record.   
 """
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Fold Analysis
