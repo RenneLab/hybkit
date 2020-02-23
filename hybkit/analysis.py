@@ -37,7 +37,7 @@ DEFAULT_MAX_MIRNA = 10
 
 ### --- Type Analysis --- ###
 
-TYPE_DESCRIPTION = None
+TYPE_DESCRIPTION = 'as_follows...'
 """
 The type analysis provides an analysis of what segment types
 are included in the analyzed hyb files.
@@ -229,7 +229,8 @@ def write_type(file_name_base, analysis_dict,
 
 ### --- miRNA Count Analysis --- ###
 
-MIRNA_COUNT_DESCRIPTION = """
+MIRNA_COUNT_DESCRIPTION = 'as_follows...'
+"""
 The mirna_count analysis determines what type each record is
 with regard to mirna and counts them accordingly.
 This includes:
@@ -394,9 +395,10 @@ def write_mirna_count(file_name_base, analysis_dict,
 
 ### --- Full Summary Analysis --- ###
 
-SUMMARY_DESCRIPTION = """
+SUMMARY_DESCRIPTION = 'as_follows...'
+"""
 This analysis includes the components of both the :ref:`type_analysis` and 
-:ref:`mirna count analyses, performed simultaneously.
+:ref:`mirna_count_analysis` analyses, performed simultaneously.
 """
 
 # Public Methods : HybRecord Analysis Preparation : Full Summary Analysis
