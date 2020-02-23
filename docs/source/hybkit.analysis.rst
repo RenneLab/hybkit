@@ -4,6 +4,8 @@ hybkit.analysis Module
 .. automodule:: hybkit.analysis
 
 
+.. _type_analysis:
+
 Type Analysis
 -------------
 
@@ -25,6 +27,8 @@ types.
 .. autofunction:: format_type
 .. autofunction:: write_type
 
+
+.. _mirna_count_analysis:
 
 miRNA Count Analysis
 --------------------
@@ -51,6 +55,7 @@ methods.
 .. autofunction:: format_mirna_count
 .. autofunction:: write_mirna_count
 
+.. _summary_analysis:
 
 Summary Analysis
 ----------------
@@ -60,6 +65,8 @@ Summary Analysis
 .. autofunction:: addto_summary
 .. autofunction:: write_summary
 
+
+.. _mirna_target_analysis:
 
 miRNA Target Analysis
 ---------------------
@@ -71,6 +78,8 @@ miRNA Target Analysis
 .. autofunction:: format_mirna_target
 .. autofunction:: write_mirna_target
 
+
+.. _mirna_fold_analysis:
 
 miRNA Fold Analysis
 -------------------

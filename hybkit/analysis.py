@@ -360,9 +360,14 @@ def write_mirna_count(file_name_base, analysis_dict,
 
 ### --- Full Summary Analysis --- ###
 
+SUMMARY_DESCRIPTION = """
+This analysis includes the components of both the :ref:`type_analysis` and 
+:ref:`mirna count analyses, performed simultaneously.
+"""
+
 # Public Methods : HybRecord Analysis Preparation : Full Summary Analysis
 def summary_dict():
-    """Create a dictionary with keys for running both type and miRNA analyses."""
+    """Return a combined dict from the :func:`type_dict` and :func:`mirna_count_dict` methods."""
     ret_dict = type_dict()
     ret_dict.update(mirna_count_dict())
     return ret_dict
@@ -370,7 +375,16 @@ def summary_dict():
 
 # Public Methods : HybRecord Analysis Preparation : Full Summary Analysis
 def combine_summary_dicts(analysis_dicts):
-    """Combine a list/tuple of dictionaries created from running summary analyses."""
+    """
+    Combine a list/tuple of dictionaries created from running summary analyses.
+
+    Args:
+        analysis_dicts (list or tuple): Iterable of dict objects from the summary analysis.
+
+    Returns:
+        Combined dict object with keys as in :func:`summary_dict` method.
+    """
+
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
