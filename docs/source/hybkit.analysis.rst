@@ -9,6 +9,8 @@ hybkit.analysis Module
 Type Analysis
 -------------
 
+.. autodata:: TYPE_DESCRIPTION
+
 The type analysis provides an analysis of what segment types 
 are included in the analyzed hyb files. 
 

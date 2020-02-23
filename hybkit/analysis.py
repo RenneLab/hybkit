@@ -37,6 +37,21 @@ DEFAULT_MAX_MIRNA = 10
 
 ### --- Type Analysis --- ###
 
+TYPE_DESCRIPTION = None
+"""
+The type analysis provides an analysis of what segment types
+are included in the analyzed hyb files.
+
+Before using the analysis, the :ref:`seg1_type <seg1_type>` and
+:ref:`seg2_type <seg2_type>` flags must be set for the record,
+as is done by :func:`hybkit.HybRecord.find_seg_types`.
+A count is added to
+the analysis dict for each hybrid type (Ex: "miRNA-mRNA") with
+segments placed in sorted order for non-redundant typing.
+The analysis additionally reports the number of individual segment
+types.
+"""
+
 # Public Methods : HybRecord Analysis Preparation : Type Analysis
 def type_dict():
     """
@@ -213,6 +228,25 @@ def write_type(file_name_base, analysis_dict,
 
 
 ### --- miRNA Count Analysis --- ###
+
+MIRNA_COUNT_DESCRIPTION = """
+The mirna_count analysis determines what type each record is
+with regard to mirna and counts them accordingly.
+This includes:
+
+    5p_mirna_hybrids: Hybrids with a |5p| miRNA.
+    3p_mirna_hybrids: Hybrids with a |3p| miRNA.
+    mirna_dimer_hybrids: Hybrids with both a |5p| and |3p| miRNA.
+    no_mirna_hybrids: Hybrids with no miRNA.
+    (And additionally includes:)
+    all_mirna_hybrids: Hybrids that fall into the first three categories.
+
+Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
+must be set for each record as can be done by sequential use of the
+:func:`hybkit.HybRecord.find_seg_types` and :func:`hybkit.HybRecord.mirna_analysis`
+methods.
+"""
+
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Count Analysis
 def mirna_count_dict():
@@ -413,11 +447,53 @@ def addto_summary(record, analysis_dict,
                   count_mode=DEFAULT_COUNT_MODE,
                   type_sep=DEFAULT_HYBRID_TYPE_SEP,
                   mirna_centric_sorting=True):
-    """Add information regarding various properties to the dictionary provided in
-    the analysis_dict argument.
+    """
+    Add the information from a :class:`~hybkit.HybRecord` to a summary analysis.
+
+    This method is designed to perform the analysis during a single reading of a
+    :class:`~hybkit.HybFile` as to minimize memory and time usage.
+    The provided dict object to analysis_dict is modified in-place.
+
+    Args:
+        record (HybRecord): Record with information to add.
+        analysis_dict (dict): Dict for summary analysis (see :func:`summary_dict`).
+        count_mode (str, optional): Indicates how entries in record should be counted.
+            Options are one of: {'read, 'record'}.
+            See :func:`hybkit.HybRecord.count` for further details.
+        type_sep (str, optional): Separator string to place between the seg_types.
+        mirna_centric_sorting (bool, optional): Where a type contains an miRNA,
+            place that first in the seg1_type<sep>seg2_type naming scheme.
+            Otherwise seg1_type and seg2_type are ordered alphabetically.
     """
     addto_type(record, analysis_dict, count_mode, type_sep, mirna_centric_sorting)
     addto_mirna_count(record, analysis_dict, count_mode)
+
+
+# Public Methods : HybRecord Analysis: Full Summary Analysis
+def format_summary(analysis_dict, sep=DEFAULT_ENTRY_SEP):
+    """
+    Return the results of a summary analysis in a list of delimited lines.
+
+    Args:
+        analysis_dict (dict): Dict for summary analysis (see :func:`summary_dict`).
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+
+    Returns:
+        list of string objects with a terminating newline character
+        representing the results of the analysis.
+    """
+
+    analyses = [
+                ('types_hybrids', _format_hybrid_type_count),
+                ('types_segs', _format_all_seg_type),
+                ('mirna_count', format_mirna_count),
+               ]
+    ret_lines = []
+    for analysis_name, analysis_method in analyses:
+        ret_lines += analysis_method(analysis_dict, sep)
+        ret_lines += ''
+
+    return ret_lines
 
 
 # Public Methods : HybRecord Analysis : Full Summary Analysis
@@ -427,9 +503,24 @@ def write_summary(file_name_base, analysis_dict,
                sep=DEFAULT_ENTRY_SEP,
                file_suffix=DEFAULT_FILE_SUFFIX,
                make_plots=DEFAULT_MAKE_PLOTS):
-    """Write the results of the summary analysis to a file or series of files with names based
-    on file_name_base.
     """
+    Write the results of a summary analysis to a file, and create plots of the results.
+
+    Args:
+        file_name_base (str): "Base" name for output files. Final file names will be generated
+            based on each respective analysis type and provided parameters.
+        analysis_dict (dict): Dict for summary analysis (see :func:`summary_dict`).
+        name (str, optional): String to add to title of plot indicating data source.
+        multi_files (bool, optional): If True, output result lines in separate files.
+            otherwise write a single delimited file containing results.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        file_suffix (str, optional): File suffix to add to delimited files.
+            Defaults to ".csv" corresponding to using the delimiter: ",".
+        make_plots (bool, optional): If True, plot results using
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            Otherwise do not make plots.
+    """
+
     analyses = [
                 ('types_hybrids', _format_hybrid_type_count),
                 ('types_segs', _format_all_seg_type),
@@ -446,6 +537,7 @@ def write_summary(file_name_base, analysis_dict,
         write_lines = []
         for analysis_name, analysis_method in analyses:
             write_lines += analysis_method(analysis_dict, sep)
+            write_lines += ''
         with open(analysis_file_name, 'w') as out_file:
             out_file.write('\n'.join(write_lines))
 
