@@ -88,7 +88,7 @@ def combine_type_dicts(analysis_dicts):
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
         or  (not all(isinstance(item, dict) for item in analysis_dicts))):
-        message = 'Input to "combine_type_analysis_dicts" method must be a list/tuple of two '
+        message = 'Input to "combine_type_dicts" method must be a list/tuple of two '
         message += 'or more dicts.\n'
         message += 'Current input:\n    %s' % str(analysis_dicts)
         print(message)
@@ -162,7 +162,7 @@ def addto_type(record, analysis_dict,
 # Public Methods : HybRecord Type Analysis Parsing
 def format_type(analysis_dict, sep=DEFAULT_ENTRY_SEP):
     """
-    Return the results of a type_analysis in a list of delimited lines.
+    Return the results of a type analysis in a list of delimited lines.
 
     Args:
         analysis_dict (dict): Dict for type analysis (see :func:`type_dict`).
@@ -187,7 +187,7 @@ def write_type(file_name_base, analysis_dict,
                 file_suffix=DEFAULT_FILE_SUFFIX,
                 make_plots=DEFAULT_MAKE_PLOTS):
     """
-    Write the results of a type_analysis to a file, and create plots of the results.
+    Write the results of a type analysis to a file, and create plots of the results.
 
     Args:
         file_name_base (str): "Base" name for output files. Final file names will be generated
@@ -200,7 +200,8 @@ def write_type(file_name_base, analysis_dict,
         file_suffix (str, optional): File suffix to add to delimited files.
             Defaults to ".csv" corresponding to using the delimiter: ",".
         make_plots (bool, optional): If True, plot results using 
-            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_
+            via :func:`hybkit.plot.type`.   
             Otherwise do not make plots.
     """
 
@@ -287,8 +288,7 @@ def combine_mirna_count_dicts(analysis_dicts):
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
         or  (not all(isinstance(item, dict) for item in analysis_dicts))):   
-        message = 'Input to "combine_type_analysis_dicts" method must be a list/tuple of two '
-        message += 'or more dicts.\n'
+        message = 'Input to "combine_type dicts.\n'
         message += 'Current input:\n    %s' % str(analysis_dicts)
         print(message)
         raise Exception(message)
@@ -376,7 +376,8 @@ def write_mirna_count(file_name_base, analysis_dict,
         file_suffix (str, optional): File suffix to add to delimited files.
             Defaults to ".csv" corresponding to using the delimiter: ",".
         make_plots (bool, optional): If True, plot results using 
-            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_
+            via :func:`hybkit.plot.mirna_count`.   
             Otherwise do not make plots.
     """
 
@@ -519,7 +520,8 @@ def write_summary(file_name_base, analysis_dict,
         file_suffix (str, optional): File suffix to add to delimited files.
             Defaults to ".csv" corresponding to using the delimiter: ",".
         make_plots (bool, optional): If True, plot results using
-            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_.
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_
+            via :func:`hybkit.plot.type` and :func:`hybkit.plot.mirna_count`.   
             Otherwise do not make plots.
     """
 
@@ -551,17 +553,45 @@ def write_summary(file_name_base, analysis_dict,
 
 ### --- miRNA Target Analysis --- ###
 
+MIRNA_TARGET_DESCRIPTION = 'as_follows...'
+"""
+The mirna_target analysis provides an analysis of what sequences are targeted
+by each respective miRNA within the hyb records. The analysis dict has keys
+of each miRNA, with each value being a dict of targeted sequences and their 
+associated count of times targeted.
+
+Before using the analysis, the :ref:`seg1_type <seg1_type>`,
+:ref:`seg2_type <seg2_type>`, and :ref:`mirna_seg <mirna_seg>` flags
+must be set for each record as can be done by sequential use of the
+:func:`hybkit.HybRecord.find_seg_types` and :func:`hybkit.HybRecord.mirna_analysis`
+methods.
+"""
+
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def mirna_target_dict():
-    """Create a dictionary with keys for running target analyses."""
-    # Created for parallel methods, potential future expansion.
+    """
+    Create a dictionary with keys for running miRNA target analyses.
+
+    Returns:
+        Dict object for target analyses::
+
+            {}
+    """
     ret_dict = {}
     return ret_dict
 
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Target Analysis
 def combine_mirna_target_dicts(analysis_dicts):
-    """Combine a list/tuple of two or more dictionaries created from running miRNA target analyses."""
+    """
+    Combine a list/tuple of dictionaries created from running mirna_target analyses.
+
+    Args:
+        analysis_dicts (list or tuple): Iterable of dict objects from the mirna_target analysis.
+
+    Returns:
+        Combined dict object with keys of each respective mirna and their target coutns.
+    """
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -588,11 +618,36 @@ def addto_mirna_target(record, analysis_dict,
                        double_count_duplexes=False,
                        mirna_contains=None, mirna_matches=None,
                        target_contains=None, target_matches=None):
-    """Add information regarding mirna/target properties to the dictionary provided in
-    the analysis_dict argument.
-    If double_count_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
-    in both orientations. If False, the 3p miRNA will be considered as the target.
     """
+    Add the information from a :class:`~hybkit.HybRecord` to a mirna_target analysis.
+    If the record contains a single miRNA, the miRNA and target are identified.
+    The count for this miRNA and its target is then added to the dict.
+
+    This method is designed to perform the analysis during a single reading of a
+    :class:`~hybkit.HybFile` as to minimize memory and time usage.
+    The provided dict object to analysis_dict is modified in-place.
+
+    Args:
+        record (HybRecord): Record with information to add.
+        analysis_dict (dict): Dict for mirna_target analysis created with
+            :func:`mirna_count_dict`.
+        count_mode (str, optional): Indicates how entries in record should be counted.
+            Options are one of: {'read, 'record'}.
+            See :func:`hybkit.HybRecord.count` for further details.
+        double_count_duplexes (bool, optional) If True, add a count to the analysis record
+            for each of the miRNA with the target assigned as the other. This will cause the 
+            final count of miRNA not to equal the total record count containing miRNA, as 
+            all duplex miRNA records will be counted twice.
+        miRNA_contains (str, optional): If provided, only miRNA with identifiers 
+            containing the provided string will be included.
+        miRNA_matches (str, optional): If provided, only miRNA with identifiers
+            matching the provided string will be included.  
+        target_contains (str, optional): If provided, only miRNA with target identifiers
+            containing the provided string will be included.  
+        target_matches (str, optional): If provided, only miRNA with target identifiers
+            matching the provided string will be included.  
+    """
+
     record._ensure_mirna_analysis()
     count = record.count(count_mode, as_int=True)
 
@@ -630,7 +685,26 @@ def addto_mirna_target(record, analysis_dict,
 
 # Public Methods : miRNA Target Analysis
 def process_mirna_target(analysis_dict):
-    """process and sort the results of target analysis"""
+    """
+    Process and sort the results of a mirna_target analysis.
+
+    Args:
+        analysis_dict (dict): Dict from target analysis (see :func:`mirna_target_dict`).
+
+    Returns:
+        A tuple of ::
+
+            (ret_dict, counts, target_type_counts, total_count)
+
+        | :obj:`ret_dict` - A copy of the analysis dict with keys sorted alphabetically, 
+          and with values of counter objects containing counts of each miRNA's targets.
+        | :obj:`counts` - A dict of miRNA with keys sorted alphabetically, and values of the 
+          total sum of the respective miRNA's targets.
+        | :obj:`target_type_counts` - A dict of miRNA with keys sorted alphabetically, and values
+          of a dict of counts of each respective type targeted by that miRNA.
+        | :obj:`total_count` - An int of the sum total of counted mirna/targets.
+
+    """
     counts = {} 
     target_type_counts = {}
     ret_dict = {}
@@ -659,7 +733,21 @@ def process_mirna_target(analysis_dict):
 def format_mirna_target(analysis_dict, counts=None, 
                         sep=DEFAULT_ENTRY_SEP, 
                         spacer_line=DEFAULT_TARGET_SPACER_LINE):
-    """Return the results of target analysis in a list of sep-delimited lines."""
+    """
+    Return the results of a mirna_target analysis in a list of delimited lines.
+
+    Args:
+        analysis_dict (dict): Dict from type analysis (see :func:`mirna_target_dict`).
+        counts (dict, optional): Dict of total miRNA couts from :func:`process_mirna_target`.
+            If povided, adds a line for the total count of each miRNA to the output.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        spacer_line (bool, optional): If True, add a blank line between each included 
+            miRNA's targets.
+
+    Returns:
+        list of string objects with a terminating newline character
+        representing the results of the analysis.
+    """
     header_items = ['mirna', 'mirna_type', 'target', 'target_type', 'count']
     ret_lines = []
     ret_lines.append(sep.join(header_items))
@@ -689,8 +777,29 @@ def write_mirna_target(file_name_base, analysis_dict,
                        spacer_line=DEFAULT_TARGET_SPACER_LINE,
                        make_plots=DEFAULT_MAKE_PLOTS,
                        max_mirna=DEFAULT_MAX_MIRNA):
-    """Write the results of the mirna_target to a file or series of files with names based
-    on file_name_base.
+    """
+    Write the results of a mirna_target analysis to a file, and create a plot of the results.
+
+    Args:
+        file_name_base (str): "Base" name for output files. Final file names will be generated
+            based on each respective analysis type and provided parameters.
+        analysis_dict (dict): Dict created from processing a mirna_target analysis 
+            (see :func:`mirna_target_dict`, and :func:`process_mirna_target`).
+        counts (dict, optional): Dict of total miRNA counts from :func:`process_mirna_target`.
+            If povided, adds a line for the total count of each miRNA to the output.
+        target_types_counts_dict (dict, optional): Dict of mirna target type counts 
+            from :func:`process_mirna_target`. If povided, enables plotting of types targeted
+            by each miRNA.
+        name (str, optional): String to add to title of plot indicating data source.
+        multi_files (bool, optional): If True, output results for each miRNA 
+            in separate files. Otherwise write a single delimited file containing results.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        file_suffix (str, optional): File suffix to add to delimited files.
+            Defaults to ".csv" corresponding to using the delimiter: ",".
+        make_plots (bool, optional): If True, plot results using
+            `matplotlib <https://matplotlib.org/3.1.1/index.html>`_ 
+            via :func:`hybkit.plot.mirna_target` and :func:`hybkit.plot.mirna_target_type`.
+            Otherwise do not make plots.
     """
     if multi_files and len(analysis_dict) > max_mirna:
         message = 'miRNA-specific individual output files not supported for > 10 miRNA, with '
@@ -741,9 +850,50 @@ def write_mirna_target(file_name_base, analysis_dict,
 
 ### --- miRNA Fold Analysis --- ###
 
+MIRNA_FOLD_DESCRIPTION = 'as_follows...'
+"""
+The mirna_fold analysis evaluates the predicted binding of miRNA within hyb records
+that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object 
+as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and 
+plotting of the predicted binding by position among the provided miRNA.
+
+Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
+must be set for each record as can be done by sequential use of the
+:func:`hybkit.HybRecord.find_seg_types` and :func:`hybkit.HybRecord.mirna_analysis`
+methods. Note: The :func:`hybkit.HybRecord.mirna_analysis` method must be used on 
+the record to set appropriate variables for evaluation.
+
+The analysis dict contains the keys:
+    | base_counts: A by-index count of whether a miRNA is predicted to be
+      base-paired.
+    | base_percent: A placeholder for evaluation of bases by percentage following analysis.
+    | all_evaluated: The number of records evaluated.
+    | all_mirna: The number of records evaluated and determined to contain miRNA.
+    | no_mirna: The number of records evaluated and determined not to contain miRNA.
+    | all_folds: The number of records evaluated, determined to contain mirna, and which
+      contained a fold record.
+    | all_folds: The number of records evaluated, determined to contain mirna, and which                  did not contain a fold record.   
+"""
+
 # Public Methods : HybRecord Analysis Preparation : miRNA Fold Analysis
 def mirna_fold_dict():
-    """Create a dictionary with keys for running fold analyses."""
+    """
+    Create a dictionary with keys for running mirna_fold analyses.
+
+    Returns:
+        Dict object for fold analyses::
+
+            {
+             'base_counts': Counter({i: 0 for i in range(1,28}),
+             'base_pecent': None,
+             'all_evaluated': 0,
+             'all_mirna': 0,
+             'no_mirna': 0,
+             'all_folds': 0,
+             'no_folds': 0,
+            }
+    """
+
     ret_dict = {}
     ret_dict['base_counts'] = Counter()
     for i in range(1,28):
@@ -759,7 +909,15 @@ def mirna_fold_dict():
 
 # Public Methods : HybRecord Analysis Preparation : miRNA Fold Analysis
 def combine_mirna_fold_dicts(analysis_dicts):
-    """Combine a list/tuple of two or more counter objects created from running miRNA fold analyses."""
+    """
+    Combine a list/tuple of dictionaries created from running mirna_fold analyses.
+
+    Args:
+        analysis_dicts (list or tuple): Iterable of dict objects from the mirna_fold analysis.
+
+    Returns:
+        Combined dict object with keys as in :func:`mirna_fold_dict` method.
+    """
     # Check that method input is formatted correctly:
     if (not (isinstance(analysis_dicts, list) or isinstance(analysis_dicts, tuple))
         or  (len(analysis_dicts) < 2)
@@ -785,6 +943,8 @@ def addto_mirna_fold(record, analysis_dict,
                      count_mode=DEFAULT_COUNT_MODE,
                      allow_duplexes=False,
                      skip_no_fold_record=False):
+
+
     """Add miRNA fold analysis to provided dict.
 
     If allow_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
