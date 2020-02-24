@@ -236,12 +236,12 @@ The mirna_count analysis determines what type each record is
 with regard to mirna and counts them accordingly.
 This includes:
 
-    5p_mirna_hybrids: Hybrids with a |5p| miRNA.
-    3p_mirna_hybrids: Hybrids with a |3p| miRNA.
-    mirna_dimer_hybrids: Hybrids with both a |5p| and |3p| miRNA.
-    no_mirna_hybrids: Hybrids with no miRNA.
-    (And additionally includes:)
-    all_mirna_hybrids: Hybrids that fall into the first three categories.
+    | 5p_mirna_hybrids: Hybrids with a |5p| miRNA.
+    | 3p_mirna_hybrids: Hybrids with a |3p| miRNA.
+    | mirna_dimer_hybrids: Hybrids with both a |5p| and |3p| miRNA.
+    | no_mirna_hybrids: Hybrids with no miRNA.
+    | (And additionally includes:)
+    | all_mirna_hybrids: Hybrids that fall into the first three categories.
 
 Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
 must be set for each record as can be done by sequential use of the

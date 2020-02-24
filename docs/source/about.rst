@@ -14,6 +14,16 @@ References
 About
 =====
 
+Renne Lab
+---------
+    | Principal Investigator: Rolf Renne
+    | Henry E. Innes Professor of Cancer Research
+    | University of Florida
+    | UF Health Cancer Center
+    | UF Department of Molecular Genetics and Microbiology
+    | UF Genetics Institute
+    | http://www.rennelab.com
+
 Lead Developer
 --------------
     * | Dan Stribling <ds@ufl.edu>
