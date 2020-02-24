@@ -4,7 +4,62 @@ hybkit Specification
 
 hybkit Specification, Version: |spec_version|
 
-Hybkit uses an extended version of the specification provided for ".hyb" format-files by 
+    The ".hyb" file format is described by Travis, et al.
+    as a "gff-related format that contains sequence identifiers, read sequences, 1-based
+    mapping coordinates, and annotation information for each chimera"
+    in conjunction with the Hyb software package. (see :ref:`References`)
+    Each line in a hyb file, referred to here as a hyb "record," contains information about a 
+    genomic sequence read identified to be a chimera by anlaysis sofwtare. 
+    Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
+    information on each of the alignments identified within the sequence read. 
+    The columns are described as follows by Travis, et al.:
+
+        | Column 1, unique sequence identifier.
+        | Column 2, read sequence [...].
+        | Column 3, predicted binding energy in kcal/mol.
+        | Columns 4–9, mapping information for first fragment of read: 
+          name of matched transcript, coordinates in 
+          read, coordinates in transcript, mapping score.
+        | Columns 10–15, mapping information for second fragment of read.
+        | Column 16 (optional, [...]), list of annotations in the format: 
+          ‘‘feature1=value1; feature2=value2;..." 
+
+    The hybkit project uses an extended version of this description, including assigning
+    columns reference names, and defining allowed flags.
+
+.. _columns: 
+Columns
+-------------
+
+    .. table:: 
+        :widths: auto
+    
+        == =============== ===================================================================
+        #  Name            Description
+        == =============== ===================================================================
+        1  id              Hybrid Read Identifier
+        2  seq             Read Nucleotide Sequence
+        3  energy          Predicted Gibbs Free-Energy of Intra-Hybrid Folding
+        4  seg1_ref        Segment 1 Mapping Reference Identity
+        5  seg1_read_start Segment 1 Mapping Start on Read 
+        6  seg1_read_end   Segment 1 Mapping End on Read
+        7  seg1_ref_start  Segment 1 Mapping Start on Reference
+        8  seg1_ref_end    Segment 1 Mapping End on Reference
+        9  seg1_score      Segment 1 Mapping Score
+        10 seg2_ref        Segment 2 Mapping Reference Identity
+        11 seg2_read_start Segment 2 Mapping Start on Read
+        12 seg2_read_end   Segment 2 Mapping End on Read
+        13 seg2_ref_start  Segment 2 Mapping Start on Reference
+        14 seg2_ref_end    Segment 2 Mapping End on Reference
+        15 seg2_score      Segment 2 Mapping Score
+        16 flags           Hybrid Read Analysis Details       
+        == =============== ===================================================================
+
+..     These columns are respectively described in hybkit as:
+         id, seq, energy, [seg1\_]ref, [seg1\_]read_start, [seg1\_]read_end, [seg1\_]ref_start,
+         [seg1\_]ref_end, [seg1\_]score, [seg2\_]read_start, [seg2\_]read_end, [seg2\_]ref_start,
+         [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
+
 
 .. toctree::
    :maxdepth: 2
@@ -14,74 +69,104 @@ Hybkit uses an extended version of the specification provided for ".hyb" format-
 
 Flags
 -----
+   
+    The following four flags are used by the Hyb software package (see :ref:`References`),
+    with definitions provided as used in the hybkit package.
 
     .. _count_total:
     
-    'count_total',            # str(int), total represented hybrids
+    :obj:`count_total` - Integer: Total represented hybrid records, if combined.
 
     .. _count_last_clustering:
 
-    'count_last_clustering',  # str(int), total represented hybrids at last clustring
+    :obj:`count_last_clustering` - Integer: Total represented hybrid records at last 
+    clustering.
                  
     .. _two_way_merged:
     
-    'two_way_merged',         # "0" or "1", boolean representation of whether
-    #   entries with mirrored 5' and 3' hybrids were merged
+    :obj:`two_way_merged` - {"0" or "1"} Boolean representation of whether
+    entries with mirrored 5' and 3' hybrids were merged if the record is a combined record.
     
     .. _seq_IDs_in_cluster:
 
-    'seq_IDs_in_cluster',     # str, comma-separated list of all ids of hybrids
-    #   merged into this hybrid entry.
+    :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all reord IDs of hybrids
+    merged into this hybrid entry.
+
+    The following flags are defined by the hybkit package:
 
     .. _read_count:
 
-    read_count,   # str(int), number of sequence reads represented by record
-    #   if merged record, represents total for all merged entries
+    :obj:`read_count` -  Integer: Number of sequence reads represented by this record.
+    If the record is combined, this represents the total read count for all merged entries.
 
     .. _orient:
 
-    'orient',       # str, orientation of strand. Options:
-    #   "F" (Forward), "IF" (Inferred Forward),
-    #   "R" (Reverse), "IR" (Inferred Reverse),
-    #   "U" (Unknown), or "IC" (Inferred Conflicting)
+    :obj:`orient` -  String: Orientation of strand. Options:
+    "F" (Forward), "IF" (Inferred Forward),
+    "R" (Reverse), "IR" (Inferred Reverse),
+    "U" (Unknown), or "IC" (Inferred Conflicting).
 
     .. _seg1_type:
 
-    :obj:`seg1_type`    # str, assigned type of segment 1, ex: "miRNA" or "mRNA"
+    :obj:`seg1_type` - String: Assigned segment type of segment 1, ex: "miRNA" or "mRNA".
 
     .. _seg2_type:
 
-    'seg2_type',    # str, assigned type of segment 2, ex: "miRNA" or "mRNA"
+    :obj:`seg2_type` - String: Assigned segment type of segment 2, ex: "miRNA" or "mRNA".
 
     .. _seg1_det:
  
-    'seg1_det',     # str, arbitrary detail about segment 1
+    :obj:`seg1_det` -  String: Arbitrary detail about segment 1.
 
     .. _seg2_det:
 
-    'seg2_det',     # str, arbitrary detail about segment 2
+    :obj:`seg2_det` -  String: Arbitrary detail about segment 2.
 
     .. _miRNA_seg:
 
-    'miRNA_seg',    # str, indicates which (if any) segment mapping is a miRNA
-    #   options are "N" (none), "3p" (seg1), "5p" (seg2),
-    #   "B" (both), or "U" (unknown)
+    :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
+    options are "N" (none), "3p" (seg1), "5p" (seg2),
+    "B" (both), or "U" (unknown).
 
     .. _target_reg:
 
-    'target_reg',   # str, assigned region of the miRNA target.
-    #   options are "5pUTR", "coding", "3pUTR",
-    #   "N" (none), or "U" (unknown)
+    :obj:`target_reg` -  String: Assigned region of the miRNA target.
+    options are "5pUTR", "coding", "3pUTR",
+    "N" (none), or "U" (unknown).
 
     .. _ext:
   
-    'ext',          # int, "0" or "1", boolean representation of whether
-    #   record sequences were bioinformatically extended as is
-    #   performed by the Hyb software package.
+    :obj:`ext` -  Integer: "0" or "1", Boolean representation of whether
+    record sequences were bioinformatically extended as is
+    performed by the Hyb software package.
 
     .. _source:
 
-    'source',       # str, label for sequence source id (eg. file), when 
-    #   combining records from different sources.
+    :obj:`source` -  String: Label for sequence source id (eg. source file), when 
+    combining records from different sources.
 
 
+.. _other_details:
+
+Other Details
+-------------
+
+.. table:: 
+    :widths: auto
+
+    ======= ==================================================================================
+    Item    Role
+    ======= ==================================================================================
+    \\\\t   Column Delimiter
+    .       Missing Data Placeholder
+    .hyb    File Suffix
+    .hyb.gz gzipped File Suffix
+    ======= ==================================================================================
+
+
+Example
+-------
+
+An example .hyb format line (courtesy of Gay et al. [:ref:`References`])::
+
+    2407_718	ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC	.	MIMAT0000078_MirBase_miR-23a_microRNA	1	21	1	21	0.0027	ENSG00000188229_ENST00000340384_TUBB2C_mRNA	23	49	1181	1207	1.2e-06
