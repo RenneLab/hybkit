@@ -2,12 +2,12 @@
 hybkit Specification
 ==================================
 
-hybkit Specification, Version: |spec_version|
+Version: |spec_version|
 
     The ".hyb" file format is described by Travis, et al.
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
     mapping coordinates, and annotation information for each chimera"
-    in conjunction with the Hyb software package. (see :ref:`References`)
+    in conjunction with the Hyb software package (see :ref:`References`).
     Each line in a hyb file, referred to here as a hyb "record," contains information about a 
     genomic sequence read identified to be a chimera by anlaysis sofwtare. 
     Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
@@ -27,7 +27,6 @@ hybkit Specification, Version: |spec_version|
     The hybkit project uses an extended version of this description, including assigning
     columns reference names, and defining allowed flags.
 
-.. _columns: 
 
 Columns
 -------------
@@ -147,7 +146,6 @@ Flags
     combining records from different sources.
 
 
-.. _other_details:
 
 Other Details
 -------------

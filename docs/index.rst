@@ -10,6 +10,5 @@
    source/hybkit
    source/hybkit.analysis
    source/hybkit.plot
-   source/references
-   source/indices
+   source/about
 

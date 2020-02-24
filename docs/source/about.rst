@@ -10,3 +10,22 @@ References
        targets in endothelial cells." Journal of virology 92.8 (2018): e02138-17.
     #. The Vienna File Format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
 
+
+About
+=====
+
+Lead Developer
+--------------
+    * | Dan Stribling <ds@ufl.edu>
+      | https://github.com/dstrib
+      | https://www.linkedin.com/in/DanielStribling
+      | University of Florida, Renne Lab
+
+Changelog
+---------
+
+    * 0.1.0 (-present) Beta Implementation
+
+
+
+
