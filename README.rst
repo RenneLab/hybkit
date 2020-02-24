@@ -12,7 +12,7 @@ This project contains multiple major components:
        for creation of custom analyses of hyb-format data.
 
 
-Full project documentation is available at `http://www.readthedocs.com/...`_
+Full project documentation is available at LINKHERE
 
 
 Installation
