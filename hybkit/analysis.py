@@ -201,7 +201,7 @@ def write_type(file_name_base, analysis_dict,
             Defaults to ".csv" corresponding to using the delimiter: ",".
         make_plots (bool, optional): If True, plot results using 
             `matplotlib <https://matplotlib.org/3.1.1/index.html>`_
-            via :func:`hybkit.plot.type`.   
+            via :func:`hybkit.plot.hybrid_type_counts`.   
             Otherwise do not make plots.
     """
 
@@ -224,8 +224,8 @@ def write_type(file_name_base, analysis_dict,
                 out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_type_hybrids', name=name)
-        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_type_seg', name=name)
+        hybkit.plot.hybrid_type_count(file_name_base + '_type_hybrids', analysis_dict, name=name)
+        hybkit.plot.all_seg_type(file_name_base + '_type_seg', analysis_dict, name=name)
 
 
 ### --- miRNA Count Analysis --- ###
@@ -391,7 +391,7 @@ def write_mirna_count(file_name_base, analysis_dict,
         out_file.write('\n'.join(format_mirna_counts(analysis_dict, sep)))
 
     if make_plots:
-        hybkit.plot.mirna_count(analysis_dict, file_name + '_mirna_counts', name=name)
+        hybkit.plot.mirna_count(file_name + '_mirna_counts', analysis_dict, name=name)
 
 
 ### --- Full Summary Analysis --- ###
@@ -546,9 +546,9 @@ def write_summary(file_name_base, analysis_dict,
             out_file.write('\n'.join(write_lines))
 
     if make_plots:
-        hybkit.plot.hybrid_type_count(analysis_dict, file_name_base + '_types_hybrids', name=name)
-        hybkit.plot.all_seg_type(analysis_dict, file_name_base + '_types_seg', name=name)
-        hybkit.plot.mirna_count(analysis_dict, file_name_base + '_mirna_count', name=name)
+        hybkit.plot.hybrid_type_count(file_name_base + '_types_hybrids', analysis_dict, name=name)
+        hybkit.plot.all_seg_type(file_name_base + '_types_seg', analysis_dict, name=name)
+        hybkit.plot.mirna_count(file_name_base + '_mirna_count', analysis_dict, name=name)
 
 
 ### --- miRNA Target Analysis --- ###
@@ -825,16 +825,16 @@ def write_mirna_target(file_name_base, analysis_dict,
 
             if make_plots:
                 target_plot_name = _sanitize_name(file_name_base + '_' + mirna)
-                hybkit.plot.mirna_target(mirna, 
+                hybkit.plot.mirna_target(target_plot_name,
+                                         mirna, 
                                          analysis_dict[mirna_id], 
-                                         target_plot_name,
                                          name=name,
                                          )
 
                 target_type_plot_name = _sanitize_name(file_name_base + '_' + mirna + '_types')
-                hybkit.plot.mirna_target_type(mirna,
+                hybkit.plot.mirna_target_type(target_type_plot_name,
+                                              mirna,
                                               target_types_count_dict[mirna_id],
-                                              target_type_plot_name,
                                               name=name
                                               )
 
@@ -872,7 +872,7 @@ The analysis dict contains the keys:
     | :obj:`no_mirna`: The number of records evaluated and determined not to contain miRNA.
     | :obj:`all_folds`: The number of records evaluated, determined to contain mirna, and which
       contained a fold record.
-    | :obj:`all_folds`: The number of records evaluated, determined to contain mirna, and which
+    | :obj:`no_folds`: The number of records evaluated, determined to contain mirna, and which
       did not contain a fold record.   
 """
 
@@ -945,11 +945,29 @@ def addto_mirna_fold(record, analysis_dict,
                      allow_duplexes=False,
                      skip_no_fold_record=False):
 
+    """
+    Add the information from a :class:`~hybkit.HybRecord` to a mirna_target analysis.
+    If the record contains a single miRNA, the miRNA and target are identified.
+    The count for this miRNA and its target is then added to the dict.
 
-    """Add miRNA fold analysis to provided dict.
+    This method is designed to perform the analysis during a single reading of a
+    :class:`~hybkit.HybFile` as to minimize memory and time usage.
+    The provided dict object to analysis_dict is modified in-place.
 
-    If allow_duplexes is provided as True, miRNA-miRNA duplexes will be counted 
-    considering the 5p miRNA as the "miRNA" in the hybrid.
+    Args:
+        record (HybRecord): Record with information to add.
+        analysis_dict (dict): Dict for mirna_fold analysis created with
+            :func:`mirna_fold_dict`.
+        count_mode (str, optional): Indicates how entries in record should be counted.
+            Options are one of: {'read, 'record'}.
+            See :func:`hybkit.HybRecord.count` for further details.
+        allow_duplexes (bool, optional) If True, miRNA-miRNA duplexes will be counted
+            considering the 5p miRNA as the "miRNA" in the hybrid. 
+            the will otherwise be ignored.
+        skip_no_fold_record (bool, optional): If True, :class:`hybkit.HybRecord` records
+            that do not contain a :class:`~hybkit.FoldRecord` object stored in the 
+            :attr:`~hybkit.HybRecord.fold_record` attribute will be added to the 'no_fold' count.
+            Otherwise an error will be raised.
     """
     record._ensure_mirna_analysis()
     count = record.count(count_mode, as_int=True)
@@ -994,7 +1012,15 @@ def addto_mirna_fold(record, analysis_dict,
 
 # Public Methods : miRNA Fold Analysis
 def process_mirna_fold(analysis_dict):
-    """Process results of mirna fold analysis."""
+    """
+    Process the results of a mirna_fold analysis. Add the 'base_fractions' key.
+
+    Args:
+        analysis_dict (dict): Dict from mirna_fold analysis (see :func:`mirna_fold_dict`).
+
+    Returns:
+        The original analysis_dict with an added 'base_fractions' key.
+    """
     total_count = analysis_dict['all_folds']
     if total_count == 0:
         message = 'Problem with mirna fold analysis, total mirna counted is 0.'
@@ -1021,7 +1047,17 @@ def process_mirna_fold(analysis_dict):
 # Public Methods : miRNA Fold Analysis
 def format_mirna_fold(analysis_dict,
                       sep=DEFAULT_ENTRY_SEP):
-    """Return the results of mirna_fold analysis in a list of sep-delimited lines."""
+    """
+    Return the results of a mirna_fold analysis in a list of delimited lines.
+
+    Args:
+        analysis_dict (dict): Dict from mirna_fold analysis (see :func:`mirna_fold_dict`).
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+
+    Returns:
+        list of string objects with a terminating newline character
+        representing the results of the analysis.
+    """
     header_items = ['data_type', 'count']
     ret_lines = []
     ret_lines.append(sep.join(header_items))
@@ -1052,8 +1088,28 @@ def write_mirna_fold(file_name_base, analysis_dict,
                      file_suffix=DEFAULT_FILE_SUFFIX,
                      spacer_line=DEFAULT_TARGET_SPACER_LINE,
                      make_plots=DEFAULT_MAKE_PLOTS):
-    """Write the results of the mirna_fold analysis to a file or series of files with names based
-    on file_name_base.
+
+    """
+    Write the results of a mirna_fold analysis to a file, and create a plot of the results.
+
+    Args:
+        file_name_base (str): "Base" name for output files. Final file names will be generated
+            based on each respective analysis type and provided parameters.
+        analysis_dict (dict): Dict created from processing a mirna_fold analysis 
+            (see :func:`mirna_fold_dict`, and :func:`process_mirna_fold`).
+        name (str, optional): String to add to title of plot indicating data source.
+        multi_files (bool, optional): If True, output results for the base counts
+            and base fractions in separate files. 
+            Otherwise write a single delimited file containing results.
+        sep (str, optional): Separator for entries within lines, such as ',' or '\\\\t'.
+        file_suffix (str, optional): File suffix to add to delimited files.
+            Defaults to ".csv" corresponding to using the delimiter: ",".
+        spacer_line (bool, optional): If True, add a blank line between the 
+            base counts and base fractions entries with combined outputting.
+        make_plots (bool, optional): If True, plot results 
+            using `matplotlib <https://matplotlib.org/3.1.1/index.html>`_
+            via :func:`hybkit.plot.mirna_fold`.
+            Otherwise do not make plots.
     """
 
     write_lines = format_mirna_folds(analysis_dict, sep=sep)
@@ -1081,8 +1137,8 @@ def write_mirna_fold(file_name_base, analysis_dict,
                 fold_base_fractions_file.write(write_lines[9] + '\n')
 
     if make_plots:
-        hybkit.plot.mirna_fold(analysis_dict, 
-                               file_name_base,
+        hybkit.plot.mirna_fold(file_name_base,
+                               analysis_dict, 
                                name=name,
                                )
 

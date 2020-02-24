@@ -48,7 +48,7 @@ FORMAT_NAME_MAP = {'5p_mirna_hybrids':"5'_miRNA_Hybrids",
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def hybrid_type_count(analysis_dict, plot_file_name,
+def hybrid_type_count(plot_file_name, analysis_dict,
                       name=None,
                       title=DEFAULT_HYBRID_TYPE_COUNTS_TITLE,
                       other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -56,7 +56,24 @@ def hybrid_type_count(analysis_dict, plot_file_name,
                       plot_file_type=DEFAULT_FILE_TYPE,
                       dpi=DEFAULT_DPI,
                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    """Plot the results of hybrid_type_counts."""
+    """
+    Plot the counts of types resulting from the :ref:`type_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plots.
+        analysis_dict (dict): Dict from type analysis (see :func:`type_dict`).
+        title (str, optional): Title / header for plot.
+        other_threshhold (float, optional): Total fraction at which to begin the "other" wedge. 
+            Setting to 0.0 disables the "other" wedge based on a threshhold.
+        min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
+            wedge. Setting to 0.0 disables the "other" wedge based on minimum wedge size.
+        plot_file_type (str, optional): File type for saving of plots. Options: 
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.plot() function
+    """
+
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -80,7 +97,7 @@ def hybrid_type_count(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def all_seg_type(analysis_dict, plot_file_name,
+def all_seg_type(plot_file_name, analysis_dict,
                  name=None,
                  title=DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -88,7 +105,25 @@ def all_seg_type(analysis_dict, plot_file_name,
                  plot_file_type=DEFAULT_FILE_TYPE,
                  dpi=DEFAULT_DPI,
                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    """Plot the results of hybrid_type_counts."""
+    """
+    Plot the counts of segment types resulting from the :ref:`type_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plot.
+        analysis_dict (dict): Dict from type analysis 
+            (see :func:`type_dict`).
+        title (str, optional): Title / header for plot.
+        other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
+            Setting to 0.0 disables the "other" wedge based on a threshhold.
+        min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
+            wedge. Setting to 0.0 disables the "other" wedge based on minimum wedge size.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.plot() function.
+    """
+
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -112,7 +147,7 @@ def all_seg_type(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord Type Analysis Plotting
-def mirna_count(analysis_dict, plot_file_name, 
+def mirna_count(plot_file_name, analysis_dict,
                 name=None,
                 title=DEFAULT_MIRNA_COUNTS_TITLE,
                 other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -120,7 +155,25 @@ def mirna_count(analysis_dict, plot_file_name,
                 plot_file_type=DEFAULT_FILE_TYPE,
                 dpi=DEFAULT_DPI,
                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    """Plot the results of hybrid_type_counts."""
+    """
+    Plot the results of the :ref:`mirna_count_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plot.
+        analysis_dict (dict): Dict from mirna count analysis 
+            (see :func:`~hybkit.mirna_count_dict`).
+        title (str, optional): Title / header for plot.
+        other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
+            Setting to 0.0 disables the "other" wedge based on a threshhold.
+        min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
+            wedge. Setting to 0.0 disables the "other" wedge based on minimum wedge size.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass 
+            to the matplotlib.plot() function.
+        """
+
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -153,7 +206,7 @@ def mirna_count(analysis_dict, plot_file_name,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_target(mirna_name, mirna_targets_dict, plot_file_name, 
+def mirna_target(plot_file_name, mirna_name, mirna_targets_dict, 
                  title=None,
                  name=None,
                  other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -161,7 +214,27 @@ def mirna_target(mirna_name, mirna_targets_dict, plot_file_name,
                  plot_file_type=DEFAULT_FILE_TYPE,
                  dpi=DEFAULT_DPI,
                  matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    """Plot the targets of a single mirna."""
+    """
+    Plot the targets of a single mirna from the :ref:`mirna_target_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plot.
+        mirna_name (str): Name of miRNA to plot for title.
+        mirna_targets_dict (dict): Dict from mirna_target analysis 
+            (see :func:`~hybkit.mirna_target_dict`).
+        title (str, optional): Title / header for plot (replaces default title).
+        name (str, optional): Data source name to prepend to title.
+        other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
+            Setting to 0.0 disables the "other" wedge based on a threshhold.
+        min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
+            wedge. Setting to 0.0 disables the "other" wedge based on minimum wedge size.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.plot() function.
+    """
+
     labels = []
     counts = []
     for ((target, target_seg_type), count) in mirna_targets_dict.most_common(): 
@@ -205,7 +278,7 @@ def mirna_target(mirna_name, mirna_targets_dict, plot_file_name,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_target_type(mirna_name, mirna_target_type_counts_dict, plot_file_name, 
+def mirna_target_type(plot_file_name, mirna_name, mirna_target_type_counts_dict, 
                       title=None,
                       name=None,
                       other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
@@ -213,7 +286,26 @@ def mirna_target_type(mirna_name, mirna_target_type_counts_dict, plot_file_name,
                       plot_file_type=DEFAULT_FILE_TYPE,
                       dpi=DEFAULT_DPI,
                       matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
-    """Plot the targets types of a single mirna."""
+    """
+    Plot the targets types of a single mirna from the :ref:`mirna_target_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plot.
+        mirna_name (str): Name of miRNA to plot for title.
+        mirna_targets_dict (dict): Dict from mirna_target analysis
+            (see :func:`~hybkit.mirna_target_dict`).
+        title (str, optional): Title / header for plot (replaces default title).
+        name (str, optional): Data source name to prepend to title.
+        other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
+            Setting to 0.0 disables the "other" wedge based on a threshhold.
+        min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
+            wedge. Setting to 0.0 disables the "other" wedge based on minimum wedge size.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.plot() function.                                                          """
+
     labels = []
     counts = []
     for key, count in mirna_target_type_counts_dict.most_common(): 
@@ -229,7 +321,6 @@ def mirna_target_type(mirna_name, mirna_target_type_counts_dict, plot_file_name,
     matplotlib_settings.update({'textprops':{'size':'small'},
                                })
 
-
     _plot_pie_chart(labels=labels,
                     sizes=counts,
                     plot_file_name=plot_file_name,
@@ -242,7 +333,7 @@ def mirna_target_type(mirna_name, mirna_target_type_counts_dict, plot_file_name,
                     )
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_fold(fold_analysis_dict, plot_file_name, 
+def mirna_fold(plot_file_name, fold_analysis_dict,
                title=None,
                name=None,
                data_format=DEFAULT_LINE_DATA_FORMAT,
@@ -250,7 +341,24 @@ def mirna_fold(fold_analysis_dict, plot_file_name,
                plot_file_type=DEFAULT_FILE_TYPE,
                dpi=DEFAULT_DPI,
                matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
-    """Plot the bound percentage of mirna by base."""
+    """
+    Plot the bound percentage of mirna by base from the :ref:`mirna_fold_analysis`.
+
+    Args:
+        plot_file_name (str): File name for output plot.
+        fold_analysis_dict (dict): Dict from mirna_fold analysis
+            (see :func:`~hybkit.mirna_fold_dict`).
+        title (str, optional): Title / header for plot (replaces default title).
+        name (str, optional): Data source name to prepend to title.
+        data_format (str, optional): matplotlib line/data format.
+        min_fractione_size (float, optional): Minimum fraction to include at tail
+            end of plot. Setting to 0 includes all bases evaluated.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.plot() function.                                                          """
+
     labels = []
     fractions = []
     max_fraction = 0.0

@@ -3069,7 +3069,7 @@ class HybFoldIter(object):
     """
     Iterator for simultaneous iteration over a :class:`HybFile` and :class:`FoldFile` object.
 
-    This class provides an iterator to iterate through a :class:`HybFile` and a 
+    This class provides an iterator to iterate through a :class:`HybFile` and one of a 
     :class:`ViennaFile`, :class:`ViennadFile`, or :class:`CtFile` simultaneously.
     It is assumed that each :class:`HybRecord` and :class:`FoldRecord` in the respective
     files are matching (though users are encouraged to inspect this themselves).
