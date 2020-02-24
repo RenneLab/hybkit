@@ -26,7 +26,8 @@ Full project documentation is available at
 Installation
 ------------
 
-Hybkit requires Python 3.6+ and the use of the matplotlib package.
+Hybkit requires Python 3.6+ and the use of the 
+`matplotlib <https://matplotlib.org/>` package.
 
 The recommended installation method is via 
 `python pip <https://pip.pypa.io/en/stable/>`_, which will 
