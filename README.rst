@@ -11,8 +11,14 @@ This project contains multiple major components:
     #. The hybkit python package, which contains an extendable codebase and documented API
        for creation of custom analyses of hyb-format data.
 
+Hybkit version |version| is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
 
-Full project documentation is available at LINKHERE
+.. image:: https://readthedocs.com/projects/renne-lab-hybkit/badge/?version=latest&token=4d0a7c519df66b243556da51fbf191c41a917b02908812fa66a453d3bc8096fa
+    :target: https://renne-lab-hybkit.readthedocs-hosted.com/en/latest/?badge=latest
+    :alt: Documentation Status
+
+Full project documentation is available at 
+`hybkit's ReadTheDocs <https://renne-lab-hybkit.readthedocs-hosted.com/en/latest/>`_
 
 
 Installation
