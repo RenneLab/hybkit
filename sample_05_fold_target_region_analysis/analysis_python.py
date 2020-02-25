@@ -8,19 +8,16 @@ Analysis for sample_fold_analysis performed as a python workflow.
 
 Provided as an example of direct 
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
+For more details, see "fold_target_region_notes.rst".
 """
 
 import os
 import sys
-import datetime
 
 # Ensure hybkit is accessible
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
-
-SHORT_CHECK = True  # DEBUG
-SHORT_CHECK = False  # DEBUG
 
 # Set count_mode:
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
@@ -40,8 +37,6 @@ out_base = os.path.join(out_dir, out_base_name)
 
 # Begin Analysis
 print('\nPerforming Analysis')
-start_time = datetime.datetime.now()  # DEBUG
-
 if not os.path.isdir(out_dir):
     print('Creating Output Directory:\n    %s\n' % out_dir)
     os.mkdir(out_dir)
@@ -54,7 +49,7 @@ hybkit.HybFile.settings['hybformat_id'] = True
 
 # Tell the FoldRecord to allow (by skipping) poorly-formatted viennad entries, instead of 
 #   raising an error.
-hybkit.FoldRecord.settings['skip_bad'] = True
+# hybkit.FoldRecord.settings['skip_bad'] = True
 
 # Create a variable mirna-types for use in the miRNA analysis, that includes kshv mirna.
 mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
@@ -66,8 +61,6 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 
 # Read the csv file containing coding sequence region info:
 hybkit.HybRecord.make_set_region_info(region_info_csv)
-
-count = 0  # DEBUG
 
 # Prepare 5 catgories for 2 classes in output_categories dict
 output_classes = {'cellular': 'Cellular', 'kshv': 'KSHV'}
@@ -96,10 +89,6 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
      hybkit.ViennadFile.open(input_viennad_name, 'r') as input_viennad:
 
     for hyb_record in hybkit.HybFoldIter(input_hyb, input_viennad, combine=True):
-        if SHORT_CHECK: # DEBUG
-            if count > 10000:
-                break
-            count += 1
 
         # Perform record analysis
         hyb_record.find_seg_types()
@@ -114,7 +103,12 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
             else:
                 label_prefix = 'cellular_'
 
+            # Perform target region analysis on record, allowing unknown regions as a separate
+            #   category.
             hyb_record.target_region_analysis(allow_unknown_regions=True)
+
+            # If the record has been identified to have a coding target, sort into 
+            #   category based on target region.
             if hyb_record.has_property('has_target'):
                 # Set coding target region labels
                 region = hyb_record.mirna_details['target_reg']
@@ -122,6 +116,8 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
                     raise Exception('Unknown Region: %s' % region) 
                 record_params = output_categories[label_prefix + region]
                 [record_analysis_dict, record_out_file, pretty_name] = record_params
+            # If the record has been identified not to have a coding target, sort into
+            #   noncoding category.
             else:
                 category = label_prefix + 'noncoding'
                 [record_analysis_dict, record_out_file, pretty_name] = output_categories[category]
@@ -143,6 +139,5 @@ for category in output_categories.keys():
                                      multi_files=True,
                                      name=data_label + ', ' + pretty_name
                                      )
-                             
-print('Time taken: %s\n' % str(datetime.datetime.now() - start_time)) # DEBUG
-sys.stdout.flush()  # DEBUG
+                            
+print('Done!\n') 

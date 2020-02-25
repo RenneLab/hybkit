@@ -742,11 +742,11 @@ class HybRecord(object):
         self.mirna_details['target_fold'] = None
         if self.fold_record is not None and mirna_flag in {'B', '5p', '3p'}:
             if mirna_flag in {'B', '5p'}:
-                mirna_details = self.fold_record.seg1_info()
-                target_details = self.fold_record.seg2_info()
+                mirna_details = self.fold_record.seg1_fold_info
+                target_details = self.fold_record.seg2_fold_info
             elif mirna_flag == '3p':
-                target_details = self.fold_record.seg1_info()
-                mirna_details = self.fold_record.seg2_info()
+                target_details = self.fold_record.seg1_fold_info
+                mirna_details = self.fold_record.seg2_fold_info
             self.mirna_details['mirna_fold'] = mirna_details['seg_fold']
             self.mirna_details['target_fold'] = target_details['seg_fold']
 
@@ -2130,8 +2130,8 @@ class FoldRecord(object):
         self.fold = fold      # Fold Representation, str of '(', '.', and ')' characters
         self.energy = float(energy)  # Predicted energy of folding
 
-        seg1_fold_info = {}   # Information on segment 1
-        seg2_fold_info = {}   # Information on segment 2
+        self.seg1_fold_info = {}   # Information on segment 1
+        self.seg2_fold_info = {}   # Information on segment 2
 
         self.set_seg1_fold_info(seg1_fold_info)
         self.set_seg2_fold_info(seg2_fold_info)

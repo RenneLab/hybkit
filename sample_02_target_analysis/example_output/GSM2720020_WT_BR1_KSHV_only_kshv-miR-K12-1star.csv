@@ -1,0 +1,5 @@
+mirna,mirna_type,target,target_type,count
+mirna,-,total,-,3
+kshv-miR-K12-1*,kshv_microRNA,kshv-miR-K12-1,kshv_microRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000117697_ENST00000366977_NSL1_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,MIMAT0000062_MirBase_let-7a_microRNA,miRNA,1

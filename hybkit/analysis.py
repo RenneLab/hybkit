@@ -818,7 +818,7 @@ def write_mirna_target(file_name_base, analysis_dict,
                 one_counts_dict = {mirna_id:counts_dict[mirna_id]}
             else:
                 one_counts_dict = None
-            write_lines = format_mirna_targets(one_mirna_dict, one_counts_dict,
+            write_lines = format_mirna_target(one_mirna_dict, one_counts_dict,
                                                sep=sep, spacer_line=False)
             with open(_sanitize_name(analysis_file_name), 'w') as out_file:
                 out_file.write('\n'.join(write_lines))
@@ -840,7 +840,7 @@ def write_mirna_target(file_name_base, analysis_dict,
 
     else:
         analysis_file_name = _sanitize_name(file_name_base + '_' + 'mirna' + file_suffix)
-        analysis = format_mirna_targets(analysis_dict, counts_dict, sep, spacer_line)
+        analysis = format_mirna_target(analysis_dict, counts_dict, sep, spacer_line)
         with open(analysis_file_name, 'w') as out_file:
             out_file.write('\n'.join(analysis))
         
@@ -1112,7 +1112,7 @@ def write_mirna_fold(file_name_base, analysis_dict,
             Otherwise do not make plots.
     """
 
-    write_lines = format_mirna_folds(analysis_dict, sep=sep)
+    write_lines = format_mirna_fold(analysis_dict, sep=sep)
     if not multi_files:
         fold_details_name = file_name_base + '_fold_info' + file_suffix
         with open(fold_details_name, 'w') as fold_details_file:
