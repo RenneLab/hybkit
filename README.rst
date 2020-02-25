@@ -8,7 +8,7 @@ hybkit
 
 
 | Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data 
-  generated from ribonomoics techniques such as CLASH and qCLASH. 
+  generated from ribonomics techniques such as CLASH and qCLASH. 
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 | Full project documentation is available at
   `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
