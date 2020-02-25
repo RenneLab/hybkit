@@ -37,7 +37,7 @@ setuptools.setup(
     python_requires='>=3.6',
     project_urls=about_vars['info_urls'],
 
-    #install_requires=['biopython'],  # Optional
+    install_requires=['matplotlib'],  # Optional
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

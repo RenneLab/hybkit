@@ -45,13 +45,11 @@ Todo:
     Add Hybrecord.to_csv_header()
     Clean from_viennd_lines() method.
     Add analysis.target_region analyses.
-    Overhaul docstrings and make beautiful documentation.
     Create hyb-format database download script.
     Add user-friendly individual scripts.
     Implement all sample analyses with bash workflows and individual scripts.
     Implement all sample analyses with nextflow workflows and individual scripts.
     Make decision and clean "extra" scripts.
-    Fill hybkit specification page.
 
 """
 
@@ -70,14 +68,15 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 class HybRecord(object):
-    """Class for storing and analyzing chimeric hybrid genomics reads in ".hyb" format.
+    """
+    Class for storing and analyzing chimeric hybrid genomics reads in ".hyb" format.
 
     Hyb format entries are a GFF-related file format described by Travis, et al. 
     (see :ref:`References`)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis sofwtare. The line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     information on each of the respective identified components. An example .hyb format line 
-    (courtesy of Gay et al. [:ref:`References`])::
+    courtesy of Gay et al. (See :ref:`References`)::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -184,19 +183,6 @@ class HybRecord(object):
         fold_seq_match (bool or None): Set to True if the sequence contained within a fold
             record exactly matches the sequence in (this) :class:`HybRecord`, when the 
             :attr:`fold_record` attribute is set via :func:`set_fold_record`.   
-
-
-
-    .. _References:     
-    References:
-        #. "Travis, Anthony J., et al. "Hyb: a bioinformatics pipeline for the analysis of CLASH 
-           (crosslinking, ligation and sequencing of hybrids) data." 
-           Methods 65.3 (2014): 263-273."
-        #. Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of 
-           hybrids (qCLASH) identifies Kaposi's Sarcoma-associated herpesvirus microRNA 
-           targets in endothelial cells." Journal of virology 92.8 (2018): e02138-17.
-
-
     """
 
     # HybRecord : Class-Level Constants
@@ -2063,7 +2049,7 @@ class FoldRecord(object):
 
     .. _vienna_file_format:
 
-    * | The Vienna file format: http://unafold.rna.albany.edu/doc/formats.php#VIENNA
+    * | The Vienna file format (see :ref:`References`):
 
       Example:
           ::
@@ -2072,7 +2058,7 @@ class FoldRecord(object):
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
 
-    * | The Viennad file format utilizied in the Hyb Software package
+    * | The Viennad file format utilizied in the Hyb Software package:
 
       Example:
           ::
@@ -2084,7 +2070,7 @@ class FoldRecord(object):
               .....((((((.((((((......)))))).))))))   (-11.1)
               [space-line]
 
-    * | The Ct file format utilized by the UNAFold Software Package.
+    * | The Ct file format utilized by the UNAFold Software Package:
 
       Example:
           ::
@@ -2223,9 +2209,6 @@ class FoldRecord(object):
         Args:
             newline (bool, optional): If True, add newline character to the end of each
                 returned line. (Default: False)
-
-        References:
-            http://unafold.rna.albany.edu/doc/formats.php#VIENNA
         """
         ret_lines = []
         suffix = ''
@@ -2254,9 +2237,6 @@ class FoldRecord(object):
         Args:
             newline (bool, optional): If True, terminate the returned string with a newline
                 character. (Default: False)
-
-        References:
-            http://unafold.rna.albany.edu/doc/formats.php#VIENNA
         """
         if newline:
             suffix = '\n'

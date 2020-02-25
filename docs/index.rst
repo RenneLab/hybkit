@@ -1,7 +1,4 @@
 
-hybkit Documentation
-==================================
-
 .. include:: ../README.rst
 
 .. toctree::
@@ -13,5 +10,5 @@ hybkit Documentation
    source/hybkit
    source/hybkit.analysis
    source/hybkit.plot
-   source/indices
+   source/about
 
