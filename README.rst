@@ -7,8 +7,11 @@ hybkit
     :alt: Documentation Status
 
 
-Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data.
+Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data 
+generated from ribonomoics techniques such as CLASH and qCLASH. 
 This software is available via Github, at http://www.github.com/RenneLab/hybkit .
+Full project documentation is available at
+`hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
 
 This project contains multiple components:
     #. A toolkit of command-line utilities for manipulating,
@@ -18,9 +21,6 @@ This project contains multiple components:
        for creation of custom analyses of hyb-format data.
 
 Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
-
-Full project documentation is available at 
-`hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_
 
 
 Installation
