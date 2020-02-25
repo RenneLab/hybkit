@@ -1,0 +1,12 @@
+mirna,mirna_type,target,target_type,count
+mirna,-,total,-,23
+kshv-miR-K12-1*,kshv_microRNA,MIMAT0000080_MirBase_miR-24_microRNA,miRNA,9
+kshv-miR-K12-1*,kshv_microRNA,kshv-miR-K12-1,kshv_microRNA,5
+kshv-miR-K12-1*,kshv_microRNA,MIMAT0000062_MirBase_let-7a_microRNA,miRNA,2
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000117697_ENST00000366977_NSL1_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000121774_ENST00000327300_KHDRBS1_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000151503_ENST00000281189_NCAPD3_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000213064_ENST00000271375_SFT2D2_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,MIMAT0000078_MirBase_miR-23a_microRNA,miRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000187990_ENST00000339812_HIST1H2BG_mRNA,mRNA,1
+kshv-miR-K12-1*,kshv_microRNA,ENSG00000120137_ENST00000239231_PANK3_mRNA,mRNA,1

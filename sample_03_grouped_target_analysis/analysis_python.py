@@ -8,21 +8,16 @@ Analysis for sample_grouped_target_analysis performed as a python workflow.
 
 Provided as an example of direct usage of hybkit functions. 
 File names are hardcoded, and functions are accessed directly.
+For more details, see: "grouped_target_analysis_notes.rst".
 """
 
 import os
 import sys
-import datetime
 
 # Ensure hybkit is accessible
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
-
-SHORT_CHECK = True   # DEBUG
-SHORT_CHECK = False  # DEBUG
-ONE_CHECK = True     # DEBUG
-ONE_CHECK = False    # DEBUG
 
 # Set count_mode:
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
@@ -46,8 +41,6 @@ match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
 print('\nPerforming Grouped Target Analysis...')
-start_time = datetime.datetime.now()  # DEBUG
-
 if not os.path.isdir(out_dir):
     print('Creating Output Directory:\n    %s\n' % out_dir)
     os.mkdir(out_dir)
@@ -62,6 +55,10 @@ hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 # Create custom list of miRNA types for analysis
 mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
 
+# Set hybrid segment types to remove as part of quality control (QC)
+remove_types = ['rRNA', 'mitoch_rRNA']
+
+# Begin Analysis
 print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
 
 # Open out-file for writing, one output file will be used for all inputs.
@@ -71,32 +68,32 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
         in_file_name = os.path.basename(in_file_path)
         in_file_label = in_file_name.split('_')[0]
         print('Analyzing:\n    %s' % in_file_path)
-        with hybkit.HybFile(in_file_path, 'r') as in_file:
-        
-            count = 0 # DEBUG
 
+        with hybkit.HybFile(in_file_path, 'r') as in_file:
             # Iterate over each record of the input file
             for hyb_record in in_file:
 
-                if SHORT_CHECK: # DEBUG
-                    count += 1
-                    if count > 10000:
-                        break
-
-                # Analyze and output only sequences where a segment identifier contains the string "kshv"
+                # Analyze only sequences where a segment identifier contains the string "kshv"
                 if hyb_record.has_property('seg_contains', 'kshv'):
                     # Find the segment types of each record
                     hyb_record.set_flag('source', in_file_label)
                     hyb_record.find_seg_types()
                     hyb_record.mirna_analysis(mirna_types=mirna_types)
         
+                    # Determine if record has type that is excluded
+                    use_record = True
+                    for remove_type in remove_types:
+                        if hyb_record.has_property('seg_type', remove_type):
+                            use_record = False
+                            break
+        
+                    # If record has an excluded type, continue to next record without analyzing.
+                    if not use_record:
+                        continue
+
                     # Write the records to the output file
                     out_kshv_file.write_record(hyb_record)
 
-        if ONE_CHECK:  # DEBUG
-            break
-
-sys.stdout.flush()  # DEBUG
 print('\nPerforming Combined Target Analysis...\n')
 # Reiterate over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
@@ -139,8 +136,5 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
                                        make_plots=True,     # Default
                                        max_mirna=25)        # Default is 10
 
-print('Total time: %s' % str(datetime.datetime.now() - start_time))  # DEBUG
-
 print('Done\n')
 
-sys.stdout.flush()  # DEBUG
