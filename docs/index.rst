@@ -10,5 +10,6 @@
    source/hybkit
    source/hybkit.analysis
    source/hybkit.plot
+   source/example_pipelines
    source/about
 

@@ -18,11 +18,19 @@ Both individual and summary output files are produced.
  
 Hybrid sequence information created by the Hyb program  information is 
 available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
+
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 
 The data files can be downloaded and uncompressed by using the command:
-  "sh ./download_data.sh"
+  
+    "sh ./download_data.sh"
 
 The unpacked hyb data-file require ~130 Mb of space.
 The completed output of the analysis requires ~20 Mb of space.
 
+Target Analysis Example Output
+------------------------------
+
+.. image:: /../sample_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_kshv-miR-K12-5.png
+
+.. image:: /../sample_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_kshv-miR-K12-5_types.png

@@ -10,7 +10,7 @@ hybkit
 Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data.
 This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 
-This project contains multiple major components:
+This project contains multiple components:
     #. A toolkit of command-line utilities for manipulating,
        analyzing, and plotting data contained within hyb-format files. (ToDo)
     #. Several template analysis piplelines providing example analyses for hybrid sequence data.

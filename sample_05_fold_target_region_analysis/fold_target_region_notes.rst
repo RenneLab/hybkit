@@ -2,8 +2,8 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-Example Target Region Analysis
-==============================
+Example Fold Target Region Analysis
+===================================
 
 This directory contains a sample analysis of Hyb-format and Viennad-format data, published in 
 the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
@@ -27,11 +27,19 @@ Hybrid sequence information created by the Hyb program and the fold output are
 provided with the hybkit package in the databases directory. They were created 
 created by the downstream analysis of files 
 available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
+
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 
 The data files can be downloaded and uncompressed by using the command:
-  "sh ./prepare_data.sh"
+
+    "sh ./prepare_data.sh"
 
 The unpacked data-files require ~0.2 Gb of space.
 The completed output of the analysis requires ~50 Mb of space.
 
+Fold Target Region Analysis Example Output
+------------------------------------------
+
+.. image:: /../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_kshv_3pUTR.png
+
+.. image:: /../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_cellular_3pUTR.png

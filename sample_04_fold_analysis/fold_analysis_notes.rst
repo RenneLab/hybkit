@@ -23,11 +23,18 @@ Hybrid sequence information created by the Hyb program and the fold output are
 provided with the hybkit package in the databases directory. They were created 
 created by the downstream analysis of files 
 available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
+
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 
 The data files can be downloaded and uncompressed by using the command:
-  "sh ./prepare_data.sh"
+
+    "sh ./prepare_data.sh"
 
 The unpacked data-files require ~0.2 Gb of space.
 The completed output of the analysis requires ~30 Mb of space.
+
+Fold Analysis Example Output
+--------------------------------------
+
+.. image:: /../sample_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_coding.png
 
