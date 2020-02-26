@@ -23,9 +23,9 @@ available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
 
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 
-The data files can be downloaded and uncompressed by using the command:
+The data files can be downloaded and uncompressed by using the command::
 
-    "sh ./download_data.sh"
+    $ sh ./download_data.sh"
 
 The unpacked hyb data-file require ~1.3 Gb of space.
 The completed output of the analysis requires ~40 Mb of space.

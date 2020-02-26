@@ -30,9 +30,9 @@ available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
 
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 
-The data files can be downloaded and uncompressed by using the command:
+The data files can be downloaded and uncompressed by using the command::
 
-    "sh ./prepare_data.sh"
+    $ sh ./prepare_data.sh
 
 The unpacked data-files require ~0.2 Gb of space.
 The completed output of the analysis requires ~50 Mb of space.
