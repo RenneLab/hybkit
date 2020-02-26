@@ -9,7 +9,6 @@
 working*
 private*
 .DS_Store
-*.nf
 *.nextflow*
 */work/*
 
