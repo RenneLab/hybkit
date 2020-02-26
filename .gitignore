@@ -10,7 +10,8 @@ working*
 private*
 .DS_Store
 *.nf
-*.nextflow
+*.nextflow*
+*/work/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
