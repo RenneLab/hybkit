@@ -24,7 +24,7 @@ Hybkit Toolkit:
     hybkit includes (**will include**) command-line utilities for the manipulation of ".hyb" format data:
 
         ============================= =========================================================
-        script                        description
+        Utility                       Description
         ============================= =========================================================
         hyb_check.py                  Read a ".hyb" file and check for errors
         hyb_filter.py                 Filter a ".hyb" file to a specific subset of sequences
@@ -83,7 +83,7 @@ Hybkit API:
     that contain a miRNA can be performed as such::
 
         import hybkit
-        in_file = '/path/to/my/file'
+        in_file = '/path/to/my_hyb_file.hyb'
 
         # Open a hyb file as a HybFile Object:
         with hybkit.HybFile.open(in_file, 'r') as hyb_file:
