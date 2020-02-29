@@ -3,13 +3,12 @@
 
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
+   :caption: Full Documentation Contents:
 
    self
    source/specification
-   source/hybkit
-   source/hybkit.analysis
-   source/hybkit.plot
+   source/toolkit
    source/example_pipelines
+   source/hybkit_api
    source/about
 

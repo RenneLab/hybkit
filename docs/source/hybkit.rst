@@ -1,5 +1,5 @@
-hybkit Module
-==============
+hybkit (module)
+===============
 
 .. automodule:: hybkit
 

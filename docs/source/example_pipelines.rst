@@ -4,7 +4,6 @@ Example Pipelines
 
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
 
    sample_01_link
    sample_02_link

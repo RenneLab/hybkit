@@ -1,4 +1,4 @@
-hybkit.plot Module
+hybkit.plot
 ==================
 
 .. automodule:: hybkit.plot

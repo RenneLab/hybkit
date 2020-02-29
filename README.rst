@@ -14,17 +14,99 @@ hybkit
   `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
 
 This project contains multiple components:
-    #. A toolkit of command-line utilities for manipulating,
-       analyzing, and plotting data contained within hyb-format files. (ToDo)
-    #. Several template analysis piplelines providing example analyses for hybrid sequence data.
-    #. The hybkit python package, which contains an extendable codebase and documented API
+    #. (**ToDo**) The hybkit toolkit of command-line utilities for manipulating,
+       analyzing, and plotting data contained within hyb-format files.
+    #. Analysis pipelines utilizing the toolkit for analysis of qCLASH hybrid sequence data.
+    #. The hybkit python API, an extendable documented codebase
        for creation of custom analyses of hyb-format data.
+
+Hybkit Toolkit:
+    hybkit includes (**will include**) command-line utilities for the manipulation of ".hyb" format data:
+
+        ============================= =========================================================
+        script                        description
+        ============================= =========================================================
+        hyb_check.py                  Read a ".hyb" file and check for errors
+        hyb_filter.py                 Filter a ".hyb" file to a specific subset of sequences
+        hyb_analyze.py                Analyze and set details for hyb records, such as segtypes
+        hyb_type_analysis.py          Perform a type analysis on a prepared "hyb" file
+        hyb_mirna_count_anlaysis.py   Perform a miRNA_count analysis on a prepared "hyb" file
+        hyb_summary_anlaysis.py       Perform a summary analysis on a prepared "hyb" file
+        hyb_mirna_target_analysis.py  Perform a mirna_target analysis on a prepared "hyb" file
+        hyb_fold_analysis.py          Perform a fold analysis on a prepared "hyb" file
+        ============================= =========================================================
+        
+    These scripts are used on the command line with hyb-format files. For example, to filter a 
+    hyb file to contain only sequences with identifiers containing the string "KSHV"::
+
+        $ hyb_filter.py ....[command_example]
+
+    Further detail on the usage of each script is provided in 
+    the |hybkit Toolkit| section of 
+    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+
+Pipelines:
+    Hybkit provides several example pipelines for analysis of "hyb" data using the 
+    utilities provided in the toolkit. These include:
+    
+        ============================= =========================================================
+        pipeline                      description
+        ============================= =========================================================
+        Summary Analysis              Summarize the sequence and miRNA types in a hyb file
+        Target Analysis               Analyze targets of a set of miRNA
+        Grouped Target Analysis       Analyze targets of a set of miRNA with grouped replicates
+        Fold Analysis                 Analyze fold patterns of miRNA-containing hybrids
+        Fold Target Region Analysis   Perform fold analysis separated by targeted mRNA region
+        ============================= =========================================================
+
+    These pipelines provide analysis results in both tabular and graph form.
+    As an illustration, the example summary analysis includes the return of 
+    the contained hybrid sequence types as both a csv table and as a pie chart:
+
+        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.csv>`_
+
+        .. image:: https://github.com/RenneLab/hybkit/raw/master/sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+        .. Comment image /../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+
+    Further detail on each provided pipeline can be found in 
+    the |Example Pipelines| section of  
+    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+
+Hybkit API:
+    Hybkit provides a Python3 module with a documented API for interacting with 
+    records in ".hyb" files. 
+    This capability was inspired by the object interactions in the 
+    `BioPython Project <https://biopython.org/>`_. The primary utility is provided by 
+    objects used to represent hyb records within hyb files. These records are assigned 
+    accessible attributes, and can be analyzed using builtin functions. 
+    For example, a workflow to print the identifiers of only sequences within a ".hyb" file
+    that contain a miRNA can be performed as such::
+
+        import hybkit
+        in_file = '/path/to/my/file'
+
+        # Open a hyb file as a HybFile Object:
+        with hybkit.HybFile.open(in_file, 'r') as hyb_file:
+
+            # Return each line in a hyb file as a HybRecord object
+            for hyb_record in hyb_file:
+
+                # Analyze each record to assign segment types
+                hyb_record.find_types()
+
+                # If the record contains an miRNA type, print the record identifier.
+                if hyb_record.has_property('segtype_contains', 'miRNA')
+                    print(hyb_record.id)
+
+    Further documentation on the hybkit API can be found in the 
+    |hybkit API| section of 
+    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
 
 Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
 
 
 Installation
-------------
+============
 
 Hybkit requires Python 3.6+ and the use of the 
 `matplotlib <https://matplotlib.org/>`_ package.

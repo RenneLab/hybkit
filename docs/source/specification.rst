@@ -4,10 +4,11 @@ hybkit Specification
 
 Version: |spec_version|
 
-    The ".hyb" file format is described by Travis, et al.
+    The ".hyb" file format is described by Travis, et al. along with the Hyb software package
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
     mapping coordinates, and annotation information for each chimera"
-    in conjunction with the Hyb software package (see :ref:`References`).
+    (see :ref:`References`).
+    
     Each line in a hyb file, referred to here as a hyb "record," contains information about a 
     genomic sequence read identified to be a chimera by anlaysis sofwtare. 
     Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
@@ -70,97 +71,97 @@ Columns
 Flags
 -----
    
-    The following four flags are used by the Hyb software package (see :ref:`References`),
-    with definitions provided as used in the hybkit package.
-
-    .. _count_total:
+    Hyb Flags:
+        The following four flags are used by the Hyb software package (see :ref:`References`).
+        The definitions provided describe how these flags are used in the hybkit package.
     
-    :obj:`count_total` - Integer: Total represented hybrid records, if combined.
-
-    .. _count_last_clustering:
-
-    :obj:`count_last_clustering` - Integer: Total represented hybrid records at last 
-    clustering.
-                 
-    .. _two_way_merged:
+        .. _count_total:
+        
+        :obj:`count_total` - Integer: Total represented hybrid records, if combined.
     
-    :obj:`two_way_merged` - {"0" or "1"} Boolean representation of whether
-    entries with mirrored 5' and 3' hybrids were merged if the record is a combined record.
+        .. _count_last_clustering:
     
-    .. _seq_IDs_in_cluster:
-
-    :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all reord IDs of hybrids
-    merged into this hybrid entry.
+        :obj:`count_last_clustering` - Integer: Total represented hybrid records at last 
+        clustering.
+                     
+        .. _two_way_merged:
+        
+        :obj:`two_way_merged` - {"0" or "1"} Boolean representation of whether
+        entries with mirrored 5' and 3' hybrids were merged if the record is a combined record.
+        
+        .. _seq_IDs_in_cluster:
+    
+        :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all reord IDs of hybrids
+        merged into this hybrid entry.
 
     The following flags are defined by the hybkit package:
-
-    .. _read_count:
-
-    :obj:`read_count` -  Integer: Number of sequence reads represented by this record.
-    If the record is combined, this represents the total read count for all merged entries.
-
-    .. _orient:
-
-    :obj:`orient` -  String: Orientation of strand. Options:
-    "F" (Forward), "IF" (Inferred Forward),
-    "R" (Reverse), "IR" (Inferred Reverse),
-    "U" (Unknown), or "IC" (Inferred Conflicting).
-
-    .. _seg1_type:
-
-    :obj:`seg1_type` - String: Assigned segment type of segment 1, ex: "miRNA" or "mRNA".
-
-    .. _seg2_type:
-
-    :obj:`seg2_type` - String: Assigned segment type of segment 2, ex: "miRNA" or "mRNA".
-
-    .. _seg1_det:
- 
-    :obj:`seg1_det` -  String: Arbitrary detail about segment 1.
-
-    .. _seg2_det:
-
-    :obj:`seg2_det` -  String: Arbitrary detail about segment 2.
-
-    .. _miRNA_seg:
-
-    :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
-    options are "N" (none), "3p" (seg1), "5p" (seg2),
-    "B" (both), or "U" (unknown).
-
-    .. _target_reg:
-
-    :obj:`target_reg` -  String: Assigned region of the miRNA target.
-    options are "5pUTR", "coding", "3pUTR",
-    "N" (none), or "U" (unknown).
-
-    .. _ext:
-  
-    :obj:`ext` -  Integer: "0" or "1", Boolean representation of whether
-    record sequences were bioinformatically extended as is
-    performed by the Hyb software package.
-
-    .. _source:
-
-    :obj:`source` -  String: Label for sequence source id (eg. source file), when 
-    combining records from different sources.
+        .. _read_count:
+    
+        :obj:`read_count` -  Integer: Number of sequence reads represented by this record.
+        If the record is combined, this represents the total read count for all merged entries.
+    
+        .. _orient:
+    
+        :obj:`orient` -  String: Orientation of strand. Options:
+        "F" (Forward), "IF" (Inferred Forward),
+        "R" (Reverse), "IR" (Inferred Reverse),
+        "U" (Unknown), or "IC" (Inferred Conflicting).
+    
+        .. _seg1_type:
+    
+        :obj:`seg1_type` - String: Assigned segment type of segment 1, ex: "miRNA" or "mRNA".
+    
+        .. _seg2_type:
+    
+        :obj:`seg2_type` - String: Assigned segment type of segment 2, ex: "miRNA" or "mRNA".
+    
+        .. _seg1_det:
+     
+        :obj:`seg1_det` -  String: Arbitrary detail about segment 1.
+    
+        .. _seg2_det:
+    
+        :obj:`seg2_det` -  String: Arbitrary detail about segment 2.
+    
+        .. _miRNA_seg:
+    
+        :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
+        options are "N" (none), "3p" (seg1), "5p" (seg2),
+        "B" (both), or "U" (unknown).
+    
+        .. _target_reg:
+    
+        :obj:`target_reg` -  String: Assigned region of the miRNA target.
+        options are "5pUTR", "coding", "3pUTR",
+        "N" (none), or "U" (unknown).
+    
+        .. _ext:
+      
+        :obj:`ext` -  Integer: "0" or "1", Boolean representation of whether
+        record sequences were bioinformatically extended as is
+        performed by the Hyb software package.
+    
+        .. _source:
+    
+        :obj:`source` -  String: Label for sequence source id (eg. source file), when 
+        combining records from different sources.
 
 
 
 Other Details
 -------------
 
-.. table:: 
-    :widths: auto
+    .. table:: 
+        :widths: auto
 
-    ======= ==================================================================================
-    Item    Role
-    ======= ==================================================================================
-    \\\\t   Column Delimiter
-    .       Missing Data Placeholder
-    .hyb    File Suffix
-    .hyb.gz gzipped File Suffix
-    ======= ==================================================================================
+        ======= ==================================================================================
+        Item    Role
+        ======= ==================================================================================
+        \\\\t   Column Delimiter
+        .       Missing Data Placeholder (equivalent to None)
+        .hyb    File Suffix
+        .hyb.gz gzipped File Suffix
+        ======= ==================================================================================
 
 
 Example

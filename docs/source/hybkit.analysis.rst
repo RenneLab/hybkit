@@ -1,4 +1,4 @@
-hybkit.analysis Module
+hybkit.analysis
 ======================
 
 .. automodule:: hybkit.analysis
