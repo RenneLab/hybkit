@@ -36,5 +36,5 @@ The completed output of the analysis requires ~30 Mb of space.
 Fold Analysis Example Output
 --------------------------------------
 
-.. image:: /../sample_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_coding.png
+.. image:: ../sample_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_coding.png
 

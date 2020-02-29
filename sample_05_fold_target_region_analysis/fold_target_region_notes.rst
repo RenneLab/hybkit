@@ -40,6 +40,6 @@ The completed output of the analysis requires ~50 Mb of space.
 Fold Target Region Analysis Example Output
 ------------------------------------------
 
-.. image:: /../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_kshv_3pUTR.png
+.. image:: ../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_kshv_3pUTR.png
 
-.. image:: /../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_cellular_3pUTR.png
+.. image:: ../sample_05_fold_target_region_analysis/example_output/WT_BR1_comp_hOH7_KSHV_cellular_3pUTR.png

@@ -25,8 +25,8 @@ The completed output of the analysis requires ~1.5 Gb of space.
 Summary Analysis Example Output
 -------------------------------
 
-.. image:: /../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
 
-.. image:: /../sample_01_summary_analysis/example_output/combined_analysis_types_seg.png
+.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_seg.png
 
-.. image:: /../sample_01_summary_analysis/example_output/combined_analysis_mirna_count.png
+.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_mirna_count.png
