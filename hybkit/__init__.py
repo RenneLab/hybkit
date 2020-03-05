@@ -59,10 +59,10 @@ import types
 import csv
 import copy
 from collections import OrderedDict
-import hybkit
-import hybkit.analysis
-import hybkit.plot
 
+# Perform *Initial* hybkit submodule imports, remainder at code end.
+import hybkit
+import hybkit.__about__
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__,\
                              __email__, __license__, __maintainer__, __status__, __version__
@@ -266,16 +266,13 @@ class HybRecord(object):
     DEFAULTS['warn_fold_record_mismatch'] = False   # Warn if mismatch, self.fold_record sequence
 
     DEFAULTS['allow_unknown_seg_types'] = False     # Allow unknown in self.find_seg_types
-    DEFAULTS['check_complete_seg_types'] = False    # False, so break after found first seg type.
+    DEFAULTS['check_complete_seg_types'] = True     # Check every seg-type possibility.
 
-    DEFAULTS['allow_unknown_regions'] = False
-    DEFAULTS['warn_unknown_regions'] = True
-
-    DEFAULTS['check_complete'] = False              # Continue find_types check after finding 
-                                                    # the first option.
+    DEFAULTS['allow_unknown_regions'] = False       # Allow unknown in self.target_region_analysis
+    DEFAULTS['warn_unknown_regions'] = True         # Warn unknown in self.target_region_analysis
 
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
-    DEFAULTS['placeholder'] = '.'
+    DEFAULTS['hyb_placeholder'] = '.'
 
     #: Dict of information required for use by :func:`find_seg_types`. 
     #: Set with the specific information required by the selected method for use by default.
@@ -315,7 +312,7 @@ class HybRecord(object):
         if energy is not None:
             self.energy = energy
         else:
-            energy = self.settings['placeholder']
+            energy = self.settings['hyb_placeholder']
 
         self.seg1_info = self._make_seg_info_dict(seg1_info)
         self.seg2_info = self._make_seg_info_dict(seg2_info)
@@ -553,7 +550,7 @@ class HybRecord(object):
             allow_unknown = self.settings['allow_unknown_seg_types']
         
         if check_complete is None:
-            check_complete = self.settings['check_complete']
+            check_complete = self.settings['check_complete_seg_types']
 
         types = []
         for seg_info in [self.seg1_info, self.seg2_info]:
@@ -1187,6 +1184,7 @@ class HybRecord(object):
         cls.find_type_method = cls.find_type_methods[find_method_name]
         cls.find_type_params = find_params
 
+    # HybRecord : Public Classmethods : target_region_analysis
     @classmethod
     def make_region_info(cls, region_csv_name, sep=','):
         """
@@ -1279,6 +1277,7 @@ class HybRecord(object):
 
         return ret_dict
 
+    # HybRecord : Public Classmethods : target_region_analysis
     @classmethod
     def set_region_info(cls, region_info_dict):
         """Set :attr:`region_info_dict` with information on coding transcript UTR regions. 
@@ -1298,6 +1297,7 @@ class HybRecord(object):
         """
         cls.target_region_info = region_info_dict
     
+    # HybRecord : Public Classmethods: target_region_analysis
     @classmethod
     def make_set_region_info(cls, region_csv_name, sep=','):
         """
@@ -1328,6 +1328,19 @@ class HybRecord(object):
     def list_custom_flags(cls):
         """List the class-level allowed custom flags."""
         return cls._custom_flags[:]
+
+
+    # HybRecord : Public Classmethods : Settings
+    @classmethod
+    def set_namespace_settings(cls, namespace, verbose=False):
+        """
+        Set the method for use to find seg types with :func:`find_seg_types`.
+        
+        This method is for providing a custom function. To use the included functions, 
+        use :func:`select_find_type_method`.
+        Functions provided to this method must have the signature::
+        """
+        pass
 
     # HybRecord : Public Classmethods : Record Construction
     @classmethod
@@ -1936,7 +1949,7 @@ class HybFile(object):
 
     The Hyb Software Package contains further information in the "name" field of the
     viennad record that can be used to infer further information about the fold divisions.
-    Set this value to True with hybkit.ViennadFile.settings['hybformat_file'] = True to read this
+    Set this value to True with hybkit.HybFile.settings['hybformat_ref'] = True to read this
     extra information.
     """
 
@@ -2112,11 +2125,11 @@ class FoldRecord(object):
     # FoldRecord : Class-Level Constants
     #: Class-level default settings, copied into :attr:`settings` at runtime.
     DEFAULTS = {}
-    DEFAULTS['skip_bad'] = False
-    DEFAULTS['warn_bad'] = True
+    DEFAULTS['skip_bad_fold_records'] = False  # Skip bad fold records.
+    DEFAULTS['warn_bad_fold_records'] = True   # Warn for bad fold records.
 
     # Placeholder symbol for empty entries. Default is "." in the Hyb software package.
-    DEFAULTS['placeholder'] = '.'
+    DEFAULTS['fold_placeholder'] = '.'
 
     #: Modifiable settings during usage. Copied at runtime from :attr:`DEFAULTS`.
     settings = copy.deepcopy(DEFAULTS)
@@ -2267,7 +2280,7 @@ class FoldRecord(object):
                         self.seg1_detail('ref_start'),
                         self.seg1_detail('ref_end')]
         line_3 = '\t'.join([str(item) if item is not None
-                            else self.settings['placeholder']
+                            else self.settings['fold_placeholder']
                             for item in line_3_items])
         ret_lines.append(line_3 + suffix)
         line_4_items = [self.seg2_detail('highlight'),
@@ -2275,7 +2288,7 @@ class FoldRecord(object):
                         self.seg2_detail('ref_start'),
                         self.seg2_detail('ref_end')]
         line_4 = '\t'.join([str(item) if item is not None
-                            else self.settings['placeholder']
+                            else self.settings['fold_placeholder']
                             for item in line_4_items])
         ret_lines.append(line_4 + suffix)
 
@@ -2999,8 +3012,7 @@ class ViennadFile(FoldFile):
     # ViennadFile : Private Methods
     def _post_init_tasks(self):
         """Add custom settings related to the ViennadFile Class."""
-
-
+        pass
 
     # ViennadFile : Private Methods
     def _to_record_string(self, write_record, newline):
@@ -3116,3 +3128,10 @@ class HybFoldIter(object):
         else:
             ret_obj = (next_hyb_record, next_fold_record)
         return ret_obj
+
+# Import the remainder of hybkit code to connect.
+import hybkit
+import hybkit.analysis
+import hybkit.plot
+import hybkit.util
+
