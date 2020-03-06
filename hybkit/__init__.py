@@ -1332,15 +1332,28 @@ class HybRecord(object):
 
     # HybRecord : Public Classmethods : Settings
     @classmethod
-    def set_namespace_settings(cls, namespace, verbose=False):
+    def set_namespace_settings(cls, nspace, verbose=False):
         """
-        Set the method for use to find seg types with :func:`find_seg_types`.
+        Take a namespace object as from an argparse parser and set settings.
         
-        This method is for providing a custom function. To use the included functions, 
-        use :func:`select_find_type_method`.
-        Functions provided to this method must have the signature::
+        | Each setting in :obj:`settings` is checked and set where applicable
+        | Flags provided in :obj:`nspace.custom_flags` are set using :func:`set_custom_flags`
+
+        Args:
+            nspace (Namespace): Namespace containing settings
+            verbose (bool, optional): If True, print when changing setting.
         """
-        pass
+        out_report = '\n'
+        for setting in cls.settings:
+            if hasattr(nspace, setting) and getattr(nspace, setting) != cls.settings[setting]:
+                new_setting = getattr(nspace, setting)
+                out_report += 'Setting HybRecord Setting:'
+                out_report += '"%s" to "%s"\n' % (setting, str(new_setting))
+                cls.settings[setting] = new_setting
+
+        if verbose and out_report.strip():
+            print(out_report)
+        
 
     # HybRecord : Public Classmethods : Record Construction
     @classmethod

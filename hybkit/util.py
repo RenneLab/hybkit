@@ -25,6 +25,19 @@ FOLD_SUFFIXES = VIENNA_SUFFIXES + VIENNAD_SUFFIXES + CT_SUFFIXES
 USE_ABSPATH = False
 
 
+# Util : Argparse Helper Functions
+def bool_from_string(value):
+    if isinstance(value, bool):
+       return value
+    if value.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif value.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+    # Snippet Credit goes to @Maxim at https://stackoverflow.com/questions/15008758/
+    #   /parsing-boolean-values-with-argparse
+
 # Util : Path Helper Functions
 def dir_exists(dir_name):
     """
@@ -200,7 +213,6 @@ def out_path_exists(file_name):
 
     return os.path.abspath(file_name)
 
-
 # Argument Parser : Input/Output Options
 in_hyb_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
@@ -213,6 +225,17 @@ in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                            help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
+positional_in_hyb_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Path to hyb-format file with a ".hyb" suffix for use in the analysis.
+                 """
+positional_in_hyb_parser.add_argument('in_hyb', type=hyb_exists,
+                                      metavar='PATH_TO/MY_FILE.HYB',
+                                      # required=True,
+                                      # nargs='1', 
+                                      help=_this_arg_help)
+
+# Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Path to one or more hyb-format files with a ".hyb" suffix for use 
@@ -223,6 +246,18 @@ in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                             required=True,
                             nargs='+', 
                             help=_this_arg_help)
+
+# Argument Parser : Input/Output Options
+positional_in_hybs_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Path to one or more hyb-format files with a ".hyb" suffix for use 
+                 in the analysis.
+                 """
+positional_in_hybs_parser.add_argument('in_hyb', type=hyb_exists,
+                                       metavar='PATH_TO/MY_FILE.HYB',
+                                       # required=True,
+                                       nargs='+', 
+                                       help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_hyb_parser = argparse.ArgumentParser(add_help=False)
@@ -320,7 +355,7 @@ _this_arg_help = """
                  Re-order flags to the hybkit-specificiation order when 
                  writing hyb records.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -334,7 +369,7 @@ _this_arg_help = """
                  using this setting,
                  the --custom_flags arguement can be be used to supply custom allowed flags.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -345,7 +380,7 @@ _this_arg_flag = '--' + _this_arg_key
 _this_arg_help = """
                  Allow unknown segment types when assigning segment types.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -358,7 +393,7 @@ _this_arg_help = """
                  breaking after the first match is found. If True, finding segment types
                  is slower but better at catching errors.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -369,7 +404,7 @@ _this_arg_flag = '--' + _this_arg_key
 _this_arg_help = """
                  Allow unknown mRNA regions when performing target region analysis.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -381,7 +416,7 @@ _this_arg_help = """
                  Print a warning message for unknown regions when performing
                  target region analysis.
                  """
-hr_group.add_argument(_this_arg_flag, type=bool,
+hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -401,7 +436,7 @@ _this_arg_help = """
                  hybrid record that can be used to infer the number of contained read counts.
                  When set to True, the identifiers will be parsed as: "<read_id>_<read_count>" 
                  """
-hf_group.add_argument(_this_arg_flag, type=bool,
+hf_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hf_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -415,7 +450,7 @@ _this_arg_help = """
                  When set to True, all hyb file identifiers will be parsed as: 
                  "<gene_id>_<transcript_id>_<gene_name>_<seg_type>"
                  """
-hf_group.add_argument(_this_arg_flag, type=bool,
+hf_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=hf_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -435,7 +470,7 @@ _this_arg_help = """
                  When set to False, an error will be raised for improperly formatted fold records.
                  When True, improperly formatted fold records will be skipped.
                  """
-fr_group.add_argument(_this_arg_flag, type=bool,
+fr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=fr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -447,7 +482,7 @@ _this_arg_help = """
                  When reading a fold record, print a warning when an improperly-formatted fold
                  record is encountered.
                  """
-fr_group.add_argument(_this_arg_flag, type=bool,
+fr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=fr_defaults[_this_arg_key],
                       help=_this_arg_help)
@@ -476,7 +511,7 @@ _this_arg_help = """
                  viennad record that can be used to infer further information 
                  about the fold divisions.
                  """
-ff_group.add_argument(_this_arg_flag, type=bool,
+ff_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=ff_defaults[_this_arg_key],
                       help=_this_arg_help)
