@@ -42,7 +42,8 @@ extensions = [
 
 # add_module_names
 autodoc_member_order = 'bysource'
-
+autosectionlabel_maxdepth = 1
+#autosectionlabel_prefix_document = True
 master_doc = 'index'
 
 # Add any paths that contain templates here, relative to this directory.

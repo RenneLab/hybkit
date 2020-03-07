@@ -26,11 +26,11 @@ def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
     parser_components = [
                          hybkit.util.in_hybs_parser,
-                         hybkit.util.out_hyb_parser,
+                         hybkit.util.out_hybs_parser,
                          hybkit.util.out_dir_parser,
                          hybkit.util.hyb_analysis_parser,
                          hybkit.util.gen_opts_parser,
-                         #hybkit.util.hybrecord_parser,
+                         hybkit.util.hybrecord_parser,
                         ]
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
@@ -40,8 +40,9 @@ def make_parser():
     return script_parser
 
 # Define main script function.
-def hyb_analyze(in_hyb_files, analysis_types, out_dir='.', 
+def hyb_analyze(in_hyb_files, analysis_types, out_dir='.', out_hyb_files=None,
                 segtype_method=None, segtype_params=None,  
+                mirna_types=None,
                 verbose=False, silent=False):
     """Perform main script function."""
 
@@ -55,6 +56,7 @@ def hyb_analyze(in_hyb_files, analysis_types, out_dir='.',
 
     if verbose:
         print('\nPerforming Analysis Types: ' + ', '.join([x.title() for x in analysis_types]))
+        print()
 
     # Prepare for segtype analysis.
     if do_segtype:
@@ -82,14 +84,25 @@ def hyb_analyze(in_hyb_files, analysis_types, out_dir='.',
             hybkit.HybRecord.select_find_type_method(segtype_method, params)
 
     if do_mirna:
-        pass
+        if not mirna_types:
+            message = 'mirna_types required for mirna analysis.'
+            print(message)
+            raise RuntimeError(message)
+
+        if verbose:
+            print('Assigning types as miRNA:')
+            print('   ', mirna_types, '\n')
 
     if do_target_region:
-        pass
+        message = 'Target Region Analysis is not yet implemented.'
+        raise NotImplementedError(message)
 
-    for in_hyb_file in in_hyb_files:
+    for i, in_hyb_file in enumerate(in_hyb_files):
         file_basename = os.path.basename(in_hyb_file)
-        out_hyb_file = os.path.join(out_dir, file_basename.replace('.hyb', '_analyzed.hyb')) 
+        if out_hyb_files is not None:
+            out_hyb_file = out_hyb_files[i]
+        else:
+            out_hyb_file = os.path.join(out_dir, file_basename.replace('.hyb', '_analyzed.hyb')) 
 
         if verbose:
             print('Analyzing File:\n    ' + in_hyb_file)
@@ -102,7 +115,7 @@ def hyb_analyze(in_hyb_files, analysis_types, out_dir='.',
                     record.find_seg_types()
             
                 if do_mirna:
-                    pass
+                    record.mirna_analysis(mirna_types)
      
                 if do_target_region:
                     pass
@@ -117,13 +130,16 @@ def hyb_analyze(in_hyb_files, analysis_types, out_dir='.',
 if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args() 
+    hybkit.util.validate_args(args, script_parser)
     hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
     hyb_analyze(
                 args.in_hyb, 
                 args.analysis_types, 
                 args.out_dir,
+                out_hyb_files=args.out_hyb,
                 segtype_method=args.segtype_method,
                 segtype_params=args.segtype_params,
+                mirna_types=args.mirna_types,
                 verbose=args.verbose,
                 silent=args.silent,
                )

@@ -5,8 +5,9 @@
 
 """This module contains helper functions for hybkit's command line scripts."""
 
-import argparse
 import os
+import sys
+import argparse
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
@@ -51,6 +52,9 @@ def dir_exists(dir_name):
     """
     if '~' in dir_name:
         dir_name = os.path.expanduser(dir_name)
+    dir_name = dir_name.strip()
+    if not dir_name:
+        dir_name = os.getcwd()
     if not os.path.isdir(dir_name):
         message = 'Provided Directory: %s Does not exist.\n' % dir_name
         raise argparse.ArgumentTypeError(message)
@@ -213,6 +217,39 @@ def out_path_exists(file_name):
 
     return os.path.abspath(file_name)
 
+# Util : Path Helper Functions 
+def validate_args(args, parser=None):
+    """
+    Check supplied arguments to make sure there are no hidden contradictions.
+
+    Current checks:
+        | If explicit output file names supplied, be sure that they match the number of 
+          input files provided.
+
+    Args:
+        args (namespace): The arguments produced by argparse.
+    """
+   
+    message = '\nArgument validation error: '
+    if parser is not None:
+        suffix = '\n\n' + parser.format_usage() + '\n' 
+    else:
+        suffix = 'Please use the -h or --help options for input requirements.'
+
+    if hasattr(args, 'in_hyb') and hasattr(args, 'out_hyb') and args.out_hyb is not None:
+        len_in_hyb = len(args.in_hyb)
+        len_out_hyb = len(args.out_hyb)
+        if len_in_hyb != len_out_hyb:
+            message += 'The number of input files and number of output files provided '
+            message += 'do not match. ( %i and %i )' % (len_in_hyb, len_out_hyb)
+            message += '\n\nInput Files:\n    '
+            message += '\n    '.join([f for f in args.in_hyb])
+            message += '\n\nOutput Files:\n    '
+            message += '\n    '.join([f for f in args.out_hyb])
+            print(message + suffix)
+            sys.exit(1)
+
+
 # Argument Parser : Input/Output Options
 in_hyb_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
@@ -221,7 +258,7 @@ _this_arg_help = """
 in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                            metavar='PATH_TO/MY_FILE.HYB',
                            required=True,
-                           #nargs='1', 
+                           # nargs='1', 
                            help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
@@ -262,15 +299,30 @@ positional_in_hybs_parser.add_argument('in_hyb', type=hyb_exists,
 # Argument Parser : Input/Output Options
 out_hyb_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Optional path to hyb-format file for output (should include a ".hyb" suffix).
+                 Optional path to a hyb-format file for 
+                 output (should include a ".hyb" suffix).
                  If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
                  will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
                  """
 out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
-                           metavar='PATH_TO/OUT_FILE.HYB',
-                           #required=True,
-                           #nargs='1', 
-                           help=_this_arg_help)
+                            metavar='PATH_TO/OUT_FILE.HYB',
+                            # required=True,
+                            # nargs='+', 
+                            help=_this_arg_help)
+
+# Argument Parser : Input/Output Options
+out_hybs_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Optional path to one or more hyb-format file for 
+                 output (should include a ".hyb" suffix).
+                 If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
+                 will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
+                 """
+out_hybs_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
+                             metavar='PATH_TO/OUT_FILE.HYB',
+                             # required=True,
+                             nargs='+', 
+                             help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 req_out_hyb_parser = argparse.ArgumentParser(add_help=False)
@@ -280,7 +332,7 @@ _this_arg_help = """
 req_out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
                                 metavar='PATH_TO/OUT_FILE.HYB',
                                 required=True,
-                                #nargs='1', 
+                                # nargs='1', 
                                 help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
@@ -290,9 +342,9 @@ _this_arg_help = """
                  Defaults to the current working directory.
                  """
 out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
-                           #required=True,
-                           #nargs='1',
-                           default='.', 
+                           # required=True,
+                           # nargs='1',
+                           default='', 
                            help=_this_arg_help)
 
 # Argument Parser : General Options
@@ -304,7 +356,7 @@ _this_arg_help = """
                  Print verbose output during run.
                  """
 verbosity_group.add_argument('-v', '--verbose', action='store_true',
-                             #nargs='+',
+                             # nargs='+',
                              help=_this_arg_help)
 
 # Argument Parser : General Options
@@ -312,7 +364,7 @@ _this_arg_help = """
                  Print no output during run.
                  """
 verbosity_group.add_argument('-s', '--silent', action='store_true',
-                             #nargs='+',
+                             # nargs='+',
                              help=_this_arg_help)
 
 
@@ -542,7 +594,7 @@ _this_arg_help = """
                  """
 hyb_analysis_parser.add_argument('-t', '--analysis_types',
                                  # required=True,
-                                 nargs='?',
+                                 nargs='+',
                                  default=['segtype'],
                                  choices=['segtype', 'mirna', 'target_region'],
                                  help=_this_arg_help)

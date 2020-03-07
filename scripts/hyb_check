@@ -53,6 +53,7 @@ def hyb_check(in_hyb_files, verbose=False, silent=False):
 if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args() 
+    hybkit.util.validate_args(args)
     hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
     hyb_check(args.in_hyb, verbose=args.verbose, silent=args.silent)
 
