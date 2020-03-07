@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
+    'sphinxarg.ext',
     ]
 
 # add_module_names

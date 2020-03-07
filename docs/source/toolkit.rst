@@ -2,5 +2,12 @@
 hybkit Toolkit
 ==================================
 
-Stub, will be filled as toolkit is developed.
+hyb_check
+------------
+
+.. argparse::
+   :filename: ../scripts/hyb_check
+   :func: make_parser
+   :prog: hyb_check
+
 
