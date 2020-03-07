@@ -17,18 +17,18 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 # Create Command-line Argument Parser
-def make_hyb_check_parser():
+def make_parser():
     parser_components = [
                          hybkit.util.positional_in_hybs_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
                         ]
-    hyb_check_parser = argparse.ArgumentParser(
+    script_parser = argparse.ArgumentParser(
          parents=parser_components,
          description=__doc__,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter
          )
-    return hyb_check_parser
+    return script_parser
 
 # Define main script function.
 def hyb_check(in_hyb_files, verbose=False, silent=False):
@@ -51,10 +51,9 @@ def hyb_check(in_hyb_files, verbose=False, silent=False):
 
 # Execute the script function
 if __name__ == '__main__':
-    hyb_check_parser = make_hyb_check_parser()
-    args = hyb_check_parser.parse_args() 
-    verbose = True
-    hybkit.HybRecord.set_namespace_settings(args, verbose=verbose)
-    hyb_check(args.in_hyb, verbose=verbose)
+    script_parser = make_parser()
+    args = script_parser.parse_args() 
+    hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
+    hyb_check(args.in_hyb, verbose=args.verbose, silent=args.silent)
 
 

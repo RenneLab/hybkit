@@ -9,10 +9,12 @@ Package details for the hybkit project.
 
 import os
 
-# Set package directory and code directory
+# Set package directory, code directory, and default file locations
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 code_dir = os.path.join(package_dir, 'hybkit')
 data_dir = os.path.join(package_dir, 'databases')
+default_string_match_params = os.path.join(code_dir, 'string_match_params.csv')
+# default_id_map_params = os.path.join()
 
 # Preparation for initial PIP release, not yet completed.
 project_name = 'hybkit'

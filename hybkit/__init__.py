@@ -1173,7 +1173,7 @@ class HybRecord(object):
         Available methods are listed in :attr:`find_type_methods`.
 
         Args:
-            find_method_name (str): Method opttion from :attr:`find_seg_types` to select
+            find_method_name (str): Method opttion from :attr:`find_type_methods` to select
                 for use by the :func:`find_seg_types` method.
             find_params (dict, optional): Dict object of parameters to use by selected method.
         """
@@ -1741,6 +1741,33 @@ class HybRecord(object):
                          'string_match': find_seg_type_string_match,
                          'id_map': find_seg_type_from_id_map}
 
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    #:   Dict of paramater generation methods for type finding methods
+    #:   
+    #:     ============== ===================================================
+    #:     'hyb'          :obj:`None`
+    #:     'string_match' :func:`make_string_match_parameters`
+    #:     'id_map'       :func:`make_seg_type_id_map`
+    #:     ============== ===================================================
+    find_type_parameter_methods = {
+        'hyb': None,
+        'string_match': make_string_match_parameters.__func__,
+        'id_map': make_seg_type_id_map.__func__,
+        }
+
+    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    #:   Dict of default paramater files to accompany type finding methods
+    #:   
+    #:     ============== ===================================================
+    #:     'hyb'          :obj:`None`
+    #:     'string_match' :obj:`hybkit.__about__.default_string_match_params`
+    #:     'id_map'       :obj:`None`
+    #:     ============== ===================================================
+    find_type_default_parameter_files = {
+        'hyb': None,
+        'string_match': hybkit.__about__.default_string_match_params,
+        'id_map': None,
+        }
 
     # HybRecord : Private Constants
     # Set object of string-comparison properties for the ".has_property()" method.

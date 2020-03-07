@@ -26,14 +26,14 @@ Hybkit Toolkit:
         ============================= =========================================================
         Utility                       Description
         ============================= =========================================================
-        hyb_check.py                  Read a ".hyb" file and check for errors
-        hyb_filter.py                 Filter a ".hyb" file to a specific subset of sequences
-        hyb_analyze.py                Analyze and set details for hyb records, such as segtypes
-        hyb_type_analysis.py          Perform a type analysis on a prepared "hyb" file
-        hyb_mirna_count_anlaysis.py   Perform a miRNA_count analysis on a prepared "hyb" file
-        hyb_summary_anlaysis.py       Perform a summary analysis on a prepared "hyb" file
-        hyb_mirna_target_analysis.py  Perform a mirna_target analysis on a prepared "hyb" file
-        hyb_fold_analysis.py          Perform a fold analysis on a prepared "hyb" file
+        hyb_check                     Read a ".hyb" file and check for errors
+        hyb_filter                    Filter a ".hyb" file to a specific subset of sequences
+        hyb_analyze                   Analyze and set details for hyb records, such as segtypes
+        hyb_type_analysis             Perform a type analysis on a prepared "hyb" file
+        hyb_mirna_count_anlaysis      Perform a miRNA_count analysis on a prepared "hyb" file
+        hyb_summary_anlaysis          Perform a summary analysis on a prepared "hyb" file
+        hyb_mirna_target_analysis     Perform a mirna_target analysis on a prepared "hyb" file
+        hyb_fold_analysis             Perform a fold analysis on a prepared "hyb" file
         ============================= =========================================================
         
     These scripts are used on the command line with hyb-format files. For example, to filter a 

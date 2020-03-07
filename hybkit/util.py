@@ -134,7 +134,7 @@ def vienna_exists(file_name):
     use_suffixes = VIENNA_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % VIENNA_SUFFIXES
+vienna_exists.__doc__ = vienna_exists.__doc__ % VIENNA_SUFFIXES
 
 # Util : Path Helper Functions 
 def viennad_exists(file_name):
@@ -152,7 +152,7 @@ def viennad_exists(file_name):
     use_suffixes = VIENNAD_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % VIENNAD_SUFFIXES
+viennad_exists.__doc__ = viennad_exists.__doc__ % VIENNAD_SUFFIXES
 
 # Util : Path Helper Functions 
 def ct_exists(file_name):
@@ -170,7 +170,7 @@ def ct_exists(file_name):
     use_suffixes = CT_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % CT_SUFFIXES
+ct_exists.__doc__ = ct_exists.__doc__ % CT_SUFFIXES
 
 # Util : Path Helper Functions 
 def fold_exists(file_name):
@@ -188,7 +188,7 @@ def fold_exists(file_name):
     use_suffixes = FOLD_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % FOLD_SUFFIXES
+fold_exists.__doc__ = fold_exists.__doc__ % FOLD_SUFFIXES
 
 # Util : Path Helper Functions 
 def out_path_exists(file_name):
@@ -264,7 +264,7 @@ out_hyb_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Optional path to hyb-format file for output (should include a ".hyb" suffix).
                  If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
-                 will be used as a template for the output "PATH_TO/MY_FILE_OUT.hyb".
+                 will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
                  """
 out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
                            metavar='PATH_TO/OUT_FILE.HYB',
@@ -286,17 +286,35 @@ req_out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
 # Argument Parser : Input/Output Options
 out_dir_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Path to directory to output analysis files.
+                 Path to directory for output of analysis files. 
+                 Defaults to the current working directory.
                  """
 out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
-                           metavar='PATH_TO/MY_FILE.HYB',
                            #required=True,
-                           #nargs='1', 
+                           #nargs='1',
+                           default='.', 
                            help=_this_arg_help)
 
-# Argument Parser : Input/Output Options
-# Stub
+# Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
+verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
+
+# Argument Parser : General Options
+_this_arg_help = """
+                 Print verbose output during run.
+                 """
+verbosity_group.add_argument('-v', '--verbose', action='store_true',
+                             #nargs='+',
+                             help=_this_arg_help)
+
+# Argument Parser : General Options
+_this_arg_help = """
+                 Print no output during run.
+                 """
+verbosity_group.add_argument('-s', '--silent', action='store_true',
+                             #nargs='+',
+                             help=_this_arg_help)
+
 
 # Argument Parser : HybRecord  
 # Create parser for HybRecord options
@@ -515,6 +533,50 @@ ff_group.add_argument(_this_arg_flag, type=bool_from_string,
                       choices=[True, False],
                       default=ff_defaults[_this_arg_key],
                       help=_this_arg_help)
+
+# Argument Parser : hyb_analysis
+hyb_analysis_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Types of analyses to perform on input hyb file.
+                 (Note: analyses can be combined, such as "--analysis_types segtype mirna")
+                 """
+hyb_analysis_parser.add_argument('-t', '--analysis_types',
+                                 # required=True,
+                                 nargs='?',
+                                 default=['segtype'],
+                                 choices=['segtype', 'mirna', 'target_region'],
+                                 help=_this_arg_help)
+
+# Argument Parser : hyb_analysis
+_this_arg_help = """
+                 Segment-type finding method to use for segtype analysis.
+                 For a description of the different methods, see the HybRecord documentation
+                 for the find_seg_types method.
+                 """
+hyb_analysis_parser.add_argument('--segtype_method',
+                                 # required=True,
+                                 # nargs='?',
+                                 default='hyb',
+                                 choices=hybkit.HybRecord.find_type_methods.keys(),
+                                 help=_this_arg_help)
+
+# Argument Parser : hyb_analysis
+_this_arg_help = """
+                 Segment-type finding paramaters to use for segtype analysis with some segtype
+                 finding methods: {string_match, id_map}.
+                 For a description of the different methods, see the HybRecord documentation
+                 for the find_seg_types method.
+                 """
+hyb_analysis_parser.add_argument('--segtype_params', type=file_exists,
+                                 metavar='PATH_TO/PARAMATERS_FILE',
+                                 # required=True,
+                                 # nargs='?',
+                                 # default='hyb',
+                                 # choices=hybkit.HybRecord.find_type_methods,
+                                 help=_this_arg_help)
+
+
+
 
 
 # Allow execution of module for testing purposes.
