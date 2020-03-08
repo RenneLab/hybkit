@@ -10,11 +10,17 @@ Read one or more '.hyb' format files and output files that meet (or exclude) a s
 import sys
 import os 
 import argparse
+import textwrap
 import hybkit
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
+# Divide docstring into argparse and full portions.
+argparse_doc = __doc__
+__doc__ += textwrap.dedent("""
+                           Example.
+                           """)
 
 # Create Command-line Argument Parser
 def make_parser():
@@ -30,7 +36,7 @@ def make_parser():
                         ]
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=__doc__,
+         description=argparse_doc,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter
          )
     return script_parser

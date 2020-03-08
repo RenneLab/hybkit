@@ -12,8 +12,20 @@
 #
 import os
 import sys
+import imp
 sys.path.insert(0, os.path.abspath('..'))
+# sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
 import hybkit
+#import hybkit_scripts
+hyb_check = imp.load_source('hyb_check', 
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
+hyb_filter = imp.load_source('hyb_filter',
+                             os.path.abspath(os.path.join('..', 'scripts', 'hyb_filter')))
+hyb_analysis = imp.load_source('hyb_analysis',
+                                os.path.abspath(os.path.join('..', 'scripts', 'hyb_analysis')))
+hyb_check = imp.load_source('hyb_check',
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
+
 
 # -- Project information -----------------------------------------------------
 

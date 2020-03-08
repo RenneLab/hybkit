@@ -693,7 +693,7 @@ _this_arg_help = """
                  The "any" mode requires only one provided filter to be true for inclusion.
                  (Note: matching any exclusion filter is grounds for exclusion of record.)
                  """
-hyb_filter_parser.add_argument('-m', '--filter_mode',
+hyb_filter_parser.add_argument('-bl', '--blah',
                                # required=True,
                                # nargs='+',
                                default='all',
