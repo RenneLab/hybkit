@@ -10,3 +10,6 @@ hybkit Toolkit
 
    toolkit/hyb_check
    toolkit/hyb_analysis
+   toolkit/hyb_filter
+
+

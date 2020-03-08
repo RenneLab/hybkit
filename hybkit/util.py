@@ -627,9 +627,62 @@ hyb_analysis_parser.add_argument('--segtype_params', type=file_exists,
                                  # choices=hybkit.HybRecord.find_type_methods,
                                  help=_this_arg_help)
 
+# Argument Parser : hyb_filter
+hyb_filter_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Modes for evaluating multiple filters. 
+                 The "all" mode requires all provided filters to be true for inclusion.
+                 The "any" mode requires only one provided filter to be true for inclusion.
+                 (Note: matching any exclusion filter is grounds for exclusion of record.)
+                 """
+hyb_filter_parser.add_argument('-m', '--filter_mode',
+                               # required=True,
+                               # nargs='+',
+                               default='all',
+                               choices={'all', 'any'},
+                               help=_this_arg_help)
 
+for i in range(1,4):
+    _this_arg_help = """
+                     Filter criteria #%i. 
+                     Records matching the criteria will be included in output.
+                     Includes a filter type, Ex: "seg_name_contains",
+                     and an argument, Ex: "ENST00000340384".
+                     (Note: not all filter types require a second argument, 
+                     for Example: "has_mirna_seg")
+                     """ % i
+    if i == 1:
+        flag_suffix = ''
+    else:
+        flag_suffix = '_' + str(i)
 
+    hyb_filter_parser.add_argument('--filter' + flag_suffix,
+                                   # required=True,
+                                   nargs='+',
+                                   # default='all',
+                                   # choices={'all', 'any'},
+                                   help=_this_arg_help)
 
+for i in range(1,4):
+    _this_arg_help = """
+                     Exclusion filter criteria #%i. 
+                     Records matching the criteria will be excluded from output.
+                     Includes a filter type, Ex: "seg_name_contains",
+                     and an argument, Ex: "ENST00000340384".
+                     (Note: not all filter types require a second argument, 
+                     for Example: "has_mirna_seg")
+                     """ % i
+    if i == 1:
+        flag_suffix = ''
+    else:
+        flag_suffix = '_' + str(i)
+
+    hyb_filter_parser.add_argument('--exclude' + flag_suffix,
+                                   # required=True,
+                                   nargs='+',
+                                   # default='all',
+                                   # choices={'all', 'any'},
+                                   help=_this_arg_help)
 
 # Allow execution of module for testing purposes.
 if __name__ == '__main__':

@@ -2084,6 +2084,30 @@ class HybFile(object):
         """Return a new HybFile object."""
         return cls(*args, **kwargs)
 
+    # HybFile : Public Classmethods : Settings
+    @classmethod
+    def set_namespace_settings(cls, nspace, verbose=False):
+        """
+        Take a namespace object as from an argparse parser and set settings.
+        
+        | Each setting in :obj:`settings` is checked and set where applicable
+
+        Args:
+            nspace (Namespace): Namespace containing settings
+            verbose (bool, optional): If True, print when changing setting.
+        """
+        out_report = '\n'
+        for setting in cls.settings:
+            if hasattr(nspace, setting) and getattr(nspace, setting) != cls.settings[setting]:
+                new_setting = getattr(nspace, setting)
+                out_report += 'Setting HybFile Setting:'
+                out_report += '"%s" to "%s"\n' % (setting, str(new_setting))
+                cls.settings[setting] = new_setting
+
+        if verbose and out_report.strip():
+            print(out_report)
+        
+
     # HybFile : Private Methods
     # Check if provided argument ("record") is an instance of HybRecord.
     def _ensure_HybRecord(self, record):

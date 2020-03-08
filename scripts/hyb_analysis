@@ -31,6 +31,7 @@ def make_parser():
                          hybkit.util.hyb_analysis_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
+                         hybkit.util.hybfile_parser,
                         ]
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
@@ -132,6 +133,7 @@ if __name__ == '__main__':
     args = script_parser.parse_args() 
     hybkit.util.validate_args(args, script_parser)
     hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
+    hybkit.HybFile.set_namespace_settings(args, verbose=args.verbose)
     hyb_analyze(
                 args.in_hyb, 
                 args.analysis_types, 

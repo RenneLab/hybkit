@@ -22,6 +22,7 @@ def make_parser():
                          hybkit.util.positional_in_hybs_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
+                         hybkit.util.hybfile_parser,
                         ]
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
@@ -55,6 +56,7 @@ if __name__ == '__main__':
     args = script_parser.parse_args() 
     hybkit.util.validate_args(args)
     hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
+    hybkit.HybFile.set_namespace_settings(args, verbose=args.verbose)
     hyb_check(args.in_hyb, verbose=args.verbose, silent=args.silent)
 
 
