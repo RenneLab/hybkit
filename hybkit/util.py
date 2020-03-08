@@ -684,6 +684,40 @@ for i in range(1,4):
                                    # choices={'all', 'any'},
                                    help=_this_arg_help)
 
+
+# Argument Parser : hyb_filter
+analysis_gen_opts_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Modes for evaluating multiple filters. 
+                 The "all" mode requires all provided filters to be true for inclusion.
+                 The "any" mode requires only one provided filter to be true for inclusion.
+                 (Note: matching any exclusion filter is grounds for exclusion of record.)
+                 """
+hyb_filter_parser.add_argument('-m', '--filter_mode',
+                               # required=True,
+                               # nargs='+',
+                               default='all',
+                               choices={'all', 'any'},
+                               help=_this_arg_help)
+
+
+
+
+
+# Argument Parser : hyb_type_analysis
+hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
+# _this_arg_help = """
+#                  Modes for evaluating multiple filters. 
+#                  """
+# hyb_type_analysis_parser.add_argument('-m', '--filter_mode',
+#                                       # required=True,
+#                                       # nargs='+',
+#                                       default='all',
+#                                       choices={'all', 'any'},
+#                                       help=_this_arg_help)
+
+
+
 # Allow execution of module for testing purposes.
 if __name__ == '__main__':
     all_parsers = [#in_hyb_parser, 
