@@ -128,5 +128,14 @@ Followed by installation using python's setuptools::
 
 Further documentation on hybkit usage can be found in the documentation pages |of Docs Link|
 
-.. include:: readme_format.rst
+.. include:: docs_readme_format.rst
+
+.. |hybkit Toolkit| replace:: *hybkit Toolkit*
+.. |Example Pipelines| replace:: *Example Pipelines*
+.. |hybkit API| replace:: *hybkit API*
+.. |of Docs Link| replace:: of `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+.. |Docs Link| replace:: `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+.. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+.. _sample_01_image: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+
 
