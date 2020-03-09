@@ -42,7 +42,7 @@ Hybkit Toolkit:
         $ hyb_filter.py ....[command_example]
 
     Further detail on the usage of each script is provided in 
-    the |hybkit Toolkit| section |of Docs Link|
+    the |hybkit Toolkit| section |of_docs_link|_ 
 
 Pipelines:
     Hybkit provides several example pipelines for analysis of "hyb" data using the 
@@ -67,7 +67,7 @@ Pipelines:
         |sample_01_image|_
 
     Further detail on each provided pipeline can be found in 
-    the |Example Pipelines| section |of Docs Link|
+    the |Example Pipelines| section |of_docs_link|_
 
 Hybkit API:
     Hybkit provides a Python3 module with a documented API for interacting with 
@@ -96,7 +96,7 @@ Hybkit API:
                     print(hyb_record.id)
 
     Further documentation on the hybkit API can be found in the 
-    |hybkit API| section |of Docs Link|
+    |hybkit API| section |of_docs_link|_
 
 Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
 
@@ -126,15 +126,17 @@ Followed by installation using python's setuptools::
 
     $ python setup.py install
 
-Further documentation on hybkit usage can be found in the documentation pages |of Docs Link|
+Further documentation on hybkit usage can be found in the documentation pages |of_docs_link|_
 
 .. include:: docs_readme_format.rst
 
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
 .. |Example Pipelines| replace:: *Example Pipelines*
 .. |hybkit API| replace:: *hybkit API*
-.. |of Docs Link| replace:: of `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
-.. |Docs Link| replace:: `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+.. |of_docs_link| replace:: of hybkit's ReadTheDocs
+.. _of_docs_link: https://hybkit.readthedocs.io
+.. |docs_link| replace:: hybkit's ReadTheDocs
+.. _docs_link: https://hybkit.readthedocs.io
 .. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
 .. _sample_01_image: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
 
