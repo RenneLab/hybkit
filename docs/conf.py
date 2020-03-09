@@ -99,9 +99,6 @@ rst_epilog = (
 .. |3p| replace:: :abbr:`3p (3-Prime)`
 .. |5p| replace:: :abbr:`5p (5-Prime)`
 .. |spec_version| replace:: %s
-.. |hybkit Toolkit| replace:: :ref:`hybkit Toolkit`
-.. |Example Pipelines| replace:: :ref:`Example Pipelines`
-.. |hybkit API| replace:: :ref:`hybkit API`
 """ % (
        hybkit.__about__.spec_version,
       )

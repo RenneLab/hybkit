@@ -42,8 +42,7 @@ Hybkit Toolkit:
         $ hyb_filter.py ....[command_example]
 
     Further detail on the usage of each script is provided in 
-    the |hybkit Toolkit| section of 
-    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+    the |hybkit Toolkit| section |of Docs Link|
 
 Pipelines:
     Hybkit provides several example pipelines for analysis of "hyb" data using the 
@@ -65,12 +64,10 @@ Pipelines:
 
         `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.csv>`_
 
-        .. image:: https://github.com/RenneLab/hybkit/raw/master/sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
-        .. Comment image /../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+        |sample_01_image|_
 
     Further detail on each provided pipeline can be found in 
-    the |Example Pipelines| section of  
-    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+    the |Example Pipelines| section |of Docs Link|
 
 Hybkit API:
     Hybkit provides a Python3 module with a documented API for interacting with 
@@ -99,8 +96,7 @@ Hybkit API:
                     print(hyb_record.id)
 
     Further documentation on the hybkit API can be found in the 
-    |hybkit API| section of 
-    `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+    |hybkit API| section |of Docs Link|
 
 Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
 
@@ -130,4 +126,7 @@ Followed by installation using python's setuptools::
 
     $ python setup.py install
 
+Further documentation on hybkit usage can be found in the documentation pages |of Docs Link|
+
+.. include:: readme_format.rst
 
