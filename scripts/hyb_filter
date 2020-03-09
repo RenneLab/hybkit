@@ -17,7 +17,7 @@ import hybkit
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
 # Divide docstring into argparse and full portions.
-argparse_doc = __doc__
+argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
                            Example.
                            """)

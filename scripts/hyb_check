@@ -18,10 +18,17 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 # Divide docstring into argparse and full portions.
-argparse_doc = __doc__
+argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-                           Example.
-                           """)
+    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Specification`)
+    and uses hybkit's internal file error checking to check for errors. This can be useful
+    as an intial preparation step for further analyses.
+
+        Example system calls::
+
+            hyb_check my_file_1.hyb 
+            hyb_check ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
+    """)
 
 # Create Command-line Argument Parser
 def make_parser():
