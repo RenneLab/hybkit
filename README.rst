@@ -1,9 +1,8 @@
 
 hybkit
 ==================================
-
-.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit
-   :alt: GitHub release (latest by date)
+.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases
+   :alt: GitHub release (latest by date including pre-releases)
 .. image:: https://badge.fury.io/py/hybkit.svg
    :target: https://badge.fury.io/py/hybkit
 .. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
