@@ -2,9 +2,15 @@
 hybkit
 ==================================
 
+.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit
+   :alt: GitHub release (latest by date)
+.. image:: https://badge.fury.io/py/hybkit.svg
+   :target: https://badge.fury.io/py/hybkit
 .. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
-    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+   :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+.. image:: https://img.shields.io/pypi/pyversions/hybkit
+   :alt: PyPI - Python Version
 
 
 | Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data 
@@ -131,3 +137,7 @@ Followed by installation using python's setuptools::
     $ python setup.py install
 
 
+
+.. |hybkit Toolkit| replace:: *hybkit Toolkit*
+.. |Example Pipelines| replace:: *Example Pipelines*
+.. |hybkit API| replace:: *hybkit API*
