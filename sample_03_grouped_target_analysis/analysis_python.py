@@ -13,10 +13,6 @@ For more details, see: "grouped_target_analysis_notes.rst".
 
 import os
 import sys
-
-# Ensure hybkit is accessible
-analysis_dir = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(os.path.join(analysis_dir, '..'))
 import hybkit
 
 # Set count_mode:
