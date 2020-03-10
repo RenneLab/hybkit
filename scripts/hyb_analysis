@@ -26,29 +26,20 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
     This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Specification`)
-    and analyzes hybrid record properties. The analyzed records are then ouptut in a file
-    with a respective file format::
-    
-        PATH_TO/MY_FILE_1.HYB
-        -->
-        OUT_DIR/MY_FILE_1_ANALYZED.HYB
-
-    Specific file names can be provided via the -o/--out_hyb argument, 
-    ensuring that the same number of input and output files are provided.
-    The output directory defaults to the current working directory, and 
-    can be modified with the :code:`--out_dir <dir>` argument. For Example::
-
-        hyb_analysis [...] --out_hyb OUT_FILE_1.HYB OUT_FILE_2.HYB --out_dir MY_DIR
-        -->
-        MY_DIR/OUT_FILE_1.hyb
-        MY_DIR/OUT_FILE_2.hyb
+    and analyzes hybrid record properties. 
 
     segtype Analysis:
         | The 'segtype' analysis utilizes the :func:`hybkit.HybRecord.find_seg_types` method
           to assign the record flags: :ref:`seg1_type <seg1_type>` 
           and :ref:`seg2_type <seg2_type>`
 
-        | Fill
+        | The 'mirna" analysis uses the :func:`hybkit.HybRecord.mirna_analysis` method
+          to identify properties relating to mirna within the hybrids, 
+          including mirna presence and positions.
+          This analysis requires the seg_type flags to be filled, either by a segtype analysis,
+          or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
+          reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
+          the presence and position of any miRNA in within the hybrid.
 
         Example system calls::
 
@@ -56,13 +47,15 @@ __doc__ += textwrap.dedent("""
             hyb_check ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
     """)
 
+__doc__ += hybkit.util.output_description
+
 # Create Command-line Argument Parser
 def make_parser():
-    script_args = argparse.ArgumentParser(add_help=False)
+    script_args = argparse.ArgumentParser(add_help=False,
+                                          allow_abbrev=False)
     parser_components = [
                          hybkit.util.in_hybs_parser,
-                         hybkit.util.out_hybs_parser,
-                         hybkit.util.out_dir_parser,
+                         hybkit.util.out_opts_parser,
                          hybkit.util.hyb_analysis_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
@@ -73,11 +66,18 @@ def make_parser():
          description=argparse_doc.replace('|', ''),
          formatter_class=argparse.ArgumentDefaultsHelpFormatter
          )
+
+    script_parser.set_defaults(out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX)
+
     return script_parser
 
 # Define main script function.
-def hyb_analyze(in_hyb_files, analysis_types, out_dir='.', out_hyb_files=None,
-                segtype_method=None, segtype_params=None,  
+def hyb_analyze(in_hyb_files, analysis_types, 
+                out_dir='.', 
+                out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX,
+                out_hyb_files=None,
+                segtype_method=None, 
+                segtype_params=None,  
                 mirna_types=None,
                 verbose=False, silent=False):
     """Perform main script function."""
@@ -138,11 +138,16 @@ def hyb_analyze(in_hyb_files, analysis_types, out_dir='.', out_hyb_files=None,
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
-            out_hyb_file = os.path.join(out_dir, file_basename.replace('.hyb', '_analyzed.hyb')) 
+            out_hyb_file = hybkit.util.make_out_file_name(in_hyb_file,
+                                                          name_suffix=out_suffix,
+                                                          in_suffix='.hyb',
+                                                          out_suffix='.hyb',
+                                                          out_dir=out_dir,
+                                                          seg_sep='_',)
 
         if verbose:
             print('Analyzing File:\n    ' + in_hyb_file)
-      
+            print(out_hyb_file)
     
         with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
              hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
@@ -173,6 +178,7 @@ if __name__ == '__main__':
                 args.in_hyb, 
                 args.analysis_types, 
                 args.out_dir,
+                out_suffix=args.out_suffix,
                 out_hyb_files=args.out_hyb,
                 segtype_method=args.segtype_method,
                 segtype_params=args.segtype_params,

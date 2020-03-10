@@ -26,14 +26,14 @@ __doc__ += textwrap.dedent("""
 
         Example system calls::
 
-            hyb_check my_file_1.hyb 
-            hyb_check ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
+            hyb_check -i my_file_1.hyb 
+            hyb_check -i ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
     """)
 
 # Create Command-line Argument Parser
 def make_parser():
     parser_components = [
-                         hybkit.util.positional_in_hybs_parser,
+                         hybkit.util.in_hybs_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,

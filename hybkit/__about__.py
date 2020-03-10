@@ -56,5 +56,5 @@ __email__ = "ds@ufl.edu"
 __license__ = "GPLv3"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 spec_version = __version__  # Define separate specification version.

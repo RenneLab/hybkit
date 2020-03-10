@@ -155,14 +155,16 @@ Other Details
     .. table:: 
         :widths: auto
 
-        ======= ==================================================================================
-        Item    Role
-        ======= ==================================================================================
-        \\\\t   Column Delimiter
-        .       Missing Data Placeholder (equivalent to None)
-        .hyb    File Suffix
-        .hyb.gz gzipped File Suffix
-        ======= ==================================================================================
+        ========== ==================================================================================
+        Item       Role
+        ========== ==================================================================================
+        \\\\t      Column Delimiter
+        .          Missing Data Placeholder (equivalent to None)
+        .hyb       File Suffix
+        .hyb.gz    gzipped File Suffix
+        Disallowed Header Lines
+        Disallowed In-file Comments
+        ========== ==================================================================================
 
 
 Example

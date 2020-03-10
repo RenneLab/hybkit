@@ -34,7 +34,8 @@ Lead Developer
 Changelog
 ---------
 
-    * 0.1.0 (-present) Beta Implementation
+    * 0.2.0 (2020-03-present) Added Command-line Toolkit. Code Refinements. 
+    * 0.1.0 (2020-03) Initial Implementation
 
 
 

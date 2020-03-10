@@ -8,6 +8,7 @@
 import os
 import sys
 import argparse
+import textwrap
 
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
@@ -25,6 +26,8 @@ FOLD_SUFFIXES = VIENNA_SUFFIXES + VIENNAD_SUFFIXES + CT_SUFFIXES
 
 USE_ABSPATH = False
 
+FILTERED_OUT_SUFFIX = '_filtered'
+ANALYSIS_OUT_SUFFIX = '_analyzed'
 
 # Util : Argparse Helper Functions
 def bool_from_string(value):
@@ -52,9 +55,11 @@ def dir_exists(dir_name):
     """
     if '~' in dir_name:
         dir_name = os.path.expanduser(dir_name)
+    if '$' in dir_name:
+        dir_name = os.path.expandvars(dir_name)
+    #if not dir_name:
+    #    dir_name = os.getcwd()
     dir_name = dir_name.strip()
-    if not dir_name:
-        dir_name = os.getcwd()
     if not os.path.isdir(dir_name):
         message = 'Provided Directory: %s Does not exist.\n' % dir_name
         raise argparse.ArgumentTypeError(message)
@@ -218,6 +223,47 @@ def out_path_exists(file_name):
     return os.path.abspath(file_name)
 
 # Util : Path Helper Functions 
+def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix='', 
+                       out_dir='', seg_sep='_'):
+    """
+    Given an input file name, generate an output file name.
+
+    Args:
+        in_file_name (str): Name of input file as template.
+        file_suffix (str): File type suffix.
+        add_suffix (str): Name suffix to add to indicate file is output.
+        out_dir (str): Directory path in which to place output file. 
+        seg_sep (str): Separator string between file name segements.
+
+    Returns:
+        An output file path based on the input file template.
+    """
+    # Normalize the file path
+    in_file_basename = os.path.basename(in_file_name)
+    if in_suffix and in_file_basename.lower().endswith(in_suffix.lower()):
+        suffix_len = len(in_suffix)
+        in_file_basename = in_file_basename[:(-1 * suffix_len)]
+
+    full_name_suffix = name_suffix
+    if out_suffix and not full_name_suffix.lower().endswith(out_suffix.lower()):
+        full_name_suffix += out_suffix
+    if seg_sep and not full_name_suffix.startswith(seg_sep):
+        full_name_suffix = seg_sep + full_name_suffix
+    
+    out_file_basename = in_file_basename + full_name_suffix
+
+    out_file_full = os.path.join(out_dir, out_file_basename)
+
+    return out_file_full
+
+    # If global option set, then find the absolute path.
+    if USE_ABSPATH:
+        file_name = os.path.abspath(file_name)
+
+    return os.path.abspath(file_name)
+
+
+# Util : Path Helper Functions 
 def validate_args(args, parser=None):
     """
     Check supplied arguments to make sure there are no hidden contradictions.
@@ -262,17 +308,6 @@ in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                            help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
-positional_in_hyb_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Path to hyb-format file with a ".hyb" suffix for use in the analysis.
-                 """
-positional_in_hyb_parser.add_argument('in_hyb', type=hyb_exists,
-                                      metavar='PATH_TO/MY_FILE.HYB',
-                                      # required=True,
-                                      # nargs='1', 
-                                      help=_this_arg_help)
-
-# Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Path to one or more hyb-format files with a ".hyb" suffix for use 
@@ -283,18 +318,6 @@ in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                             required=True,
                             nargs='+', 
                             help=_this_arg_help)
-
-# Argument Parser : Input/Output Options
-positional_in_hybs_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Path to one or more hyb-format files with a ".hyb" suffix for use 
-                 in the analysis.
-                 """
-positional_in_hybs_parser.add_argument('in_hyb', type=hyb_exists,
-                                       metavar='PATH_TO/MY_FILE.HYB',
-                                       # required=True,
-                                       nargs='+', 
-                                       help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_hyb_parser = argparse.ArgumentParser(add_help=False)
@@ -344,8 +367,28 @@ _this_arg_help = """
 out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
                            # required=True,
                            # nargs='1',
-                           default='', 
+                           default='$PWD', 
                            help=_this_arg_help)
+
+
+# Argument Parser : Input/Output Options
+out_suffix_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Suffix to add to the name of output hyb files.
+                 (Note: If the provided suffix does not end with ".hyb", then ".hyb" will be added)
+                 """
+out_suffix_parser.add_argument('--out_suffix',
+                               # required=True,
+                               # nargs='1',
+                               help=_this_arg_help)
+
+
+out_opts_parser = argparse.ArgumentParser(add_help=False, 
+                                          parents=[
+                                                   out_hybs_parser,
+                                                   out_dir_parser,
+                                                   out_suffix_parser,
+                                                  ],)
 
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
@@ -701,8 +744,25 @@ hyb_filter_parser.add_argument('-bl', '--blah',
                                help=_this_arg_help)
 
 
+# Argument Parser : Standardized Documentation Settings
+output_description = textwrap.dedent("""
+File Naming:
+    Records are then ouptut in a file with a respective file format::
+    
+        PATH_TO/MY_FILE_1.HYB
+        -->
+        OUT_DIR/MY_FILE_1_ANALYZED.HYB
 
+    Specific file names can be provided via the -o/--out_hyb argument, 
+    ensuring that the same number of input and output files are provided.
+    The output directory defaults to the current working directory, and 
+    can be modified with the :code:`--out_dir <dir>` argument. For Example::
 
+        hyb_analysis [...] --out_hyb OUT_FILE_1.HYB OUT_FILE_2.HYB --out_dir MY_DIR
+        -->
+        MY_DIR/OUT_FILE_1.hyb
+        MY_DIR/OUT_FILE_2.hyb
+    """)
 
 # Argument Parser : hyb_type_analysis
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
