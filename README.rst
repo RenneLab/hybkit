@@ -132,6 +132,7 @@ Further documentation on hybkit usage can be found in |docs_link|_.
 .. |Example Pipelines| replace:: *Example Pipelines*
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
+.. _docs_link: https://hybkit.readthedocs.io#
 .. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
 
 .. include:: docs_readme_format.rst

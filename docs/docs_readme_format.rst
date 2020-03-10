@@ -2,5 +2,4 @@
 .. |Example Pipelines| replace:: :ref:`Example Pipelines`
 .. |hybkit API| replace:: :ref:`hybkit API`
 .. |docs_link| replace:: this documentation
-.. _docs_link: https://hybkit.readthedocs.io#
 .. |sample_01_image| image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
