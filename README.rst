@@ -5,7 +5,7 @@ hybkit
    :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
 .. image:: https://badge.fury.io/py/hybkit.svg
-   :target: https://pypi.org/project/hybkit/0.1.8/
+   :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
 .. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
