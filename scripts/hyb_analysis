@@ -51,8 +51,7 @@ __doc__ += hybkit.util.output_description
 
 # Create Command-line Argument Parser
 def make_parser():
-    script_args = argparse.ArgumentParser(add_help=False,
-                                          allow_abbrev=False)
+    script_args = argparse.ArgumentParser(add_help=False)
     parser_components = [
                          hybkit.util.in_hybs_parser,
                          hybkit.util.out_opts_parser,
@@ -64,7 +63,8 @@ def make_parser():
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
          description=argparse_doc.replace('|', ''),
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+         allow_abbrev=False,
          )
 
     script_parser.set_defaults(out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX)

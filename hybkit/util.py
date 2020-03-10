@@ -26,7 +26,7 @@ FOLD_SUFFIXES = VIENNA_SUFFIXES + VIENNAD_SUFFIXES + CT_SUFFIXES
 
 USE_ABSPATH = False
 
-FILTERED_OUT_SUFFIX = '_filtered'
+FILTER_OUT_SUFFIX = '_filtered'
 ANALYSIS_OUT_SUFFIX = '_analyzed'
 
 # Util : Argparse Helper Functions

@@ -41,7 +41,8 @@ def make_parser():
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
          description=argparse_doc,
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+         allow_abbrev=False,
          )
     return script_parser
 

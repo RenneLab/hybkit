@@ -22,13 +22,14 @@ __doc__ += textwrap.dedent("""
                            Example.
                            """)
 
+__doc__ += hybkit.util.output_description
+
 # Create Command-line Argument Parser
 def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
     parser_components = [
                          hybkit.util.in_hybs_parser,
-                         hybkit.util.out_hybs_parser,
-                         hybkit.util.out_dir_parser,
+                         hybkit.util.out_opts_parser,
                          hybkit.util.hyb_filter_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
@@ -37,13 +38,19 @@ def make_parser():
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
          description=argparse_doc,
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+         allow_abbrev=False,
          )
+
+    script_parser.set_defaults(out_suffix=hybkit.util.FILTER_OUT_SUFFIX)
+
     return script_parser
 
 # Define main script function.
 def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
-               out_dir='.', out_hyb_files=None,
+               out_dir='.', 
+               out_suffix=hybkit.util.FILTER_OUT_SUFFIX,
+               out_hyb_files=None,
                verbose=False, silent=False):
     """Perform main script function."""
 
@@ -70,7 +77,12 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
-            out_hyb_file = os.path.join(out_dir, file_basename.replace('.hyb', '_filtered.hyb')) 
+            out_hyb_file = hybkit.util.make_out_file_name(in_hyb_file,
+                                                          name_suffix=out_suffix,
+                                                          in_suffix='.hyb',
+                                                          out_suffix='.hyb',
+                                                          out_dir=out_dir,
+                                                          seg_sep='_',)
 
         if verbose:
             print('Filtering File:\n    ' + in_hyb_file)
@@ -150,6 +162,7 @@ if __name__ == '__main__':
                 filter_params,
                 exclude_params,
                 out_dir=args.out_dir,
+                out_suffix=args.out_suffix,
                 out_hyb_files=args.out_hyb,
                 verbose=args.verbose,
                 silent=args.silent,
