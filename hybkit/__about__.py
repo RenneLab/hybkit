@@ -10,9 +10,10 @@ Package details for the hybkit project.
 import os
 import sys
 if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
-    from importlib import resources as importlib_resources
+    from importlib import resources
 else:
     import importlib_resources
+    module_path_find_function = importlib_resources.files
 
 project_name = 'hybkit'
 version = "0.1.8"
@@ -24,7 +25,12 @@ keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
 name_and_version = project_name + '-' + version
 
-module_dir = importlib_resources.files('hybkit')
+if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
+    with resources.path('hybkit', '__init__.py') as path_obj:
+        module_dir = os.path.dirname(path_obj)
+else:
+    module_dir = importlib_resources.files('hybkit')
+
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)
 #Putting in try block to allow use with exec()
 try:
