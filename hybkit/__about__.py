@@ -42,7 +42,7 @@ if os.path.isdir(os.path.join(prefix_data_dir, 'databases')):
 elif os.path.isdir(os.path.join(local_data_dir, 'databases')):
     hybkit_data_dir = local_data_dir
 else:
-    print('WARNING: hybkit_data_dir variable cannot be set.')
+    print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
     hybkit_data_dir = ''
 
 databases_dir = os.path.join(hybkit_data_dir, 'databases')
