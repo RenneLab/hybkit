@@ -69,6 +69,7 @@ setuptools.setup(
                              if not (os.path.basename(f).endswith('.py')
                              or os.path.basename(f).endswith('__'))]
                  },
+    scripts=glob.glob('scripts/*'),
     python_requires='>=3.6',
     project_urls=about_vars['info_urls'],
     data_files=data_files,
