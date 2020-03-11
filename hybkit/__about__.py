@@ -49,6 +49,7 @@ reference_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
 docs_dir = os.path.join(hybkit_data_dir, 'docs')
 scripts_extra_dir = os.path.join(hybkit_data_dir, 'scripts_extra')
 
+default_coding_region_ref = os.path.join(databases_dir, 'hybkit_coding_ref_combined.csv')
 default_string_match_params = os.path.join(module_dir, 'string_match_params.csv')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/
