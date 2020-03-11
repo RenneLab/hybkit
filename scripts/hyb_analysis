@@ -7,9 +7,9 @@
 Read one or more '.hyb' format files and analyze the contained hybrid sequences.
 
 Analysis Types:
-    | segtype : Assigns types to each segment within hyb records.
-    | mirna : Assigns which segments are a miRNA based on segment types.
-    | target_region : Assigns the coding region of a coding segment types.
+    | ``segtype`` : Assigns types to each segment within hyb records.
+    | ``mirna`` : Assigns which segments are a miRNA based on segment types.
+    | ``target_region`` : Assigns the coding region of a coding segment types.
 """
 
 import sys
@@ -33,18 +33,47 @@ __doc__ += textwrap.dedent("""
           to assign the record flags: :ref:`seg1_type <seg1_type>` 
           and :ref:`seg2_type <seg2_type>`
 
-        | The 'mirna" analysis uses the :func:`hybkit.HybRecord.mirna_analysis` method
+        Example system calls:
+            ::
+            
+                hyb_analysis -t segtype -i my_file_1.hyb
+
+                hyb_analysis -t segtype -i my_file_1.hyb \\
+                             --segtype_method string_match
+
+                hyb_analysis -t segtype -i my_file_1.hyb \\
+                             --segtype_method string_match \\
+                             --segtype_parameters my_parameters_file.csv \\
+                             --allow_unknown_seg_types
+
+    mirna Analysis:
+        | The 'mirna' analysis uses the :func:`hybkit.HybRecord.mirna_analysis` method
           to identify properties relating to mirna within the hybrids, 
           including mirna presence and positions.
           This analysis requires the seg_type flags to be filled, either by a segtype analysis,
           or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
           reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
-          the presence and position of any miRNA in within the hybrid.
+          the presence and position of any miRNA within the hybrid.
 
-        Example system calls::
+        Example system calls:
+            ::
+            
+                hyb_analysis -t mirna -i my_file_1.hyb
 
-            hyb_check my_file_1.hyb
-            hyb_check ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
+                hyb_analysis -t mirna -i my_file_1.hyb \\
+                             --mirna_types miRNA kshv_miRNA
+
+        This can also be combined with the segtype analysis, as such:
+
+                hyb_analysis -t segtype mirna -i my_file_1.hyb \\
+                             --segtype_method string_match \\
+                             --segtype_parameters my_parameters_file.csv \\
+                             --allow_unknown_seg_types \\
+                             --mirna_types mirRNA kshv_miRNA
+
+    target_region Analysis:
+        | The 'target_region' analysis is currently pending implementation.
+
     """)
 
 __doc__ += hybkit.util.output_description
@@ -62,7 +91,7 @@ def make_parser():
                         ]
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=argparse_doc.replace('|', ''),
+         description=argparse_doc.replace('|', '').replace('``', ''),
          formatter_class=argparse.ArgumentDefaultsHelpFormatter,
          allow_abbrev=False,
          )

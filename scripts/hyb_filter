@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and output files that meet (or exclude) a speific criteria.
+Read one or more '.hyb' format files and output files that meet (or exclude) speific criteria.
 """
 
 import sys
@@ -19,8 +19,58 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 # Divide docstring into argparse and full portions.
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-                           Example.
-                           """)
+    This script takes one or more filter and/or exclusion criteria 
+    and outputs only those records matching (/excluding) those criteria.
+
+    The filter criteria and options are based on the options provided by the 
+    :func:`hybkit.HybRecord.has_property` method of the Hybkit API.
+
+    Example System Calls:
+        ::
+
+            hyb_filter -i my_file_1.hyb --filter has_seg_types
+            # Returns records that have completed a segtype analysis
+
+            hyb_filter -i my_file_1.hyb --include seg_type mRNA
+            # Returns records with either segtype of mRNA
+
+            hyb_filter -i my_file_1.hyb --exclude seg_type mRNA
+            # Returns records without either segtype of mRNA
+
+            hyb_filter -i my_file_1.hyb --include seg1_type mRNA
+            # Returns records with only the first / |5p| segtype of mRNA
+
+            hyb_filter -i my_file_1.hyb --include seg_type_contains RNA
+            # Returns all records with a segtype that includes 
+            #   the string "RNA" (case-sensitive)
+
+            hyb_filter -i my_file_1.hyb --filter seg_contains kshv
+            # Returns records where either segment identifier contains the 
+            #   the string: "kshv" (case-sensitive)
+
+    Multiple filtering options can be used together. 
+    The ``-m`` / ``--filter_mode`` argument determines whether 
+    "any" (DEFAULT) or "all" filters are required to be true for inclusion.
+    Note: Matching any exclusion criteria results in exclusion of the record.
+
+    Example System Calls (match ALL criteria):
+        ::
+
+            hyb_filter -i my_file_1.hyb --filter seg_contains kshv \\
+                       --filter_2 seg_type miRNA
+            # Returns records with either reference identifier containing "kshv"
+            #   and with a segtype of miRNA
+
+    Example System Calls (match ANY criteria):
+        ::
+
+            hyb_filter -i my_file_1.hyb --filter_mode any \\
+                       --filter seg_type miRNA \\
+                       --filter_2 seg_type lncRNA 
+            # Returns records containing either reference identifier matching 
+            #   either "miRNA" or "lncRNA" (case-sensitive)
+                                              
+    """)
 
 __doc__ += hybkit.util.output_description
 

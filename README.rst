@@ -22,32 +22,32 @@ hybkit
   `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
 
 This project contains multiple components:
-    #. (**ToDo**) The hybkit toolkit of command-line utilities for manipulating,
+    #. The hybkit toolkit of command-line utilities for manipulating,
        analyzing, and plotting data contained within hyb-format files.
     #. Analysis pipelines utilizing the toolkit for analysis of qCLASH hybrid sequence data.
     #. The hybkit python API, an extendable documented codebase
        for creation of custom analyses of hyb-format data.
 
 Hybkit Toolkit:
-    hybkit includes (**will include**) command-line utilities for the manipulation of ".hyb" format data:
+    hybkit includes command-line utilities for the manipulation of ".hyb" format data:
 
-        ============================= =========================================================
-        Utility                       Description
-        ============================= =========================================================
-        hyb_check                     Read a ".hyb" file and check for errors
-        hyb_filter                    Filter a ".hyb" file to a specific subset of sequences
-        hyb_analyze                   Analyze and set details for hyb records, such as segtypes
-        hyb_type_analysis             Perform a type analysis on a prepared "hyb" file
-        hyb_mirna_count_anlaysis      Perform a miRNA_count analysis on a prepared "hyb" file
-        hyb_summary_anlaysis          Perform a summary analysis on a prepared "hyb" file
-        hyb_mirna_target_analysis     Perform a mirna_target analysis on a prepared "hyb" file
-        hyb_fold_analysis             Perform a fold analysis on a prepared "hyb" file
-        ============================= =========================================================
+        =================================== =========================================================
+        Utility                             Description
+        =================================== =========================================================
+        hyb_check                           Read a ".hyb" file and check for errors
+        hyb_analyze                         Analyze and set details for hyb records, such as segtypes
+        hyb_filter                          Filter a ".hyb" file to a specific subset of sequences
+        hyb_type_analysis (pending)         Perform a type analysis on a prepared "hyb" file
+        hyb_mirna_count_anlaysis (pending)  Perform a miRNA_count analysis on a prepared "hyb" file
+        hyb_summary_anlaysis (pending)      Perform a summary analysis on a prepared "hyb" file
+        hyb_mirna_target_analysis (pending) Perform a mirna_target analysis on a prepared "hyb" file
+        hyb_fold_analysis (pending)         Perform a fold analysis on a prepared "hyb" file
+        =================================== =========================================================
         
     These scripts are used on the command line with hyb-format files. For example, to filter a 
-    hyb file to contain only sequences with identifiers containing the string "KSHV"::
+    hyb file to contain only hybrids with a sequence identifier containing the string "kshv"::
 
-        $ hyb_filter.py ....[command_example]
+        $ hyb_filter -i my_hyb_file.hyb --filter seg_contains kshv
 
     Further detail on the usage of each script is provided in 
     the |hybkit Toolkit| section of |docs_link|_.

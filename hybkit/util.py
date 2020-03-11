@@ -377,7 +377,7 @@ _this_arg_help = """
                  Suffix to add to the name of output hyb files.
                  (Note: If the provided suffix does not end with ".hyb", then ".hyb" will be added)
                  """
-out_suffix_parser.add_argument('--out_suffix',
+out_suffix_parser.add_argument('-u', '--out_suffix',
                                # required=True,
                                # nargs='1',
                                help=_this_arg_help)
@@ -414,7 +414,7 @@ verbosity_group.add_argument('-s', '--silent', action='store_true',
 # Argument Parser : HybRecord  
 # Create parser for HybRecord options
 hybrecord_parser = argparse.ArgumentParser(add_help=False)
-hr_group = hybrecord_parser.add_argument_group('Hyb Record Settings')
+hr_group = hybrecord_parser.add_argument_group('General Hyb Record Settings')
 hr_defaults = hybkit.HybRecord.DEFAULTS
 
 # Argument Parser : HybRecord
@@ -428,28 +428,7 @@ hr_group.add_argument(_this_arg_flag, type=str,
                       nargs='+',
                       help=_this_arg_help)
 
-# Argument Parser : HybRecord
-_this_arg_key  = 'mirna_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Segment types to identifiy as microRNAs (miRNAs) during miRNA analysis.
-                 """
-hr_group.add_argument(_this_arg_flag, type=str,
-                      nargs='+',
-                      default=hybkit.HybRecord.MIRNA_TYPES,
-                      help=_this_arg_help)
 
-# Argument Parser : HybRecord
-_this_arg_key  = 'coding_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Segment types to identify as coding/messenger RNA (mRNA) during
-                 target region analysis.
-                 """
-hr_group.add_argument(_this_arg_flag, type=str,
-                      nargs='+',
-                      default=hybkit.HybRecord.CODING_TYPES,
-                      help=_this_arg_help)
 
 # Argument Parser : HybRecord
 _this_arg_key  = 'hyb_placeholder'
@@ -487,58 +466,13 @@ hr_group.add_argument(_this_arg_flag, type=bool_from_string,
                       default=hr_defaults[_this_arg_key],
                       help=_this_arg_help)
 
-# Argument Parser : HybRecord
-_this_arg_key  = 'allow_unknown_seg_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Allow unknown segment types when assigning segment types.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
 
-# Argument Parser : HybRecord
-_this_arg_key  = 'check_complete_seg_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Check every segment possibility when assigning segment types, rather than
-                 breaking after the first match is found. If True, finding segment types
-                 is slower but better at catching errors.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : HybRecord
-_this_arg_key  = 'allow_unknown_regions'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Allow unknown mRNA regions when performing target region analysis.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : HybRecord
-_this_arg_key  = 'warn_unknown_regions'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Print a warning message for unknown regions when performing
-                 target region analysis.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
 
 
 # Argument Parser : HybFile
 # Create parser for HybFile options
 hybfile_parser = argparse.ArgumentParser(add_help=False)
-hf_group = hybfile_parser.add_argument_group('Hyb File Settings')
+hf_group = hybfile_parser.add_argument_group('General Hyb File Settings')
 hf_defaults = hybkit.HybFile.DEFAULTS
 
 # Argument Parser : HybFile 
@@ -642,33 +576,113 @@ hyb_analysis_parser.add_argument('-t', '--analysis_types',
                                  choices=['segtype', 'mirna', 'target_region'],
                                  help=_this_arg_help)
 
-# Argument Parser : hyb_analysis
+
+# Argument Parser : hyb_analysis : segtype
+segtype_opts_group = hyb_analysis_parser.add_argument_group('segtype Analysis Options')
+# Argument Parser : hyb_analysis : segtype
 _this_arg_help = """
                  Segment-type finding method to use for segtype analysis.
                  For a description of the different methods, see the HybRecord documentation
                  for the find_seg_types method.
                  """
-hyb_analysis_parser.add_argument('--segtype_method',
-                                 # required=True,
-                                 # nargs='?',
-                                 default='hyb',
-                                 choices=hybkit.HybRecord.find_type_methods.keys(),
-                                 help=_this_arg_help)
+segtype_opts_group.add_argument('--segtype_method',
+                                # required=True,
+                                # nargs='?',
+                                default='hyb',
+                                choices=hybkit.HybRecord.find_type_methods.keys(),
+                                help=_this_arg_help)
 
-# Argument Parser : hyb_analysis
+# Argument Parser : hyb_analysis : segtype
 _this_arg_help = """
                  Segment-type finding paramaters to use for segtype analysis with some segtype
                  finding methods: {string_match, id_map}.
                  For a description of the different methods, see the HybRecord documentation
                  for the find_seg_types method.
                  """
-hyb_analysis_parser.add_argument('--segtype_params', type=file_exists,
-                                 metavar='PATH_TO/PARAMATERS_FILE',
-                                 # required=True,
-                                 # nargs='?',
-                                 # default='hyb',
-                                 # choices=hybkit.HybRecord.find_type_methods,
-                                 help=_this_arg_help)
+segtype_opts_group.add_argument('--segtype_params', type=file_exists,
+                                metavar='PATH_TO/PARAMATERS_FILE',
+                                # required=True,
+                                # nargs='?',
+                                # default='hyb',
+                                # choices=hybkit.HybRecord.find_type_methods,
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis : segtype
+_this_arg_key  = 'allow_unknown_seg_types'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Allow unknown segment types when assigning segment types.
+                 """
+segtype_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
+                                choices=[True, False],
+                                default=hr_defaults[_this_arg_key],
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis : segtype
+_this_arg_key  = 'check_complete_seg_types'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Check every segment possibility when assigning segment types, rather than
+                 breaking after the first match is found. If True, finding segment types
+                 is slower but better at catching errors.
+                 """
+segtype_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
+                                choices=[True, False],
+                                default=hr_defaults[_this_arg_key],
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis : mirna
+mirna_opts_group = hyb_analysis_parser.add_argument_group('mirna Analysis Options')
+
+# Argument Parser : hyb_analysis : mirna
+_this_arg_key  = 'mirna_types'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Segment types to identifiy as microRNAs (miRNAs) during miRNA analysis.
+                 """
+mirna_opts_group.add_argument(_this_arg_flag, type=str,
+                              nargs='+',
+                              default=hybkit.HybRecord.MIRNA_TYPES,
+                              help=_this_arg_help)
+
+# Arguemnt Parser : hyb_analysis : target_region
+regions_opts_group = hyb_analysis_parser.add_argument_group('target_region Analysis Options')
+
+# Argument Parser : HybRecord
+_this_arg_key  = 'coding_types'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Segment types to identify as coding/messenger RNA (mRNA) during
+                 target region analysis.
+                 """
+regions_opts_group.add_argument(_this_arg_flag, type=str,
+                                nargs='+',
+                                default=hybkit.HybRecord.CODING_TYPES,
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis : target_region
+_this_arg_key  = 'allow_unknown_regions'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Allow unknown mRNA regions when performing target region analysis.
+                 """
+regions_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
+                                choices=[True, False],
+                                default=hr_defaults[_this_arg_key],
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis : target_region
+_this_arg_key  = 'warn_unknown_regions'
+_this_arg_flag = '--' + _this_arg_key
+_this_arg_help = """
+                 Print a warning message for unknown regions when performing
+                 target region analysis.
+                 """
+regions_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
+                                choices=[True, False],
+                                default=hr_defaults[_this_arg_key],
+                                help=_this_arg_help)
+
 
 # Argument Parser : hyb_filter
 hyb_filter_parser = argparse.ArgumentParser(add_help=False)
@@ -727,41 +741,53 @@ for i in range(1,4):
                                    # choices={'all', 'any'},
                                    help=_this_arg_help)
 
-
-# Argument Parser : hyb_filter
-analysis_gen_opts_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Modes for evaluating multiple filters. 
-                 The "all" mode requires all provided filters to be true for inclusion.
-                 The "any" mode requires only one provided filter to be true for inclusion.
-                 (Note: matching any exclusion filter is grounds for exclusion of record.)
-                 """
-hyb_filter_parser.add_argument('-bl', '--blah',
-                               # required=True,
-                               # nargs='+',
-                               default='all',
-                               choices={'all', 'any'},
-                               help=_this_arg_help)
-
-
 # Argument Parser : Standardized Documentation Settings
 output_description = textwrap.dedent("""
-File Naming:
-    Records are then ouptut in a file with a respective file format::
+Output File Naming:
+    Output files can be named in two fashions: via automatic name generation,
+    or by providing specific out file names.
+
+    Automatic Name Generation:
+        For output name generation, the default respective naming scheme is used::
+        
+            hyb_script -i PATH_TO/MY_FILE_1.HYB [...]
+                -->  OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
     
-        PATH_TO/MY_FILE_1.HYB
-        -->
-        OUT_DIR/MY_FILE_1_ANALYZED.HYB
-
-    Specific file names can be provided via the -o/--out_hyb argument, 
-    ensuring that the same number of input and output files are provided.
-    The output directory defaults to the current working directory, and 
-    can be modified with the :code:`--out_dir <dir>` argument. For Example::
-
-        hyb_analysis [...] --out_hyb OUT_FILE_1.HYB OUT_FILE_2.HYB --out_dir MY_DIR
-        -->
-        MY_DIR/OUT_FILE_1.hyb
-        MY_DIR/OUT_FILE_2.hyb
+        This output file path can be modified with the arguments {--out_dir, --out_suffix}
+        described below.
+    
+        The output directory defaults to the current working directory ``($PWD)``, and 
+        can be modified with the ``--out_dir <dir>`` argument. 
+        Note: The provided directory must exist, or an error will be raised.
+        For Example::
+    
+            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_dir MY_OUT_DIR
+                -->  MY_OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
+    
+        The suffix used for output files is based on the primary actions of the script.
+        It can be specified using ``--out_suffix <suffix>``. This can optionally include
+        the ".hyb" final suffix.
+        for Example::
+    
+            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX
+                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB 
+            #OR
+            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX.HYB
+                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
+    
+    Specific Output Names:
+        Alternatively, specific file names can be provided via the -o/--out_hyb argument,
+        ensuring that the same number of input and output files are provided. This argument
+        takes precedence over all automatic output file naming options 
+        (--out_dir, --out_suffix), which are ignored if -o/--out_hyb is provided.
+        For Example::
+    
+            hyb_script [...] --out_hyb MY_OUT_DIR/OUT_FILE_1.HYB MY_OUT_DIR/OUT_FILE_2.HYB
+                -->  MY_OUT_DIR/OUT_FILE_1.hyb
+                -->  MY_OUT_DIR/OUT_FILE_2.hyb
+        
+        Note: The directory provided with output file paths (MY_OUT_DIR above) must exist, 
+        otherwise an error will be raised.
     """)
 
 # Argument Parser : hyb_type_analysis
