@@ -19,7 +19,6 @@ version = "0.1.8"
 description = 'Toolkit for analysis of .hyb format genomic '
 description += 'sequence data from ribonomics experiments.'
 project_url = 'https://github.com/RenneLab/hybkit'
-project_download_url = 'https://github.com/RenneLab/hybkit' + '/tarball/' + version
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
 name_and_version = project_name + '-' + version
@@ -65,6 +64,7 @@ classifiers = [
     ]
 
 info_urls = {
+    'Download as TAR': ('https://github.com/RenneLab/hybkit/tarball/' + version),
     'Renne Lab Github': 'https://github.com/RenneLab',
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
     'Hyb Format Specification':
