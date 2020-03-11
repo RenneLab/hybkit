@@ -16,7 +16,7 @@ else:
     module_path_find_function = importlib_resources.files
 
 project_name = 'hybkit'
-version = "0.1.8"
+version = "0.1.9"
 description = 'Toolkit for analysis of .hyb format genomic '
 description += 'sequence data from ribonomics experiments.'
 project_url = 'https://github.com/RenneLab/hybkit'

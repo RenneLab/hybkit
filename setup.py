@@ -51,10 +51,6 @@ for dir_name in data_file_dirs:
     target_dir_name = os.path.join(about_vars['name_and_version'], dir_name)
     data_files.append((target_dir_name, file_list))
 
-for items in data_files:
-    print(items)
-sys.exit()
-
 setuptools.setup(
     name='hybkit',
     version=about_vars['__version__'],
