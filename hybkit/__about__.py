@@ -13,10 +13,9 @@ if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
     from importlib import resources
 else:
     import importlib_resources
-    module_path_find_function = importlib_resources.files
 
 project_name = 'hybkit'
-version = "0.1.9"
+version = "0.2.0"
 description = 'Toolkit for analysis of .hyb format genomic '
 description += 'sequence data from ribonomics experiments.'
 project_url = 'https://github.com/RenneLab/hybkit'
@@ -50,6 +49,7 @@ reference_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
 docs_dir = os.path.join(hybkit_data_dir, 'docs')
 scripts_extra_dir = os.path.join(hybkit_data_dir, 'scripts_extra')
 
+default_coding_region_ref = os.path.join(databases_dir, 'hybkit_coding_ref_combined.csv')
 default_string_match_params = os.path.join(module_dir, 'string_match_params.csv')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/

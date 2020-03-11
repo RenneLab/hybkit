@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+# Daniel B. Stribling
+# Renne Lab, University of Florida
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
+
+"""
+Perform a type analysis on one or more prepared '.hyb' format files.
+
+Required preparation steps include adding the segtype flags,
+as can be performed with the hyb_analysis "segtype" mode.
+"""
+
+import sys
+import os 
+import argparse
+import textwrap
+import hybkit
+
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
+
+# Divide docstring into argparse and full portions.
+argparse_doc = __doc__
+__doc__ += textwrap.dedent("""
+                           Example.
+                           """)
+
+# Create Command-line Argument Parser
+def make_parser():
+    script_args = argparse.ArgumentParser(add_help=False)
+    parser_components = [
+                         hybkit.util.in_hybs_parser,
+                         #hybkit.util.out_hybs_parser,
+                         hybkit.util.out_dir_parser,
+                         hybkit.util.hyb_type_analysis_parser,
+                         hybkit.util.gen_opts_parser,
+                         hybkit.util.hybrecord_parser,
+                         hybkit.util.hybfile_parser,
+                        ]
+    script_parser = argparse.ArgumentParser(
+         parents=parser_components,
+         description=__doc__,
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+         )
+    return script_parser
+
+# Define main script function.
+def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
+               out_dir='.', out_hyb_files=None,
+               verbose=False, silent=False):
+    """Perform main script function."""
+
+    if not silent:
+        print('\nFiltering Hyb Files...')
+  
+    if verbose:
+        if filter_params:
+            print('Records Must match %s Filter Parameters:' % filter_mode.upper())
+            print('    ' + '\n    '.join((str(p) for p in filter_params)) +'\n')
+
+        if exclude_params:
+            print('Using Exclusion Filter Parameters:')
+            print('    ' + '\n    '.join((str(p) for p in exclude_params)) +'\n')
+
+    allowed_modes = {'all', 'any'}
+
+    if filter_mode not in allowed_modes:
+        message = 'Unrecognized filtering mode: %s\n' % filter_mode
+        message += 'Options are: %s' % str(allowed_modes)
+ 
+    for i, in_hyb_file in enumerate(in_hyb_files):
+        file_basename = os.path.basename(in_hyb_file)
+        if out_hyb_files is not None:
+            out_hyb_file = out_hyb_files[i]
+        else:
+            out_hyb_file = os.path.join(out_dir, file_basename.replace('.hyb', '_filtered.hyb')) 
+
+        if verbose:
+            print('Filtering File:\n    ' + in_hyb_file)
+    
+        include_count = 0
+        exclude_count = 0
+
+        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
+             hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
+            for record in in_hyb:
+                if filter_mode == 'all':
+                    use_record = True
+                    for prop_type, prop_compare in filter_params:
+                        if not record.has_property(prop_type, prop_compare):
+                            use_record = False
+                            break
+
+                elif filter_mode == 'any':
+                    use_record = False
+                    for prop_type, prop_compare in filter_params:
+                        if record.has_property(prop_type, prop_compare):
+                            use_record = True
+                            break
+
+                for prop_type, prop_compare in exclude_params:
+                    if record.has_property(prop_type, prop_compare):
+                        use_record = False
+                        break
+                
+                if use_record:
+                    out_hyb.write_record(record)
+                    include_count += 1               
+                else:
+                    exclude_count += 1
+        
+        total_count = include_count + exclude_count 
+        if verbose:
+            print('    Complete. %i Total,  ' % total_count
+                  + '%i Included,  %i Excluded\n' % (include_count, exclude_count)) 
+
+    if verbose:
+        print('\nFiltering Complete.\n')
+
+
+# Execute the script function
+if __name__ == '__main__':
+    script_parser = make_parser()
+    args = script_parser.parse_args() 
+    hybkit.util.validate_args(args, script_parser)
+    hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
+    hybkit.HybFile.set_namespace_settings(args, verbose=args.verbose)
+    filter_params = []
+    for param_set in [getattr(args, key) for key in ['filter', 'filter_2', 'filter_3']]:
+        if param_set is not None and bool(param_set):
+            if len(param_set) > 2:
+                print('Invalid Filtering Parameter Set Encountered: %s ' % str(param_set))
+                print('Parameter sets should have 1 or 2 arguments.\n')
+                sys.exit()
+            elif len(param_set) == 1:
+                param_set.append(None)
+            filter_params.append(param_set)
+
+    exclude_params = []
+    for param_set in [getattr(args, key) for key in ['exclude', 'exclude_2', 'exclude_3']]:
+        if param_set is not None and bool(param_set):
+            if len(param_set) > 2:
+                print('Invalid Exclusion Filtering Parameter Set Encountered: '
+                      + '%s ' % str(param_set))
+                print('Parameter sets should have 1 or 2 arguments.\n')
+                sys.exit()
+            elif len(param_set) == 1:
+                param_set.append(None)
+            exclude_params.append(param_set)
+
+    hyb_filter(
+                args.in_hyb, 
+                filter_params,
+                exclude_params,
+                out_dir=args.out_dir,
+                out_hyb_files=args.out_hyb,
+                verbose=args.verbose,
+                silent=args.silent,
+               )
+

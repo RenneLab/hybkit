@@ -8,4 +8,4 @@ hybkit API
    hybkit
    hybkit.analysis
    hybkit.plot
-
+   hybkit.util

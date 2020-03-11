@@ -12,8 +12,20 @@
 #
 import os
 import sys
+import imp
 sys.path.insert(0, os.path.abspath('..'))
+# sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
 import hybkit
+#import hybkit_scripts
+hyb_check = imp.load_source('hyb_check', 
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
+hyb_filter = imp.load_source('hyb_filter',
+                             os.path.abspath(os.path.join('..', 'scripts', 'hyb_filter')))
+hyb_analysis = imp.load_source('hyb_analysis',
+                                os.path.abspath(os.path.join('..', 'scripts', 'hyb_analysis')))
+hyb_check = imp.load_source('hyb_check',
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
+
 
 # -- Project information -----------------------------------------------------
 
@@ -37,11 +49,13 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
+    'sphinxarg.ext',
     ]
 
 # add_module_names
 autodoc_member_order = 'bysource'
-
+autosectionlabel_maxdepth = 1
+#autosectionlabel_prefix_document = True
 master_doc = 'index'
 
 # Add any paths that contain templates here, relative to this directory.
@@ -85,9 +99,6 @@ rst_epilog = (
 .. |3p| replace:: :abbr:`3p (3-Prime)`
 .. |5p| replace:: :abbr:`5p (5-Prime)`
 .. |spec_version| replace:: %s
-.. |hybkit Toolkit| replace:: :ref:`hybkit Toolkit`
-.. |Example Pipelines| replace:: :ref:`Example Pipelines`
-.. |hybkit API| replace:: :ref:`hybkit API`
 """ % (
        hybkit.__about__.spec_version,
       )

@@ -2,12 +2,12 @@
 .. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Full Documentation Contents:
+   :maxdepth: 2
+   :caption: Documentation Contents:
 
    self
    source/specification
-   source/toolkit
+   source/hybkit_toolkit
    source/example_pipelines
    source/hybkit_api
    source/about

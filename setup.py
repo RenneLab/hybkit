@@ -18,7 +18,10 @@ proj_dir = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
 with open(os.path.join(proj_dir, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+    long_description = ''
+    for line in f:
+        if not 'include::' in line:
+            long_description += line
 
 # Get the remaining project details variables from the "__about__.py" file.
 about_vars = {}
@@ -69,21 +72,16 @@ setuptools.setup(
                              if not (os.path.basename(f).endswith('.py')
                              or os.path.basename(f).endswith('__'))]
                  },
+    scripts=glob.glob('scripts/*'),
     python_requires='>=3.6',
     project_urls=about_vars['info_urls'],
     data_files=data_files,
-               #[
-               # ('databases', glob.glob('databases/*')),
-               # ('reference_data', glob.glob('reference_data/*')),
-               #],
-
-
     install_requires=[
                       'matplotlib',
                       'importlib_resources',
-                     ],  # Optional
-
-    # To provide executable scripts, use entry points in preference to the
+                     ],
+ 
+   # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
     # platform.

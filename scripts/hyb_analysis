@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+# Daniel B. Stribling
+# Renne Lab, University of Florida
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
+
+"""
+Read one or more '.hyb' format files and analyze the contained hybrid sequences.
+
+Analysis Types:
+    | ``segtype`` : Assigns types to each segment within hyb records.
+    | ``mirna`` : Assigns which segments are a miRNA based on segment types.
+    | ``target_region`` : Assigns the coding region of a coding segment types.
+"""
+
+import sys
+import os 
+import argparse
+import textwrap
+import hybkit
+
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
+
+# Divide docstring into argparse and full portions.
+argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
+__doc__ += textwrap.dedent("""
+    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Specification`)
+    and analyzes hybrid record properties. 
+
+    segtype Analysis:
+        | The 'segtype' analysis utilizes the :func:`hybkit.HybRecord.find_seg_types` method
+          to assign the record flags: :ref:`seg1_type <seg1_type>` 
+          and :ref:`seg2_type <seg2_type>`
+
+        Example system calls:
+            ::
+            
+                hyb_analysis -t segtype -i my_file_1.hyb
+
+                hyb_analysis -t segtype -i my_file_1.hyb \\
+                             --segtype_method string_match
+
+                hyb_analysis -t segtype -i my_file_1.hyb \\
+                             --segtype_method string_match \\
+                             --segtype_parameters my_parameters_file.csv \\
+                             --allow_unknown_seg_types
+
+    mirna Analysis:
+        | The 'mirna' analysis uses the :func:`hybkit.HybRecord.mirna_analysis` method
+          to identify properties relating to mirna within the hybrids, 
+          including mirna presence and positions.
+          This analysis requires the seg_type flags to be filled, either by a segtype analysis,
+          or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
+          reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
+          the presence and position of any miRNA within the hybrid.
+
+        Example system calls:
+            ::
+            
+                hyb_analysis -t mirna -i my_file_1.hyb
+
+                hyb_analysis -t mirna -i my_file_1.hyb \\
+                             --mirna_types miRNA kshv_miRNA
+
+        This can also be combined with the segtype analysis, as such:
+
+                hyb_analysis -t segtype mirna -i my_file_1.hyb \\
+                             --segtype_method string_match \\
+                             --segtype_parameters my_parameters_file.csv \\
+                             --allow_unknown_seg_types \\
+                             --mirna_types mirRNA kshv_miRNA
+
+    target_region Analysis:
+        | The 'target_region' analysis is currently pending implementation.
+
+    """)
+
+__doc__ += hybkit.util.output_description
+
+# Create Command-line Argument Parser
+def make_parser():
+    script_args = argparse.ArgumentParser(add_help=False)
+    parser_components = [
+                         hybkit.util.in_hybs_parser,
+                         hybkit.util.out_opts_parser,
+                         hybkit.util.hyb_analysis_parser,
+                         hybkit.util.gen_opts_parser,
+                         hybkit.util.hybrecord_parser,
+                         hybkit.util.hybfile_parser,
+                        ]
+    script_parser = argparse.ArgumentParser(
+         parents=parser_components,
+         description=argparse_doc.replace('|', '').replace('``', ''),
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+         allow_abbrev=False,
+         )
+
+    script_parser.set_defaults(out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX)
+
+    return script_parser
+
+# Define main script function.
+def hyb_analyze(in_hyb_files, analysis_types, 
+                out_dir='.', 
+                out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX,
+                out_hyb_files=None,
+                segtype_method=None, 
+                segtype_params=None,  
+                mirna_types=None,
+                verbose=False, silent=False):
+    """Perform main script function."""
+
+    if not silent:
+        print('\nPerforming Analysis of Hyb Files...')
+   
+    # Set analysis modes
+    do_segtype = ('segtype' in analysis_types)
+    do_mirna = ('mirna' in analysis_types)
+    do_target_region = ('target_region' in analysis_types)
+
+    if verbose:
+        print('\nPerforming Analysis Types: ' + ', '.join([x.title() for x in analysis_types]))
+        print()
+
+    # Prepare for segtype analysis.
+    if do_segtype:
+        if segtype_method is None:
+            message = '"segtype_method" argument is required for hyb_analysis method.'
+            print(message)
+            raise Error(message)
+
+        if segtype_method != make_parser().get_default('segtype_method'):
+            if verbose:
+                print('Setting non-default segtype finding method: %s' % segtype_method)
+            params = {}
+            params_method = hybkit.HybRecord.find_type_parameter_methods[segtype_method]
+            if params_method is not None:
+                if segtype_params is None:
+                    segtype_params = (
+                        hybkit.HybRecord.find_type_default_parameter_files[segtype_method])
+                    if verbose:
+                        print ('Using default segtype parameter file: %s' % segtype_params)
+                elif verbose:
+                    print('Using provided segtype parameter file: %s' % segtype_params)
+                params = params_method(segtype_params)
+                if verbose:
+                    print()
+            hybkit.HybRecord.select_find_type_method(segtype_method, params)
+
+    if do_mirna:
+        if not mirna_types:
+            message = 'mirna_types required for mirna analysis.'
+            print(message)
+            raise RuntimeError(message)
+
+        if verbose:
+            print('Assigning types as miRNA:')
+            print('   ', mirna_types, '\n')
+
+    if do_target_region:
+        message = 'Target Region Analysis is not yet implemented.'
+        raise NotImplementedError(message)
+
+    for i, in_hyb_file in enumerate(in_hyb_files):
+        file_basename = os.path.basename(in_hyb_file)
+        if out_hyb_files is not None:
+            out_hyb_file = out_hyb_files[i]
+        else:
+            out_hyb_file = hybkit.util.make_out_file_name(in_hyb_file,
+                                                          name_suffix=out_suffix,
+                                                          in_suffix='.hyb',
+                                                          out_suffix='.hyb',
+                                                          out_dir=out_dir,
+                                                          seg_sep='_',)
+
+        if verbose:
+            print('Analyzing File:\n    ' + in_hyb_file)
+            print(out_hyb_file)
+    
+        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
+             hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
+            for record in in_hyb:
+                if do_segtype:
+                    record.find_seg_types()
+            
+                if do_mirna:
+                    record.mirna_analysis(mirna_types)
+     
+                if do_target_region:
+                    pass
+
+                out_hyb.write_record(record)
+
+    if verbose:
+        print('\nAnalysis Complete.\n')
+
+
+# Execute the script function
+if __name__ == '__main__':
+    script_parser = make_parser()
+    args = script_parser.parse_args() 
+    hybkit.util.validate_args(args, script_parser)
+    hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
+    hybkit.HybFile.set_namespace_settings(args, verbose=args.verbose)
+    hyb_analyze(
+                args.in_hyb, 
+                args.analysis_types, 
+                args.out_dir,
+                out_suffix=args.out_suffix,
+                out_hyb_files=args.out_hyb,
+                segtype_method=args.segtype_method,
+                segtype_params=args.segtype_params,
+                mirna_types=args.mirna_types,
+                verbose=args.verbose,
+                silent=args.silent,
+               )
+
