@@ -18,7 +18,10 @@ proj_dir = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
 with open(os.path.join(proj_dir, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+    long_description = ''
+    for line in f:
+        if not 'include::' in line:
+            long_description += line
 
 # Get the remaining project details variables from the "__about__.py" file.
 about_vars = {}
