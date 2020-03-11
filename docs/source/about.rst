@@ -34,8 +34,10 @@ Lead Developer
 Changelog
 ---------
 
-    * 0.2.0 (2020-03-present) Added Command-line Toolkit. Code Refinements. 
-    * 0.1.0 (2020-03) Initial Implementation
+    * 0.2.0 (pre-release) Added Command-line Toolkit. Code Refinements.
+    * 0.1.9 (2020-03) Fix for Module Path Finding for Python > 3.6
+    * 0.1.8 (2020-03) Streamlining, PyPI / PIP Initial Release
+    * 0.1.0 (2020-01) Initial Implementation
 
 
 

@@ -8,24 +8,52 @@ Package details for the hybkit project.
 '''
 
 import os
+import sys
+if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
+    from importlib import resources
+else:
+    import importlib_resources
 
-# Set package directory, code directory, and default file locations
-package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-code_dir = os.path.join(package_dir, 'hybkit')
-data_dir = os.path.join(package_dir, 'databases')
-default_string_match_params = os.path.join(code_dir, 'string_match_params.csv')
-# default_id_map_params = os.path.join()
-
-# Preparation for initial PIP release, not yet completed.
 project_name = 'hybkit'
-description = 'Toolkit for analysis of .hyb format genomic sequence data.'
+version = "0.2.0"
+description = 'Toolkit for analysis of .hyb format genomic '
+description += 'sequence data from ribonomics experiments.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
+name_and_version = project_name + '-' + version
+
+if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
+    with resources.path('hybkit', '__init__.py') as path_obj:
+        module_dir = os.path.dirname(path_obj)
+else:
+    module_dir = importlib_resources.files('hybkit')
+
+prefix_data_dir = os.path.join(sys.prefix, name_and_version)
+#Putting in try block to allow use with exec()
+try:
+    local_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+except NameError:
+    local_data_dir = 'using_with_exec'
+
+if os.path.isdir(os.path.join(prefix_data_dir, 'databases')):
+    hybkit_data_dir = prefix_data_dir
+elif os.path.isdir(os.path.join(local_data_dir, 'databases')):
+    hybkit_data_dir = local_data_dir
+else:
+    print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
+    hybkit_data_dir = ''
+
+databases_dir = os.path.join(hybkit_data_dir, 'databases')
+reference_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
+docs_dir = os.path.join(hybkit_data_dir, 'docs')
+scripts_extra_dir = os.path.join(hybkit_data_dir, 'scripts_extra')
+
+default_string_match_params = os.path.join(module_dir, 'string_match_params.csv')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 4 - Beta',
     'Natural Language :: English',
     'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',
@@ -41,6 +69,7 @@ classifiers = [
     ]
 
 info_urls = {
+    'Download as TAR': ('https://github.com/RenneLab/hybkit/tarball/' + version),
     'Renne Lab Github': 'https://github.com/RenneLab',
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
     'Hyb Format Specification':
@@ -50,11 +79,11 @@ info_urls = {
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel B. Stribling", "Rolf Renne"]
-__date__ = "YYYY/MM/DD"
+__date__ = "2020/03/10"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
 __license__ = "GPLv3"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
-__version__ = "0.2.0"
+__version__ = version
 spec_version = __version__  # Define separate specification version.

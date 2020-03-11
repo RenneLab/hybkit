@@ -1,10 +1,18 @@
 
 hybkit
 ==================================
-
+.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases
+   :target: https://github.com/RenneLab/hybkit/releases
+   :alt: GitHub release (latest by date including pre-releases)
+.. image:: https://badge.fury.io/py/hybkit.svg
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI Package Version
 .. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
-    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+   :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+.. image:: https://img.shields.io/pypi/pyversions/hybkit
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI - Python Version
 
 
 | Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data 
@@ -107,15 +115,16 @@ Installation
 Hybkit requires Python 3.6+ and the use of the 
 `matplotlib <https://matplotlib.org/>`_ package.
 
-The recommended installation method is via 
-`python pip <https://pip.pypa.io/en/stable/>`_, which will 
+The recommended installation method is via hybkit's 
+`PyPI Package Index <https://pypi.org/project/hybkit/>`_ using 
+`python3 pip <https://pip.pypa.io/en/stable/>`_, which will 
 automatically handle version control and dependency installation::
     
     $ pip install hybkit
 
 Acquisition of the package can also be performed by cloning the project's Github repository::
 
-    $ git clone git:://github.com/RenneLab/hybkit
+    $ git clone git://github.com/RenneLab/hybkit
 
 Or by downloading the zipped package::
 

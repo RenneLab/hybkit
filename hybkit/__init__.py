@@ -1536,7 +1536,7 @@ class HybRecord(object):
     # HybRecord : Public Staticmethods : find_seg_type
     @staticmethod
     def make_string_match_parameters(
-            legend_file=os.path.join(hybkit.__about__.code_dir, 'find_type_string_match.csv')
+            legend_file=hybkit.__about__.default_string_match_params
             ):
         """Read csv and return a dict of search parameters for :func:`find_seg_type_string_match`.
 
