@@ -10,21 +10,26 @@ Package details for the hybkit project.
 import os
 import sys
 if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
-    from importlib import resources as importlib_resources
+    from importlib import resources
 else:
     import importlib_resources
+    module_path_find_function = importlib_resources.files
 
 project_name = 'hybkit'
-version = "0.1.8"
+version = "0.1.9"
 description = 'Toolkit for analysis of .hyb format genomic '
 description += 'sequence data from ribonomics experiments.'
 project_url = 'https://github.com/RenneLab/hybkit'
-project_download_url = 'https://github.com/RenneLab/hybkit' + '/tarball/' + version
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
 name_and_version = project_name + '-' + version
 
-module_dir = importlib_resources.files('hybkit')
+if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
+    with resources.path('hybkit', '__init__.py') as path_obj:
+        module_dir = os.path.dirname(path_obj)
+else:
+    module_dir = importlib_resources.files('hybkit')
+
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)
 #Putting in try block to allow use with exec()
 try:
@@ -37,7 +42,7 @@ if os.path.isdir(os.path.join(prefix_data_dir, 'databases')):
 elif os.path.isdir(os.path.join(local_data_dir, 'databases')):
     hybkit_data_dir = local_data_dir
 else:
-    print('WARNING: hybkit_data_dir variable cannot be set.')
+    print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
     hybkit_data_dir = ''
 
 databases_dir = os.path.join(hybkit_data_dir, 'databases')
@@ -65,6 +70,7 @@ classifiers = [
     ]
 
 info_urls = {
+    'Download as TAR': ('https://github.com/RenneLab/hybkit/tarball/' + version),
     'Renne Lab Github': 'https://github.com/RenneLab',
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
     'Hyb Format Specification':

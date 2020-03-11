@@ -2,13 +2,16 @@
 hybkit
 ==================================
 .. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases
+   :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
 .. image:: https://badge.fury.io/py/hybkit.svg
-   :target: https://badge.fury.io/py/hybkit
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI Package Version
 .. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 .. image:: https://img.shields.io/pypi/pyversions/hybkit
+   :target: https://pypi.org/project/hybkit/
    :alt: PyPI - Python Version
 
 

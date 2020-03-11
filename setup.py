@@ -11,6 +11,7 @@ import setuptools
 import os
 import hybkit
 import glob
+import fnmatch
 
 # Set project directory
 proj_dir = os.path.abspath(os.path.dirname(__file__))
@@ -26,25 +27,26 @@ with open(os.path.join(proj_dir, 'hybkit', '__about__.py')) as f:
 
 # Dynamically generate reference data file tuples:
 data_files = []
-data_file_dirs = ['scripts', 'scripts_extra', 'databases', 'reference_data', 'hybkit']
+data_file_dirs = ['', 'scripts', 'scripts_extra', 'databases', 'reference_data', 'hybkit']
 sample_directory_dirs = glob.glob('sample_0*')
 data_file_dirs += sample_directory_dirs
 for item in glob.glob('docs/**', recursive=True):
     if os.path.isdir(item) and not item.startswith(os.path.join('docs','_')):
         data_file_dirs.append(item)
 
+ignore_file_patterns = []
+with open('.gitignore', 'r') as git_ignore:
+    for line in git_ignore:
+        line = line.strip()
+        if line.startswith('#') or not line:
+            continue
+        ignore_file_patterns.append(line)
+
 for dir_name in data_file_dirs:
     file_list = [f for f in glob.glob(os.path.join(dir_name, '*'))
                  if not (
-                         (os.path.isdir(f)) 
-                         or ('/output' in f)
-                         or (f.endswith('.hyb'))
-                         or (f.endswith('.viennad'))
-                         or (f.endswith('.vienna'))
-                         or (f.endswith('.ct'))
-                         or (f.endswith('__'))
-                         or (f.endswith('.pyc'))
-                  
+                         os.path.isdir(f)
+                         or any(fnmatch.fnmatch(f, ignore) for ignore in ignore_file_patterns)
                         )]
     target_dir_name = os.path.join(about_vars['name_and_version'], dir_name)
     data_files.append((target_dir_name, file_list))
@@ -56,7 +58,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url=about_vars['project_url'],
-    download_url=about_vars['project_download_url'],
     author=about_vars['__author__'],
     author_email=about_vars['__contact__'],
     classifiers=about_vars['classifiers'],
