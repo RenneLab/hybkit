@@ -1,16 +1,16 @@
 
 hybkit
 ==================================
-.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases
+.. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
    :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
-.. image:: https://badge.fury.io/py/hybkit.svg
+.. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
-.. image:: https://readthedocs.org/projects/hybkit/badge/?version=latest
+.. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-.. image:: https://img.shields.io/pypi/pyversions/hybkit
+.. image:: https://img.shields.io/pypi/pyversions/hybkit?logo=python&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI - Python Version
 
@@ -87,6 +87,7 @@ Hybkit API:
     For example, a workflow to print the identifiers of only sequences within a ".hyb" file
     that contain a miRNA can be performed as such::
 
+        #!/usr/bin/env python3
         import hybkit
         in_file = '/path/to/my_hyb_file.hyb'
 
