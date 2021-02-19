@@ -4,7 +4,7 @@ hybkit
 .. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
    :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
-.. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi
+.. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
