@@ -64,7 +64,7 @@ setuptools.setup(
     author=about_vars['__author__'],
     author_email=about_vars['__contact__'],
     classifiers=about_vars['classifiers'],
-    keywords='genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA',
+    keywords=about_vars['keywords'],
     packages=['hybkit'],
     package_dir={'hybkit': 'hybkit'},
     package_data={

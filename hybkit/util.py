@@ -9,28 +9,16 @@ import os
 import sys
 import argparse
 import textwrap
+import copy
 
-# Import module-level dunder-names:
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+#Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
-
-import hybkit
-
-
-# Util : Global Variables
-HYB_SUFFIXES = ['.hyb', '.Hyb', '.HYB']
-VIENNA_SUFFIXES = ['.vienna', '.Vienna', '.VIENNA']
-VIENNAD_SUFFIXES = ['.viennad', '.Viennad', '.VIENNAD']
-CT_SUFFIXES = ['.ct', '.Ct', '.CT']
-FOLD_SUFFIXES = VIENNA_SUFFIXES + VIENNAD_SUFFIXES + CT_SUFFIXES
-
-USE_ABSPATH = False
-
-FILTER_OUT_SUFFIX = '_filtered'
-ANALYSIS_OUT_SUFFIX = '_analyzed'
+from hybkit import settings, HybRecord
 
 # Util : Argparse Helper Functions
-def bool_from_string(value):
+def _bool_from_string(value):
     if isinstance(value, bool):
        return value
     if value.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -41,6 +29,15 @@ def bool_from_string(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
     # Snippet Credit goes to @Maxim at https://stackoverflow.com/questions/15008758/
     #   /parsing-boolean-values-with-argparse
+
+_custom_types = {
+    'custom_bool_from_str': _bool_from_string,
+    'str': str,
+}
+_custom_type_choices = {
+    'custom_bool_from_str': [True, False],
+    'str': None,
+}
 
 # Util : Path Helper Functions
 def dir_exists(dir_name):
@@ -64,7 +61,7 @@ def dir_exists(dir_name):
         message = 'Provided Directory: %s Does not exist.\n' % dir_name
         raise argparse.ArgumentTypeError(message)
     dir_name = os.path.abspath(dir_name)
-    if USE_ABSPATH:
+    if settings._USE_ABSPATH:
         dir_name = os.path.abspath(dir_name)
     return dir_name
 
@@ -104,7 +101,7 @@ def file_exists(file_name, required_suffixes=[]):
     file_name = os.path.normpath(file_name)
 
     # If global option set, then find the absolute path.
-    if USE_ABSPATH:
+    if settings._USE_ABSPATH:
         file_name = os.path.abspath(file_name)
 
     return os.path.abspath(file_name)
@@ -122,10 +119,10 @@ def hyb_exists(file_name):
     Returns:
         A normalized version of the path passed to file_name.
     """
-    use_suffixes = HYB_SUFFIXES
+    use_suffixes = settings.HYB_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % HYB_SUFFIXES
+hyb_exists.__doc__ = hyb_exists.__doc__ % settings.HYB_SUFFIXES
 
 # Util : Path Helper Functions 
 def vienna_exists(file_name):
@@ -140,28 +137,10 @@ def vienna_exists(file_name):
     Returns:
         A normalized version of the path passed to file_name.
     """
-    use_suffixes = VIENNA_SUFFIXES
+    use_suffixes = settings.VIENNA_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-vienna_exists.__doc__ = vienna_exists.__doc__ % VIENNA_SUFFIXES
-
-# Util : Path Helper Functions 
-def viennad_exists(file_name):
-    """
-    Check if a .viennad file exists at the provided path, and return a normalized path.
-
-    Wrapper for :func:`file_exists` that includes the required suffixes: %s.
-
-    Args:
-        file_name (str): Name of file to check for existence.
-
-    Returns:
-        A normalized version of the path passed to file_name.
-    """
-    use_suffixes = VIENNAD_SUFFIXES
-    return file_exists(file_name, use_suffixes)
-
-viennad_exists.__doc__ = viennad_exists.__doc__ % VIENNAD_SUFFIXES
+vienna_exists.__doc__ = vienna_exists.__doc__ % settings.VIENNA_SUFFIXES
 
 # Util : Path Helper Functions 
 def ct_exists(file_name):
@@ -176,10 +155,10 @@ def ct_exists(file_name):
     Returns:
         A normalized version of the path passed to file_name.
     """
-    use_suffixes = CT_SUFFIXES
+    use_suffixes = settings.CT_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-ct_exists.__doc__ = ct_exists.__doc__ % CT_SUFFIXES
+ct_exists.__doc__ = ct_exists.__doc__ % settings.CT_SUFFIXES
 
 # Util : Path Helper Functions 
 def fold_exists(file_name):
@@ -194,10 +173,10 @@ def fold_exists(file_name):
     Returns:
         A normalized version of the path passed to file_name.
     """
-    use_suffixes = FOLD_SUFFIXES
+    use_suffixes = settings.FOLD_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-fold_exists.__doc__ = fold_exists.__doc__ % FOLD_SUFFIXES
+fold_exists.__doc__ = fold_exists.__doc__ % settings.FOLD_SUFFIXES
 
 # Util : Path Helper Functions 
 def out_path_exists(file_name):
@@ -217,7 +196,7 @@ def out_path_exists(file_name):
     file_name = os.path.normpath(file_name)
 
     # If global option set, then find the absolute path.
-    if USE_ABSPATH:
+    if settings._USE_ABSPATH:
         file_name = os.path.abspath(file_name)
 
     return os.path.abspath(file_name)
@@ -257,7 +236,7 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
     return out_file_full
 
     # If global option set, then find the absolute path.
-    if USE_ABSPATH:
+    if settings._USE_ABSPATH:
         file_name = os.path.abspath(file_name)
 
     return os.path.abspath(file_name)
@@ -411,157 +390,43 @@ verbosity_group.add_argument('-s', '--silent', action='store_true',
                              help=_this_arg_help)
 
 
-# Argument Parser : HybRecord  
+# Argument Parser : HybRecord, HybFile, FoldRecord 
+_class_settings_groups = {}
 # Create parser for HybRecord options
 hybrecord_parser = argparse.ArgumentParser(add_help=False)
-hr_group = hybrecord_parser.add_argument_group('General Hyb Record Settings')
-hr_defaults = hybkit.HybRecord.DEFAULTS
+hr_group = hybrecord_parser.add_argument_group('Hyb Record Settings')
+_class_settings_groups['HybRecord'] = hr_group
 
-# Argument Parser : HybRecord
-_this_arg_key  = 'custom_flags'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Custom flags to allow in addition to those specified in the hybkit 
-                 specification.
-                 """
-hr_group.add_argument(_this_arg_flag, type=str,
-                      nargs='+',
-                      help=_this_arg_help)
-
-
-
-# Argument Parser : HybRecord
-_this_arg_key  = 'hyb_placeholder'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Placeholder character/string for missing data in hyb files.
-                 """
-hr_group.add_argument(_this_arg_flag, type=str,
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : HybRecord 
-_this_arg_key  = 'reorder_flags'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Re-order flags to the hybkit-specificiation order when 
-                 writing hyb records.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : HybRecord
-_this_arg_key  = 'allow_undefined_flags'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Allow use of flags not definied in the hybkit-specificiation order when 
-                 reading and writing hyb records. As the preferred alternative to 
-                 using this setting,
-                 the --custom_flags arguement can be be used to supply custom allowed flags.
-                 """
-hr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-
-
-
-# Argument Parser : HybFile
 # Create parser for HybFile options
 hybfile_parser = argparse.ArgumentParser(add_help=False)
-hf_group = hybfile_parser.add_argument_group('General Hyb File Settings')
-hf_defaults = hybkit.HybFile.DEFAULTS
+hf_group = hybfile_parser.add_argument_group('Hyb File Settings')
+_class_settings_groups['HybFile'] = hf_group
 
-# Argument Parser : HybFile 
-_this_arg_key  = 'hybformat_id'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 The Hyb Software Package places further information in the "id" field of the
-                 hybrid record that can be used to infer the number of contained read counts.
-                 When set to True, the identifiers will be parsed as: "<read_id>_<read_count>" 
-                 """
-hf_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hf_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : HybFile 
-_this_arg_key  = 'hybformat_ref'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 The Hyb Software Package uses a reference database with identifiers
-                 that contain sequence type and other sequence information.
-                 When set to True, all hyb file identifiers will be parsed as: 
-                 "<gene_id>_<transcript_id>_<gene_name>_<seg_type>"
-                 """
-hf_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=hf_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-
-# Argument Parser : FoldRecord
 # Create parser for FoldRecord options
 foldrecord_parser = argparse.ArgumentParser(add_help=False)
 fr_group = foldrecord_parser.add_argument_group('Fold Record Settings')
-fr_defaults = hybkit.FoldRecord.DEFAULTS
+_class_settings_groups['FoldRecord'] = fr_group
 
-# Argument Parser : FoldRecord 
-_this_arg_key  = 'skip_bad_fold_records'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 When reading a fold record, bad fold records should be skipped.
-                 When set to False, an error will be raised for improperly formatted fold records.
-                 When True, improperly formatted fold records will be skipped.
-                 """
-fr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=fr_defaults[_this_arg_key],
-                      help=_this_arg_help)
+for _cls_name, _cls_group in _class_settings_groups.items():
+    _cls_settings = getattr(settings, _cls_name + '_settings_info')
+    for _key, _details in _cls_settings.items():
+        _flag = '--' + _key
+        _default, _description, _type_str, _short_flag, _extra_kwargs = _details
+        _use_args = []
+        if _short_flag is not None:
+            _use_args.append(_short_flag)
+        _use_args.append(_flag) 
+        _use_kwargs = copy.deepcopy(_extra_kwargs)
+        _use_kwargs['help'] = _description
+        _use_kwargs['type'] = _custom_types[_type_str]
+        if _custom_type_choices[_type_str] is not None:
+            _use_kwargs['choices'] = _custom_type_choices[_type_str]
+        _use_kwargs['type'] = _custom_types[_type_str]
+        _use_kwargs['default'] = _default
+        _cls_group.add_argument(*_use_args, **_use_kwargs)
 
-# Argument Parser : FoldRecord 
-_this_arg_key  = 'warn_bad_fold_records'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 When reading a fold record, print a warning when an improperly-formatted fold
-                 record is encountered.
-                 """
-fr_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=fr_defaults[_this_arg_key],
-                      help=_this_arg_help)
 
-# Argument Parser : FoldRecord 
-_this_arg_key  = 'fold_placeholder'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Placeholder character/string for missing data for reading/writing fold records.
-                 """
-fr_group.add_argument(_this_arg_flag, type=str,
-                      default=fr_defaults[_this_arg_key],
-                      help=_this_arg_help)
-
-# Argument Parser : FoldFile
-# Create parser for FoldFile options
-foldfile_parser = argparse.ArgumentParser(add_help=False)
-ff_group = foldfile_parser.add_argument_group('Fold File Settings')
-ff_defaults = hybkit.FoldFile.DEFAULTS
-
-# Argument Parser : FoldFile 
-_this_arg_key  = 'hybformat_file'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 The Hyb Software Package contains further information in the "name" field of the
-                 viennad record that can be used to infer further information 
-                 about the fold divisions.
-                 """
-ff_group.add_argument(_this_arg_flag, type=bool_from_string,
-                      choices=[True, False],
-                      default=ff_defaults[_this_arg_key],
-                      help=_this_arg_help)
+##  ----- Task-specific Parsers -----
 
 # Argument Parser : hyb_analysis
 hyb_analysis_parser = argparse.ArgumentParser(add_help=False)
@@ -589,7 +454,7 @@ segtype_opts_group.add_argument('--segtype_method',
                                 # required=True,
                                 # nargs='?',
                                 default='hyb',
-                                choices=hybkit.HybRecord.find_type_methods.keys(),
+                                choices=HybRecord.TypeFinder.methods.keys(),
                                 help=_this_arg_help)
 
 # Argument Parser : hyb_analysis : segtype
@@ -604,85 +469,8 @@ segtype_opts_group.add_argument('--segtype_params', type=file_exists,
                                 # required=True,
                                 # nargs='?',
                                 # default='hyb',
-                                # choices=hybkit.HybRecord.find_type_methods,
+                                # choices=HybRecord.find_type_methods,
                                 help=_this_arg_help)
-
-# Argument Parser : hyb_analysis : segtype
-_this_arg_key  = 'allow_unknown_seg_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Allow unknown segment types when assigning segment types.
-                 """
-segtype_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
-                                choices=[True, False],
-                                default=hr_defaults[_this_arg_key],
-                                help=_this_arg_help)
-
-# Argument Parser : hyb_analysis : segtype
-_this_arg_key  = 'check_complete_seg_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Check every segment possibility when assigning segment types, rather than
-                 breaking after the first match is found. If True, finding segment types
-                 is slower but better at catching errors.
-                 """
-segtype_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
-                                choices=[True, False],
-                                default=hr_defaults[_this_arg_key],
-                                help=_this_arg_help)
-
-# Argument Parser : hyb_analysis : mirna
-mirna_opts_group = hyb_analysis_parser.add_argument_group('mirna Analysis Options')
-
-# Argument Parser : hyb_analysis : mirna
-_this_arg_key  = 'mirna_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Segment types to identifiy as microRNAs (miRNAs) during miRNA analysis.
-                 """
-mirna_opts_group.add_argument(_this_arg_flag, type=str,
-                              nargs='+',
-                              default=hybkit.HybRecord.MIRNA_TYPES,
-                              help=_this_arg_help)
-
-# Arguemnt Parser : hyb_analysis : target_region
-regions_opts_group = hyb_analysis_parser.add_argument_group('target_region Analysis Options')
-
-# Argument Parser : HybRecord
-_this_arg_key  = 'coding_types'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Segment types to identify as coding/messenger RNA (mRNA) during
-                 target region analysis.
-                 """
-regions_opts_group.add_argument(_this_arg_flag, type=str,
-                                nargs='+',
-                                default=hybkit.HybRecord.CODING_TYPES,
-                                help=_this_arg_help)
-
-# Argument Parser : hyb_analysis : target_region
-_this_arg_key  = 'allow_unknown_regions'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Allow unknown mRNA regions when performing target region analysis.
-                 """
-regions_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
-                                choices=[True, False],
-                                default=hr_defaults[_this_arg_key],
-                                help=_this_arg_help)
-
-# Argument Parser : hyb_analysis : target_region
-_this_arg_key  = 'warn_unknown_regions'
-_this_arg_flag = '--' + _this_arg_key
-_this_arg_help = """
-                 Print a warning message for unknown regions when performing
-                 target region analysis.
-                 """
-regions_opts_group.add_argument(_this_arg_flag, type=bool_from_string,
-                                choices=[True, False],
-                                default=hr_defaults[_this_arg_key],
-                                help=_this_arg_help)
-
 
 # Argument Parser : hyb_filter
 hyb_filter_parser = argparse.ArgumentParser(add_help=False)
@@ -791,17 +579,38 @@ Output File Naming:
     """)
 
 # Argument Parser : hyb_type_analysis
+# TODO
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
-# _this_arg_help = """
-#                  Modes for evaluating multiple filters. 
-#                  """
-# hyb_type_analysis_parser.add_argument('-m', '--filter_mode',
-#                                       # required=True,
-#                                       # nargs='+',
-#                                       default='all',
-#                                       choices={'all', 'any'},
-#                                       help=_this_arg_help)
 
+def set_settings(nspace, verbose=False):
+    """
+    Take a namespace object as from an argparse parser and update settings.
+    
+    Each setting in the following settings dictionaries are checked and set where aplicable:
+    | HybRecord Settings: :obj:`settings.HybRecord_settings`
+    | HybFile Settings: :obj:`settings.HybFile_settings`
+    | FoldRecord Settings: :obj:`settings.FoldRecord_settings`
+    | FoldFile Settings: :obj:`settings.FoldFile_settings`
+
+    Args:
+        nspace (argparse.Namespace): Namespace containing settings
+        verbose (bool, optional): If True, print when changing setting.
+    """
+    out_report = '\n'
+    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 'FoldFile']:
+        cls_settings_info = getattr(settings, class_name + '_settings_info')
+        cls_settings = getattr(settings, class_name + '_settings')
+        for setting_key in cls_settings:
+            if hasattr(nspace, setting_key): 
+                argparse_setting = getattr(nspace, setting_key)
+                if (argparse_setting is not None 
+                    and argparse_setting != cls_settings_info[setting_key][0]):
+                    out_report += 'Setting %s Setting: ' % class_name
+                    out_report += '"%s" to "%s"\n' % (setting_key, str(argparse_setting))
+                    cls_settings[setting_key] = new_setting
+
+    if verbose and out_report.strip():
+        print(out_report)
 
 
 # Allow execution of module for testing purposes.
@@ -810,7 +619,7 @@ if __name__ == '__main__':
                    in_hybs_parser,
                    out_hyb_parser,
                    out_dir_parser,
-                   hybrecord_parser, hybfile_parser, foldrecord_parser, foldfile_parser]
+                   hybrecord_parser, hybfile_parser, foldrecord_parser]
     test_parser = argparse.ArgumentParser(parents=all_parsers,
                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     test_parser.print_help()

@@ -11,6 +11,7 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 
 import hybkit
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plot
 import copy
 

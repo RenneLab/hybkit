@@ -133,8 +133,8 @@ Flags
         .. _target_reg:
     
         :obj:`target_reg` -  String: Assigned region of the miRNA target.
-        options are "5pUTR", "coding", "3pUTR",
-        "N" (none), or "U" (unknown).
+        options are "5pUTR", "C" (coding), "3pUTR",
+        "NON" (noncoding), "N" (none), or "U" (unknown).
     
         .. _ext:
       

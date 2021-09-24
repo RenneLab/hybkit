@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Daniel B. Stribling
-# Renne Lab, University of Florida
+# Daniel Stribling
+# ORCID: 0000-0002-0649-9506
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """

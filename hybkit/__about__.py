@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Daniel Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
@@ -11,25 +11,22 @@ import os
 import sys
 if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
     from importlib import resources
+    with resources.path('hybkit', '__init__.py') as path_obj:
+        module_dir = os.path.dirname(path_obj)
 else:
     import importlib_resources
+    module_dir = importlib_resources.files('hybkit')
 
 project_name = 'hybkit'
-version = "0.2.0"
-description = 'Toolkit for analysis of .hyb format genomic '
-description += 'sequence data from ribonomics experiments.'
+version = "0.3.0a"
+description = 'Toolkit for analysis of hybrid genomic sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
 name_and_version = project_name + '-' + version
 
-if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
-    with resources.path('hybkit', '__init__.py') as path_obj:
-        module_dir = os.path.dirname(path_obj)
-else:
-    module_dir = importlib_resources.files('hybkit')
-
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)
+
 #Putting in try block to allow use with exec()
 try:
     local_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -50,7 +47,6 @@ docs_dir = os.path.join(hybkit_data_dir, 'docs')
 scripts_extra_dir = os.path.join(hybkit_data_dir, 'scripts_extra')
 
 default_coding_region_ref = os.path.join(databases_dir, 'hybkit_coding_ref_combined.csv')
-default_string_match_params = os.path.join(module_dir, 'string_match_params.csv')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [
@@ -77,14 +73,16 @@ info_urls = {
     'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
     }
 
+keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
+
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
-__credits__ = ["Daniel B. Stribling", "Rolf Renne"]
-__date__ = "2020/03/10"
+__credits__ = ["Daniel Stribling", "Rolf Renne"]
+__date__ = "2021/02/11"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
-__license__ = "GPLv3"
+__license__ = "GPLv3+"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
 __version__ = version
-spec_version = __version__  # Define separate specification version.
+spec_version = __version__  # Optionally define separate specification version.

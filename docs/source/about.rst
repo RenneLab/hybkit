@@ -26,18 +26,28 @@ Renne Lab
 
 Lead Developer
 --------------
-    * | Dan Stribling <ds@ufl.edu>
-      | https://github.com/dstrib
-      | https://www.linkedin.com/in/DanielStribling
+    * | Daniel Stribling <ds@ufl.edu>
+      | https://www.danthescienceman.com
+      | https://orcid.org/0000-0002-0649-9506 
       | University of Florida, Renne Lab
 
 Changelog
 ---------
 
-    * 0.2.0 (pre-release) Added Command-line Toolkit. Code Refinements.
-    * 0.1.9 (2020-03) Fix for Module Path Finding for Python > 3.6
-    * 0.1.8 (2020-03) Streamlining, PyPI / PIP Initial Release
-    * 0.1.0 (2020-01) Initial Implementation
+    * | 0.3.0b (dev)     Further Refactoring:
+    * | 0.3.0a (2021-09) Major Codebase And API Overhaul. Changes include:
+      | Simplifying HybRecord API
+      | Simplifying FoldRecord API
+      | Unifying settings information for argparse and module
+      | Removing Support for ViennaD format
+      | Addition of "NON" value to "target_reg" flag in specification
+      | Moving identifier-parsing code to module type_finder
+      | Moving target region analysis code to module region_finder
+      | Moving code for settings into a "settings" module.
+    * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
+    * 0.1.9  (2020-03) Fix for Module Path Finding for Python > 3.6
+    * 0.1.8  (2020-03) Streamlining, PyPI / PIP Initial Release
+    * 0.1.0  (2020-01) Initial Implementation
 
 
 
