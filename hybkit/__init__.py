@@ -23,6 +23,7 @@ information:
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFile`        | Class for reading and writing ".hyb"-format files                |
 |                         | containing chimeric RNA sequence information                     |
+|                         | into :class:`HybRecord` objects                                  |
 +-------------------------+------------------------------------------------------------------+
 | :class:`ViennaFile`     | Class for reading and writing Vienna (.vienna)-format files      |
 |                         | containing RNA secondary structure information in dot-bracket    |
@@ -67,13 +68,14 @@ except ModuleNotFoundError as bio_module_error:
 
 # Perform *Initial* hybkit submodule imports, remainder at code end.
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-import settings
-import type_finder
-import region_finder
-import __about__
+import hybkit
+import hybkit.settings
+import hybkit.type_finder
+import hybkit.region_finder
+import hybkit.__about__
 # Import module-level dunder-names:
-from __about__ import __author__, __contact__, __credits__, __date__, __deprecated__,\
-                      __email__, __license__, __maintainer__, __status__, __version__
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__,\
+                             __email__, __license__, __maintainer__, __status__, __version__
 
 class HybRecord(object):
     """
@@ -152,9 +154,9 @@ class HybRecord(object):
             keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (dict, optional): Dict with keys of flags for the record and their associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom 
-            flags can be added via :func:`set_custom_flags`.
+            flags can be supplied in :attr:`settings.custom_flags`.
             This setting can also be disabled by setting 'allow_undefined_flags' 
-            to True in :attr:`settings`.
+            to :obj:`True` in :attr:`settings`.
         fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
             as the provided FoldRecord object using :func:`set_fold_record` on initializtaion.
 
@@ -172,8 +174,6 @@ class HybRecord(object):
             'ref_end' (int), and 'score' (float).
         flags (dict): Dict of flags with possible keys and values as defined in
             the :ref:`Flags` section of the :ref:`Hybkit Specification`.
-        mirna_info (dict or None): Dict of details on miRNA-related hybrid characteristics 
-            filled by the :func:`mirna_analysis` method.
         mirna_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's miRNA (if present), assigned by the 
             :func:`mirna_analysis` method.
@@ -192,8 +192,8 @@ class HybRecord(object):
                       'energy',  #: str(of float), Intra-hybrid folding energy, ex: "-11.33"
                      ]
 
-    #: Record columns 4-9 and 10-15, respectively, defining parameters of each 
-    #: respective segment mapping, defined by the Hyb format
+    #: Record columns 4-9 and 10-15, respectively, defining annotated parameters of  
+    #: seg1 and seg2 respectively, defined by the Hyb format
     SEGMENT_COLUMNS = [
                        'ref_name',    # str, Mapping Reference Identity: ex:
                                       #   "MIMAT0000076_MirBase_miR-21_microRNA"
@@ -246,16 +246,16 @@ class HybRecord(object):
     #: For information on flags, see the :any:`Flags` portion of the :any:`hybkit Specification`.
     ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
 
-    #: Class-level settings. See :ref:`hybkit.settings.HybRecord_settings` for descriptions.
+    #: Class-level settings. See :attr:`hybkit.settings.HybRecord_settings` for descriptions.
     settings = hybkit.settings.HybRecord_settings
 
     #: Link to :class:`type_finder.TypeFinder` class for parsing sequence identifiers
     #: in assigning segment types by :func:`find_seg_types`.
-    TypeFinder = type_finder.TypeFinder
+    TypeFinder = hybkit.type_finder.TypeFinder
 
     #: Link to :class:`region_finder.RegionFinder` class for idenfitying target region
     #: in assigning segment types by :func:`target_region_analysis`.
-    RegionFinder = region_finder.RegionFinder
+    RegionFinder = hybkit.region_finder.RegionFinder
 
     # Placeholder for set of allowed flags filled on first use.
     _flagset = None
@@ -626,7 +626,7 @@ class HybRecord(object):
 
 
     # HybRecord : Public Methods : target_analysis
-    def prep_target_region_analysis(self, region_info=None, region_csv_name=None, sep=',') 
+    def prep_target_region_analysis(self, region_info=None, region_csv_name=None, sep=','): 
         """
         Prepare from an input csv and assign (or only assign) a dict with information 
         on coding transcript regions. This method is required to be used before
@@ -660,9 +660,9 @@ class HybRecord(object):
             raise Exception(message)
 
         elif region_info:
-            self.region_finder.set_region_info(region_info)
+            self.RegionFinder.set_region_info(region_info)
         elif region_csv_name:
-            self.region_finder.make_set_region_info(region_csv_name, sep=sep)
+            self.RegionFinder.make_set_region_info(region_csv_name, sep=sep)
         else:
             raise Exception()
 
@@ -793,7 +793,7 @@ class HybRecord(object):
  
         Check property against list of allowed properties in :attr:`PROPERTIES`.
         If query property has a comparator, provide this in prop_compare.
-        Raises an error if property is not set (use :method:`is_set` to check).
+        Raises an error if property is not set (use :func:`is_set` to check).
         
         Args:
             prop: Property to check
@@ -1209,9 +1209,9 @@ class HybRecord(object):
     ]
 
     #: All allowed properties for the ".has_prop()" method.
-    HAS_PROPERTIES = STR_PROPERTIES + MIRNA_PROPERTIES + TARGET_PROPERTIES)
+    HAS_PROPERTIES = STR_PROPERTIES + MIRNA_PROPERTIES + TARGET_PROPERTIES
 
-    _HAS_PROPERTIES_SET = set(HAS_PROPERTIES_SET)
+    _HAS_PROPERTIES_SET = set(HAS_PROPERTIES)
 
     # HybRecord : Private Methods : Initialization
     def _post_init_tasks(self):
@@ -1434,7 +1434,7 @@ class HybFile(object):
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
     """
 
-    #: Class-level settings. See :ref:`hybkit.settings.HybFile_settings` for descriptions.
+    #: Class-level settings. See :obj:`hybkit.settings.HybFile_settings` for descriptions.
     settings = hybkit.settings.HybFile_settings
 
     # HybFile : Public Methods : Initialization / Closing
@@ -1582,11 +1582,11 @@ class FoldRecord(object):
     """
 
     # FoldRecord : Class-Level Constants
-    #: Class-level settings. See :ref:`hybkit.settings.HybRecord_settings` for descriptions.
+    #: Class-level settings. See :obj:`hybkit.settings.HybRecord_settings` for descriptions.
     settings = hybkit.settings.HybRecord_settings
 
     # FoldRecord : Public Methods : Initialization
-    def __init__(self, id, seq, fold, energy,
+    def __init__(self, id, seq, fold, energy):
         self.id = id                 # Sequence Identifier (often seg1name-seg2name)
         self.seq = seq               # Genomic Sequence
         self.fold = fold             # Fold Representation, str of '(', '.', and ')' characters
@@ -1708,10 +1708,10 @@ class FoldRecord(object):
         if "(99" in line_3:
            if skip_bad_fold_records:
                 if warn_bad_fold_records:
-                    message = 'WARNING: Improper Viennad: No Fold (Energy = 99*.*)'
+                    message = 'WARNING: Improper Vienna: No Fold (Energy = 99*.*)'
                 return fail_ret_val
            else:
-                message = 'ERROR: Improper Viennad: No Fold (Energy = 99*.*)'
+                message = 'ERROR: Improper Vienna: No Fold (Energy = 99*.*)'
                 print(message)
                 raise Exception(message)
 
@@ -2033,11 +2033,7 @@ class HybFoldIter(object):
 
 
 # Import the remainder of hybkit code to connect.
-#import hybkit
-#import hybkit.analysis
-#import hybkit.plot
-#import hybkit.util
-import analysis
-import plot
-import util
+import hybkit.analysis
+import hybkit.plot
+import hybkit.util
 

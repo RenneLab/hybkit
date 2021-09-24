@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 #Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
                              __email__, __license__, __maintainer__, __status__, __version__
-from hybkit import settings, HybRecord
+from hybkit import settings, type_finder
 
 # Util : Argparse Helper Functions
 def _bool_from_string(value):
@@ -454,7 +454,7 @@ segtype_opts_group.add_argument('--segtype_method',
                                 # required=True,
                                 # nargs='?',
                                 default='hyb',
-                                choices=HybRecord.TypeFinder.methods.keys(),
+                                choices=type_finder.TypeFinder.methods.keys(),
                                 help=_this_arg_help)
 
 # Argument Parser : hyb_analysis : segtype

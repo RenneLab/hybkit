@@ -96,14 +96,14 @@ def make_parser():
          allow_abbrev=False,
          )
 
-    script_parser.set_defaults(out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX)
+    script_parser.set_defaults(out_suffix=hybkit.settings._ANALYSIS_OUT_SUFFIX)
 
     return script_parser
 
 # Define main script function.
 def hyb_analyze(in_hyb_files, analysis_types, 
                 out_dir='.', 
-                out_suffix=hybkit.util.ANALYSIS_OUT_SUFFIX,
+                out_suffix=hybkit.settings._ANALYSIS_OUT_SUFFIX,
                 out_hyb_files=None,
                 segtype_method=None, 
                 segtype_params=None,  

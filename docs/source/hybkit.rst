@@ -9,6 +9,7 @@ HybRecord Class
 
 .. autoclass:: hybkit.HybRecord
    :members:
+   :no-members: TypeFinder, RegionFinder
    :undoc-members:
 
 FoldRecord Class
@@ -29,14 +30,6 @@ ViennaFile Class
 ----------------
 
 .. autoclass:: hybkit.ViennaFile
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-ViennadFile Class
------------------
-
-.. autoclass:: hybkit.ViennadFile
    :members:
    :undoc-members:
    :inherited-members:
