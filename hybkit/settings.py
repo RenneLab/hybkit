@@ -25,14 +25,11 @@ HYB_SUFFIXES = _all_str_cases('.hyb')
 #: Allowed suffixes for "Vienna" files.
 VIENNA_SUFFIXES = _all_str_cases('.vienna')
 
-#: Allowed suffixes for "Vienna-Detail" files.
-VIENNAD_SUFFIXES = _all_str_cases('.viennad')
-
 #: Allowed suffixes for "Connection-Table" files.
 CT_SUFFIXES = _all_str_cases('.ct')
 
-#: Allowed suffixes for "Vienna," "Vienna-Detail," and "Connection-Table" files.
-FOLD_SUFFIXES = VIENNA_SUFFIXES + VIENNAD_SUFFIXES + CT_SUFFIXES
+#: Allowed suffixes for "Vienna" and "Connection-Table" files.
+FOLD_SUFFIXES = VIENNA_SUFFIXES + CT_SUFFIXES
 
 _USE_ABSPATH = False
 

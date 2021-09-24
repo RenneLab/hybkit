@@ -48,7 +48,8 @@ class RegionFinder(object):
 
         # Method is temporarily disabled pending conceptual review.
 
-        The analysis requires :attr:`region_info` to be populated by using 
+        The analysis requires :attr:`region_finder.RegionFinder.region_info` 
+        to be populated by using 
         the :func:`set_region_info` method, with information prepared using 
         the :func:`make_region_info` method.
 
@@ -64,7 +65,7 @@ class RegionFinder(object):
             ref_end (str or int): Base position of end of the sequence.
         """
         raise NotImplementedError()
-        if self.region_info == {}:
+        if cls.region_info == {}:
             message = 'RegionFinder.region_info attribute has not been populated.\n'
             message += '  Please fill this variable with "set_region_info()" before use.'
             print(message)
@@ -89,7 +90,7 @@ class RegionFinder(object):
 
             if ref_cds_start >= ref_cds_end:
                 message = 'Reverse oreintation reference: %s\n' % self.target_props['ref']
-                message += '    "Start:", %i,  "End:" %i' % (ref_cds_start, ref_cds_end))
+                message += '    "Start:", %i,  "End:" %i' % (ref_cds_start, ref_cds_end)
                 print(message)
                 raise Exception(message)
 

@@ -16,6 +16,11 @@ import imp
 sys.path.insert(0, os.path.abspath('..'))
 # sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
 import hybkit
+
+#Cutoff connections for purposes of document generation
+hybkit.HybRecord.TypeFinder = None
+hybkit.HybRecord.RegionFinder = None
+
 #import hybkit_scripts
 hyb_check = imp.load_source('hyb_check', 
                             os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
@@ -30,7 +35,7 @@ hyb_check = imp.load_source('hyb_check',
 # -- Project information -----------------------------------------------------
 
 project = hybkit.__about__.project_name
-copyright = '2020, ' + hybkit.__about__.__author__
+copyright = '2021, ' + hybkit.__about__.__author__
 author = hybkit.__about__.__author__
 
 # The full version, including alpha/beta/rc tags

@@ -29,7 +29,7 @@ class TypeFinder(object):
     """
 
     # TypeFinder : Public Attributes
-    #:   Placeholder for storing active method, set with :func:`set_method`.
+    #: Placeholder for storing active method, set with :func:`set_method`.
     method = None
 
     # TypeFinder : Public Methods : Initialization
@@ -41,13 +41,13 @@ class TypeFinder(object):
     @classmethod
     def set_method(cls, method, params={}):
         """
-        Select method to use with :func:`find`.
+        Select method to use when finding types.
 
         Available methods are listed in :attr:`methods`.
 
         Args:
             method (str): Method option from :attr:`methods` to select
-                for use by the :func:`find` method.
+                for use.
             params (dict, optional): Dict object of parameters to use by selected method.
         """
 
@@ -61,7 +61,7 @@ class TypeFinder(object):
     @classmethod
     def set_custom_method(cls, method, params={}):
         """
-        Set the method for use to find seg types with :func:`find`.
+        Set the method for use to find seg types.
         
         This method is for providing a custom function. To use the included functions, 
         use :func:`select_method`.
@@ -77,9 +77,8 @@ class TypeFinder(object):
         a given sequence, instead of stopping after the first is found.
 
         Args:
-            method (method): Method to set for use by :func:`find`.
-            params (dict, optional): dict of custom parameters to set for use by
-                :func:`find`.
+            method (method): Method to set for use.
+            params (dict, optional): dict of custom parameters to set for use.
         """
 
         cls.method = types.MethodType(method, cls)
@@ -106,7 +105,7 @@ class TypeFinder(object):
                 "MIMAT0000076_MirBase_miR-21_microRNA"  --->  "microRNA".
 
         Args:
-            seg_props (dict): :attr:seg_props from hyb_record
+            seg_props (dict): :obj:`seg_props` from :class:`hybkit.HybRecord`
             params (dict, optional): Unused in this method.
             check_complete (bool, optional): Unused in this method.
 
@@ -131,7 +130,7 @@ class TypeFinder(object):
                 params = {'suffix': [('_miR', 'microRNA'),
                                                ('_trans', 'mRNA')   ]}
 
-        This dict can be generated with the associated :func:`make_string_match_parameters`
+        This dict can be generated with the associated :func:`make_string_match_params`
         method and an associated csv legend file with format::
 
             #commentline

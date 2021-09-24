@@ -92,14 +92,14 @@ def make_parser():
          allow_abbrev=False,
          )
 
-    script_parser.set_defaults(out_suffix=hybkit.util.FILTER_OUT_SUFFIX)
+    script_parser.set_defaults(out_suffix=hybkit.settings._FILTER_OUT_SUFFIX)
 
     return script_parser
 
 # Define main script function.
 def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
                out_dir='.', 
-               out_suffix=hybkit.util.FILTER_OUT_SUFFIX,
+               out_suffix=hybkit.settings._FILTER_OUT_SUFFIX,
                out_hyb_files=None,
                verbose=False, silent=False):
     """Perform main script function."""
