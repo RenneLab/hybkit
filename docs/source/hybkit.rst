@@ -9,7 +9,6 @@ HybRecord Class
 
 .. autoclass:: hybkit.HybRecord
    :members:
-   :no-members: TypeFinder, RegionFinder
    :undoc-members:
 
 FoldRecord Class

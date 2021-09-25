@@ -1,4 +1,4 @@
-hybkit.region_finders
+hybkit.region_finder
 ======================
 
 .. automodule:: hybkit.region_finder

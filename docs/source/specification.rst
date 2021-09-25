@@ -1,5 +1,5 @@
 
-hybkit Specification
+hybkit Hyb File Specification
 ==================================
 
 Version: |spec_version|
@@ -95,7 +95,9 @@ Flags
         :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all reord IDs of hybrids
         merged into this hybrid entry.
 
-    The following flags are defined by the hybkit package:
+    hybkit Flags:
+        The following flags are used by hybkit.
+
         .. _read_count:
     
         :obj:`read_count` -  Integer: Number of sequence reads represented by this record.
@@ -155,16 +157,16 @@ Other Details
     .. table:: 
         :widths: auto
 
-        ========== ==================================================================================
-        Item       Role
-        ========== ==================================================================================
-        \\\\t      Column Delimiter
-        .          Missing Data Placeholder (equivalent to None)
-        .hyb       File Suffix
-        .hyb.gz    gzipped File Suffix
-        Disallowed Header Lines
-        Disallowed In-file Comments
-        ========== ==================================================================================
+        ============ ==================================================================================
+        Item         Role
+        ============ ==================================================================================
+        \\\\t  (tab) Column Delimiter
+        .            Missing Data Placeholder (equivalent to None)
+        .hyb         File Suffix
+        .hyb.gz      gzipped File Suffix
+        Disallowed   Header Lines
+        Disallowed   In-file Comments
+        ============ ==================================================================================
 
 
 Example

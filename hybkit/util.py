@@ -111,7 +111,8 @@ def hyb_exists(file_name):
     """
     Check if a .hyb file exists at the provided path, and return a normalized path.
 
-    Wrapper for :func:`file_exists` that includes the required suffixes: %s.
+    Wrapper for :func:`file_exists` that includes the required suffixes in
+    :attr:`hybkit.settings.HYB_SUFFIXES`.
 
     Args:
         file_name (str): Name of file to check for existence.
@@ -122,14 +123,13 @@ def hyb_exists(file_name):
     use_suffixes = settings.HYB_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-hyb_exists.__doc__ = hyb_exists.__doc__ % settings.HYB_SUFFIXES
-
 # Util : Path Helper Functions 
 def vienna_exists(file_name):
     """
     Check if a .vienna file exists at the provided path, and return a normalized path.
 
-    Wrapper for :func:`file_exists` that includes the required suffixes: %s.
+    Wrapper for :func:`file_exists` that includes the required suffixes in
+    :attr:`hybkit.settings.VIENNA_SUFFIXES`.
 
     Args:
         file_name (str): Name of file to check for existence.
@@ -140,14 +140,13 @@ def vienna_exists(file_name):
     use_suffixes = settings.VIENNA_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-vienna_exists.__doc__ = vienna_exists.__doc__ % settings.VIENNA_SUFFIXES
-
 # Util : Path Helper Functions 
 def ct_exists(file_name):
     """
     Check if a .ct file exists at the provided path, and return a normalized path.
 
-    Wrapper for :func:`file_exists` that includes the required suffixes: %s.
+    Wrapper for :func:`file_exists` that includes the required suffixes in
+    :attr:`hybkit.settings.CT_SUFFIXES`.
 
     Args:
         file_name (str): Name of file to check for existence.
@@ -158,14 +157,13 @@ def ct_exists(file_name):
     use_suffixes = settings.CT_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-ct_exists.__doc__ = ct_exists.__doc__ % settings.CT_SUFFIXES
-
 # Util : Path Helper Functions 
 def fold_exists(file_name):
     """
     Check if a fold-representing file exists at the provided path, and return a normalized path.
 
-    Wrapper for :func:`file_exists` that includes the required suffixes: %s.
+    Wrapper for :func:`file_exists` that includes the required suffixes in
+    :attr:`hybkit.settings.FOLD_SUFFIXES`.
 
     Args:
         file_name (str): Name of file to check for existence.
@@ -175,8 +173,6 @@ def fold_exists(file_name):
     """
     use_suffixes = settings.FOLD_SUFFIXES
     return file_exists(file_name, use_suffixes)
-
-fold_exists.__doc__ = fold_exists.__doc__ % settings.FOLD_SUFFIXES
 
 # Util : Path Helper Functions 
 def out_path_exists(file_name):
@@ -252,7 +248,7 @@ def validate_args(args, parser=None):
           input files provided.
 
     Args:
-        args (namespace): The arguments produced by argparse.
+        args (argparse.Namespace): The arguments produced by argparse.
     """
    
     message = '\nArgument validation error: '
@@ -579,18 +575,18 @@ Output File Naming:
     """)
 
 # Argument Parser : hyb_type_analysis
-# TODO
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
 
 def set_settings(nspace, verbose=False):
     """
     Take a namespace object as from an argparse parser and update settings.
     
-    Each setting in the following settings dictionaries are checked and set where aplicable:
-    | HybRecord Settings: :obj:`settings.HybRecord_settings`
-    | HybFile Settings: :obj:`settings.HybFile_settings`
-    | FoldRecord Settings: :obj:`settings.FoldRecord_settings`
-    | FoldFile Settings: :obj:`settings.FoldFile_settings`
+    Each setting in the following settings dictionaries are checked and set where applicable:
+
+    | HybRecord Settings: :attr:`hybkit.settings.HybRecord_settings`
+    | HybFile Settings: :attr:`hybkit.settings.HybFile_settings`
+    | FoldRecord Settings: :attr:`hybkit.settings.FoldRecord_settings`
+    | FoldFile Settings: :attr:`hybkit.settings.FoldFile_settings`
 
     Args:
         nspace (argparse.Namespace): Namespace containing settings

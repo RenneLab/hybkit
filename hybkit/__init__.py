@@ -23,15 +23,15 @@ information:
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFile`        | Class for reading and writing ".hyb"-format files                |
 |                         | containing chimeric RNA sequence information                     |
-|                         | into :class:`HybRecord` objects                                  |
+|                         | as :class:`HybRecord` objects                                    |
 +-------------------------+------------------------------------------------------------------+
 | :class:`ViennaFile`     | Class for reading and writing Vienna (.vienna)-format files      |
 |                         | containing RNA secondary structure information in dot-bracket    |
-|                         | format into :class:`FoldRecord` objects                          |
+|                         | format as :class:`FoldRecord` objects                            |
 +-------------------------+------------------------------------------------------------------+
 | :class:`CtFile`         | Class for reading Connectivity Table (.ct)-format files          |
 |                         | containing predicted RNA secondary-structure information         |
-|                         | as used by the RNAStructure software package into                |
+|                         | as used by the RNAStructure software package as                  |
 |                         | :class:`FoldRecord` objects                                      |
 |                         | http://rna.urmc.rochester.edu/Text/File_Formats.html#CT          |
 +-------------------------+------------------------------------------------------------------+
@@ -154,9 +154,9 @@ class HybRecord(object):
             keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (dict, optional): Dict with keys of flags for the record and their associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom 
-            flags can be supplied in :attr:`settings.custom_flags`.
+            flags can be supplied in :attr:`HybRecord.settings` : :obj:`settings['custom_flags']`.
             This setting can also be disabled by setting 'allow_undefined_flags' 
-            to :obj:`True` in :attr:`settings`.
+            to :obj:`True` in :attr:`HybRecord.settings`.
         fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
             as the provided FoldRecord object using :func:`set_fold_record` on initializtaion.
 
@@ -164,6 +164,7 @@ class HybRecord(object):
 
     Attributes:
         id (str): Identifier for the hyb record (Hyb format: "<read-num>_<read-count>")
+
         seq (str): Nucleotide sequence of the hyb record
         energy (str or None): Predicted energy of folding
         seg1_props (dict): Information on chimeric segment 1, contains keys: 
@@ -173,7 +174,7 @@ class HybRecord(object):
             'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int), 
             'ref_end' (int), and 'score' (float).
         flags (dict): Dict of flags with possible keys and values as defined in
-            the :ref:`Flags` section of the :ref:`Hybkit Specification`.
+            the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
         mirna_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's miRNA (if present), assigned by the 
             :func:`mirna_analysis` method.
@@ -243,7 +244,8 @@ class HybRecord(object):
                    ]
 
     #: Flags defined by the hybkit package. Flags 1-4 are utilized by the Hyb software package.
-    #: For information on flags, see the :any:`Flags` portion of the :any:`hybkit Specification`.
+    #: For information on flags, see the :any:`Flags` portion of the 
+    #: :any:`hybkit Hyb File Specification`.
     ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
 
     #: Class-level settings. See :attr:`hybkit.settings.HybRecord_settings` for descriptions.
@@ -309,8 +311,10 @@ class HybRecord(object):
             flag_key (str): Key for flag to set.
             flag_val : Value for flag to set.
             allow_undefined_flags (bool or None, optional): Allow inclusion of flags not  
-                defined in :attr:`ALL_FLAGS` or in :attr:`settings['custom_flags']`.
-                If None (default), uses setting in :attr:`settings` : allow_undefined_flags.
+                defined in :attr:`ALL_FLAGS` or in :attr:`HybRecord.settings` : 
+                :obj:`settings['custom_flags']`.
+                If None (default), uses setting in :attr:`HybRecord.settings` : 
+                :obj:`settings['allow_undefined_flags']`.
         """
 
         if allow_undefined_flags is None:
@@ -438,11 +442,13 @@ class HybRecord(object):
         Args:
             allow_unknown (bool, optional): If True, allow segment types that cannot be
                 identified and set them as "unknown". Otherwise raise an error.
-                If None (default), uses setting in :attr:`settings` : allow_unknown_seg_types.
+                If None (default), uses setting in :attr:`HybRecord.settings` : 
+                :obj:`settings['allow_unknown_seg_types']`.
             check_complete (bool, optional): If True, check every possibility for the 
                 type of a given segment (where applicable), instead of 
                 stopping after finding the first type.
-                If None (default), uses setting in :attr:`settings` : check_complete_seg_types.
+                If None (default), uses setting in :attr:`HybRecord.settings` : 
+                :obj:`settings['check_complete_seg_types']`.
         """
 
         # If types already set, skip.
@@ -475,13 +481,13 @@ class HybRecord(object):
     # TOREDO
     def set_fold_record(self, fold_record):
         """
-        Check and set provided fold_record (:class:`FoldRecord`) as :attr:`fold_record`.
+        Check and set provided fold_record (:class:`FoldRecord`) as :obj:`fold_record`.
          
         Ensures that fold_record argument is an instance of FoldRecord and 
         has a matching sequence to this HybRecord, then set as self.fold_record.
 
         Args:
-            fold_record (FoldRecord): :attr:`FoldRecord` instance to set as :attr:`fold_record`.
+            fold_record (FoldRecord): :attr:`FoldRecord` instance to set as :obj:`fold_record`.
         """
         if fold_record is None or (isinstance(fold_record, tuple) and fold_record[0] is None):
             message = 'Trying to assign None object as FoldRecord.'
@@ -514,7 +520,7 @@ class HybRecord(object):
         Args:
             mirna_types (list, tuple, or set, optional): Iterable of strings of "types" to be 
                 considered as miRNA. Otherwise, the default types are used 
-                from :attr:`settings['mirna_types']`.
+                from :attr:`HybRecord.settings` : :obj:`settings['mirna_types']`.
         """
 
         if mirna_types is None:
@@ -554,16 +560,16 @@ class HybRecord(object):
         Method requires record to contain a non-dimer miRNA, otherwise will produce an error.
 
         Args:
-            detail (str): Type of detail to return. Options include: 
-                'all' : (dict of all properties, default); 
-                'mirna_name'      : Identifier for Assigned miRNA;
-                'target_name'     : Identifier for Assigned Target;
-                'mirna_seg_type'  : Assigned seg_type of miRNA;
-                'target_seg_type' : Assigned seg_type of target;
-                'mirna_seq'       : Annotated subsequence of miRNA;
-                'target_seq'      : Annotated subsequence of target;
-                'mirna_fold'      : Annotated fold substring of miRNA (requires fold_record set);
-                'target_fold'     : Annotated fold substring target (requires fold_record set);
+            detail (str): | Type of detail to return. Options include: 
+                          | 'all' : (dict of all properties, default); 
+                          | 'mirna_name'      : Identifier for Assigned miRNA;
+                          | 'target_name'     : Identifier for Assigned Target;
+                          | 'mirna_seg_type'  : Assigned seg_type of miRNA;
+                          | 'target_seg_type' : Assigned seg_type of target;
+                          | 'mirna_seq'       : Annotated subsequence of miRNA;
+                          | 'target_seq'      : Annotated subsequence of target;
+                          | 'mirna_fold'      : Annotated fold substring of miRNA (requires fold_record set);
+                          | 'target_fold'     : Annotated fold substring target (requires fold_record set);
 
         """
 
@@ -647,9 +653,9 @@ class HybRecord(object):
             identifier,cdna_coding_start,cdna_coding_end
 
         Args:
-            region_info (dict): Dict of region information to set as 
+            region_info (dict, optional): Dict of region information to set as 
                 :attr:`region_finder.RegionFinder.region_info`.
-            region_csv_name (str): String of path to csv file to read information from.
+            region_csv_name (str, optional): String of path to csv file to read information from.
             sep (str, optional): Separator for columns of input delimited file. (Default: ',')
 
         """
@@ -694,14 +700,16 @@ class HybRecord(object):
         Args:
             coding_types (iterable, optional): Iterable of strings representing sequence
                 types to be recognized as coding.
-                If None (default), uses :attr:`settings['coding_types']`.
+                If None (default), uses :attr:`HybRecord.settings` : :obj:`settings['coding_types']`.
             allow_unknown_regions (bool, optional):
                 Allow missing identifiers in analysis by skipping sequences instead of 
                 raising an error.
-                If None (default), uses setting in :attr:`settings` : allow_unknown_regions.
+                If None (default), uses setting in :attr:`HybRecord.settings` : 
+                :obj:`settings['allow_unknown_regions']`. 
             allow_unknown_regions (bool, optional):
                 Warn for missing identifiers in analysis by printing a message.
-                If None (default), uses setting in :attr:`settings` : allow_undefined_flags.
+                If None (default), uses setting in :attr:`HybRecord.settings` : 
+                :obj:`settings['allow_undefined_flags']`.
         """
         if coding_types is None:
             coding_types = self.settings['coding_types']
@@ -1538,18 +1546,6 @@ class FoldRecord(object):
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
 
-    * | The .viennad file format (output only) utilizied in the Hyb Software package:
-
-      Example:
-          ::
-
-              34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-34-...
-              TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
-              TAGCTTATCAGACTGATGT------------------   miR-21_microRNA 1       19
-              -------------------TAGCTTATCAGACTGATG   miR-21_microRNA 1       18
-              .....((((((.((((((......)))))).))))))   (-11.1)
-              [space-line]
-
     * | The .ct file format utilized by the UNAFold Software Package:
 
       Example:
@@ -1582,8 +1578,8 @@ class FoldRecord(object):
     """
 
     # FoldRecord : Class-Level Constants
-    #: Class-level settings. See :obj:`hybkit.settings.HybRecord_settings` for descriptions.
-    settings = hybkit.settings.HybRecord_settings
+    #: Class-level settings. See :obj:`hybkit.settings.FoldRecord_settings` for descriptions.
+    settings = hybkit.settings.FoldRecord_settings
 
     # FoldRecord : Public Methods : Initialization
     def __init__(self, id, seq, fold, energy):
@@ -1675,14 +1671,14 @@ class FoldRecord(object):
         Args:
             record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
                 vienna-format record.
-            hybformat_file (bool, optional): If True, extra information stored in the 
-                record identifier by Hyb will be parsed.
             skip_bad_fold_records (bool, optional): If True, return None when parsing 
                 badly-formatted entries instead of raising an error. 
-                If None (default), uses setting in :attr:`settings` : skip_bad_fold_records.
+                If None (default), uses setting in :attr:`FoldRecord.settings` : 
+                :obj:`settings['skip_bad_fold_records']`.
             warn_bad_fold_records (bool, optional): If True, print a warning message when 
                 attempting to parse badly-formatted entries.
-                If None (default), uses setting in :attr:`settings` : warn_bad_fold_records.
+                If None (default), uses setting in :attr:`FoldRecord.settings` : 
+                :obj:`settings['warn_bad_fold_records']`.
         """
 
         if skip_bad_fold_records is None:
@@ -1981,7 +1977,7 @@ class CtFile(FoldFile):
 
     # CtFile : Private Methods
     def _to_record_string(self, write_record, newline):
-        """Return a :class:`Fold Record` as a Viennad-format string."""
+        """Return a :class:`Fold Record` as a Ct-format string."""
         message = 'No write_record is implmeneted for ct files, as the FoldRecord '
         message += 'object does not contain the complete set of ct record information.'
         print(message)

@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-This module contains the TypeFinder class to work with :class:`HybRecord` to 
+This module contains the TypeFinder class to work with :class:`hybkit.HybRecord` to 
 parse sequence identifiers to idenfity sequence type.
 """
 

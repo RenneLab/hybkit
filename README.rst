@@ -15,8 +15,9 @@ hybkit
    :alt: PyPI - Python Version
 
 
-| Welcome to *hybkit*, a toolkit for analysis of ".hyb" format genomic sequence data 
-  generated from ribonomics techniques such as CLASH and qCLASH. 
+| Welcome to *hybkit*, a toolkit for analysis of ".hyb" format chimeric (hybrid) RNA sequence data
+  generated from ribonomics techniques such as Crosslinking, Ligation, and 
+  Sequencing of Hybrids (CLASH) and Quick CLASH (qCLASH). 
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 | Full project documentation is available at
   `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
