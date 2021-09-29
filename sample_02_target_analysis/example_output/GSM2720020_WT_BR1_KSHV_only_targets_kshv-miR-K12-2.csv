@@ -1,6 +1,5 @@
 mirna,mirna_type,target,target_type,count
 kshv-miR-K12-2,kshv-miRNA,MIMAT0003218_MirBase_miR-92b_microRNA,miRNA,9
-kshv-miR-K12-2,kshv-miRNA,G00000210082_ENST00000387347_MTRNR2L9_mtrRNA,mitoch-rRNA,7
 kshv-miR-K12-2,kshv-miRNA,ENSG00000240155_ENST00000482877_AC114498-1_pseudo,pseudogene,6
 kshv-miR-K12-2,kshv-miRNA,ENSG00000241780_ENST00000469340_AC025627-7_pseudo,pseudogene,6
 kshv-miR-K12-2,kshv-miRNA,ENSG00000173915_ENST00000337003_USMG5_mRNA,mRNA,6

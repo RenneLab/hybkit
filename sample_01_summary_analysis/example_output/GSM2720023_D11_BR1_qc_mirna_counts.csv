@@ -1,6 +1,6 @@
 miRNA_type,count
-mirnas_5p,376904
-mirnas_3p,21848
+mirnas_5p,374820
+mirnas_3p,21780
 mirna_dimers,29350
-non_mirnas,291929
-has_mirna,428102
+non_mirnas,289455
+has_mirna,425950
