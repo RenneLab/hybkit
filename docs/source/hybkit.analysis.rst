@@ -3,75 +3,55 @@ hybkit.analysis
 
 .. automodule:: hybkit.analysis
 
+Base Analysis
+-------------
 
-.. _type_analysis:
+.. autoclass:: hybkit.analysis.BaseAnalysis
+   :members:
+   :undoc-members:
+
 
 Type Analysis
 -------------
 
-.. autodata:: TYPE_DESCRIPTION
-
-.. autofunction:: type_dict
-.. autofunction:: combine_type_dicts
-.. autofunction:: addto_type
-.. autofunction:: format_type
-.. autofunction:: write_type
+.. autoclass:: hybkit.analysis.TypeAnalysis
+   :members:
+   :undoc-members:
+   :inherited-members:
 
 
-.. _mirna_count_analysis:
+miRNA Analysis
+--------------
 
-miRNA Count Analysis
---------------------
+.. autoclass:: hybkit.analysis.MirnaAnalysis
+   :members:
+   :undoc-members:
+   :inherited-members:
 
-.. autodata:: MIRNA_COUNT_DESCRIPTION 
-
-.. autofunction:: mirna_count_dict
-.. autofunction:: combine_mirna_count_dicts
-.. autofunction:: addto_mirna_count
-.. autofunction:: format_mirna_count
-.. autofunction:: write_mirna_count
-
-
-.. _summary_analysis:
 
 Summary Analysis
 ----------------
 
-.. autodata:: SUMMARY_DESCRIPTION
-
-.. autofunction:: summary_dict
-.. autofunction:: combine_summary_dicts
-.. autofunction:: addto_summary
-.. autofunction:: format_summary
-.. autofunction:: write_summary
+.. autoclass:: hybkit.analysis.SummaryAnalysis
+   :members:
+   :undoc-members:
+   :inherited-members:
 
 
-.. _mirna_target_analysis:
+Target Analysis
+---------------
 
-miRNA Target Analysis
----------------------
-
-.. autodata:: MIRNA_TARGET_DESCRIPTION
-
-.. autofunction:: mirna_target_dict
-.. autofunction:: combine_mirna_target_dicts
-.. autofunction:: addto_mirna_target
-.. autofunction:: process_mirna_target
-.. autofunction:: format_mirna_target
-.. autofunction:: write_mirna_target
+.. autoclass:: hybkit.analysis.TargetAnalysis
+   :members:
+   :undoc-members:
+   :inherited-members:
 
 
-.. _mirna_fold_analysis:
+Fold Analysis
+-------------
 
-miRNA Fold Analysis
--------------------
-
-.. autodata:: MIRNA_FOLD_DESCRIPTION
-
-.. autofunction:: mirna_fold_dict
-.. autofunction:: combine_mirna_fold_dicts
-.. autofunction:: addto_mirna_fold
-.. autofunction:: process_mirna_fold
-.. autofunction:: format_mirna_fold
-.. autofunction:: write_mirna_fold
+.. autoclass:: hybkit.analysis.FoldAnalysis
+   :members:
+   :undoc-members:
+   :inherited-members:
 

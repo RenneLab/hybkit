@@ -25,7 +25,7 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
 # Divide docstring into argparse and full portions.
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Specification`)
+    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
     and analyzes hybrid record properties. 
 
     segtype Analysis:

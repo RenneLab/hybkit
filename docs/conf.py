@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
 import hybkit
 
-#Cutoff connections for purposes of document generation
+# remove TypeFinder and RegionFinder links from HybRecord class for documentation
 hybkit.HybRecord.TypeFinder = None
 hybkit.HybRecord.RegionFinder = None
 
@@ -37,7 +37,6 @@ hyb_check = imp.load_source('hyb_check',
 project = hybkit.__about__.project_name
 copyright = '2021, ' + hybkit.__about__.__author__
 author = hybkit.__about__.__author__
-
 # The full version, including alpha/beta/rc tags
 version = '.'.join(hybkit.__about__.__version__.split('.'))
 release = hybkit.__about__.__version__
@@ -82,21 +81,19 @@ napoleon_use_ivar = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-# html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # Fix to RTD table wrapping: https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-        ],
-     }
+#html_context = {
+#    'css_files': [
+#        '_static/theme_overrides.css',  # override wide tables in RTD theme
+#        ],
+#     }
 
 # Define custom variables
 rst_epilog = (

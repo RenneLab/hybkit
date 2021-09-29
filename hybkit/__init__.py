@@ -97,7 +97,7 @@ class HybRecord(object):
          [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
 
     The preferred method for reading hyb records from lines is with 
-    the :meth:`HybRecord.from_line` constructor::
+    the :func:`HybRecord.from_line` constructor::
 
         # line = "2407_718\tATC..."
         hyb_record = hybkit.HybRecord.from_line(line)
@@ -154,7 +154,7 @@ class HybRecord(object):
             keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (dict, optional): Dict with keys of flags for the record and their associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom 
-            flags can be supplied in :attr:`HybRecord.settings` : :obj:`settings['custom_flags']`.
+            flags can be supplied in :attr:`settings['custom_flags'] <settings>`.
             This setting can also be disabled by setting 'allow_undefined_flags' 
             to :obj:`True` in :attr:`HybRecord.settings`.
         fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
@@ -177,12 +177,12 @@ class HybRecord(object):
             the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
         mirna_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's miRNA (if present), assigned by the 
-            :meth:`eval_mirna` method.
+            :func:`eval_mirna` method.
         target_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's target of a miRNA (if present), assigned by the  
-            :meth:`eval_mirna` method.
+            :func:`eval_mirna` method.
         fold_record (FoldRecord): Information on the predicted secondary structure of the sequence
-            set by :meth:`set_fold_record`.
+            set by :func:`set_fold_record`.
     """
 
     # HybRecord : Class-Level Constants
@@ -248,15 +248,19 @@ class HybRecord(object):
     #: :any:`hybkit Hyb File Specification`.
     ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
 
-    #: Class-level settings. See :attr:`hybkit.settings.HybRecord_settings` for descriptions.
+    #: Class-level settings. See :attr:`settings.HybRecord_settings` for descriptions.
     settings = hybkit.settings.HybRecord_settings
 
     #: Link to :class:`type_finder.TypeFinder` class for parsing sequence identifiers
-    #: in assigning segment types by :meth:`eval_typess`.
+    #: in assigning segment types by :func:`eval_types`.
+    #:
+    #: :meta hide-value:
     TypeFinder = hybkit.type_finder.TypeFinder
 
     #: Link to :class:`region_finder.RegionFinder` class for idenfitying target region
-    #: in assigning segment types by :meth:`target_region_eval`.
+    #: in assigning segment types by :func:`target_region_eval`.
+    #: 
+    #: :meta hide-value:
     RegionFinder = hybkit.region_finder.RegionFinder
 
     # Placeholder for set of allowed flags filled on first use.
@@ -311,10 +315,9 @@ class HybRecord(object):
             flag_key (str): Key for flag to set.
             flag_val : Value for flag to set.
             allow_undefined_flags (bool or None, optional): Allow inclusion of flags not  
-                defined in :attr:`ALL_FLAGS` or in :attr:`HybRecord.settings` : 
-                :obj:`settings['custom_flags']`.
-                If None (default), uses setting in :attr:`HybRecord.settings` : 
-                :obj:`settings['allow_undefined_flags']`.
+                defined in :attr:`ALL_FLAGS` or in :attr:`settings['custom_flags'] <settings>`.
+                If None (default), uses setting in 
+                :attr:`settings['allow_undefined_flags'] <settings>`.
         """
 
         if allow_undefined_flags is None:
@@ -406,7 +409,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info
     def get_count(self, count_mode, require=False):
-        """Return either of :meth:`get_read_count` or :meth:`get_record_count`.
+        """Return either of :func:`get_read_count` or :func:`get_record_count`.
 
         Args:
             count_mode (str) : Mode for returned count: one of : {'read', 'record'}
@@ -431,23 +434,23 @@ class HybRecord(object):
 
         This method provides :attr:`seg1_props` and :attr:`seg2_props` 
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
-        This uses the method: :meth:`TypeFinder.method`
-        set by :meth:`TypeFinder.set_method` or :meth:`TypeFinder.set_custom_method` to set the
+        This uses the method: :func:`TypeFinder.method`
+        set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
         :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>` flags if not already set. 
 
         To use a system other than the default, prepare the :class:`TypeFinder` class by 
-        preparing and setting :attr:`TypeFinder.params` and using :meth:`TypeFinder.set_method`. 
+        preparing and setting :attr:`TypeFinder.params` and using :func:`TypeFinder.set_method`. 
 
         Args:
             allow_unknown (bool, optional): If True, allow segment types that cannot be
                 identified and set them as "unknown". Otherwise raise an error.
-                If None (default), uses setting in :attr:`HybRecord.settings` : 
-                :obj:`settings['allow_unknown_seg_types']`.
+                If None (default), uses setting in 
+                :attr:`settings['allow_unknown_seg_types'] <settings>`.
             check_complete (bool, optional): If True, check every possibility for the 
                 type of a given segment (where applicable), instead of 
                 stopping after finding the first type.
-                If None (default), uses setting in :attr:`HybRecord.settings` : 
-                :obj:`settings['check_complete_seg_types']`.
+                If None (default), uses setting in 
+                :attr:`settings['check_complete_seg_types'] <settings>`.
         """
 
         # If types already set, skip.
@@ -476,10 +479,10 @@ class HybRecord(object):
         self.set_flag('seg1_type', types[0])
         self.set_flag('seg2_type', types[1])
 
-    # HybRecord : Public Methods : eval_typess
+    # HybRecord : Public Methods : eval_types
     def find_seg_types(self, *args, **kwargs):
-        """Find_seg_types method is deprecated. Please use :meth:`eval_typess`'"""
-        message = 'find_seg_types method is deprecated. Please use eval_typess.'
+        """Find_seg_types method is deprecated. Please use :func:`eval_types`"""
+        message = 'find_seg_types method is deprecated. Please use eval_types.'
         print(message)
         raise Exception(message)
 
@@ -518,14 +521,14 @@ class HybRecord(object):
         If not already done, determine whether a miRNA exists within this record and 
         set the :ref:`miRNA_seg <mirna_seg>` flag.
         This evaluation requries the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags to 
-        be populated, which can be performed by the :meth:`eval_typess` method.
+        be populated, which can be performed by the :func:`eval_types` method.
         If the record contains a miRNA, link the :attr:`mirna_props` and :attr:`target_props` 
         dicts to the corresponding :attr:`seg1_props` / :attr:`seg2_props` dicts as appropriate.
 
         Args:
             mirna_types (list, tuple, or set, optional): Iterable of strings of "types" to be 
                 considered as miRNA. Otherwise, the default types are used 
-                from :attr:`HybRecord.settings` : :obj:`settings['mirna_types']`.
+                from :attr:`settings['mirna_types'] <settings>`.
         """
 
         if mirna_types is None:
@@ -559,7 +562,7 @@ class HybRecord(object):
 
 
     def mirna_detail(self, detail='all'):
-        """Provide a detail about the miRNA or target following :meth:`eval_mirna`.
+        """Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
         Analyze miRNA properties within the sequence record and provide a detail as ouptut.
         Method requires record to contain a non-dimer miRNA, otherwise will produce an error.
@@ -643,7 +646,7 @@ class HybRecord(object):
         """
         Prepare from an input csv and assign (or only assign) a dict with information 
         on coding transcript regions. This method is required to be used before
-        performing a target region evaluation with :meth:`target_region_eval`.
+        performing a target region evaluation with :func:`target_region_eval`.
         
         Example:
             Example format of prepared/input dict object::
@@ -680,20 +683,20 @@ class HybRecord(object):
             raise Exception()
 
     # HybRecord : Public Methods : eval_target
-    def target_region_eval(self, coding_types=None,
-                               allow_unknown_regions=None, warn_unknown_regions=None):
+    def eval_target(self, coding_types=None,
+                    allow_unknown_regions=None, warn_unknown_regions=None):
         """
         For miRNA/coding-target pairs, find the region of the coding transcript targeted.
 
         The evaluation requires a dict containing region 
-        information to be set using the :meth:`prep_target_region_eval` method.
+        information to be set using the :func:`prep_target_region_eval` method.
         
         If the record contains an identified mirna and identified coding target, 
         find the region in which the targeted sequence resides and store the results in the 
         :ref:`target_reg <target_reg>` flag and miRNA_eval dict.
         This evaluation requries the :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>`, 
         and :ref:`miRNA_seg <mirna_seg>` flags to be populated. This can be performed 
-        by sequentially using the :meth:`eval_typess` and :meth:`eval_mirna` methods.
+        by sequentially using the :func:`eval_types` and :func:`eval_mirna` methods.
         If the :ref:`miRNA_seg <mirna_seg>` flag is in {"N" (None), "B" (Both)},
         the :ref:`target_reg <target_reg>` flag will be set to {"N" (None)}. 
         If the :ref:`miRNA_seg <mirna_seg>` flag == "U" (Unknown),
@@ -707,16 +710,16 @@ class HybRecord(object):
         Args:
             coding_types (iterable, optional): Iterable of strings representing sequence
                 types to be recognized as coding.
-                If None (default), uses :attr:`HybRecord.settings` : :obj:`settings['coding_types']`.
+                If None (default), uses :attr:`settings['coding_types'] <settings>`.
             allow_unknown_regions (bool, optional):
                 Allow missing identifiers in evaluation by skipping sequences instead of 
                 raising an error.
-                If None (default), uses setting in :attr:`HybRecord.settings` : 
-                :obj:`settings['allow_unknown_regions']`. 
+                If None (default), uses setting in 
+                :attr:`settings['allow_unknown_regions'] <settings>`. 
             allow_unknown_regions (bool, optional):
                 Warn for missing identifiers in evaluation by printing a message.
-                If None (default), uses setting in :attr:`HybRecord.settings` : 
-                :obj:`settings['allow_undefined_flags']`.
+                If None (default), uses setting in 
+                :attr:`settings['allow_undefined_flags'] <settings>`.
         """
         if coding_types is None:
             coding_types = self.settings['coding_types']
@@ -808,7 +811,7 @@ class HybRecord(object):
  
         Check property against list of allowed properties in :attr:`PROPERTIES`.
         If query property has a comparator, provide this in prop_compare.
-        Raises an error if property is not set (use :meth:`is_set` to check).
+        Raises an error if property is not set (use :func:`is_set` to check).
         
         Args:
             prop: Property to check
@@ -1460,7 +1463,7 @@ class HybFile(object):
     File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
     """
 
-    #: Class-level settings. See :obj:`hybkit.settings.HybFile_settings` for descriptions.
+    #: Class-level settings. See :obj:`settings.HybFile_settings` for descriptions.
     settings = hybkit.settings.HybFile_settings
 
     # HybFile : Public Methods : Initialization / Closing
@@ -1596,7 +1599,7 @@ class FoldRecord(object):
     """
 
     # FoldRecord : Class-Level Constants
-    #: Class-level settings. See :obj:`hybkit.settings.FoldRecord_settings` for descriptions.
+    #: Class-level settings. See :obj:`settings.FoldRecord_settings` for descriptions.
     settings = hybkit.settings.FoldRecord_settings
 
     # FoldRecord : Public Methods : Initialization
@@ -1691,12 +1694,12 @@ class FoldRecord(object):
                 vienna-format record.
             skip_bad_fold_records (bool, optional): If True, return None when parsing 
                 badly-formatted entries instead of raising an error. 
-                If None (default), uses setting in :attr:`FoldRecord.settings` : 
-                :obj:`settings['skip_bad_fold_records']`.
+                If None (default), uses setting in 
+                :attr:`settings['skip_bad_fold_records'] <settings>`.
             warn_bad_fold_records (bool, optional): If True, print a warning message when 
                 attempting to parse badly-formatted entries.
-                If None (default), uses setting in :attr:`FoldRecord.settings` : 
-                :obj:`settings['warn_bad_fold_records']`.
+                If None (default), uses setting in 
+                :attr:`settings['warn_bad_fold_records'] <settings>`.
         """
 
         if skip_bad_fold_records is None:
@@ -1853,7 +1856,7 @@ class FoldFile(object):
 
     """
 
-    #: Class-level settings. See :ref:`hybkit.settings.FoldFile_settings` for descriptions.
+    #: Class-level settings. See :attr:`settings.FoldFile_settings` for descriptions.
     settings = hybkit.settings.FoldFile_settings
 
     # FoldFile : Public Methods : Initialization / Closing

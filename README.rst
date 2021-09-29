@@ -71,7 +71,7 @@ Pipelines:
     As an illustration, the example summary analysis includes the return of 
     the contained hybrid sequence types as both a csv table and as a pie chart:
 
-        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.csv>`_
+        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.csv>`_
 
         |sample_01_image|
 
@@ -144,6 +144,6 @@ Further documentation on hybkit usage can be found in |docs_link|_.
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
-.. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
+.. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
 .. include:: docs_readme_format.rst

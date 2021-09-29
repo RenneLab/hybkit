@@ -61,7 +61,7 @@ def type_count(type_counter,
                dpi=DEFAULT_DPI,
                matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the counts of types resulting from the :ref:`type_analysis`.
+    Plot the counts of types resulting from the :class:`TypeAnalysis`.
 
     Args:
         type_counter (Counter): Counter containing type information from 
@@ -113,7 +113,7 @@ def mirna(analysis,
           dpi=DEFAULT_DPI,
           matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the results of the :ref:`mirna_count_analysis`.
+    Plot the results of the :class:`MirnaAnalysis`.
 
     Args:
         analysis (Analysis): Analysis that includes attributes of
@@ -294,7 +294,7 @@ def mirna_fold(analysis,
                dpi=DEFAULT_DPI,
                matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     """
-    Plot the bound percentage of mirna by base from the :ref:`mirna_fold_analysis`.
+    Plot the bound percentage of mirna by base from the :class:`FoldAnalysis`.
 
     Args:
         analysis (Analysis): Analysis that includes attributes of

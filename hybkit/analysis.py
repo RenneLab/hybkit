@@ -326,7 +326,8 @@ class BaseAnalysis(object):
     
 ### --- Type Analysis --- ###
 
-_TYPEANALYSIS_DESCRIPTION = """
+class TypeAnalysis(BaseAnalysis):
+    """
     Analysis of segment types included in the analyzed hyb_records.
     
     Before using the analysis, the :ref:`seg1_type <seg1_type>` and
@@ -337,21 +338,20 @@ _TYPEANALYSIS_DESCRIPTION = """
     segments placed in sorted order for non-redundant type-combinations.
     The analysis additionally reports the number of individual segment
     types.
-"""
-
-class TypeAnalysis(BaseAnalysis):
-    """
-    %s
     
     Args:
         name (str, optional): Analysis name
 
     Attributes:
         name (str): Analysis name
-        hybrid_types (Counter): Counter containing annotated ordered types of seg1 and seg2
-        seg1_types (Counter): Counter containing annotated type of segment in position seg1 
-        seg2_types (Counter): Counter containing annotated type of segment in position seg2 
-        all_seg_types (Counter): Counter containing position-independent annotated types
+        hybrid_types (~collections.Counter): Counter containing annotated ordered types of 
+            seg1 and seg2
+        seg1_types (~collections.Counter): Counter containing annotated type of 
+            segment in position seg1 
+        seg2_types (~collections.Counter): Counter containing annotated type of 
+            segment in position seg2 
+        all_seg_types (~collections.Counter): Counter containing position-independent 
+            annotated types
           
     """
 
@@ -366,7 +366,7 @@ class TypeAnalysis(BaseAnalysis):
     # TypeAnalysis : Public Methods
     def add(self, hyb_record):
         """
-        Add information from a :class:`HybRecord` record to analysis.
+        Add information from a :class:`~hybkit.HybRecord` record to analysis.
     
         Args:
             hyb_record (HybRecord): Record with information to add.
@@ -379,7 +379,7 @@ class TypeAnalysis(BaseAnalysis):
         Add another TypeAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (TypeAnalysis): :class:`TypeAnalysis object to add.
+            add_analysis (TypeAnalysis): :class:`TypeAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
         self._update_type_analysis(add_analysis)
@@ -391,7 +391,7 @@ class TypeAnalysis(BaseAnalysis):
     
         Args:
             out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
-                If not provided, defaults to :attr:`settings` : :obj:`settings['out_delim']`
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
     
         Returns:
@@ -418,7 +418,7 @@ class TypeAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -454,33 +454,27 @@ class TypeAnalysis(BaseAnalysis):
         hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_seg2', 
                                title='3p Segment Types Types', name=self.name)
 
-TypeAnalysis.__doc__ = TypeAnalysis.__doc__ % _TYPEANALYSIS_DESCRIPTION
-
 
 ### --- miRNA Count Analysis --- ###
 
-_MIRNAANALYSIS_DESCRIPTION = """
-Analyze counts/types of miRNA in hyb records.
-
-The mirna_count analysis determines what type each record is
-with regard to mirna and counts them accordingly.
-This includes:
-
-    | mirnas_5p: Hybrids with a |5p| miRNA.
-    | mirnas_3p: Hybrids with a |3p| miRNA.
-    | mirna_dimers: Hybrids with both a |5p| and |3p| miRNA.
-    | non_mirnas: Hybrids with no miRNA.
-    | has_mirna: Hybrids with a miRNA (one of first three categories).
-
-Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
-must be set for each record as can be done by sequential use of the
-:func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-methods.
-"""
-
 class MirnaAnalysis(BaseAnalysis):
     """
-    %s
+    Analyze counts/types of miRNA in hyb records.
+    
+    The mirna_count analysis determines what type each record is
+    with regard to mirna and counts them accordingly.
+    This includes:
+    
+        | :obj:`mirnas_5p`: Hybrids with a |5p| miRNA.
+        | :obj:`mirnas_3p`: Hybrids with a |3p| miRNA.
+        | :obj:`mirna_dimers`: Hybrids with both a |5p| and |3p| miRNA.
+        | :obj:`non_mirnas`: Hybrids with no miRNA.
+        | :obj:`has_mirna`: Hybrids with a miRNA (one of first three categories).
+    
+    Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
+    must be set for each record as can be done by sequential use of the
+    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
+    methods.
     
     Args:
         name (str, optional): Analysis name
@@ -505,7 +499,7 @@ class MirnaAnalysis(BaseAnalysis):
     # MirnaAnalysis : Public Methods
     def add(self, hyb_record):
         """
-        Add information from a :class:`HybRecord` record to analysis.
+        Add information from a :class:`~hybkit.HybRecord` record to analysis.
     
         Args:
             hyb_record (HybRecord): Record with information to add.
@@ -518,7 +512,7 @@ class MirnaAnalysis(BaseAnalysis):
         Add another MirnaAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (MirnaAnalysis): :class:`MirnaAnalysis object to add.
+            add_analysis (MirnaAnalysis): :class:`MirnaAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
         self._update_mirna_analysis(add_analysis)
@@ -530,7 +524,7 @@ class MirnaAnalysis(BaseAnalysis):
     
         Args:
             out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
-                If not provided, defaults to :attr:`settings` : :obj:`settings['out_delim']`
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
     
         Returns:
@@ -556,7 +550,7 @@ class MirnaAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -580,31 +574,32 @@ class MirnaAnalysis(BaseAnalysis):
     
         hybkit.plot.mirna(self, file_name_base + '_mirna_counts')
 
-MirnaAnalysis.__doc__ = MirnaAnalysis.__doc__ % _MIRNAANALYSIS_DESCRIPTION
-
 
 ### --- Full Summary Analysis --- ###
 
-_SUMMARYANALYSIS_DESCRIPTION = 'as_follows...'
-"""
-This analysis includes the components of both the :ref:`type_analysis` and 
-:ref:`mirna_count_analysis` analyses, performed simultaneously.
-"""
-
 class SummaryAnalysis(BaseAnalysis):
     """
-    %s
+    This analysis includes the components of both the :class:`TypeAnalysis` and 
+    :class:`MirnaAnalysis` analyses, performed simultaneously.
     
     Args:
         name (str, optional): Analysis name
 
     Attributes:
         name (str): Analysis name
-        summarys_5p (int): Count of |5p| miRNAs detected
-        summarys_3p (int): Count of |3p| miRNAs detected
-        summary_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
-        non_summarys (int): Count of non-miRNA hybrids detected
-        has_summary (int): Hybrids with |5p|, |3p|, or both as miRNA
+        hybrid_types (~collections.Counter): Counter containing annotated ordered types of 
+            seg1 and seg2
+        seg1_types (~collections.Counter): Counter containing annotated type of 
+            segment in position seg1 
+        seg2_types (~collections.Counter): Counter containing annotated type of 
+            segment in position seg2 
+        all_seg_types (~collections.Counter): Counter containing position-independent 
+            annotated types
+        mirnas_5p (int): Count of |5p| miRNAs detected
+        mirnas_3p (int): Count of |3p| miRNAs detected
+        mirna_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
+        non_mirnas (int): Count of non-miRNA hybrids detected
+        has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
     """
 
 
@@ -619,7 +614,7 @@ class SummaryAnalysis(BaseAnalysis):
     # SummaryAnalysis : Public Methods
     def add(self, hyb_record):
         """
-        Add information from a :class:`HybRecord` record to analysis.
+        Add information from a :class:`hybkit.HybRecord` record to analysis.
     
         Args:
             hyb_record (HybRecord): Record with information to add.
@@ -633,7 +628,7 @@ class SummaryAnalysis(BaseAnalysis):
         Add another SummaryAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (SummaryAnalysis): :class:`SummaryAnalysis object to add.
+            add_analysis (SummaryAnalysis): :class:`SummaryAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
         self._update_type_analysis(add_analysis)
@@ -646,7 +641,7 @@ class SummaryAnalysis(BaseAnalysis):
     
         Args:
             out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
-                If not provided, defaults to :attr:`settings` : :obj:`settings['out_delim']`
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
     
         Returns:
@@ -676,7 +671,7 @@ class SummaryAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -715,27 +710,21 @@ class SummaryAnalysis(BaseAnalysis):
                                title='3p Segment Types Types', name=self.name)
         hybkit.plot.mirna(self, file_name_base + '_mirna_counts')
 
-SummaryAnalysis.__doc__ = SummaryAnalysis.__doc__ % _SUMMARYANALYSIS_DESCRIPTION
-
 
 ### --- Target Analysis --- ###
 
-_TARGETANALYSIS_DESCRIPTION = """
-The mirna_target analysis provides an analysis of what sequences are targeted
-by each respective miRNA within the hyb records. The analysis dict has keys
-of each miRNA, with each value being a dict of targeted sequences and their 
-associated count of times targeted.
-
-Before using the analysis, the :ref:`seg1_type <seg1_type>`,
-:ref:`seg2_type <seg2_type>`, and :ref:`mirna_seg <mirna_seg>` flags
-must be set for each record as can be done by sequential use of the
-:func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-methods.
-"""
-
 class TargetAnalysis(BaseAnalysis):
     """
-    %s
+    The mirna_target analysis provides an analysis of what sequences are targeted
+    by each respective miRNA within the hyb records. The analysis dict has keys
+    of each miRNA, with each value being a dict of targeted sequences and their 
+    associated count of times targeted.
+    
+    Before using the analysis, the :ref:`seg1_type <seg1_type>`,
+    :ref:`seg2_type <seg2_type>`, and :ref:`mirna_seg <mirna_seg>` flags
+    must be set for each record as can be done by sequential use of the
+    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
+    methods.
     
     Args:
         name (str, optional): Analysis name
@@ -748,7 +737,6 @@ class TargetAnalysis(BaseAnalysis):
         non_targets (int): Count of non-miRNA hybrids detected
         has_target (int): Hybrids with |5p|, |3p|, or both, as miRNA
     """
-
 
     # TargetAnalysis : Public Methods
     def __init__(self, 
@@ -775,7 +763,7 @@ class TargetAnalysis(BaseAnalysis):
         Add another TargetAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (TargetAnalysis): :class:`TargetAnalysis object to add.
+            add_analysis (TargetAnalysis): :class:`TargetAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
         self._update_target_analysis(add_analysis)
@@ -787,12 +775,12 @@ class TargetAnalysis(BaseAnalysis):
    
         This fills the analysis variables:
         
-            | mirna_targets : Dict with keys of miRNA names and values of :class:`Counter` 
+            | :obj:`mirna_targets` : Dict with keys of miRNA names and values of :class:`Counter` 
               objects, with each counter objects containing the count of target names 
               for that miRNA.
-            | mirna_target_total_counts : :class:`Counter` with keys of miRNA names and
+            | :obj:`mirna_target_total_counts` : :class:`Counter` with keys of miRNA names and
               values of miRNA total counts.
-            | mirna_target_type_counts : Dict with keys of miRNA names and values of 
+            | :obj:`mirna_target_type_counts` : Dict with keys of miRNA names and values of 
               :class:`Counter` objects, with each counter object containin the count of 
               segment types targeted by that miRNA.
         """
@@ -805,7 +793,7 @@ class TargetAnalysis(BaseAnalysis):
     
         Args:
             out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
-                If not provided, defaults to :attr:`settings` : :obj:`settings['out_delim']`
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
     
         Returns:
@@ -837,7 +825,7 @@ class TargetAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -863,7 +851,7 @@ class TargetAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -890,26 +878,22 @@ class TargetAnalysis(BaseAnalysis):
 
 ### --- miRNA Fold Analysis --- ###
 
-_FOLDANALYSIS_DESCRIPTION = """
-This analysis evaluates the predicted binding of miRNA within hyb records
-that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object 
-as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and 
-plotting of the predicted binding by position among the provided miRNA.
-
-Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
-must be set for each record as can be done by sequential use of the
-:func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-methods. 
-
-The analysis dict contains the keys:
-    | :obj:`mirna_folds`: Number of miRNA folds represented.
-    | :obj:`mirna_fold_counts`: A by-index count of whether a miRNA is predicted to be base-paired
-    | :obj:`mirna_fold_frac`: A by-index count of the percent of miRNAs paird at each index
-"""
-
 class FoldAnalysis(BaseAnalysis):
     """
-    %s
+    This analysis evaluates the predicted binding of miRNA within hyb records
+    that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object 
+    as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and 
+    plotting of the predicted binding by position among the provided miRNA.
+    
+    Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
+    must be set for each record as can be done by sequential use of the
+    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
+    methods. 
+    
+    The analysis dict contains the keys:
+        | :obj:`mirna_folds`: Number of miRNA folds represented.
+        | :obj:`mirna_fold_counts`: A by-index count of whether a miRNA is predicted to be base-paired
+        | :obj:`mirna_fold_frac`: A by-index count of the percent of miRNAs paird at each index
     
     Args:
         name (str, optional): Analysis name
@@ -936,7 +920,7 @@ class FoldAnalysis(BaseAnalysis):
         """
         Add the information from a :class:`~hybkit.HybRecord` to a mirna_fold analysis.
         If the record contains a single miRNA, the miRNA fold is identified.
-        miRNA Dimers are skipped unless the :attr:`settings` : :obj:`settings['all_mirna_dimers']
+        miRNA Dimers are skipped unless the :attr:`settings['all_mirna_dimers'] <settings>`
         setting is True.
         The count for this miRNA and its target is then added to :obj:`mirna_fold_counts` and 
         :obj:`mirna_fold_frac` is recalculated.
@@ -954,7 +938,7 @@ class FoldAnalysis(BaseAnalysis):
         Add another FoldAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (FoldAnalysis): :class:`FoldAnalysis object to add.
+            add_analysis (FoldAnalysis): :class:`FoldAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
         self._update_fold_analysis(add_analysis)
@@ -966,13 +950,14 @@ class FoldAnalysis(BaseAnalysis):
    
         This fills the analysis variables:
         
-            | mirna_folds : Dict with keys of miRNA names and values of :class:`Counter` 
+            | :obj:`mirna_folds` : Dict with keys of miRNA names and values of 
+              :class:`~collections.Counter` 
               objects, with each counter objects containing the count of fold names 
               for that miRNA.
-            | mirna_fold_total_counts : :class:`Counter` with keys of miRNA names and
-              values of miRNA total counts.
-            | mirna_fold_type_counts : Dict with keys of miRNA names and values of 
-              :class:`Counter` objects, with each counter object containin the count of 
+            | :obj:`mirna_fold_total_counts` : :class:`~collections.Counter` 
+              with keys of miRNA names and values of miRNA total counts.
+            | :obj:`mirna_fold_type_counts` : Dict with keys of miRNA names and values of 
+              :type:`~collections.Counter` objects, with each counter object containin the count of 
               segment types folded by that miRNA.
         """
         self._process_fold_analysis_info()
@@ -984,7 +969,7 @@ class FoldAnalysis(BaseAnalysis):
     
         Args:
             out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
-                If not provided, defaults to :attr:`settings` : :obj:`settings['out_delim']`
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
     
         Returns:
@@ -1011,7 +996,7 @@ class FoldAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
             out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings` : :obj:`settings['out_delim']` if not provided.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
         """
         if out_delim is None:
             out_delim = self.settings['out_delim']
