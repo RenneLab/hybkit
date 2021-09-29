@@ -561,7 +561,7 @@ class HybRecord(object):
                 self.target_props = self.seg1_props
 
 
-    def mirna_detail(self, detail='all'):
+    def mirna_detail(self, detail='all', allow_mirna_dimers=False):
         """Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
         Analyze miRNA properties within the sequence record and provide a detail as ouptut.
@@ -578,13 +578,18 @@ class HybRecord(object):
                           | 'target_seq'      : Annotated subsequence of target;
                           | 'mirna_fold'      : Annotated fold substring of miRNA (requires fold_record set);
                           | 'target_fold'     : Annotated fold substring target (requires fold_record set);
+            allow_mirna_dimers (bool, optional): Allow miRNA/miRNA dimers. 
+                5p-position will be assigned as miRNA.
 
         """
 
         self._ensure_set('eval_mirna')
         mirna_flag = self._get_flag('miRNA_seg')
-        if not self.has_prop('mirna_not_dimer'):
-            message = 'mirna_detail method requires a hybrid containing a single mirna.'
+        
+
+        if ((not self.has_prop('has_mirna')) or
+            (not allow_mirna_dimers and not self.has_prop('mirna_not_dimer'))):
+            message = 'mirna_detail method requires a hybrid containing a single mirna.\n'
             message += 'hybrecord: %s does not meet this criteria ' % str(self)
             message += 'with miRNA_seg flag: %s' % mirna_flag
             print(message)
@@ -601,36 +606,32 @@ class HybRecord(object):
             print(message)
             raise Exception(message)
 
-        # If necessary, perform eval_mirna to set mirna_details, target_details attributes
-        if self.mirna_props is None or self.target_props is None:
-            self.eval_mirna()
-
         # Analyze miRNA details
         mirna_details = {}
 
-        if mirna_flag == '5p':
+        if mirna_flag in {'5p', 'B'}:
             mirna_details['mirna_seg_type'] = self.get_seg1_type(require=True)
             mirna_details['target_seg_type'] = self.get_seg2_type(require=True)
-            self.mirna_props = self.seg1_props
-            self.target_props = self.seg2_props
+            mirna_props = self.seg1_props
+            target_props = self.seg2_props
         elif mirna_flag == '3p':
             mirna_details['mirna_seg_type'] = self.get_seg2_type(require=True)
             mirna_details['target_seg_type'] = self.get_seg1_type(require=True)
-            self.mirna_props = self.seg2_props
-            self.target_props = self.seg1_props
+            mirna_props = self.seg2_props
+            target_props = self.seg1_props
         else:
             message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
             message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
             print(message)
             raise Exception(message)
 
-        mirna_details['mirna_name'] = self.mirna_props['ref_name']
-        mirna_details['target_name'] = self.target_props['ref_name']
-        mirna_details['mirna_seq'] = self._get_seg_seq(self.mirna_props)
-        mirna_details['target_seq'] = self._get_seg_seq(self.target_props)
+        mirna_details['mirna_name'] = mirna_props['ref_name']
+        mirna_details['target_name'] = target_props['ref_name']
+        mirna_details['mirna_seq'] = self._get_seg_seq(mirna_props)
+        mirna_details['target_seq'] = self._get_seg_seq(target_props)
         if self.fold_record is not None:
-            mirna_details['mirna_fold'] = self.fold_record._get_seg_fold(self.miRNA_props)
-            mirna_details['target_fold'] = self.fold_record._get_seg_fold(self.miRNA_props)
+            mirna_details['mirna_fold'] = self.fold_record._get_seg_fold(miRNA_props)
+            mirna_details['target_fold'] = self.fold_record._get_seg_fold(target_props)
         else:
             mirna_details['mirna_fold'] = None
             mirna_details['target_fold'] = None

@@ -25,6 +25,9 @@ hybkit.settings.Analysis_settings['count_mode'] = count_mode
 # Set mirna types as custom to include KSHV-miRNAs
 hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
 
+# Allow mirna/mirna dimers in analysis.
+hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
+
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output')
@@ -89,8 +92,8 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     target_analysis = hybkit.analysis.TargetAnalysis(name=in_file_label)
 
     for hyb_record in out_kshv_file:
-        if (not hyb_record.has_prop('mirna_dimer')
-            and 'kshv' in hyb_record.mirna_detail('mirna_name')):
+        mirna_name = hyb_record.mirna_detail('mirna_name', allow_mirna_dimers=True)
+        if 'kshv' in mirna_name:
             target_analysis.add(hyb_record)
     
 
@@ -101,7 +104,9 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     analysis_basename = out_file_path.replace('.hyb', '')
     print('Writing Individual Analysis Files to Name Base:\n    %s' % analysis_basename)
     target_analysis.write_individual(analysis_basename)
+    target_analysis.plot_individual(analysis_basename)
     print('Writing Combined Analysis Files to Name Base:\n    %s' % analysis_basename)
     target_analysis.write(analysis_basename)
+    target_analysis.plot(analysis_basename)
 
 print('Done\n')

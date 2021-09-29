@@ -39,6 +39,8 @@ DEFAULT_LINE_RC_PARAMS = {
 DEFAULT_LINE_DATA_FORMAT = '-'
 DEFAULT_LINE_MIN_FRACTION_SIZE = 0.01
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
+DEFAULT_TARGET_TITLE = 'Targets'
+DEFAULT_TARGET_TYPE_TITLE = 'Target Types'
 DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE = 'Total Segment Portions'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_FIG_SIZE = matplotlib.rcParams['figure.figsize']  # 6.4, 4.8 in
@@ -161,8 +163,9 @@ def mirna(analysis,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def target(analysis, plot_file_name, mirna_name,
-           title=None,
+def target(mirna_counts, plot_file_name,
+           name=None,
+           title=DEFAULT_TARGET_TITLE,
            other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
            min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
            plot_file_type=DEFAULT_FILE_TYPE,
@@ -172,11 +175,11 @@ def target(analysis, plot_file_name, mirna_name,
     Plot the targets of a single mirna from the :class:`MirnaAnalysis`.
 
     Args:
-        analysis (Analysis): Analysis that includes attributes of
+        mirna_counts (~collection.Counter): Counter of targets of a mirna produced by 
             :class:`TargetAnalysis`.
         plot_file_name (str): File name for output plot.
-        mirna_name (str): Name of miRNA to plot for title.
-        title (str, optional): Title / header for plot (replaces default title).
+        name (str, optional): Name of analysis
+        title (str, optional): Title / header for plot.
         other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
             Setting to 0.0 disables the "other" wedge based on a threshhold.
         min_wedge_size (float, optional): Minimum wedge fraction at which to add to the "other"
@@ -190,12 +193,9 @@ def target(analysis, plot_file_name, mirna_name,
 
     labels = []
     counts = []
-    for ((target, target_seg_type), count) in mirna_targets_dict.most_common(): 
+    for ((target, target_seg_type), count) in mirna_counts.most_common(): 
         labels.append(target)
         counts.append(count)
-
-    if title is None:
-        title = 'Targets of ' + str(mirna_name) 
 
     if name is not None:
         title = str(name) + ': ' + title
@@ -231,9 +231,9 @@ def target(analysis, plot_file_name, mirna_name,
 
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def target_type(plot_file_name, mirna_name, mirna_target_type_counts_dict, 
-                title=None,
+def target_type(target_type_count, plot_file_name,
                 name=None,
+                title=DEFAULT_TARGET_TYPE_TITLE,
                 other_threshhold=DEFAULT_PIE_OTHER_THRESHHOLD,
                 min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                 plot_file_type=DEFAULT_FILE_TYPE,
@@ -243,10 +243,10 @@ def target_type(plot_file_name, mirna_name, mirna_target_type_counts_dict,
     Plot the targets types of a single mirna from the :class:`TargetAnalysis`.
 
     Args:
-        analysis (Analysis): Analysis that includes attributes of
+        target_type_count (~collections.Counter): Counter with types of targets for miRNAs from
             :class:`TargetAnalysis`.
         plot_file_name (str): File name for output plot.
-        mirna_name (str): Name of miRNA to plot for title.
+        name (str): Name of analysis to plot for title.
         title (str, optional): Title / header for plot (replaces default title).
         other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
             Setting to 0.0 disables the "other" wedge based on a threshhold.
@@ -260,12 +260,9 @@ def target_type(plot_file_name, mirna_name, mirna_target_type_counts_dict,
 
     labels = []
     counts = []
-    for key, count in mirna_target_type_counts_dict.most_common(): 
+    for key, count in target_type_count.most_common(): 
         labels.append(key)
         counts.append(count)
-
-    if title is None:
-        title = str(mirna_name) + ' Target Types'
 
     if name is not None:
         title = str(name) + ': ' + title

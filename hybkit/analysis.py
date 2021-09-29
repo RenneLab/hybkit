@@ -134,7 +134,9 @@ class BaseAnalysis(object):
             self.has_mirna += count
         elif hyb_record.has_prop('no_mirna'):
             self.non_mirnas += count
-    
+        else:
+            raise Exception()   
+ 
     # BaseAnalysis : Private Methods : MirnaAnalysis
     def _update_mirna_analysis(self, add_analysis):
         self.mirnas_5p += add_analysis.mirnas_5p
@@ -154,7 +156,6 @@ class BaseAnalysis(object):
     def _init_target_analysis(self):
         self.mirna_target_info = {}
         self.mirna_target_count = 0
-        self.mirna_targets = None
         self.mirna_target_total_counts = None
         self.mirna_target_type_counts = None
 
@@ -189,8 +190,8 @@ class BaseAnalysis(object):
 
     # BaseAnalysis : Private Methods : TargetAnalysis
     def _update_target_analysis(self, add_analysis):
-        for mirna_id in add_analysis.mirna_targets:
-            if mirna_id not in self.mirna_targets:
+        for mirna_id in add_analysis.mirna_target_info:
+            if mirna_id not in self.mirna_target_info:
                 self.mirna_target_info[mirna_id] = add_analysis.mirna_target_info[mirna_id]
             else:
                 self.mirna_target_info[mirna_id].update(add_analysis.mirna_target_info[mirna_id])
@@ -198,7 +199,6 @@ class BaseAnalysis(object):
 
     # BaseAnalysis : Private Methods : TargetAnalysis
     def _process_target_analysis_info(self):
-        self.mirna_targets = {}
         self.mirna_target_total_counts = Counter()
         self.mirna_target_type_counts = {}
         # Iterate over each miRNA
@@ -213,9 +213,8 @@ class BaseAnalysis(object):
                 target_name, target_type = target_id
                 target_count = self.mirna_target_info[mirna_id][target_id]
                 mirna_i_target_type_counts[target_type] += target_count           
-            self.mirna_target_type_counts[mirna_name] = mirna_i_target_type_counts.most_common()
+            self.mirna_target_type_counts[mirna_name] = mirna_i_target_type_counts
             # Sort mirna targets by most common
-            self.mirna_targets[mirna_name] = self.mirna_target_info[mirna_id].most_common() 
 
     # BaseAnalysis : Private Methods : TargetAnalysis
     def _format_target_analysis(self, out_delim, only_mirna_id=None):
@@ -775,9 +774,6 @@ class TargetAnalysis(BaseAnalysis):
    
         This fills the analysis variables:
         
-            | :obj:`mirna_targets` : Dict with keys of miRNA names and values of :class:`Counter` 
-              objects, with each counter objects containing the count of target names 
-              for that miRNA.
             | :obj:`mirna_target_total_counts` : :class:`Counter` with keys of miRNA names and
               values of miRNA total counts.
             | :obj:`mirna_target_type_counts` : Dict with keys of miRNA names and values of 
@@ -830,9 +826,12 @@ class TargetAnalysis(BaseAnalysis):
         if out_delim is None:
             out_delim = self.settings['out_delim']
         
+        if self.mirna_target_total_counts is None:
+            self.process_target_analysis()
+
         analyses = [
-                    ('mirna_targets', self._format_target_analysis),
-                    ('mirna_totals', self._format_target_analysis_totals),
+                    ('targets_all', self._format_target_analysis),
+                    ('targets_total', self._format_target_analysis_totals),
                     ]
     
         for analysis_name, analysis_method in analyses:
@@ -858,7 +857,7 @@ class TargetAnalysis(BaseAnalysis):
 
         for mirna_id in self.mirna_target_info:
             mirna, mirna_seg_type = mirna_id
-            analysis_file_name = file_name_base + '_' + mirna + '.csv'
+            analysis_file_name = file_name_base + '_targets_' + mirna + '.csv'
             analysis_file_name = self._sanitize_name(analysis_file_name)
             out_lines = self._format_target_analysis(out_delim, only_mirna_id=mirna_id)
             with open(analysis_file_name, 'w') as out_file:
@@ -867,14 +866,58 @@ class TargetAnalysis(BaseAnalysis):
     # TargetAnalysis : Public Methnds
     def plot(self, file_name_base):
         """
-        Create plots of the results.
+        Plot targets of all miRNAs in analysis
     
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
         """
+        if self.mirna_target_total_counts is None:
+            self.process_target_analysis()
+
+        combined_targets = Counter()
+        combined_target_types = Counter()
+        for mirna_id in self.mirna_target_info:
+            mirna_name, _ = mirna_id
+            combined_targets.update(self.mirna_target_info[mirna_id])
+            combined_target_types.update(self.mirna_target_type_counts[mirna_name])
+        hybkit.plot.target(combined_targets,
+                           file_name_base + '_targets_all',
+                           title='Combined miRNA Targets', 
+                          )
+        hybkit.plot.target_type(combined_target_types,
+                                file_name_base + '_targets_types_all',
+                                title='Combined miRNA Target Types', 
+                               )
+
+    # TargetAnalysis : Public Methnds
+    def plot_individual(self, file_name_base):
+        """
+        Plot targets of each individual miRNA in analysis
     
-        hybkit.plot.target_count(file_name + '_target_counts', analysis_dict)
+        Args:
+            file_name_base (str): "Base" name for output files. Final file names will be generated
+                based on analysis type and provided parameters.
+        """
+        if self.mirna_target_total_counts is None:
+            self.process_target_analysis()
+
+        for mirna_id in self.mirna_target_info:
+            mirna_name, mirna_seg_type = mirna_id
+            analysis_file_name = file_name_base + '_targets_' + mirna_name 
+            analysis_file_name = self._sanitize_name(analysis_file_name)
+            analysis_target_file_name = file_name_base + '_targets_' + mirna_name + '_types' 
+            analysis_target_file_name = self._sanitize_name(analysis_target_file_name)
+        
+            hybkit.plot.target(self.mirna_target_info[mirna_id],
+                               analysis_file_name,
+                               name=mirna_name,
+                              )
+            hybkit.plot.target_type(self.mirna_target_type_counts[mirna_name],
+                                    analysis_target_file_name,
+                                    name=mirna_name,
+                                   )
+
 
 ### --- miRNA Fold Analysis --- ###
 
