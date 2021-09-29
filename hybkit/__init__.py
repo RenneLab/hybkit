@@ -97,7 +97,7 @@ class HybRecord(object):
          [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
 
     The preferred method for reading hyb records from lines is with 
-    the :func:`HybRecord.from_line` constructor::
+    the :meth:`HybRecord.from_line` constructor::
 
         # line = "2407_718\tATC..."
         hyb_record = hybkit.HybRecord.from_line(line)
@@ -158,7 +158,7 @@ class HybRecord(object):
             This setting can also be disabled by setting 'allow_undefined_flags' 
             to :obj:`True` in :attr:`HybRecord.settings`.
         fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
-            as the provided FoldRecord object using :func:`set_fold_record` on initializtaion.
+            as the provided FoldRecord object using :meth:`set_fold_record` on initializtaion.
 
     .. _HybRecord-Attributes:
 
@@ -177,12 +177,12 @@ class HybRecord(object):
             the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
         mirna_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's miRNA (if present), assigned by the 
-            :func:`mirna_analysis` method.
+            :meth:`eval_mirna` method.
         target_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's target of a miRNA (if present), assigned by the  
-            :func:`mirna_analysis` method.
+            :meth:`eval_mirna` method.
         fold_record (FoldRecord): Information on the predicted secondary structure of the sequence
-            set by :func:`set_fold_record`.
+            set by :meth:`set_fold_record`.
     """
 
     # HybRecord : Class-Level Constants
@@ -252,11 +252,11 @@ class HybRecord(object):
     settings = hybkit.settings.HybRecord_settings
 
     #: Link to :class:`type_finder.TypeFinder` class for parsing sequence identifiers
-    #: in assigning segment types by :func:`find_seg_types`.
+    #: in assigning segment types by :meth:`eval_typess`.
     TypeFinder = hybkit.type_finder.TypeFinder
 
     #: Link to :class:`region_finder.RegionFinder` class for idenfitying target region
-    #: in assigning segment types by :func:`target_region_analysis`.
+    #: in assigning segment types by :meth:`target_region_eval`.
     RegionFinder = hybkit.region_finder.RegionFinder
 
     # Placeholder for set of allowed flags filled on first use.
@@ -285,8 +285,8 @@ class HybRecord(object):
         self.seg2_props = self._make_seg_props_dict(seg2_props)
         self.flags = self._make_flags_dict(flags)
 
-        self.mirna_props = None     # Placeholder variable for mirna_analysis
-        self.target_props = None    # Placeholder variable for mirna_analysis
+        self.mirna_props = None     # Placeholder variable for eval_mirna
+        self.target_props = None    # Placeholder variable for eval_mirna
 
         if read_count is not None:
             if read_count in flags:
@@ -406,13 +406,12 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info
     def get_count(self, count_mode, require=False):
-        """Return either of :func:`get_read_count` or :func:`get_record_count`.
+        """Return either of :meth:`get_read_count` or :meth:`get_record_count`.
 
         Args:
             count_mode (str) : Mode for returned count: one of : {'read', 'record'}
                 If 'read', require the 'read_count' flag to be defined.
                 If 'record', return '1' if the 'count_total' flag is not defined.
-            as_int (bool, optional): If True, return the value as an int (instead of str).
         """
 
         if count_mode in {'read'}:
@@ -427,17 +426,17 @@ class HybRecord(object):
         return ret_val
 
     # HybRecord : Public Methods : Flag_Info : find_seg_type
-    def find_seg_types(self, allow_unknown=None, check_complete=None):
+    def eval_types(self, allow_unknown=None, check_complete=None):
         """Find the types of each segment using the the :class:`TypeFinder` class.
 
         This method provides :attr:`seg1_props` and :attr:`seg2_props` 
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
-        This uses the method: :func:`TypeFinder.method`
-        set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
+        This uses the method: :meth:`TypeFinder.method`
+        set by :meth:`TypeFinder.set_method` or :meth:`TypeFinder.set_custom_method` to set the
         :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>` flags if not already set. 
 
         To use a system other than the default, prepare the :class:`TypeFinder` class by 
-        preparing and setting :attr:`TypeFinder.params` and using :func:`TypeFinder.set_method`. 
+        preparing and setting :attr:`TypeFinder.params` and using :meth:`TypeFinder.set_method`. 
 
         Args:
             allow_unknown (bool, optional): If True, allow segment types that cannot be
@@ -452,7 +451,7 @@ class HybRecord(object):
         """
 
         # If types already set, skip.
-        if self.is_set('type_analysis'):
+        if self.is_set('eval_types'):
             return        
 
         if allow_unknown is None:
@@ -463,7 +462,7 @@ class HybRecord(object):
 
         types = []
         for seg_props in [self.seg1_props, self.seg2_props]:
-            seg_type = self.TypeFinder(seg_props, self.TypeFinder.params, check_complete)
+            seg_type = self.TypeFinder.find(seg_props, self.TypeFinder.params, check_complete)
             if seg_type is None:
                 if allow_unknown:
                     types.append('unknown')
@@ -477,8 +476,14 @@ class HybRecord(object):
         self.set_flag('seg1_type', types[0])
         self.set_flag('seg2_type', types[1])
 
+    # HybRecord : Public Methods : eval_typess
+    def find_seg_types(self, *args, **kwargs):
+        """Find_seg_types method is deprecated. Please use :meth:`eval_typess`'"""
+        message = 'find_seg_types method is deprecated. Please use eval_typess.'
+        print(message)
+        raise Exception(message)
+
     # HybRecord : Public Methods : fold_record
-    # TOREDO
     def set_fold_record(self, fold_record):
         """
         Check and set provided fold_record (:class:`FoldRecord`) as :obj:`fold_record`.
@@ -506,14 +511,14 @@ class HybRecord(object):
             raise Exception(message)
         self.fold_record = fold_record
 
-    # HybRecord : Public Methods : mirna_analysis
-    def mirna_analysis(self, mirna_types=None):
+    # HybRecord : Public Methods : eval_mirna
+    def eval_mirna(self, mirna_types=None):
         """Analyze and set mstore miRNA properties from other properties in the hyb record.
 
         If not already done, determine whether a miRNA exists within this record and 
-        set the :ref:`mirna_seg <mirna_seg>` flag.
-        This analysis requries the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags to 
-        be populated, which can be performed by the :func:`find_seg_types` method.
+        set the :ref:`miRNA_seg <mirna_seg>` flag.
+        This evaluation requries the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags to 
+        be populated, which can be performed by the :meth:`eval_typess` method.
         If the record contains a miRNA, link the :attr:`mirna_props` and :attr:`target_props` 
         dicts to the corresponding :attr:`seg1_props` / :attr:`seg2_props` dicts as appropriate.
 
@@ -526,9 +531,9 @@ class HybRecord(object):
         if mirna_types is None:
             mirna_types = self.settings['mirna_types']
 
-        # If mirna_seg flag is not defined, find and set flag.
-        if not self.is_set('mirna_analysis'):
-            self._ensure('type_analysis')
+        # If miRNA_seg flag is not defined, find and set flag.
+        if not self.is_set('eval_mirna'):
+            self._ensure_set('eval_types')
             seg_types = self.get_seg_types()
 
             seg1_is_mirna = seg_types[0] in mirna_types
@@ -544,7 +549,7 @@ class HybRecord(object):
                 mirna_flag = 'N'
             self.set_flag('miRNA_seg', mirna_flag)
 
-        if self.has_prop('has_mirna_not_dimer'):
+        if self.has_prop('mirna_not_dimer'):
             if self.has_prop('5p_mirna'):
                 self.mirna_props = self.seg1_props
                 self.target_props = self.seg2_props
@@ -554,7 +559,7 @@ class HybRecord(object):
 
 
     def mirna_detail(self, detail='all'):
-        """Provide a detail about the miRNA or target following :func:`mirna_analysis`.
+        """Provide a detail about the miRNA or target following :meth:`eval_mirna`.
 
         Analyze miRNA properties within the sequence record and provide a detail as ouptut.
         Method requires record to contain a non-dimer miRNA, otherwise will produce an error.
@@ -573,12 +578,12 @@ class HybRecord(object):
 
         """
 
-        self._ensure_set('mirna_analysis')
-        mirna_flag = self._get_flag('mirna_seg')
-        if not self.has_prop('has_mirna_not_dimer'):
+        self._ensure_set('eval_mirna')
+        mirna_flag = self._get_flag('miRNA_seg')
+        if not self.has_prop('mirna_not_dimer'):
             message = 'mirna_detail method requires a hybrid containing a single mirna.'
             message += 'hybrecord: %s does not meet this criteria ' % str(self)
-            message += 'with mirna_seg flag: %s' % mirna_flag
+            message += 'with miRNA_seg flag: %s' % mirna_flag
             print(message)
             raise Exception(message)
 
@@ -593,9 +598,9 @@ class HybRecord(object):
             print(message)
             raise Exception(message)
 
-        # If necessary, perform mirna_analysis to set mirna_details, target_details attributes
-        if self.mirna_details is None or self.target_details is None:
-            self.mirna_analysis()
+        # If necessary, perform eval_mirna to set mirna_details, target_details attributes
+        if self.mirna_props is None or self.target_props is None:
+            self.eval_mirna()
 
         # Analyze miRNA details
         mirna_details = {}
@@ -611,11 +616,13 @@ class HybRecord(object):
             self.mirna_props = self.seg2_props
             self.target_props = self.seg1_props
         else:
-            message = 'Problem with mirna_analysis for hybrecord: %s ' % str(self)
+            message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
             message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
             print(message)
             raise Exception(message)
 
+        mirna_details['mirna_name'] = self.mirna_props['ref_name']
+        mirna_details['target_name'] = self.target_props['ref_name']
         mirna_details['mirna_seq'] = self._get_seg_seq(self.mirna_props)
         mirna_details['target_seq'] = self._get_seg_seq(self.target_props)
         if self.fold_record is not None:
@@ -631,12 +638,12 @@ class HybRecord(object):
             return mirna_details[detail]
 
 
-    # HybRecord : Public Methods : target_analysis
-    def prep_target_region_analysis(self, region_info=None, region_csv_name=None, sep=','): 
+    # HybRecord : Public Methods : eval_target
+    def prep_target_region_eval(self, region_info=None, region_csv_name=None, sep=','): 
         """
         Prepare from an input csv and assign (or only assign) a dict with information 
         on coding transcript regions. This method is required to be used before
-        performing a target region analysis with :func:`target_region_analysis`.
+        performing a target region evaluation with :meth:`target_region_eval`.
         
         Example:
             Example format of prepared/input dict object::
@@ -661,7 +668,7 @@ class HybRecord(object):
         """
         if region_info is None and region_csv_name is None:
             message = 'One of "region_info" or "region_csv_name" arguments must be supplied '
-            message += 'to prep_target_region_analysis() method.\n'
+            message += 'to prep_target_region_eval() method.\n'
             print(message)
             raise Exception(message)
 
@@ -672,28 +679,28 @@ class HybRecord(object):
         else:
             raise Exception()
 
-    # HybRecord : Public Methods : target_analysis
-    def target_region_analysis(self, coding_types=None,
+    # HybRecord : Public Methods : eval_target
+    def target_region_eval(self, coding_types=None,
                                allow_unknown_regions=None, warn_unknown_regions=None):
         """
         For miRNA/coding-target pairs, find the region of the coding transcript targeted.
 
-        The analysis requires a dict containing region 
-        information to be set using the :func:`prep_target_region_analysis` method.
+        The evaluation requires a dict containing region 
+        information to be set using the :meth:`prep_target_region_eval` method.
         
         If the record contains an identified mirna and identified coding target, 
         find the region in which the targeted sequence resides and store the results in the 
-        :ref:`target_reg <target_reg>` flag and miRNA_analysis dict.
-        This analysis requries the :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>`, 
-        and :ref:`mirna_seg <mirna_seg>` flags to be populated. This can be performed 
-        by sequentially using the :func:`find_seg_types` and :func:`mirna_analysis` methods.
+        :ref:`target_reg <target_reg>` flag and miRNA_eval dict.
+        This evaluation requries the :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>`, 
+        and :ref:`miRNA_seg <mirna_seg>` flags to be populated. This can be performed 
+        by sequentially using the :meth:`eval_typess` and :meth:`eval_mirna` methods.
         If the :ref:`miRNA_seg <mirna_seg>` flag is in {"N" (None), "B" (Both)},
         the :ref:`target_reg <target_reg>` flag will be set to {"N" (None)}. 
         If the :ref:`miRNA_seg <mirna_seg>` flag == "U" (Unknown),
         the :ref:`target_reg <target_reg>` flag will be set to {"U" (Unknown)}. 
         If the :ref:`miRNA_seg <mirna_seg>` flag is in {"3p", "5p"},
         the :ref:`target_reg <target_reg>` flag will be checked if it is a coding type.
-        If the target is a coding type the analysis will be performed and the 
+        If the target is a coding type the evaluation will be performed and the 
         :ref:`target_reg <target_reg>` flag will be set appropriately.
 
 
@@ -702,12 +709,12 @@ class HybRecord(object):
                 types to be recognized as coding.
                 If None (default), uses :attr:`HybRecord.settings` : :obj:`settings['coding_types']`.
             allow_unknown_regions (bool, optional):
-                Allow missing identifiers in analysis by skipping sequences instead of 
+                Allow missing identifiers in evaluation by skipping sequences instead of 
                 raising an error.
                 If None (default), uses setting in :attr:`HybRecord.settings` : 
                 :obj:`settings['allow_unknown_regions']`. 
             allow_unknown_regions (bool, optional):
-                Warn for missing identifiers in analysis by printing a message.
+                Warn for missing identifiers in evaluation by printing a message.
                 If None (default), uses setting in :attr:`HybRecord.settings` : 
                 :obj:`settings['allow_undefined_flags']`.
         """
@@ -722,13 +729,13 @@ class HybRecord(object):
 
         if self.region_finder.region_info == {}:
             message = 'Target region information has not yet been prepared.\n'
-            message += 'Please prepare with "prep_target_region_analysis()" before use.'
+            message += 'Please prepare with "prep_target_region_eval()" before use.'
             print(message)
             raise Exception(message)
 
-        # Ensure type_analysis and mirna_analysis has been performed.
-        self._ensure_set('type_analysis')
-        self._ensure_set('mirna_analysis')
+        # Ensure eval_types and eval_mirna has been performed.
+        self._ensure_set('eval_types')
+        self._ensure_set('eval_mirna')
         
         # Get miRNA flag.
         mirna_flag = self._get_flag('miRNA_seg')
@@ -756,11 +763,11 @@ class HybRecord(object):
         if target_reg == 'U':
             if allow_unknown_regions:
                 if warn_unknown_regions:
-                    message = 'WARNING: target_region_analysis: ' + reason
+                    message = 'WARNING: target_region_eval: ' + reason
                     print(message)
     
             else:
-                message = 'Problem with target_region_analysis for hybrecord: %s \n' % str(self)
+                message = 'Problem with target_region_eval for hybrecord: %s \n' % str(self)
                 message += reason + '\n'
                 print(message)
                 raise Exception(message)
@@ -785,27 +792,27 @@ class HybRecord(object):
 
         if prop in {'energy', 'fold_record'}:
             ret_bool = (getattr(self, prop) is not None)
-        elif prop == 'type_analysis':
+        elif prop == 'eval_types':
             ret_bool = all(st is not None for st in self.get_seg_types())
-        elif prop == 'mirna_analysis':
+        elif prop == 'eval_mirna':
             ret_bool = self._get_flag_or_none('miRNA_seg') is not None
-        elif prop == 'target_analysis':
+        elif prop == 'eval_target':
             ret_bool = self._get_flag_or_none('target_reg') is not None
         return ret_bool
         
 
     # HybRecord : Public Methods : Record Properties
-    def has_prop(self, prop, prop_equals=None):
+    def has_prop(self, prop, prop_compare=None):
         """
         Check if HybRecord has property of "prop_type". 
  
         Check property against list of allowed properties in :attr:`PROPERTIES`.
         If query property has a comparator, provide this in prop_compare.
-        Raises an error if property is not set (use :func:`is_set` to check).
+        Raises an error if property is not set (use :meth:`is_set` to check).
         
         Args:
             prop: Property to check
-            prop_equals (optional): Optional comparator to check.
+            prop_compare (optional): Optional comparator to check.
 
         Examples:
             General Record Properties::
@@ -830,18 +837,18 @@ class HybRecord(object):
                 # hyb_record = hybkit.HybRecord(id, seq....)
                 # hyb_record.find_types()
                 mirna_analyzed = hyb_record.has_prop('has_mirna_seg')  # -> False
-                hyb_record.mirna_analysis()
+                hyb_record.eval_mirna()
                 mirna_analyzed = hyb_record.has_prop('has_mirna_seg')  # -> True
-                # Requires mirna analysis
+                # Requires mirna evaluation
                 has_mirna = hyb_record.has_prop('has_mirna')  # Requires miRNA Analysis
                 has_5p_mirna = hyb_record.has_prop('5p_mirna')
                 
             Target Region Properties::
                 # hyb_record = hybkit.HybRecord(id, seq....)
                 # hyb_record.find_types()
-                # hyb_record.mirna_analysis()
+                # hyb_record.eval_mirna()
                 targets_analyzed = hyb_record.has_prop('has_target_reg')  # -> False
-                hyb_record.target_region_analysis()
+                hyb_record.target_region_eval()
                 targets_analyzed = hyb_record.has_prop('has_target_reg')  # -> True
                 has_coding_target = hyb_record.has_prop('target_coding') 
                
@@ -854,7 +861,7 @@ class HybRecord(object):
             raise Exception(message)
 
         # Check if a substring compares to a desired property string.
-        if prop in self._STR_PROPERTIES:
+        if prop in self.STR_PROPERTIES:
             if not prop_compare:
                 message = 'Property: %s  requires a comparison string. ' % prop
                 message += 'Please provide an argument to prop_compare.'
@@ -878,12 +885,12 @@ class HybRecord(object):
                 multi_check = check_attr.split('_')[0]
             elif check_attr == 'seg1_type':
                 check_info = self.get_seg1_type()
-                self._ensure_set('type_analysis')
+                self._ensure_set('eval_types')
             elif check_attr == 'seg2_type':
                 check_info = self.get_seg2_type()
-                self._ensure_set('type_analysis')
+                self._ensure_set('eval_types')
             elif check_attr in {'any_seg_type', 'all_seg_type'}:
-                self._ensure_set('type_analysis')
+                self._ensure_set('eval_types')
                 check_info = (self.get_seg1_type(), self.get_seg2_type())
                 multi_check = check_attr.split('_')[0]
             else:
@@ -909,34 +916,44 @@ class HybRecord(object):
                 ret_val = any((prop_compare in val) for val in check_info)
             elif check_type == 'suffix':
                 ret_val = any((val.endswith(prop_compare)) for val in check_info)
-            elif check_type == 'matches':
+            elif check_type == 'is':
                  ret_val = bool(prop_compare in check_info)
                 # ret_val = any((prop_copmpare == val) for val in check_info)
+            else:
+                raise Exception(prop)
 
-        # Check mirna-specific properties (requires mirna-analysis)
-        elif prop in self._MIRNA_PROPERTIES:
-            self._ensure_set('mirna_analysis')
+        # Check mirna-specific properties (requires mirna-evaluation)
+        elif prop in self.MIRNA_PROPERTIES:
+            self._ensure_set('eval_mirna')
             if prop == 'has_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'5p', '3p', 'B'}
             elif prop == 'no_mirna':
                 ret_val = self.flags['miRNA_seg'] not in {'5p', '3p', 'B'}
-            elif prop == 'has_mirna_dimer':
+            elif prop == 'mirna_dimer':
                 ret_val = self.flags['miRNA_seg'] == 'B'
-            elif prop == 'has_mirna_not_dimer':
+            elif prop == 'mirna_not_dimer':
                 ret_val = self.flags['miRNA_seg'] in {'5p', '3p'}
             elif prop == '5p_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'5p', 'B'}
             elif prop == '3p_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'3p', 'B'}
+            else:
+                raise Exception(prop)
 
-        elif prop in self._TARGET_PROPERTIES:
-            self._ensure_set('target_analysis')
+        elif prop in self.TARGET_PROPERTIES:
+            self._ensure_set('eval_target')
             if prop == 'has_target':
                 raise NotImplementedError()
+            elif prop == 'target_none':
+                ret_val = (self._get_flag('target_reg') == 'N')
+            elif prop == 'target_unknown':
+                ret_val = (self._get_flag('target_reg') == 'U')
+            elif prop == 'target_ncrna':
+                ret_val = (self._get_flag('target_reg') == 'NON')
             elif prop == 'target_5p_utr':
                 ret_val = (self._get_flag('target_reg') == '5pUTR')
             elif prop == 'target_coding':
-                ret_val = (self._get_flag('target_reg') == 'coding')
+                ret_val = (self._get_flag('target_reg') == 'C')
             elif prop == 'target_3p_utr':
                 ret_val = (self._get_flag('target_reg') == '3pUTR')
         return ret_val         
@@ -1023,8 +1040,8 @@ class HybRecord(object):
                 fasta_description = fasta_description.lstrip()
 
         if mode in {'mirna', 'target'}:
-            if not self._is_set('mirna_analysis'):
-                message = 'mirna_analysis must be performed before miRNA/target fasta output'
+            if not self._is_set('eval_mirna'):
+                message = 'eval_mirna must be performed before miRNA/target fasta output'
                 print(message)
                 raise Exception(message)
             elif self.has_prop('no_mirna'):
@@ -1191,7 +1208,7 @@ class HybRecord(object):
     # HybRecord : Private Constants
     #: Properties for the ".is_set()" method.
     IS_SET_PROPERTIES = {
-        'energy', 'fold_record', 'type_analysis', 'mirna_analysis', 'target_analysis'
+        'energy', 'fold_record', 'eval_types', 'eval_mirna', 'eval_target'
     }
     #: String-comparison properties for the ".has_prop()" method.
     STR_PROPERTIES = [
@@ -1206,13 +1223,14 @@ class HybRecord(object):
         'any_seg_type_is', 'any_seg_type_prefix', 'any_seg_type_suffix', 'any_seg_type_contains',
         'all_seg_type_is', 'all_seg_type_prefix', 'all_seg_type_suffix', 'all_seg_type_contains',
     ]
-    #: miRNA-analysis-related properties for the ".has_prop()" method.
+    #: miRNA-evaluation-related properties for the ".has_prop()" method.
     MIRNA_PROPERTIES = [
         'has_mirna', 'no_mirna', 'mirna_dimer', 'mirna_not_dimer',
         '3p_mirna', '5p_mirna',
     ]
-    #: Target-analysis-related properties for the ".has_prop()" method.
+    #: Target-evaluation-related properties for the ".has_prop()" method.
     TARGET_PROPERTIES = [
+        'target_none', 'target_unknown', 'target_ncrna', 
         'target_5p_utr', 'target_3p_utr', 'target_coding', 
     ]
 
@@ -1258,13 +1276,13 @@ class HybRecord(object):
 
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_seq(self, seg_props):
-        if any (seq_props[v] == None for v in ['read_start', 'read_end']):
+        if any (seg_props[v] == None for v in ['read_start', 'read_end']):
             message = 'Segement subsequence cannot be obtained for '
             message += 'Record %s, Segment %s.\n' % (str(self), seg_props['ref_name'])
             message += 'Record segment is missing one of read_start/read_end.'
             print(message)
             raise Exception(message)
-        read_start, read_end = seq_props['read_start'], seq_props['read_end']
+        read_start, read_end = seg_props['read_start'], seg_props['read_end']
         return self.seq[read_start-1:read_end]
 
     # HybRecord : Private Methods : flags
@@ -1309,7 +1327,7 @@ class HybRecord(object):
         if self._flagset is None:
             self._flagset = set(self.ALL_FLAGS + list(self.settings.custom_flags))
         return_list = []
-        for flag in self.ALL_FLAGS + self.settings.custom_flags:
+        for flag in self.ALL_FLAGS + self.settings['custom_flags']:
             if flag in self.flags:
                 return_list.append(flag)
         for flag in self.flags:
@@ -1326,7 +1344,7 @@ class HybRecord(object):
             allow_undefined_flags = self.settings['allow_undefined_flags']
 
         if self._flagset is None:
-            self._flagset = set(self.ALL_FLAGS + list(self.settings.custom_flags))
+            self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))
 
         if not isinstance(flag_obj, dict):
             message = '"flag_obj" argument must be a dict obj. Defined keys are:'
@@ -1359,7 +1377,7 @@ class HybRecord(object):
                                 }
         for column in self.SEGMENT_COLUMNS:
             if column in seg_props_obj:
-                if seg_props_obj[column] == self.settings['field_placeholder']:
+                if seg_props_obj[column] == self.settings['hyb_placeholder']:
                     return_dict[column] = None
                 else:
                     column_type = segment_column_types[column]
@@ -1379,7 +1397,7 @@ class HybRecord(object):
     def _ensure_set(self, prop):
         if not self.is_set(prop):
             message = 'Problem with HybRecord instance: %s\n' % str(self)
-            message += 'Method requries set attribute/analysis: "%s" before use.' % prop
+            message += 'Method requries set attribute/evaluation: "%s" before use.' % prop
             print(message)
             raise Exception(message)
 
@@ -1421,7 +1439,7 @@ class HybRecord(object):
             allow_undefined_flags = cls.settings['allow_undefined_flags']
 
         if cls._flagset is None:
-            cls._flagset = set(cls.ALL_FLAGS + list(cls.settings.custom_flags))
+            cls._flagset = set(cls.ALL_FLAGS + list(cls.settings['custom_flags']))
         flag_string = flag_string.rstrip()
         flag_string = flag_string.rstrip(';')
         flag_pairs = [flag_pair.split('=') for flag_pair in flag_string.split(';')]

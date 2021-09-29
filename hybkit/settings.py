@@ -37,10 +37,10 @@ _FILTER_OUT_SUFFIX = '_filtered'
 _ANALYSIS_OUT_SUFFIX = '_analyzed'
 
 #: Default miRNA types for use in :func:`mirna_analysis`.
-MIRNA_TYPES = {'miRNA', 'microRNA'}
+MIRNA_TYPES = ['miRNA', 'microRNA']
 
 #: Default coding sequence types for use in the :func:`target_region_analysis`.
-CODING_TYPES = {'mRNA'}
+CODING_TYPES = ['mRNA']
 
 # settings_info : HybRecord
 #: Information for settings of HybRecord class.
@@ -50,15 +50,15 @@ CODING_TYPES = {'mRNA'}
 #:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
 #:     }                   
 HybRecord_settings_info = {
-    'miRNA_types': [ 
-        MIRNA_TYPES,
+    'mirna_types': [ 
+        copy.deepcopy(MIRNA_TYPES),
         '"seg_type" fields identifying a miRNA',
         'str',
         None,
         {'nargs':'+'}
     ],
     'coding_types': [ 
-        CODING_TYPES,
+        copy.deepcopy(CODING_TYPES),
         '"seg_type" fields identifying a coding sequence',
         'str',
         None,
@@ -229,6 +229,59 @@ FoldRecord_settings_info = {
 FoldFile_settings_info = {
 }
 
+Analysis_settings_info = {
+    'count_mode': [
+        'record',
+        """
+        Method for counting records. "read": use the number of reads per hyb record as the count 
+        (may contain PCR duplicates); "record" count the number of records represented by each 
+        (hyb record entry 1 for "unmerged" records, >= 1 for "merged" records)
+        """,
+        'str',
+        None,
+        {'choices':['read','record']}
+    ],
+    'mirna_sort': [
+        True,
+        """
+        During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs. 
+        If False, sort alphabetically.
+        """,
+        'custom_bool_from_str',
+        None,
+        {}
+    ],
+    'allow_mirna_dimers': [
+        False,
+        """
+        Include miRNA / miRNA dimers in TargetAnalysis.
+        If False, exclude these from analysis results.
+        """,
+        'custom_bool_from_str',
+        None,
+        {}
+    ],
+    'type_sep': [
+        '-',
+        """
+        Separator-string to place between types in analysis output.
+        """,
+        'str',
+        None,
+        {}
+    ],
+    'out_delim': [
+        ',',
+        """
+        Delimiter-string to place between fields in analysis output.
+        """,
+        'str',
+        None,
+        {}
+    ],
+
+}
+
 # Settings (active) : HybRecord
 #: HybRecord Active Settings
 HybRecord_settings = _settings_info_to_settings(HybRecord_settings_info)
@@ -245,3 +298,6 @@ FoldRecord_settings = _settings_info_to_settings(FoldRecord_settings_info)
 #: FoldFile Active Settings
 FoldFile_settings = _settings_info_to_settings(FoldFile_settings_info)
 
+# Settings (active) : Analysis
+#: Analysis Active Settings
+Analysis_settings = _settings_info_to_settings(Analysis_settings_info)

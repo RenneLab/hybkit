@@ -1,6 +1,6 @@
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
-# Hybkit Project : http://www.github.com/RenneLab/hybkit
+# Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 Example Summary Analysis
 ========================
@@ -27,6 +27,6 @@ Summary Analysis Example Output
 
 .. image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_hybrids.png
 
-.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_seg.png
+.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_types_segall.png
 
 .. image:: ../sample_01_summary_analysis/example_output/combined_analysis_mirna_count.png

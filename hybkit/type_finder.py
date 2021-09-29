@@ -29,8 +29,8 @@ class TypeFinder(object):
     """
 
     # TypeFinder : Public Attributes
-    #: Placeholder for storing active method, set with :func:`set_method`.
-    method = None
+    #: Placeholder for storing active method, set with :meth:`set_method`.
+    find = None
 
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
@@ -46,15 +46,15 @@ class TypeFinder(object):
         Available methods are listed in :attr:`methods`.
 
         Args:
-            method (str): Method option from :attr:`methods` to select
-                for use.
-            params (dict, optional): Dict object of parameters to use by selected method.
+            method (str): Method option from :attr:`methods` to set
+                for use as :meth:`find`.
+            params (dict, optional): Dict object of parameters to use by set method.
         """
 
         if method not in cls.methods:
             message = 'Selected method: %s is not defined.\n' % method
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
-        cls.method = cls.methods[method]
+        cls.find = cls.methods[method]
         cls.params = params
 
     # TypeFinder : Public Classmethods : method
@@ -64,7 +64,7 @@ class TypeFinder(object):
         Set the method for use to find seg types.
         
         This method is for providing a custom function. To use the included functions, 
-        use :func:`select_method`.
+        use :meth:`set_method`.
         Custom functions provided must have the signature::
 
             seg_type = custom_method(self, seg_props, params, check_complete)
@@ -81,7 +81,7 @@ class TypeFinder(object):
             params (dict, optional): dict of custom parameters to set for use.
         """
 
-        cls.method = types.MethodType(method, cls)
+        cls.find = types.MethodType(method, cls)
         cls.params = params
 
 
@@ -120,23 +120,23 @@ class TypeFinder(object):
         """Return the type of the provided segment, or None if unidentified.
         
         This method attempts to find a string matching a specific pattern within the identifier
-        of the aligned segment. Search options include "prefix", "contains", "suffix", and
+        of the aligned segment. Search options include "startswith", "contains", "endswith", and
         "matches". The required params dict should contain a key for each desired
         search type, with a list of 2-tuples for each search-string with assigned-type.
 
         Example:
             ::
 
-                params = {'suffix': [('_miR', 'microRNA'),
-                                               ('_trans', 'mRNA')   ]}
+                params = {'endswith': [('_miR', 'microRNA'),
+                                       ('_trans', 'mRNA')   ]}
 
-        This dict can be generated with the associated :func:`make_string_match_params`
+        This dict can be generated with the associated :meth:`make_string_match_params`
         method and an associated csv legend file with format::
 
             #commentline
             #search_type,search_string,seg_type
-            suffix,_miR,microRNA
-            suffix,_trans,mRNA
+            endswith,_miR,microRNA
+            endswith,_trans,mRNA
 
         Args:
             params (dict, optional): Dict with search paramaters as described above.
@@ -146,10 +146,10 @@ class TypeFinder(object):
                 (faster method). (Default: False)
         """
         seg_name = seg_props['ref_name']
-        found_types = {}
+        found_types = set()
         check_done = False
-        if not check_done and 'prefix' in params:
-            for search_string, search_type in params['prefix']:
+        if not check_done and 'startswith' in params:
+            for search_string, search_type in params['startswith']:
                 if seg_name.startswith(search_string):
                     found_types.add(search_type)
                     if not check_complete:
@@ -162,8 +162,8 @@ class TypeFinder(object):
                     if not check_complete:
                         check_done = True
                         break
-        if not check_done and 'suffix' in params:
-            for search_string, search_type in params['suffix']:
+        if not check_done and 'endswith' in params:
+            for search_string, search_type in params['endswith']:
                 if seg_name.endswith(search_string):
                     found_types.add(search_type)
                     if not check_complete:
@@ -180,7 +180,7 @@ class TypeFinder(object):
         if not found_types:
             return None
         elif len(found_types) == 1:
-            return found_types[0]
+            return next(iter(found_types))
         elif len(found_types) > 1:
             message = 'Multiple sequence types found for item: %s' % seg_name
             message += '  ' + ', '.join(sorted(list(found_types)))
@@ -192,27 +192,27 @@ class TypeFinder(object):
     def make_string_match_params(
             legend_file
             ):
-        """Read csv and return a dict of search parameters for :func:`method_string_match`.
+        """Read csv and return a dict of search parameters for :meth:`method_string_match`.
 
         The my_legend.csv file should have the format::
 
             #commentline
             #search_type,search_string,seg_type
-            suffix,_miR,microRNA
-            suffix,_trans,mRNA
+            endswith,_miR,microRNA
+            endswith,_trans,mRNA
 
-        Search_type options include "prefix", "contains", "suffix", and "matches"
+        Search_type options include "startswith", "contains", "endswith", and "matches"
         The produced dict object contains a key for each search type, with a list of
         2-tuples for each search-string and associated segment-type. 
 
         For example::
 
-            {'suffix': [('_miR', 'microRNA'),
-                        ('_trans', 'mRNA')   ]}
+            {'endswith': [('_miR', 'microRNA'),
+                          ('_trans', 'mRNA')   ]}
 
         """
 
-        ALLOWED_SEARCH_TYPES = {'prefix', 'contains', 'suffix', 'matches'}
+        ALLOWED_SEARCH_TYPES = {'startswith', 'contains', 'endswith', 'matches'}
         return_dict = {}
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
@@ -259,9 +259,9 @@ class TypeFinder(object):
             ::
 
                 params = {'MIMAT0000076_MirBase_miR-21_microRNA': 'microRNA',
-                                    'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
+                          'ENSG00000XXXXXX_NR003287-2_RN28S1_rRNA': 'rRNA'}
 
-        This dict can be generated with the associated :func:`make_id_map_params` method.
+        This dict can be generated with the associated :meth:`make_id_map_params` method.
 
         Args:
             params (dict): Dict of mapping of sequence identifiers to sequence types.
@@ -284,7 +284,7 @@ class TypeFinder(object):
         Read file(s) into a mapping of sequence identifiers.
 
         This method reads one or more files into a dict for use with the 
-        :func:`method_id_map` method.
+        :meth:`method_id_map` method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
         or a list/tuple of one or more pairs of file lists and file types 
         passed to type_file_pairs.
@@ -384,9 +384,9 @@ class TypeFinder(object):
     #:   Dict of provided methods available to assign segment types
     #:   
     #:     ============== ==================================
-    #:     'hybformat'    :func:`method_hybformat`
-    #:     'string_match' :func:`method_string_match`
-    #:     'id_map'       :func:`method_id_map`
+    #:     'hybformat'    :meth:`method_hybformat`
+    #:     'string_match' :meth:`method_string_match`
+    #:     'id_map'       :meth:`method_id_map`
     #:     ============== ==================================
     methods = {'hybformat': method_hybformat,
                'string_match': method_string_match,
@@ -397,8 +397,8 @@ class TypeFinder(object):
     #:   
     #:     ============== ===================================================
     #:     'hybformat'    :obj:`None`
-    #:     'string_match' :func:`make_string_match_params`
-    #:     'id_map'       :func:`make_id_map_params`
+    #:     'string_match' :meth:`make_string_match_params`
+    #:     'id_map'       :meth:`make_id_map_params`
     #:     ============== ===================================================
     parameter_methods = {
         'hybformat': None,
@@ -406,7 +406,3 @@ class TypeFinder(object):
         'id_map': make_id_map_params.__func__,
         }
 
-    # FindType : Public MagicMethods : Call
-    def __call__(self, *args, **kwargs):
-        """Shortcut for :func:`method`"""
-        return self.method(*args, **kwargs)
