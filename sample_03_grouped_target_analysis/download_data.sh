@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
-# Hybkit Project : http://www.github.com/RenneLab/hybkit
+# Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 # usage: "sh ./download_data.sh"
 

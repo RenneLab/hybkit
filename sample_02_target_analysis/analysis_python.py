@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
@@ -19,6 +19,11 @@ import hybkit
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
 count_mode = 'record'  # Count each record/line as one, unless record is combined.
                        #   (Default count mode, but specified here for readability)
+
+hybkit.settings.Analysis_settings['count_mode'] = count_mode 
+
+# Set mirna types as custom to include KSHV-miRNAs
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -40,11 +45,8 @@ print('Analyzing File:')
 print('    ' + in_file_path + '\n')
 
 # Set the method of finding segment type
-match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
-hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
-
-# Create custom list of miRNA types for analysis
-mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
+match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
+hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch_rRNA']
@@ -60,21 +62,22 @@ with hybkit.HybFile(in_file_path, 'r') as in_file, \
     for hyb_record in in_file:
 
         # Analyze and output only sequences where a segment identifier contains the string "kshv"
-        if hyb_record.has_property('seg_contains', 'kshv'):
+        if hyb_record.has_prop('any_seg_contains', 'kshv'):
             # Find the segment types of each record
-            hyb_record.find_seg_types()
-            hyb_record.mirna_analysis(mirna_types=mirna_types)
+            hyb_record.eval_types()
 
             # Determine if record has type that is excluded
             use_record = True
             for remove_type in remove_types:
-                if hyb_record.has_property('seg_type', remove_type):
+                if hyb_record.has_prop('any_seg_type_is', remove_type):
                     use_record = False
                     break
 
             # If record has an excluded type, continue to next record without analyzing.
             if not use_record:
                 continue
+
+            hyb_record.eval_mirna()
 
             # Write the records to the output file
             out_kshv_file.write_record(hyb_record)
@@ -83,54 +86,22 @@ print('Performing Target Analysis...\n')
 # Reiterate over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Prepare target analysis dict:
-    target_dict = hybkit.analysis.mirna_target_dict()
+    target_analysis = hybkit.analysis.TargetAnalysis(name=in_file_label)
 
     for hyb_record in out_kshv_file:
-        # Repeat .mirna_analysis, so that hyb_record object has associated metadata
-        hyb_record.mirna_analysis(mirna_types=mirna_types)
+        if (not hyb_record.has_prop('mirna_dimer')
+            and 'kshv' in hyb_record.mirna_detail('mirna_name')):
+            target_analysis.add(hyb_record)
+    
 
-        # Perform target-analysis of mirna within kshv-associated data.
-        hybkit.analysis.addto_mirna_target(hyb_record, target_dict,
-                                           count_mode=count_mode, 
-                                           double_count_duplexes=True, # Includes mirna duplexes
-                                           # Limits output to KSHV miRNA:
-                                           mirna_contains='kshv')
-        
-    # Process and sort dictionary of miRNA and targets
-    results = hybkit.analysis.process_mirna_target(target_dict)
-    (sorted_target_dict,       # Contains same data as target_dict, but with keys sorted by count
-     counts_dict,              # dict with keys: mirna_id, values: total mirna-specific hybrids
-     target_type_counts_dict,  # dict with keys: mirna_id, values: dict of targeted type counts
-     total_count               # integer: total number of mirna found.
-     ) = results
+    results = target_analysis.results() 
 
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb', '')
-    print('Writing Analysis Files to Name Base:\n    %s' % analysis_basename)
-    hybkit.analysis.write_mirna_target(analysis_basename, 
-                                       sorted_target_dict,
-                                       counts_dict,
-                                       target_type_counts_dict,
-                                       name=in_file_label,
-                                       multi_files=True,    # Default
-                                       sep=',',             # Default
-                                       file_suffix='.csv',  # Default
-                                       spacer_line=True,    # Default
-                                       make_plots=True,     # Default
-                                       max_mirna=25)        # Default is 10
-
-    hybkit.analysis.write_mirna_target(analysis_basename,
-                                       sorted_target_dict,
-                                       counts_dict,
-                                       target_type_counts_dict,
-                                       name=in_file_label,
-                                       multi_files=False,   # Non-Default
-                                       sep=',',             # Default
-                                       file_suffix='.csv',  # Default
-                                       spacer_line=True,    # Default
-                                       make_plots=False,    # Non-Default
-                                       max_mirna=25)        # Default is 10
-
+    print('Writing Individual Analysis Files to Name Base:\n    %s' % analysis_basename)
+    target_analysis.write_individual(analysis_basename)
+    print('Writing Combined Analysis Files to Name Base:\n    %s' % analysis_basename)
+    target_analysis.write(analysis_basename)
 
 print('Done\n')

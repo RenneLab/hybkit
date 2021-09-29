@@ -1,4 +1,4 @@
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
@@ -13,7 +13,7 @@ herpesvirus microRNA targets in endothelial cells."
 Journal of virology 92.8 (2018): e02138-17.
 
 This analysis specifically investigates and characterizes miRNA arising from 
-Kaposi's Sarcoma Herpesvirus, which are given the type name "KSHV_miRNA".
+Kaposi's Sarcoma Herpesvirus, which are given the type name "KSHV-miRNA".
 Both individual and summary output files are produced.
  
 Hybrid sequence information created by the Hyb program  information is 

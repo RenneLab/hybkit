@@ -44,6 +44,11 @@ Changelog
       | Moving identifier-parsing code to module type_finder
       | Moving target region analysis code to module region_finder
       | Moving code for settings into a "settings" module.
+      | Renamed HybRecord type_analysis, mirna_analysis, and target_analysis to 
+        eval_types, eval_mirna, eval_target, respectively
+        to differentiate from :module:`analysis` module functions
+      | Reimplemented analyses methods as classes.
+        
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
     * 0.1.9  (2020-03) Fix for Module Path Finding for Python > 3.6
     * 0.1.8  (2020-03) Streamlining, PyPI / PIP Initial Release

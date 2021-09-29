@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
-# Hybkit Project : http://www.github.com/RenneLab/hybkit
+# Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
 Analysis for sample_grouped_target_analysis performed as a python workflow.
@@ -48,8 +48,8 @@ print('    ' + '\n    '.join(input_files) + '\n')
 match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
 hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
 
-# Create custom list of miRNA types for analysis
-mirna_types = list(hybkit.HybRecord.MIRNA_TYPES) + ['kshv_microRNA']
+# Add custom miRNA type for analysis
+hybkit.HybRecord.settings['mirna_types'].append('kshv-miRNA')
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch_rRNA']

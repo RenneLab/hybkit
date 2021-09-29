@@ -1,31 +1,31 @@
-# Daniel B. Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 # 
-# Default legend for the make_string_match_parameters function, for use with 
-# the find_seg_type_string_match function in the string_match for the find_type.py module.
+# Custom legend for the make_string_match_params function, for use with 
+# the method_string_match method in type_finder.py.
 #
 # Notes:
 # Spaces are included in search terms.
 # Commas are reserved and separate entries
 # Each line should contain: "search_type,search_string,seg_type"
-# Allowed search types are: "prefix", "contains", "suffix", and "matches"
+# Allowed search types are: "startswith", "contains", "endswith", and "matches"
 
 # Hyb Software Reference Search Terms:
-suffix,_microRNA,miRNA
-suffix,_pseudo,pseudogene
-suffix,_rRNA,rRNA
-suffix,_mRNA,mRNA
-suffix,_mtrRNA,mitoch_rRNA
-suffix,_tRNA,tRNA
-suffix,_snoRNA,snoRNA
-suffix,_miscRNA,miscRNA
-suffix,_snRNA,snRNA
-suffix,_pr-tr,pr-tr
-suffix,_lincRNA,lincRNA
-suffix,_Ig,Ig
-suffix,_Trec,Trec
+endswith,_microRNA,miRNA
+endswith,_pseudo,pseudogene
+endswith,_rRNA,rRNA
+endswith,_mRNA,mRNA
+endswith,_mtrRNA,mitoch-rRNA
+endswith,_tRNA,tRNA
+endswith,_snoRNA,snoRNA
+endswith,_miscRNA,miscRNA
+endswith,_snRNA,snRNA
+endswith,_pr-tr,pr-tr
+endswith,_lincRNA,lincRNA
+endswith,_Ig,Ig
+endswith,_Trec,Trec
 
 
 #custom
-prefix,kshv-miR,kshv_microRNA
+startswith,kshv-miR,kshv-miRNA
