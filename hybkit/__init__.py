@@ -239,8 +239,8 @@ class HybRecord(object):
                     'extended',     # int, "TRUE" or "FALSE", boolean representation of whether
                                     #   record sequences were bioinformatically extended as is
                                     #   performed by the Hyb software package.
-                    'dataset',      # str, label for sequence source id (eg. file), when 
-                                    #   combining records from different sources.
+                    'dataset',      # str, label for sequence dataset id (eg. source file), when 
+                                    #   combining records from different datasets.
                    ]
 
     #: Flags defined by the hybkit package. Flags 1-4 are utilized by the Hyb software package.

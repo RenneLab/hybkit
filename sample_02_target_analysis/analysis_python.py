@@ -19,7 +19,6 @@ import hybkit
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
 count_mode = 'record'  # Count each record/line as one, unless record is combined.
                        #   (Default count mode, but specified here for readability)
-
 hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
@@ -52,7 +51,7 @@ match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend
 hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
 # Set hybrid segment types to remove as part of quality control (QC)
-remove_types = ['rRNA', 'mitoch_rRNA']
+remove_types = ['rRNA', 'mitoch-rRNA']
 
 # Begin Analysis
 print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
@@ -92,12 +91,14 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     target_analysis = hybkit.analysis.TargetAnalysis(name=in_file_label)
 
     for hyb_record in out_kshv_file:
-        mirna_name = hyb_record.mirna_detail('mirna_name', allow_mirna_dimers=True)
+        mirna_name = hyb_record.mirna_detail('mirna_name',
+            allow_mirna_dimers=hybkit.settings.Analysis_settings['allow_mirna_dimers']
+        )
         if 'kshv' in mirna_name:
             target_analysis.add(hyb_record)
     
 
-    results = target_analysis.results() 
+    # results = target_analysis.results() 
 
     # Write target information to output file
     # Set analysis basename without ".hyb" extension

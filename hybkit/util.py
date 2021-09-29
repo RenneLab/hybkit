@@ -587,13 +587,14 @@ def set_settings(nspace, verbose=False):
     | HybFile Settings: :attr:`hybkit.settings.HybFile_settings`
     | FoldRecord Settings: :attr:`hybkit.settings.FoldRecord_settings`
     | FoldFile Settings: :attr:`hybkit.settings.FoldFile_settings`
+    | Analysis Settings: :attr:`hybkit.settings.Analysis_settings`
 
     Args:
         nspace (argparse.Namespace): Namespace containing settings
         verbose (bool, optional): If True, print when changing setting.
     """
     out_report = '\n'
-    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 'FoldFile']:
+    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 'FoldFile', 'Analysis']:
         cls_settings_info = getattr(settings, class_name + '_settings_info')
         cls_settings = getattr(settings, class_name + '_settings')
         for setting_key in cls_settings:

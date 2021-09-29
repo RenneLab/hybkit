@@ -144,10 +144,10 @@ Flags
         record sequences were bioinformatically extended as is
         performed by the Hyb software package.
     
-        .. _source:
+        .. _dataset:
     
-        :obj:`source` -  String: Label for sequence source id (eg. source file), when 
-        combining records from different sources.
+        :obj:`dataset` -  String: Label for sequence dataset id (eg. source file), when 
+        combining records from different datasets.
 
 
 

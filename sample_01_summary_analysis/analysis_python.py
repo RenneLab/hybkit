@@ -61,7 +61,7 @@ hybkit.HybFile.settings['hybformat_record'] = True
 summary_analyses = [] 
 
 # Set hybrid segment types to remove as part of quality control (QC)
-remove_types = ['rRNA', 'mitoch_rRNA']
+remove_types = ['rRNA', 'mitoch-rRNA']
 
 # Iterate over each input file, find the segment types, and save the output 
 #   in the output directory.

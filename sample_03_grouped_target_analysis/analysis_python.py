@@ -19,6 +19,13 @@ import hybkit
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
 count_mode = 'record'  # Count each record/line as one, unless record is combined.
                        #   (Default count mode, but specified here for readability)
+hybkit.settings.Analysis_settings['count_mode'] = count_mode 
+
+# Set mirna types as custom to include KSHV-miRNAs
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
+
+# Allow mirna/mirna dimers in analysis.
+hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -32,7 +39,7 @@ input_files = [
     os.path.join(analysis_dir, 'GSM2720024_D11_BR1.hyb'),
     os.path.join(analysis_dir, 'GSM2720025_D11_BR1.hyb')
 ]
-out_file_path = os.path.join(analysis_dir, 'output', 'KSHV_Hyb_Combined.hyb')
+out_file_path = os.path.join(analysis_dir, 'output', analysis_label + '.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
@@ -45,14 +52,14 @@ print('Analyzing Files:')
 print('    ' + '\n    '.join(input_files) + '\n')
 
 # Set the method of finding segment type
-match_parameters = hybkit.HybRecord.make_string_match_parameters(match_legend_file)
-hybkit.HybRecord.select_find_type_method('string_match', match_parameters)
+match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
+hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
-# Add custom miRNA type for analysis
-hybkit.HybRecord.settings['mirna_types'].append('kshv-miRNA')
+# Set mirna types as custom to include KSHV-miRNAs
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
 
 # Set hybrid segment types to remove as part of quality control (QC)
-remove_types = ['rRNA', 'mitoch_rRNA']
+remove_types = ['rRNA', 'mitoch-rRNA']
 
 # Begin Analysis
 print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
@@ -69,17 +76,16 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
             # Iterate over each record of the input file
             for hyb_record in in_file:
 
-                # Analyze only sequences where a segment identifier contains the string "kshv"
-                if hyb_record.has_property('seg_contains', 'kshv'):
+                # Analyze only sequences where anya segment identifier contains the string "kshv"
+                if hyb_record.has_prop('any_seg_contains', 'kshv'):
                     # Find the segment types of each record
-                    hyb_record.set_flag('source', in_file_label)
-                    hyb_record.find_seg_types()
-                    hyb_record.mirna_analysis(mirna_types=mirna_types)
+                    hyb_record.set_flag('dataset', in_file_label)
+                    hyb_record.eval_types()
         
                     # Determine if record has type that is excluded
                     use_record = True
                     for remove_type in remove_types:
-                        if hyb_record.has_property('seg_type', remove_type):
+                        if hyb_record.has_prop('any_seg_type_is', remove_type):
                             use_record = False
                             break
         
@@ -87,50 +93,35 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
                     if not use_record:
                         continue
 
+                    # Evaluate whether hybrid contains a miRNA.
+                    hyb_record.eval_mirna()
+
                     # Write the records to the output file
                     out_kshv_file.write_record(hyb_record)
 
 print('\nPerforming Combined Target Analysis...\n')
-# Reiterate over output HybFile and perform target analysis.
+# Repeat iteration over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Prepare target analysis dict:
-    target_dict = {}
+    target_analysis = hybkit.analysis.TargetAnalysis(name=analysis_label)
 
     for hyb_record in out_kshv_file:
-        # Repeat .mirna_analysis, so that hyb_record object has associated metadata
-        hyb_record.mirna_analysis(mirna_types=mirna_types)
-
         # Perform target-analysis of mirna within kshv-associated data.
-        hybkit.analysis.addto_mirna_target(hyb_record, target_dict, 
-                                           count_mode=count_mode,
-                                           double_count_duplexes=True, # Includes mirna duplexes
-                                           # Limits output to KSHV miRNA:
-                                           mirna_contains='kshv')
+        mirna_name = hyb_record.mirna_detail('mirna_name',
+            allow_mirna_dimers=hybkit.settings.Analysis_settings['allow_mirna_dimers']
+        )
+        if 'kshv' in mirna_name:
+            target_analysis.add(hyb_record)
         
-    # Process and sort dictionary of miRNA and targets
-    results = hybkit.analysis.process_mirna_target(target_dict)
-    (sorted_target_dict,       # Contains same data as target_dict, but with keys sorted by count
-     counts_dict,              # dict with keys: mirna_id, values: total mirna-specific hybrids
-     target_type_counts_dict,  # dict with keys: mirna_id, values: dict of targeted type counts
-     total_count               # integer: total number of mirna found.
-     ) = results
-
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
-    analysis_basename = out_file_path.replace('.hyb','')
-    print('Writing Analyses to files named after:\n    %s\n' % analysis_basename)
-
-    hybkit.analysis.write_mirna_target(analysis_basename, 
-                                       sorted_target_dict,
-                                       counts_dict,
-                                       target_type_counts_dict,
-                                       name=analysis_label,
-                                       multi_files=True,    # Default
-                                       sep=',',             # Default
-                                       file_suffix='.csv',  # Default
-                                       spacer_line=True,    # Default
-                                       make_plots=True,     # Default
-                                       max_mirna=25)        # Default is 10
+    analysis_basename = out_file_path.replace('.hyb', '')
+    print('Writing Individual Analysis Files to Name Base:\n    %s' % analysis_basename)
+    target_analysis.write_individual(analysis_basename)
+    target_analysis.plot_individual(analysis_basename)
+    print('Writing Combined Analysis Files to Name Base:\n    %s' % analysis_basename)
+    target_analysis.write(analysis_basename)
+    target_analysis.plot(analysis_basename)
 
 print('Done\n')
 
