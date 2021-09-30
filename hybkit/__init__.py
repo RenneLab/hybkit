@@ -35,7 +35,7 @@ information:
 +-------------------------+------------------------------------------------------------------+
 | :class:`CtFile`         | Class for reading Connectivity Table (.ct)-format files          |
 |                         | [CTFormat]_ containing predicted RNA secondary-structure         |
-|                         | information as used by the UNAFold as                            |
+|                         | information as used by the UNAFold_ as                           |
 |                         | :class:`FoldRecord` objects                                      |
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and a     |
@@ -1453,7 +1453,7 @@ class FoldRecord(object):
 
     .. _vienna_file_format:
 
-    * | The .vienna file format used by the ViennaRNA package (see :ref:`References`;
+    * | The .vienna file format used by the ViennaRNA_ package (see :ref:`References`;
         [ViennaFormat]_; [Lorenz2011]_):
 
       Example:
@@ -1463,7 +1463,7 @@ class FoldRecord(object):
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
 
-    * | The .ct file format used by UNAFold and other packages (see :ref:`References`;
+    * | The .ct file format used by UNAFold_ and other packages (see :ref:`References`;
         [CTFormat]_, [Zuker2003]_):
 
       Example:

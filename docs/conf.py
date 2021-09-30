@@ -159,6 +159,9 @@ rst_epilog = (
 .. |3p| replace:: :abbr:`3p (3-Prime)`
 .. |5p| replace:: :abbr:`5p (5-Prime)`
 .. |spec_version| replace:: %s
+.. _UNAFold: http://www.unafold.org/
+.. _ViennaRNA: https://www.tbi.univie.ac.at/RNA/
+
 """ % (
        hybkit.__about__.spec_version,
       )
