@@ -81,8 +81,7 @@ class HybRecord(object):
     """
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by [Travis2014]_
-    (see :ref:`References`)
+    Hyb format entries are a GFF-related file format described by [Travis2014]_.
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     annotations on each components. An example .hyb format line 
@@ -1453,8 +1452,7 @@ class FoldRecord(object):
 
     .. _vienna_file_format:
 
-    * | The .vienna file format used by the ViennaRNA_ package (see :ref:`References`;
-        [ViennaFormat]_; [Lorenz2011]_):
+    * | The .vienna file format used by the ViennaRNA_ package ([ViennaFormat]_; [Lorenz2011]_):
 
       Example:
           ::
@@ -1463,8 +1461,7 @@ class FoldRecord(object):
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
 
-    * | The .ct file format used by UNAFold_ and other packages (see :ref:`References`;
-        [CTFormat]_, [Zuker2003]_):
+    * | The .ct file format used by UNAFold_ and other packages ([CTFormat]_, [Zuker2003]_):
 
       Example:
           ::
