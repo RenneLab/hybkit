@@ -5,17 +5,21 @@
 
 """
 This module contains classes and methods for reading, writing, and manipulating data 
-in the ".hyb" genomic sequence format.
+in the ".hyb" genomic sequence format (|Travis2014|).
 
-This is primarily based on two classes for storage of 
+This is primarily based on three classes for storage of 
 chimeric sequence information and associated fold-information:
 
-+---------------------+----------------------------------------------------------------------+
-| :class:`HybRecord`  | Class for storage of hybrid sequence records                         |
-+---------------------+----------------------------------------------------------------------+
-| :class:`FoldRecord` | Minimal class for storage of predicted RNA                           |
-|                     | secondary structure information for chimeric sequence reads          |
-+---------------------+----------------------------------------------------------------------+
++----------------------------+---------------------------------------------------------------+
+| :class:`HybRecord`         | Class for storage of hybrid sequence records                  |
++----------------------------+---------------------------------------------------------------+
+| :class:`FoldRecord`        | Minimal class for storage of predicted RNA                    |
+|                            | secondary structure information for chimeric sequence reads   |
++----------------------------+---------------------------------------------------------------+
+| :class:`DynamicFoldRecord` | Minimal class for storage of predicted RNA                    |
+|                            | secondary structure information for sequence constructed from |
+|                            | aligned portions of chimeric sequence reads                   |
++----------------------------+---------------------------------------------------------------+
     
 It also includes classes for reading, writing, and iterating over files containing that 
 information:
@@ -41,8 +45,6 @@ information:
 
 Todo:
     Add Hybrecord.to_csv_header()
-    Create hyb-format database download script.
-    Add user-friendly individual scripts.
     Implement all sample analyses with bash workflows and individual scripts.
     Implement all sample analyses with nextflow workflows and individual scripts.
     Make decision and clean "extra" scripts.
@@ -80,12 +82,12 @@ class HybRecord(object):
     """
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by Travis, et al. 
+    Hyb format entries are a GFF-related file format described by |Travis2014| 
     (see :ref:`References`)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     annotations on each components. An example .hyb format line 
-    from Gay et al. (See :ref:`References`)::
+    from |Gay2018|::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -1448,11 +1450,12 @@ class FoldRecord(object):
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     
     This class supports the following file types:
-    (Data courtesy of Gay et al. [see :ref:`References`])
+    (Data courtesy of |Gay2018|)
 
     .. _vienna_file_format:
 
-    * | The .vienna file format used by the RNAStructure package (see :ref:`References`):
+    * | The .vienna file format used by the ViennaRNA package (see :ref:`References`;
+        |ViennaFormat|; |Lorenz2011|):
 
       Example:
           ::
@@ -1461,7 +1464,8 @@ class FoldRecord(object):
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
 
-    * | The .ct file format utilized by the UNAFold Software Package:
+    * | The .ct file format used by UNAFold and other packages (see :ref:`References`;
+        |CTFormat|, |Zuker2003|):
 
       Example:
           ::
@@ -1548,7 +1552,7 @@ class FoldRecord(object):
             suffix = ''
         return ('\n'.join(self.to_vienna_lines(newline=False)) + suffix)
 
-    # DynamicFoldRecord : Public Methods : HybRecord Comparison
+    # FoldRecord : Public Methods : HybRecord Comparison
     def count_hyb_record_mismatches(self, hyb_record):
         """
         Count mismatches between dynamic hyb_record seq and fold_record.seq
@@ -1622,7 +1626,7 @@ class FoldRecord(object):
                           error_mode='raise',
                          ):
         """
-        Construct instance from a list of 3 strings of Vienna-format lines.
+        Construct instance from a list of 3 strings of Vienna-format (|ViennaFormat|) lines.
 
         Args:
             record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
@@ -1704,7 +1708,7 @@ class FoldRecord(object):
     def from_ct_lines(cls, record_lines, error_mode=None):
         """
         Create a FoldRecord entry from a list of an arbitrary number of strings
-        corresponding to lines in the ".ct" file format.
+        corresponding to lines in the ".ct" file format (|CTFormat|).
 
         Args
             error_mode (str, optional): 'string representing the error mode.

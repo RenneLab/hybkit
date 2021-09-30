@@ -13,14 +13,16 @@ hybkit
 .. image:: https://img.shields.io/pypi/pyversions/hybkit?logo=python&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI - Python Version
-
+.. image:: https://img.shields.io/badge/License-GPLv3+-blue?logo=GNU
+   :target: https://www.gnu.org/licenses/gpl-3.0.en.html
+   :alt: GNU GPLv3+ License
 
 | Welcome to *hybkit*, a toolkit for analysis of ".hyb" format chimeric (hybrid) RNA sequence data
-  generated from ribonomics techniques such as Crosslinking, Ligation, and 
-  Sequencing of Hybrids (CLASH) and Quick CLASH (qCLASH). 
+  defined with the Hyb software package by |Travis2014|.
+  This genomic data-type is generated from ribonomics techniques such as Crosslinking, Ligation, and 
+  Sequencing of Hybrids (CLASH; |Helwak2013|) and Quick CLASH (qCLASH; |Gay2018|). 
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
-| Full project documentation is available at
-  `hybkit's ReadTheDocs <https://hybkit.readthedocs.io/>`_.
+| Full project documentation is available at |docs_link|_.
 
 This project contains multiple components:
     #. The hybkit toolkit of command-line utilities for manipulating,
@@ -32,23 +34,27 @@ This project contains multiple components:
 Hybkit Toolkit:
     hybkit includes command-line utilities for the manipulation of ".hyb" format data:
 
-        =================================== =========================================================
+        =================================== ==========================================================
         Utility                             Description
-        =================================== =========================================================
+        =================================== ==========================================================
         hyb_check                           Read a ".hyb" file and check for errors
-        hyb_analyze                         Analyze and set details for hyb records, such as segtypes
+        hyb_analyze                         Analyze and set details for hyb records, such as seg types
         hyb_filter                          Filter a ".hyb" file to a specific subset of sequences
         hyb_type_analysis (pending)         Perform a type analysis on a prepared "hyb" file
         hyb_mirna_count_anlaysis (pending)  Perform a miRNA_count analysis on a prepared "hyb" file
         hyb_summary_anlaysis (pending)      Perform a summary analysis on a prepared "hyb" file
         hyb_mirna_target_analysis (pending) Perform a mirna_target analysis on a prepared "hyb" file
         hyb_fold_analysis (pending)         Perform a fold analysis on a prepared "hyb" file
-        =================================== =========================================================
+        =================================== ==========================================================
         
     These scripts are used on the command line with hyb-format files. For example, to filter a 
-    hyb file to contain only hybrids with a sequence identifier containing the string "kshv"::
+    hyb file to contain only hybrids with a sequence identifier containing the string "kshv"
 
-        $ hyb_filter -i my_hyb_file.hyb --filter seg_contains kshv
+    Example:
+
+        ::
+
+            $ hyb_filter -i my_hyb_file.hyb --filter seg_contains kshv
 
     Further detail on the usage of each script is provided in 
     the |hybkit Toolkit| section of |docs_link|_.
@@ -144,6 +150,9 @@ Further documentation on hybkit usage can be found in |docs_link|_.
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
+.. |Travis2014| replace:: *Travis et al. (Methods 2014)*
+.. |Helwak2013| replace:: *Helwak et al. (Cell 2013)*
+.. |Gay2018| replace:: *Gay et al. (J. Virol. 2013)*
 .. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
 .. include:: docs_readme_format.rst
