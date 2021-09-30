@@ -112,7 +112,17 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
     'sphinxarg.ext',
+    'sphinx_rtd_theme',
     ]
+
+
+# Latex/PDF output options:
+latex_toplevel_sectioning = 'chapter'
+latex_show_pagerefs = True
+latex_show_urls = 'footnote'
+latex_elements = {
+  'extraclassoptions': 'openany,oneside'
+}
 
 # add_module_names
 autodoc_member_order = 'bysource'
