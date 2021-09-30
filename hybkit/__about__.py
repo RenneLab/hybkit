@@ -33,9 +33,9 @@ try:
 except NameError:
     local_data_dir = 'using_with_exec'
 
-if os.path.isdir(os.path.join(prefix_data_dir, 'reference_data')):
+if os.path.isdir(os.path.join(prefix_data_dir, 'ref_data')):
     hybkit_data_dir = prefix_data_dir
-elif os.path.isdir(os.path.join(local_data_dir, 'reference_data')):
+elif os.path.isdir(os.path.join(local_data_dir, 'ref_data')):
     hybkit_data_dir = local_data_dir
 else:
     print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
@@ -43,7 +43,7 @@ else:
     print('local_data_dir', local_data_dir)
     hybkit_data_dir = ''
 
-reference_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
+ref_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
 docs_dir = os.path.join(hybkit_data_dir, 'docs')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/

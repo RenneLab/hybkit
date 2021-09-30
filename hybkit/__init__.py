@@ -1831,7 +1831,7 @@ class DynamicFoldRecord(FoldRecord):
         seg2:                 222222222222222222       
         seq:  AGCTTATCAGACTGATTAGCTTATCAGACTGATG
 
-    This type of sequence is found in the Hyb program *_hybrids_ua.hyb file type. 
+    This type of sequence is found in the Hyb program \*_hybrids_ua.hyb file type. 
     This is primarily relevant in error-checking when setting a :obj:`HybRecord.fold_record`
     attribute.
 

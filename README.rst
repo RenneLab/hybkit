@@ -18,9 +18,9 @@ hybkit
    :alt: GNU GPLv3+ License
 
 | Welcome to *hybkit*, a toolkit for analysis of ".hyb" format chimeric (hybrid) RNA sequence data
-  defined with the Hyb software package by |Travis2014|.
+  defined with the Hyb software package by |Travis2014|_.
   This genomic data-type is generated from ribonomics techniques such as Crosslinking, Ligation, and 
-  Sequencing of Hybrids (CLASH; |Helwak2013|) and Quick CLASH (qCLASH; |Gay2018|). 
+  Sequencing of Hybrids (CLASH; |Helwak2013|_) and Quick CLASH (qCLASH; |Gay2018|_). 
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 | Full project documentation is available at |docs_link|_.
 
@@ -150,9 +150,12 @@ Further documentation on hybkit usage can be found in |docs_link|_.
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
-.. |Travis2014| replace:: *Travis et al. (Methods 2014)*
 .. |Helwak2013| replace:: *Helwak et al. (Cell 2013)*
+.. _Helwak2013: https://doi.org/10.1016/j.cell.2013.03.043
+.. |Travis2014| replace:: *Travis et al. (Methods 2014)*
+.. _Travis2014: https://doi.org/10.1016/j.ymeth.2013.10.015 
 .. |Gay2018| replace:: *Gay et al. (J. Virol. 2013)*
+.. _Gay2018: https://doi.org/10.1128/JVI.02138-17
 .. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
 .. include:: docs_readme_format.rst
