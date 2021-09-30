@@ -2,7 +2,7 @@
 hybkit Hyb File Specification
 ==================================
 
-Version: |spec_version|
+    Version: |spec_version|
 
     The ".hyb" file format is described by Travis, et al. along with the Hyb software package
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
@@ -160,10 +160,10 @@ Other Details
         ============ ==================================================================================
         Item         Role
         ============ ==================================================================================
-        \\\\t  (tab) Column Delimiter
-        .            Missing Data Placeholder (equivalent to None)
-        .hyb         File Suffix
-        .hyb.gz      gzipped File Suffix
+        "\\t" (tab)  Column Delimiter
+        "."          Missing Data Placeholder (equivalent to None)
+        ".hyb"       File Suffix
+        ".hyb.gz"    gzipped File Suffix
         Disallowed   Header Lines
         Disallowed   In-file Comments
         ============ ==================================================================================

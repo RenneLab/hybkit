@@ -1000,7 +1000,7 @@ class FoldAnalysis(BaseAnalysis):
             | :obj:`mirna_fold_total_counts` : :class:`~collections.Counter` 
               with keys of miRNA names and values of miRNA total counts.
             | :obj:`mirna_fold_type_counts` : Dict with keys of miRNA names and values of 
-              :type:`~collections.Counter` objects, with each counter object containin the count of 
+              :class:`~collections.Counter` objects, with each counter object containin the count of 
               segment types folded by that miRNA.
         """
         self._process_fold_analysis_info()

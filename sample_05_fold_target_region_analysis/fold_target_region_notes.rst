@@ -1,6 +1,7 @@
-# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
-# Renne Lab, University of Florida
-# Hybkit Project : https://www.github.com/RenneLab/hybkit
+..
+    Daniel Stribling  |  ORCID: 0000-0002-0649-9506
+    Renne Lab, University of Florida
+    Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 Example Fold Target Region Analysis
 ===================================
@@ -34,8 +35,8 @@ The data files can be downloaded and uncompressed by using the command::
 
     $ sh ./prepare_data.sh
 
-The unpacked data-files require ~0.2 Gb of space.
-The completed output of the analysis requires ~50 Mb of space.
+The unpacked data-files require ~0.2 GB of space.
+The completed output of the analysis requires ~50 MB of space.
 
 Fold Target Region Analysis Example Output
 ------------------------------------------

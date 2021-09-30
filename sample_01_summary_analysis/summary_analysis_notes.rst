@@ -1,6 +1,7 @@
-# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
-# Renne Lab, University of Florida
-# Hybkit Project : https://www.github.com/RenneLab/hybkit
+..
+    Daniel Stribling  |  ORCID: 0000-0002-0649-9506
+    Renne Lab, University of Florida
+    Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 Example Summary Analysis
 ========================
@@ -19,8 +20,8 @@ The data files can be downloaded and uncompressed by using the command::
 
   $ sh ./download_data.sh
 
-The unpacked hyb data-files require ~2 Gb of space.
-The completed output of the analysis requires ~1.5 Gb of space.
+The unpacked hyb data-files require ~2 GB of space.
+The completed output of the analysis requires ~1.5 GB of space.
 
 Summary Analysis Example Output
 -------------------------------

@@ -1,6 +1,7 @@
-# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
-# Renne Lab, University of Florida
-# Hybkit Project : https://www.github.com/RenneLab/hybkit
+..
+    Daniel Stribling  |  ORCID: 0000-0002-0649-9506
+    Renne Lab, University of Florida
+    Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 Example Fold Analysis
 =====================
