@@ -46,7 +46,7 @@ Changelog
       | Moving code for settings into a "settings" module.
       | Renamed HybRecord type_analysis, mirna_analysis, and target_analysis to 
         eval_types, eval_mirna, eval_target, respectively
-        to differentiate from :module:`analysis` module functions
+        to differentiate from analysis module functions
       | Reimplemented analyses methods as classes.
         
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.

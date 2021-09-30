@@ -6,40 +6,33 @@ hybkit.settings
 
 .. autodata:: hybkit.settings.HybRecord_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.HybRecord_settings_info, 
-                               prefix_indent=8, item_name='HybRecord_settings_info')
+.. ppdict:: 
+   hybkit.settings.HybRecord_settings_info  
 
 .. autodata:: hybkit.settings.HybFile_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.HybFile_settings_info, 
-                               prefix_indent=8, item_name='HybFile_settings_info')
+.. ppdict:: 
+   hybkit.settings.HybFile_settings_info  
 
 .. autodata:: hybkit.settings.FoldRecord_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.FoldRecord_settings_info, 
-                               prefix_indent=8, item_name='FoldRecord_settings_info')
+.. ppdict:: 
+   hybkit.settings.FoldRecord_settings_info  
 
 .. autodata:: hybkit.settings.FoldFile_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.FoldFile_settings_info, 
-                               prefix_indent=8, item_name='FoldFile_settings_info')
+.. ppdict:: 
+   hybkit.settings.FoldFile_settings_info  
 
 .. autodata:: hybkit.settings.HybFoldIter_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.HybFoldIter_settings_info, 
-                               prefix_indent=8, item_name='HybFoldIter_settings_info')
+.. ppdict:: 
+   hybkit.settings.HybFoldIter_settings_info  
 
 .. autodata:: hybkit.settings.Analysis_settings_info
     :no-value:
-.. expy::
-    pprint_settings_info_block(hybkit.settings.Analysis_settings_info, 
-                               prefix_indent=8, item_name='Analysis_settings_info')
-
+.. ppdict:: 
+   hybkit.settings.Analysis_settings_info  
 
 
 .. autodata:: hybkit.settings.HybRecord_settings
