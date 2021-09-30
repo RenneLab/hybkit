@@ -4,16 +4,15 @@ hybkit Hyb File Specification
 
     Version: |spec_version|
 
-    The ".hyb" file format is described by Travis, et al. along with the Hyb software package
+    The ".hyb" file format is described by [Travi2014]_ along with the Hyb software package
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
-    mapping coordinates, and annotation information for each chimera"
-    (see :ref:`References`).
+    mapping coordinates, and annotation information for each chimera".
     
     Each line in a hyb file, referred to here as a hyb "record," contains information about a 
     genomic sequence read identified to be a chimera by anlaysis sofwtare. 
     Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
     information on each of the alignments identified within the sequence read. 
-    The columns are described as follows by Travis, et al.:
+    The columns are described as follows by [Travis2014]_.:
 
         | Column 1, unique sequence identifier.
         | Column 2, read sequence [...].
@@ -73,7 +72,7 @@ Flags
 -----
    
     Hyb Flags:
-        The following four flags are used by the Hyb software package (see :ref:`References`).
+        The following four flags are used by the Hyb software package ([Travis2014]_).
         The definitions provided describe how these flags are used in the hybkit package.
     
         .. _count_total:
@@ -172,6 +171,6 @@ Other Details
 Example
 -------
 
-An example .hyb format line (courtesy of Gay et al. [:ref:`References`])::
+An example .hyb format line (courtesy of [Gay2018])::
 
     2407_718	ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC	.	MIMAT0000078_MirBase_miR-23a_microRNA	1	21	1	21	0.0027	ENSG00000188229_ENST00000340384_TUBB2C_mRNA	23	49	1181	1207	1.2e-06
