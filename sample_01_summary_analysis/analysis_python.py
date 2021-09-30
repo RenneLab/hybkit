@@ -27,14 +27,14 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output')
 input_files = [
     os.path.join(analysis_dir, 'GSM2720017_UI_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720018_UI_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720019_UI_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720018_UI_BR2.hyb'),
+    os.path.join(analysis_dir, 'GSM2720019_UI_BR3.hyb'),
     os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720021_WT_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720022_WT_BR1.hyb'),
+    os.path.join(analysis_dir, 'GSM2720021_WT_BR2.hyb'),
+    os.path.join(analysis_dir, 'GSM2720022_WT_BR3.hyb'),
     os.path.join(analysis_dir, 'GSM2720023_D11_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720024_D11_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720025_D11_BR1.hyb')
+    os.path.join(analysis_dir, 'GSM2720024_D11_BR2.hyb'),
+    os.path.join(analysis_dir, 'GSM2720025_D11_BR3.hyb')
 ]
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
