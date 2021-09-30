@@ -81,7 +81,7 @@ class HybRecord(object):
     """
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by [Travis2014] 
+    Hyb format entries are a GFF-related file format described by [Travis2014]_
     (see :ref:`References`)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
