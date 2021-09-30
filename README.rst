@@ -117,33 +117,32 @@ Hybkit API:
 Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu !
 
 
-Installation
-------------
-
-Hybkit requires Python 3.6+ and the use of the 
-`matplotlib <https://matplotlib.org/>`_ package.
-
-The recommended installation method is via hybkit's 
-`PyPI Package Index <https://pypi.org/project/hybkit/>`_ using 
-`python3 pip <https://pip.pypa.io/en/stable/>`_, which will 
-automatically handle version control and dependency installation::
+Installation:
     
-    $ pip install hybkit
-
-Acquisition of the package can also be performed by cloning the project's Github repository::
-
-    $ git clone git://github.com/RenneLab/hybkit
-
-Or by downloading the zipped package::
-
-    $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
-    $ unzip master.zip
-
-Followed by installation using python's setuptools::
-
-    $ python setup.py install
-
-Further documentation on hybkit usage can be found in |docs_link|_.
+    Hybkit requires Python 3.6+ and the use of the 
+    `matplotlib <https://matplotlib.org/>`_ package.
+    
+    The recommended installation method is via hybkit's 
+    `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using 
+    `python3 pip <https://pip.pypa.io/en/stable/>`_, which will 
+    automatically handle version control and dependency installation::
+        
+        $ pip install hybkit
+    
+    Acquisition of the package can also be performed by cloning the project's Github repository::
+    
+        $ git clone git://github.com/RenneLab/hybkit
+    
+    Or by downloading the zipped package::
+    
+        $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
+        $ unzip master.zip
+    
+    Followed by installation using python's setuptools::
+    
+        $ python setup.py install
+    
+    Further documentation on hybkit usage can be found in |docs_link|_.
 
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
 .. |Example Pipelines| replace:: *Example Pipelines*
