@@ -8,6 +8,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from collections import Counter
 import copy
 import hybkit
@@ -41,8 +42,8 @@ DEFAULT_LINE_MIN_FRACTION_SIZE = 0.01
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_TARGET_TITLE = 'Targets'
 DEFAULT_TARGET_TYPE_TITLE = 'Target Types'
-DEFAULT_ALL_SEG_TYPE_COUNTS_TITLE = 'Total Segment Portions'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
+DEFAULT_FOLD_TITLE = 'Bound miRNA by Position'
 DEFAULT_FIG_SIZE = matplotlib.rcParams['figure.figsize']  # 6.4, 4.8 in
 TITLE_PAD = 15
 FORMAT_NAME_MAP = {'mirnas_5p':"5'_miRNA_Hybrids",
@@ -282,21 +283,23 @@ def target_type(target_type_count, plot_file_name,
                     )
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
-def mirna_fold(analysis, 
-               plot_file_name,
-               title=None,
-               data_format=DEFAULT_LINE_DATA_FORMAT,
-               min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
-               plot_file_type=DEFAULT_FILE_TYPE,
-               dpi=DEFAULT_DPI,
-               matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+def fold(analysis, 
+         plot_file_name,
+         name=None,
+         title=DEFAULT_FOLD_TITLE,
+         data_format=DEFAULT_LINE_DATA_FORMAT,
+         min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
+         plot_file_type=DEFAULT_FILE_TYPE,
+         dpi=DEFAULT_DPI,
+         matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     """
     Plot the bound percentage of mirna by base from the :class:`FoldAnalysis`.
 
     Args:
-        analysis (Analysis): Analysis that includes attributes of
-            :class:`TargetAnalysis`.
+        analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
+            :class:`FoldAnalysis`.
         plot_file_name (str): File name for output plot.
+        name (str, optional): name to prepend to title.
         title (str, optional): Title / header for plot (replaces default title).
         data_format (str, optional): matplotlib line/data format.
         min_fractione_size (float, optional): Minimum fraction to include at tail
@@ -310,23 +313,18 @@ def mirna_fold(analysis,
     labels = []
     fractions = []
     max_fraction = 0.0
-    for seq_i, fraction in fold_analysis_dict['base_fractions'].items():
+    for seq_i, fraction in analysis.mirna_fold_frac.items():
         max_fraction = max(max_fraction, fraction)
-        if seq_i > 22:
-            if fraction/max_fraction < min_fraction_size:
-                break
+        if seq_i > 22 and fraction/max_fraction < min_fraction_size:
+            break
         labels.append(seq_i)
         fractions.append(fraction)
 
-    if title is None:
-        title = 'Bound miRNA by Position'
-
-    if name is not None:
-        title = str(name) + ': ' + title
+    if analysis.name is not None:
+        title = str(analysis.name) + ': ' + title
 
     #matplotlib_settings.update({'textprops':{'size':'small'},
     #                           })
-
 
     _plot_line(labels=labels,
                sizes=fractions,
@@ -418,9 +416,12 @@ def _plot_line(labels, sizes, plot_file_name,
     fig = plt.gcf()
     fig.set_size_inches(figsize)
     lines = plt.plot(use_labels, use_sizes, data_format)
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     plt.xlim(left=1)
     plt.xticks(range(1,len(labels)+1,2))
-    plt.xlabel('miRNA Base Position Index')
+    plt.xlabel('miRNA Base Index')
+    plt.yticks(range(10,110,10))
     plt.ylabel('Percent Bound')
     if title is not None:
         plt.title(title, pad=TITLE_PAD)

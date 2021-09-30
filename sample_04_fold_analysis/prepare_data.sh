@@ -9,13 +9,13 @@ echo -e "\nPreparing data for sample fold analysis."
 
 echo -e "\nCopying data to analysis directory."
 cp -v ../reference_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
-      ../reference_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad.gz \
+      ../reference_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna.gz \
       ./
   
 
 # Unzip (gunzip) individual hyb-format data-files.
 echo -e "\nUnpacking gz-compressed hyb data files...\n"
 gunzip WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
-       WT_BR1_comp_hOH7_KSHV_hybrids_ua.viennad.gz
+       WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna.gz
 
 echo -e "Done.\n"

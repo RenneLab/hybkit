@@ -246,8 +246,8 @@ class BaseAnalysis(object):
     # BaseAnalysis : Private Methods : FoldAnalysis
     def _init_fold_analysis(self):
         self.mirna_folds = 0
-        self.mirna_fold_count = {i:0 for i in range(25)}
-        self.mirna_fold_frac = {i:0.0 for i in range(25)}
+        self.mirna_fold_count = {i:0 for i in range(1,25)}
+        self.mirna_fold_frac = {i:0.0 for i in range(1,25)}
 
     # BaseAnalysis : Private Methods : FoldAnalysis
     def _add_fold_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
@@ -262,7 +262,7 @@ class BaseAnalysis(object):
                 if allow_mirna_dimers:
                     mirna_fold = hyb_record.fold_record._get_seg_fold(hyb_record.seg1_props)
             else:
-                mirna_fold = hyb_record.mirna_details('mirna_fold')
+                mirna_fold = hyb_record.mirna_detail('mirna_fold')
 
             if (('(' in mirna_fold and ')' in mirna_fold)               
                 or ('(' not in mirna_fold and ')' not in mirna_fold)
@@ -276,8 +276,8 @@ class BaseAnalysis(object):
             self.mirna_folds += count
             for i in range(len(mirna_fold)):
                 if mirna_fold[i] in {'(', ')'}:
-                    self.mirna_fold_count[i] += count
-            for i in range(len(self.mirna_fold_count)):
+                    self.mirna_fold_count[i+1] += count
+            for i in self.mirna_fold_count:
                 self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
 
     # BaseAnalysis : Private Methods : FoldAnalysis
@@ -297,7 +297,7 @@ class BaseAnalysis(object):
         ret_lines.append('')
     
         line_values = ['index']
-        max_i = 25
+        max_i = 24
         while self.mirna_fold_count[max_i] == 0:
             max_i -= 1
         line_values +=  [str(i) for i in range(1, max_i+1)]
@@ -971,9 +971,9 @@ class FoldAnalysis(BaseAnalysis):
         Args:
             hyb_record (HybRecord): Record with information to add.
         """
-        count_method = self.settings['count_method']
+        count_mode = self.settings['count_mode']
         allow_mirna_dimers = self.settings['allow_mirna_dimers']
-        self._add_fold_analysis(hyb_record, count_method, allow_mirna_dimers)
+        self._add_fold_analysis(hyb_record, count_mode, allow_mirna_dimers)
    
     # FoldAnalysis : Public Methods
     def update(self, add_analysis):
@@ -1052,7 +1052,7 @@ class FoldAnalysis(BaseAnalysis):
             fold_counts_file.write(out_delim.join(['mirna_folds', str(self.mirna_folds)]) + '\n')
 
         line_values = ['index']
-        max_i = 25
+        max_i = 24
         while self.mirna_fold_count[max_i] == 0:
             max_i -= 1
         line_values +=  [str(i) for i in range(1, max_i+1)]
@@ -1066,9 +1066,9 @@ class FoldAnalysis(BaseAnalysis):
         line_values += ["%f.3" % self.mirna_fold_frac[i] for i in range(1, max_i+1)]
         write_lines.append(out_delim.join(line_values))
 
-        fold_count_name = file_name_base + '_fold_count.csv'
-        with open(fold_count_name, 'w') as fold_count_file:
-            fold_count_file.write('\n'.join(write_lines) + '\n')
+        fold_bases_name = file_name_base + '_fold_bases.csv'
+        with open(fold_bases_name, 'w') as fold_bases_file:
+            fold_bases_file.write('\n'.join(write_lines) + '\n')
 
 
     # FoldAnalysis : Public Methods
@@ -1081,6 +1081,6 @@ class FoldAnalysis(BaseAnalysis):
                 based on analysis type and provided parameters.
         """
     
-        hybkit.plot.fold_count(file_name + '_fold_counts', analysis_dict)
+        hybkit.plot.fold(self, file_name_base + '_fold_bases')
 
 

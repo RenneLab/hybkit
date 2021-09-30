@@ -187,24 +187,12 @@ HybFile_settings_info = {
 #:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
 #:     }                   
 FoldRecord_settings_info = {
-    'skip_bad_fold_record': [ 
-        False,
+    'allowed_mismatches': [
+        0,
         """
-        When reading a fold record, bad fold records should be skipped.
-        When set to False, an error will be raised for improperly formatted fold records.
-        When True, improperly formatted fold records will be skipped.
+        For DynamicFoldRecords, allowed number of mismatches with a HybRecord.
         """,
-        'custom_bool_from_str',
-        None,
-        {}
-    ],
-    'warn_bad_fold_record': [ 
-        True,
-        """
-        When reading a fold record, print a warning when an improperly-formatted fold
-        record is encountered.
-        """,
-        'custom_bool_from_str',
+        'int',
         None,
         {}
     ],
@@ -227,8 +215,86 @@ FoldRecord_settings_info = {
 #:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
 #:     }                   
 FoldFile_settings_info = {
+    'fold_record_type': [
+        'strict',
+        """
+        Type of fold record object to use. Options: "strict": FoldRecord, requires an exact sequence
+        match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence 
+        match to the "dynamic" annotated regions of a HybRecord, and may be shorter/longer
+        than the original sequence.
+        """,
+        'str',
+        None,
+        {'choices':['strict','dynamic']}
+    ],
+    'error_mode': [ 
+        'raise',
+        """
+        Mode for handling errors during reading of HybFiles 
+        (overridden by HybFoldIter.settings['error_mode'] when using HybFoldIter).
+        Options: "raise": Raise an error when encountered and exit program;
+        "warn_return": Print a warning and return the error_value ;
+        "return": Return the error value with no program output.
+        record is encountered.
+        """,
+        'str',
+        None,
+        {'choices':{'raise', 'warn_return', 'return'}}
+    ],
 }
 
+# settings_info : HybFoldIter
+#: Information for settings of HybFoldIter class.
+#: setting_info format contains structure:: 
+#:
+#:     {
+#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+#:     }                   
+HybFoldIter_settings_info = {
+    'error_checks': [
+        ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'],
+        """
+        Error checks for simultaneous HybFile and FoldFile parsing.
+        Options: "hybrecord_indel": Error for HybRecord objects where one/both sequences have 
+        insertions/deletions in alignment, which prevents matching of sequences; 
+        "foldrecord_nofold": Error when failure in reading a fold_record object; 
+        "max_mismatch": Error when mismatch between hybrecord and foldrecord sequences is 
+        """,
+        'str',
+        None,
+        {'choices':{'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'}}
+    ],
+    'error_mode': [
+        'warn_skip',
+        """
+        Mode for handling errors found during error checks. Options: 
+        "raise": Raise an error when encountered and exit program;
+        "warn_return": Print a warning and return the value ;
+        "warn_skip": Print a warning and continue to the next iteration;
+        "skip": Continue to the next iteration without any output.
+        """,
+        'custom_bool_from_str',
+        None,
+        {'chioces':{'raise', 'warn_return', 'warn_skip', 'skip'}}
+    ],
+    'max_sequential_skips': [
+        20,
+        """
+        Maximum number of record(-pairs) to skip in a row. Limited as several sequential skips
+        usually indicates an issue with record formatting or a desynchrnoization between files.
+        """,
+        'int',
+        None,
+        {}
+    ],
+}
+# settings_info : Analysis
+#: Information for settings of Analysis classes.
+#: setting_info format contains structure:: 
+#:
+#:     {
+#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+#:     }                   
 Analysis_settings_info = {
     'count_mode': [
         'record',
@@ -301,3 +367,7 @@ FoldFile_settings = _settings_info_to_settings(FoldFile_settings_info)
 # Settings (active) : Analysis
 #: Analysis Active Settings
 Analysis_settings = _settings_info_to_settings(Analysis_settings_info)
+
+# Settings (active) : HybFoldIter
+#: HybFoldIter Active Settings
+HybFoldIter_settings = _settings_info_to_settings(HybFoldIter_settings_info)

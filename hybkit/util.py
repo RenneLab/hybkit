@@ -33,10 +33,12 @@ def _bool_from_string(value):
 _custom_types = {
     'custom_bool_from_str': _bool_from_string,
     'str': str,
+    'int': int,
 }
 _custom_type_choices = {
     'custom_bool_from_str': [True, False],
     'str': None,
+    'int': None,
 }
 
 # Util : Path Helper Functions
