@@ -2324,8 +2324,8 @@ class HybFoldIter(object):
         ret_lines.append(add_line)
         add_line = 'Fold Record Iteration Attempts: ' + str(self.counters['fold_record_read_attempts'])
         ret_lines.append(add_line)
-        add_line = 'Total Skipped Fold-Only Records: ' + str(self.counters['fold_only_skips'])
-        ret_lines.append(add_line)
+        #add_line = 'Total Skipped Fold-Only Records: ' + str(self.counters['fold_only_skips'])
+        #ret_lines.append(add_line)
         add_line = 'Total Skipped Record Pairs: ' + str(self.counters['pair_skips'])
         ret_lines.append(add_line)
         return ret_lines
@@ -2353,22 +2353,24 @@ class HybFoldIter(object):
             error = ''
             do_skip = False
             if 'foldrecord_nofold' in self.settings['error_checks']:
-                while isinstance(next_fold_record, tuple) and next_fold_record[0] =='NOFOLD':
-                    if 'skip' in self.settings['error_mode']:
-                        if self.settings['error_mode'] == 'warn_skip':
-                            print('WARNING: SkipFold: Improper FoldRecord: No Fold (Energy = 99*.*)')  
-                        self.sequential_skips += 1
-                        self.counters['fold_only_skips'] += 1
-                        if self.sequential_skips > self.settings['max_sequential_skips']:
-                            message = 'ERROR: Skipped %i records in a row ' % self.sequential_skips
-                            message += '(max: %i)\n' % self.settings['max_sequential_skips']
-                            message += 'Check for misalignment of records, or disable setting.'
-                            print(message)
-                            raise Exception(message)
-                        self.counters['fold_record_read_attempts'] += 1
-                        next_fold_record = self.foldfile_handle.read_record(error_mode='return')
-                    else:
-                        error = 'Improper FoldRecord: No Fold (Energy = 99*.*)' 
+                if isinstance(next_fold_record, tuple) and next_fold_record[0] =='NOFOLD':
+                    error = 'Improper FoldRecord: No Fold (Energy = 99*.*)' 
+                #while isinstance(next_fold_record, tuple) and next_fold_record[0] =='NOFOLD':
+                #    if 'skip' in self.settings['error_mode']:
+                #        if self.settings['error_mode'] == 'warn_skip':
+                #            print('WARNING: SkipFold: Improper FoldRecord: No Fold (Energy = 99*.*)')  
+                #        self.sequential_skips += 1
+                #        self.counters['fold_only_skips'] += 1
+                #        if self.sequential_skips > self.settings['max_sequential_skips']:
+                #            message = 'ERROR: Skipped %i records in a row ' % self.sequential_skips
+                #            message += '(max: %i)\n' % self.settings['max_sequential_skips']
+                #            message += 'Check for misalignment of records, or disable setting.'
+                #            print(message)
+                #            raise Exception(message)
+                #        self.counters['fold_record_read_attempts'] += 1
+                #        next_fold_record = self.foldfile_handle.read_record(error_mode='return')
+                #    else:
+                #        error = 'Improper FoldRecord: No Fold (Energy = 99*.*)' 
 
             if not error and 'hybrecord_indel' in self.settings['error_checks']:
                 if next_hyb_record.has_prop('has_indels'):
@@ -2422,6 +2424,8 @@ class HybFoldIter(object):
         else:
             ret_obj = (next_hyb_record, next_fold_record)
 
+        self.last_hyb_record = next_hyb_record
+        self.last_fold_record = next_fold_record
         self.sequential_skips = 0
         return ret_obj
 
