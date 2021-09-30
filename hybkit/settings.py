@@ -43,12 +43,12 @@ MIRNA_TYPES = ['miRNA', 'microRNA']
 CODING_TYPES = ['mRNA']
 
 # settings_info : HybRecord
-#: Information for settings of HybRecord class.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.HybRecord` class.
+#: Copied into :data:`HybRecord_settings` for use at runtime.
 HybRecord_settings_info = {
     'mirna_types': [ 
         copy.deepcopy(MIRNA_TYPES),
@@ -147,12 +147,12 @@ HybRecord_settings_info = {
 }
 
 # settings_info : HybFile
-#: Information for settings of HybFile class.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.HybFile` class.
+#: Copied into :data:`HybFile_settings` for use at runtime.
 HybFile_settings_info = {
     'hybformat_id': [ 
         False,
@@ -180,12 +180,12 @@ HybFile_settings_info = {
 }
 
 # settings_info : FoldRecord
-#: Information for settings of FoldRecord class.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.FoldRecord` class.
+#: Copied into :data:`FoldRecord_settings` for use at runtime.
 FoldRecord_settings_info = {
     'allowed_mismatches': [
         0,
@@ -208,12 +208,12 @@ FoldRecord_settings_info = {
 }
 
 # settings_info : FoldFile
-#: Information for settings of FoldFile class.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.FoldFile` class.
+#: Copied into :data:`FoldFile_settings` for use at runtime.
 FoldFile_settings_info = {
     'fold_record_type': [
         'strict',
@@ -244,12 +244,12 @@ FoldFile_settings_info = {
 }
 
 # settings_info : HybFoldIter
-#: Information for settings of HybFoldIter class.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.HybFoldIter` class.
+#: Copied into :data:`HybFoldIter_settings` for use at runtime.
 HybFoldIter_settings_info = {
     'error_checks': [
         ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'],
@@ -288,13 +288,14 @@ HybFoldIter_settings_info = {
         {}
     ],
 }
+
 # settings_info : Analysis
-#: Information for settings of Analysis classes.
-#: setting_info format contains structure:: 
-#:
-#:     {
-#:         setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-#:     }                   
+# setting_info format contains structure:: 
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }                   
+#: Information for settings of :class:`~hybkit.Analysis` class.
+#: Copied into :data:`Analysis_settings` for use at runtime.
 Analysis_settings_info = {
     'count_mode': [
         'record',
@@ -349,25 +350,32 @@ Analysis_settings_info = {
 }
 
 # Settings (active) : HybRecord
-#: HybRecord Active Settings
+#: Settings for :class:`~hybkit.HybRecord`,
+#: created from :data:`HybRecord_settings_info`
 HybRecord_settings = _settings_info_to_settings(HybRecord_settings_info)
 
 # Settings (active) : HybFile
-#: HybFile Active Settings
+#: Settings for :class:`~hybkit.HybFile`,
+#: created from :data:`HybFile_settings_info`
 HybFile_settings = _settings_info_to_settings(HybFile_settings_info)
 
 # Settings (active) : FoldRecord
-#: FoldRecord Active Settings
+#: Settings for :class:`~hybkit.FoldRecord`,
+#: created from :data:`FoldRecord_settings_info`
 FoldRecord_settings = _settings_info_to_settings(FoldRecord_settings_info)
 
 # Settings (active) : FoldFile
-#: FoldFile Active Settings
+#: Settings for :class:`~hybkit.FoldFile`,
+#: created from :data:`FoldFile_settings_info`
 FoldFile_settings = _settings_info_to_settings(FoldFile_settings_info)
 
+# Settings (active) : HybFoldIter
+#: Settings for :class:`~hybkit.HybFoldIter`,
+#: created from :data:`HybFoldIter_settings_info`
+HybFoldIter_settings = _settings_info_to_settings(HybFoldIter_settings_info)
+
 # Settings (active) : Analysis
-#: Analysis Active Settings
+#: Settings for :class:`~hybkit.analysis.BaseAnalysis`,
+#: created from :data:`Analysis_settings_info`
 Analysis_settings = _settings_info_to_settings(Analysis_settings_info)
 
-# Settings (active) : HybFoldIter
-#: HybFoldIter Active Settings
-HybFoldIter_settings = _settings_info_to_settings(HybFoldIter_settings_info)

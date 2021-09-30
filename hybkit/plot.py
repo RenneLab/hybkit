@@ -64,11 +64,11 @@ def type_count(type_counter,
                dpi=DEFAULT_DPI,
                matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the counts of types resulting from the :class:`TypeAnalysis`.
+    Plot the counts of types resulting from the :class:`~hybkit.analysis.TypeAnalysis`.
 
     Args:
         type_counter (Counter): Counter containing type information from 
-            :class:`hybkit.analysis.TypeAnalysis`.
+            :class:`~hybkit.analysis.hybkit.analysis.TypeAnalysis`.
         plot_file_name (str): File name for output plots.
         name (str, optional): name to prepend to title.
         title (str, optional): Title / header for plot.
@@ -116,11 +116,11 @@ def mirna(analysis,
           dpi=DEFAULT_DPI,
           matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the results of the :class:`MirnaAnalysis`.
+    Plot the results of the :class:`~hybkit.analysis.MirnaAnalysis`.
 
     Args:
         analysis (Analysis): Analysis that includes attributes of
-            :class:`MirnaAnalysis`.
+            :class:`~hybkit.analysis.MirnaAnalysis`.
         plot_file_name (str): File name for output plot.
         title (str, optional): Title / header for plot.
         other_threshhold (float, optional): Total fraction at which to begin the "other" wedge.
@@ -173,11 +173,11 @@ def target(mirna_counts, plot_file_name,
            dpi=DEFAULT_DPI,
            matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the targets of a single mirna from the :class:`MirnaAnalysis`.
+    Plot the targets of a single mirna from the :class:`~hybkit.analysis.MirnaAnalysis`.
 
     Args:
         mirna_counts (~collection.Counter): Counter of targets of a mirna produced by 
-            :class:`TargetAnalysis`.
+            :class:`~hybkit.analysis.TargetAnalysis`.
         plot_file_name (str): File name for output plot.
         name (str, optional): Name of analysis
         title (str, optional): Title / header for plot.
@@ -241,11 +241,11 @@ def target_type(target_type_count, plot_file_name,
                 dpi=DEFAULT_DPI,
                 matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
     """
-    Plot the targets types of a single mirna from the :class:`TargetAnalysis`.
+    Plot the targets types of a single mirna from the :class:`~hybkit.analysis.TargetAnalysis`.
 
     Args:
         target_type_count (~collections.Counter): Counter with types of targets for miRNAs from
-            :class:`TargetAnalysis`.
+            :class:`~hybkit.analysis.TargetAnalysis`.
         plot_file_name (str): File name for output plot.
         name (str): Name of analysis to plot for title.
         title (str, optional): Title / header for plot (replaces default title).
@@ -293,11 +293,11 @@ def fold(analysis,
          dpi=DEFAULT_DPI,
          matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     """
-    Plot the bound percentage of mirna by base from the :class:`FoldAnalysis`.
+    Plot the bound percentage of mirna by base from the :class:`~hybkit.analysis.FoldAnalysis`.
 
     Args:
         analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
-            :class:`FoldAnalysis`.
+            :class:`~hybkit.analysis.FoldAnalysis`.
         plot_file_name (str): File name for output plot.
         name (str, optional): name to prepend to title.
         title (str, optional): Title / header for plot (replaces default title).
