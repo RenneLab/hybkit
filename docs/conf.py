@@ -14,6 +14,7 @@ import os
 import sys
 import copy
 import imp
+import pprint
 
 sys.path.insert(0, os.path.abspath('..'))
 # sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
@@ -44,7 +45,6 @@ version = '.'.join(hybkit.__about__.__version__.split('.'))
 release = hybkit.__about__.__version__
 
 # -- PPrint Functions -----------------------------------------------------------
-import pprint
 def return_pprint_code_block(in_item, prefix_indent=8, obj_indent=1, width=92, item_name=''):
     ret_str = '\n.. code-block:: python\n\n'
     ptext = pprint.pformat(in_item, indent=obj_indent, compact=False, 
@@ -75,32 +75,10 @@ def return_settings_info_block(settings_name, prefix_indent=8, obj_indent=1,
     return return_pprint_code_block(new_settings_info, prefix_indent=prefix_indent, 
                                     obj_indent=obj_indent, width=width, item_name=item_name)
 
-# -- Exec Directive -----------------------------------------------------------
-# Source: https://stackoverflow.com/a/18143318
-from io import StringIO
+# -- PrettyPrint Directive -----------------------------------------------------------
+# Inspriaton: https://stackoverflow.com/a/18143318
 from docutils.parsers.rst import Directive    
 from docutils import nodes, statemachine
-
-class ExecDirective(Directive):
-    """Execute the specified python code and insert the output into the document"""
-    has_content = True
-
-    def run(self):
-        oldStdout, sys.stdout = sys.stdout, StringIO()
-
-        tab_width = self.options.get('tab-width', self.state.document.settings.tab_width)
-        source = self.state_machine.input_lines.source(self.lineno - self.state_machine.input_offset - 1)
-
-        try:
-            exec('\n'.join(self.content))
-            text = sys.stdout.getvalue()
-            lines = statemachine.string2lines(text, tab_width, convert_whitespace=True)
-            self.state_machine.insert_input(lines, source)
-            return []
-        except Exception:
-            return [nodes.error(None, nodes.paragraph(text = "Unable to execute python code at %s:%d:" % (source, self.lineno)), nodes.paragraph(text = str(sys.exc_info()[1])))]
-        finally:
-            sys.stdout = oldStdout
 
 class PPrintDictDirective(Directive):
     """Execute the specified python code and insert the output into the document"""
@@ -119,9 +97,7 @@ class PPrintDictDirective(Directive):
             return [nodes.error(None, nodes.paragraph(text = "Unable to prettyprint dict at %s:%d:" % (source, self.lineno)), nodes.paragraph(text = str(sys.exc_info()[1])))]
 
 def setup(app):
-    #app.add_directive('expy', ExecDirective)
     app.add_directive('ppdict', PPrintDictDirective)
-
 
 
 # -- General configuration ---------------------------------------------------
