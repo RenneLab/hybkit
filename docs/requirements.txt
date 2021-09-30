@@ -1,3 +1,5 @@
 matplotlib
 importlib_resources
 sphinx-argparse
+sphinx>=4.2
+
