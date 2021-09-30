@@ -1,35 +1,44 @@
 
 References
 ==========
-    .. [ViennaFormat] `ViennaRNA Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
-           `UNAFold Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
-    .. [CTFormat] `UNAFold CT Format Description <http://www.unafold.org/doc/formats.php#CT>`_
-           `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
-           `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
+    .. [ViennaFormat] 
+         | `ViennaRNA Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
+         | `UNAFold Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
+    .. [CTFormat] 
+         | `UNAFold CT Format Description <http://www.unafold.org/doc/formats.php#CT>`_
+         | `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
+         | `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
     .. [Zuker2003] Zuker M. Mfold web server for nucleic acid folding and hybridization 
-           prediction. Nucleic Acids Res. 2003 Jul 1;31(13):3406-15. doi: 10.1093/nar/gkg595. 
+           prediction. Nucleic Acids Res. 2003 Jul 1;31(13):3406-15. 
+           doi: `10.1093/nar/gkg595 <https://doi.org/10.1093/nar/gkg595>`_. 
            PMID: 12824337; PMCID: PMC169194.
     .. [Hunter2007] J. Hunter, "Matplotlib: A 2D Graphics Environment" in Computing in 
            Science & Engineering, vol. 9, no. 03, pp. 90-95, 2007.
-           doi: 10.1109/MCSE.2007.55
+           doi: `10.1109/MCSE.2007.55 <https://doi.org/10.1109/MCSE.2007.55>`_
     .. [Cock2009] Cock PJ, Antao T, Chang JT, Chapman BA, Cox CJ, Dalke A, Friedberg I, 
            Hamelryck T, Kauff F, Wilczynski B, de Hoon MJ. Biopython: freely available 
            Python tools for computational molecular biology and bioinformatics. Bioinformatics. 
-           2009 Jun 1;25(11):1422-3. doi: 10.1093/bioinformatics/btp163. Epub 2009 Mar 20. 
+           2009 Jun 1;25(11):1422-3. doi: 
+           `10.1093/bioinformatics/btp163 <https://doi.org/10.1093/bioinformatics/btp163>`_. 
+           Epub 2009 Mar 20. 
            PMID: 19304878; PMCID: PMC2682512.
     .. [Lorenz2011] Lorenz, R., Bernhart, S.H., Höner zu Siederdissen, C. et al. 
            ViennaRNA Package 2.0. Algorithms Mol Biol 6, 26 (2011). 
-           doi: 10.1186/1748-7188-6-26
+           doi: `10.1186/1748-7188-6-26 <https://doi.org/10.1186/1748-7188-6-26>`_
     .. [Helwak2013] Helwak A, Kudla G, Dudnakova T, Tollervey D. Mapping the human miRNA 
            interactome by CLASH reveals frequent noncanonical binding. Cell. 2013 
-           Apr 25;153(3):654-65. doi: 10.1016/j.cell.2013.03.043. PMID: 23622248; PMCID: PMC3650559.
+           Apr 25;153(3):654-65. doi: 
+           `10.1016/j.cell.2013.03.043 <https://doi.org/10.1016/j.cell.2013.03.043>`_. 
+           PMID: 23622248; PMCID: PMC3650559.
     .. [Travis2014] Travis AJ, et al. Hyb: a bioinformatics pipeline for the analysis of 
            CLASH (crosslinking, ligation and sequencing of hybrids) data. 
-           Methods. 2014 Feb;65(3):263-73. doi: 10.1016/j.ymeth.2013.10.015.
+           Methods. 2014 Feb;65(3):263-73. 
+           doi: `10.1016/j.ymeth.2013.10.015 <https://doi.org/10.1016/j.ymeth.2013.10.015>`_.
     .. [Gay2018] Gay LA, Sethuraman S, Thomas M, Turner PC, Renne R. Modified Cross-Linking, 
            Ligation, and Sequencing of Hybrids (qCLASH) Identifies Kaposi's 
            Sarcoma-Associated Herpesvirus MicroRNA Targets in Endothelial Cells. 
-           J Virol. 2018 Mar 28;92(8):e02138-17. doi: 10.1128/JVI.02138-17. 
+           J Virol. 2018 Mar 28;92(8):e02138-17. 
+           doi: `10.1128/JVI.02138-17 <https://doi.org/10.1128/JVI.02138-17>`_. 
            PMID: 29386283; PMCID: PMC5874430.
 
 
