@@ -5,7 +5,7 @@
 
 """
 This module contains classes and methods for reading, writing, and manipulating data 
-in the ".hyb" genomic sequence format (|Travis2014|).
+in the ".hyb" genomic sequence format ([Travis2014]_).
 
 This is primarily based on three classes for storage of 
 chimeric sequence information and associated fold-information:
@@ -26,18 +26,17 @@ information:
 
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFile`        | Class for reading and writing ".hyb"-format files                |
-|                         | containing chimeric RNA sequence information                     |
+|                         | [Travis2014]_ containing chimeric RNA sequence information       |
 |                         | as :class:`HybRecord` objects                                    |
 +-------------------------+------------------------------------------------------------------+
 | :class:`ViennaFile`     | Class for reading and writing Vienna (.vienna)-format files      |
-|                         | containing RNA secondary structure information in dot-bracket    |
-|                         | format as :class:`FoldRecord` objects                            |
+|                         | [ViennaFormat]_ containing RNA secondary structure information   |
+|                         | dot-bracket format as :class:`FoldRecord` objects                |
 +-------------------------+------------------------------------------------------------------+
 | :class:`CtFile`         | Class for reading Connectivity Table (.ct)-format files          |
-|                         | containing predicted RNA secondary-structure information         |
-|                         | as used by the RNAStructure software package as                  |
+|                         | [CTFormat]_ containing predicted RNA secondary-structure         |
+|                         | information as used by the UNAFold as                            |
 |                         | :class:`FoldRecord` objects                                      |
-|                         | http://rna.urmc.rochester.edu/Text/File_Formats.html#CT          |
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and a     |
 |                         | :class:`ViennaFile` or :class:`CtFile`                           |
@@ -82,12 +81,12 @@ class HybRecord(object):
     """
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by |Travis2014| 
+    Hyb format entries are a GFF-related file format described by [Travis2014] 
     (see :ref:`References`)
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     annotations on each components. An example .hyb format line 
-    from |Gay2018|::
+    from [Gay2018]::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -1450,12 +1449,12 @@ class FoldRecord(object):
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     
     This class supports the following file types:
-    (Data courtesy of |Gay2018|)
+    (Data courtesy of [Gay2018]_)
 
     .. _vienna_file_format:
 
     * | The .vienna file format used by the ViennaRNA package (see :ref:`References`;
-        |ViennaFormat|; |Lorenz2011|):
+        [ViennaFormat]_; [Lorenz2011]_):
 
       Example:
           ::
@@ -1465,7 +1464,7 @@ class FoldRecord(object):
               .....((((((.((((((......)))))).))))))   (-11.1)
 
     * | The .ct file format used by UNAFold and other packages (see :ref:`References`;
-        |CTFormat|, |Zuker2003|):
+        [CTFormat]_, [Zuker2003]_):
 
       Example:
           ::
@@ -1626,7 +1625,7 @@ class FoldRecord(object):
                           error_mode='raise',
                          ):
         """
-        Construct instance from a list of 3 strings of Vienna-format (|ViennaFormat|) lines.
+        Construct instance from a list of 3 strings of Vienna-format ([ViennaFormat]_) lines.
 
         Args:
             record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
@@ -1708,7 +1707,7 @@ class FoldRecord(object):
     def from_ct_lines(cls, record_lines, error_mode=None):
         """
         Create a FoldRecord entry from a list of an arbitrary number of strings
-        corresponding to lines in the ".ct" file format (|CTFormat|).
+        corresponding to lines in the ".ct" file format ([CTFormat]_).
 
         Args
             error_mode (str, optional): 'string representing the error mode.

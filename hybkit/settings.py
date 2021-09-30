@@ -54,13 +54,6 @@ HybRecord_settings_info = {
         None,
         {'nargs':'+'}
     ],
-    'coding_types': [ 
-        copy.deepcopy(CODING_TYPES),
-        '"seg_type" fields identifying a coding sequence',
-        'str',
-        None,
-        {'nargs':'+'}
-    ],
     'custom_flags': [
         [],
         """
