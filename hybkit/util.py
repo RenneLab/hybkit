@@ -436,7 +436,7 @@ hyb_analysis_parser.add_argument('-t', '--analysis_types',
                                  # required=True,
                                  nargs='+',
                                  default=['segtype'],
-                                 choices=['segtype', 'mirna', 'target_region'],
+                                 choices=['segtype', 'mirna'],
                                  help=_this_arg_help)
 
 

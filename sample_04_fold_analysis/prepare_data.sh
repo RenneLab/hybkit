@@ -8,8 +8,8 @@
 echo -e "\nPreparing data for sample fold analysis."
 
 echo -e "\nCopying data to analysis directory."
-cp -v ../reference_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
-      ../reference_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna.gz \
+cp -v ../ref_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \
+      ../ref_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna.gz \
       ./
   
 

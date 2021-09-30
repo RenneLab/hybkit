@@ -39,9 +39,6 @@ _ANALYSIS_OUT_SUFFIX = '_analyzed'
 #: Default miRNA types for use in :func:`mirna_analysis`.
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
-#: Default coding sequence types for use in the :func:`target_region_analysis`.
-CODING_TYPES = ['mRNA']
-
 # settings_info : HybRecord
 # setting_info format contains structure:: 
 # {
@@ -120,25 +117,6 @@ HybRecord_settings_info = {
         Check every segment possibility when assigning segment types, rather than
         breaking after the first match is found. If True, finding segment types
         is slower but better at catching errors.
-        """,
-        'custom_bool_from_str',
-        None,
-        {}
-    ],
-    'allow_unknown_target_regions': [
-        False,
-        """
-        Allow unknown mRNA regions when performing target region analysis.
-        """,
-        'custom_bool_from_str',
-        None,
-        {}
-    ],
-    'warn_unknown_target_regions': [
-        False,
-        """
-        Print a warning message for unknown regions when performing
-        target region analysis.
         """,
         'custom_bool_from_str',
         None,

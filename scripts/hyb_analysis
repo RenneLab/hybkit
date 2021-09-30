@@ -11,7 +11,6 @@ Analysis Types:
     ========== =========================================================
     ``type``   Assigns types to each segment within hyb records
     ``mirna``  Assigns which segments are a miRNA based on segment types
-    ``region`` Assigns the coding region of a coding segment types
     ========== =========================================================
 """
 
@@ -74,9 +73,6 @@ __doc__ += textwrap.dedent("""
                                --allow_unknown_seg_types \\
                                --mirna_types miRNA kshv-miRNA
 
-    target_region Analysis:
-        | The 'target_region' analysis is currently pending implementation.
-
     """)
 
 __doc__ += hybkit.util.output_description
@@ -120,7 +116,6 @@ def hyb_analyze(in_hyb_files, analysis_types,
     # Set analysis modes
     do_type = ('type' in analysis_types)
     do_mirna = ('mirna' in analysis_types)
-    do_target_region = ('target_region' in analysis_types)
 
     if verbose:
         print('\nPerforming Analysis Types: ' + ', '.join([x.title() for x in analysis_types]))
@@ -161,10 +156,6 @@ def hyb_analyze(in_hyb_files, analysis_types,
             print('Assigning types as miRNA:')
             print('   ', mirna_types, '\n')
 
-    if do_target_region:
-        message = 'Target Region Analysis is not yet implemented.'
-        raise NotImplementedError(message)
-
     for i, in_hyb_file in enumerate(in_hyb_files):
         file_basename = os.path.basename(in_hyb_file)
         if out_hyb_files is not None:
@@ -190,9 +181,6 @@ def hyb_analyze(in_hyb_files, analysis_types,
                 if do_mirna:
                     record.eval_mirna(mirna_types)
      
-                if do_target_region:
-                    pass
-
                 out_hyb.write_record(record)
 
     if verbose:

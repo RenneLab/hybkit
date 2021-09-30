@@ -12,6 +12,7 @@ private*
 *.nf
 *.nextflow*
 */work/*
+deprecated*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

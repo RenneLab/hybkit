@@ -33,20 +33,18 @@ try:
 except NameError:
     local_data_dir = 'using_with_exec'
 
-if os.path.isdir(os.path.join(prefix_data_dir, 'databases')):
+if os.path.isdir(os.path.join(prefix_data_dir, 'reference_data')):
     hybkit_data_dir = prefix_data_dir
-elif os.path.isdir(os.path.join(local_data_dir, 'databases')):
+elif os.path.isdir(os.path.join(local_data_dir, 'reference_data')):
     hybkit_data_dir = local_data_dir
 else:
     print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
+    print('prefix_data_dir', prefix_data_dir)
+    print('local_data_dir', local_data_dir)
     hybkit_data_dir = ''
 
-databases_dir = os.path.join(hybkit_data_dir, 'databases')
 reference_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
 docs_dir = os.path.join(hybkit_data_dir, 'docs')
-scripts_extra_dir = os.path.join(hybkit_data_dir, 'scripts_extra')
-
-default_coding_region_ref = os.path.join(databases_dir, 'hybkit_coding_ref_combined.csv')
 
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [
@@ -78,7 +76,7 @@ keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel Stribling", "Rolf Renne"]
-__date__ = "2021/02/11"
+__date__ = "2021/09/30"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
 __license__ = "GPLv3+"

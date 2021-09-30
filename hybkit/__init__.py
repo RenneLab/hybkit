@@ -41,7 +41,6 @@ information:
 
 Todo:
     Add Hybrecord.to_csv_header()
-    Add analysis.target_region analyses.
     Create hyb-format database download script.
     Add user-friendly individual scripts.
     Implement all sample analyses with bash workflows and individual scripts.
@@ -72,7 +71,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import hybkit
 import hybkit.settings
 import hybkit.type_finder
-import hybkit.region_finder
 import hybkit.__about__
 # Import module-level dunder-names:
 from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__,\
@@ -257,12 +255,6 @@ class HybRecord(object):
     #:
     #: :meta hide-value:
     TypeFinder = hybkit.type_finder.TypeFinder
-
-    #: Link to :class:`region_finder.RegionFinder` class for idenfitying target region
-    #: in assigning segment types by :func:`target_region_eval`.
-    #: 
-    #: :meta hide-value:
-    RegionFinder = hybkit.region_finder.RegionFinder
 
     # Placeholder for set of allowed flags filled on first use.
     _flagset = None
@@ -637,143 +629,6 @@ class HybRecord(object):
         else:
             return mirna_details[detail]
 
-
-    # HybRecord : Public Methods : eval_target
-    def prep_target_region_eval(self, region_info=None, region_csv_name=None, sep=','): 
-        """
-        Prepare from an input csv and assign (or only assign) a dict with information 
-        on coding transcript regions. This method is required to be used before
-        performing a target region evaluation with :func:`target_region_eval`.
-        
-        Example:
-            Example format of prepared/input dict object::
-
-                region_info = {'ENST00000372098': {'cdna_coding_start':'45340255',
-                                                   'cdna_coding_end':'45340388'}}
-
-        This method requires one of the "region_info" (supply dict directly) or 
-        "region_csv_name" (csv_file for preparation) arguments to be filled.
-        
-        If supplying the a csv file,
-        the input csv must contain a header line, and must contain the columns::
-
-            identifier,cdna_coding_start,cdna_coding_end
-
-        Args:
-            region_info (dict, optional): Dict of region information to set as 
-                :attr:`region_finder.RegionFinder.region_info`.
-            region_csv_name (str, optional): String of path to csv file to read information from.
-            sep (str, optional): Separator for columns of input delimited file. (Default: ',')
-
-        """
-        if region_info is None and region_csv_name is None:
-            message = 'One of "region_info" or "region_csv_name" arguments must be supplied '
-            message += 'to prep_target_region_eval() method.\n'
-            print(message)
-            raise Exception(message)
-
-        elif region_info:
-            self.RegionFinder.set_region_info(region_info)
-        elif region_csv_name:
-            self.RegionFinder.make_set_region_info(region_csv_name, sep=sep)
-        else:
-            raise Exception()
-
-    # HybRecord : Public Methods : eval_target
-    def eval_target(self, coding_types=None,
-                    allow_unknown_regions=None, warn_unknown_regions=None):
-        """
-        For miRNA/coding-target pairs, find the region of the coding transcript targeted.
-
-        The evaluation requires a dict containing region 
-        information to be set using the :func:`prep_target_region_eval` method.
-        
-        If the record contains an identified mirna and identified coding target, 
-        find the region in which the targeted sequence resides and store the results in the 
-        :ref:`target_reg <target_reg>` flag and miRNA_eval dict.
-        This evaluation requries the :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>`, 
-        and :ref:`miRNA_seg <mirna_seg>` flags to be populated. This can be performed 
-        by sequentially using the :func:`eval_types` and :func:`eval_mirna` methods.
-        If the :ref:`miRNA_seg <mirna_seg>` flag is in {"N" (None), "B" (Both)},
-        the :ref:`target_reg <target_reg>` flag will be set to {"N" (None)}. 
-        If the :ref:`miRNA_seg <mirna_seg>` flag == "U" (Unknown),
-        the :ref:`target_reg <target_reg>` flag will be set to {"U" (Unknown)}. 
-        If the :ref:`miRNA_seg <mirna_seg>` flag is in {"3p", "5p"},
-        the :ref:`target_reg <target_reg>` flag will be checked if it is a coding type.
-        If the target is a coding type the evaluation will be performed and the 
-        :ref:`target_reg <target_reg>` flag will be set appropriately.
-
-
-        Args:
-            coding_types (iterable, optional): Iterable of strings representing sequence
-                types to be recognized as coding.
-                If None (default), uses :attr:`settings['coding_types'] <settings>`.
-            allow_unknown_regions (bool, optional):
-                Allow missing identifiers in evaluation by skipping sequences instead of 
-                raising an error.
-                If None (default), uses setting in 
-                :attr:`settings['allow_unknown_regions'] <settings>`. 
-            allow_unknown_regions (bool, optional):
-                Warn for missing identifiers in evaluation by printing a message.
-                If None (default), uses setting in 
-                :attr:`settings['allow_undefined_flags'] <settings>`.
-        """
-        if coding_types is None:
-            coding_types = self.settings['coding_types']
-
-        if allow_unknown_regions is None:
-            allow_unknown_regions = self.settings['allow_unknown_regions']
-
-        if warn_unknown_regions is None:
-            warn_unknown_regions = self.settings['warn_unknown_regions']
-
-        if self.region_finder.region_info == {}:
-            message = 'Target region information has not yet been prepared.\n'
-            message += 'Please prepare with "prep_target_region_eval()" before use.'
-            print(message)
-            raise Exception(message)
-
-        # Ensure eval_types and eval_mirna has been performed.
-        self._ensure_set('eval_types')
-        self._ensure_set('eval_mirna')
-        
-        # Get miRNA flag.
-        mirna_flag = self._get_flag('miRNA_seg')
-        # If miRNA is unknown, target is unknown
-        if mirna_flag == 'U':
-           target_reg = 'U'
-           reason = 'miRNA status is unknown (miRNA_flag = "U").'
-        # If no miRNA or both miRNA, there is no target.
-        elif miRNA_flag in {'N', 'B'}:
-           target_reg = 'N' 
-        # If miRNA and target, identify relevant seg_props
-        if mirna_flag in {'5p', '3p'}:
-            target_type = self.mirna_detail('target_seg_type')
-            if target_type not in coding_types:
-                target_reg = 'NON'
-            else:
-                target_name = self.target_props['ref_name']
-                target_start = self.target_props['ref_start']
-                target_end = self.target_props['ref_end']
-                target_reg = self.region_finder.find(target_type, target_start, target_end)
-                if target_reg is None:
-                    target_reg = 'U'
-                    reason = 'Target ID not in supplied region info (region_info): ' + target_name
-                    
-        if target_reg == 'U':
-            if allow_unknown_regions:
-                if warn_unknown_regions:
-                    message = 'WARNING: target_region_eval: ' + reason
-                    print(message)
-    
-            else:
-                message = 'Problem with target_region_eval for hybrecord: %s \n' % str(self)
-                message += reason + '\n'
-                print(message)
-                raise Exception(message)
-
-        self.set_flag('target_reg', target_reg)               
-
     # HybRecord : Public Methods : Record Properties
     def is_set(self, prop):
         """
@@ -1029,8 +884,8 @@ class HybRecord(object):
                                   'hybrid': Entire hybrid sequence (default); 
                                   'seg1': Sequence 1 (if defined); 
                                   'seg2': Sequence 2 (if defined);
-                                  'miRNA': miRNA sequence of miRNA/target pair (if defined); 
-                                  'target': Target sequence of miRNA/target pair (if defined);
+                                  'miRNA': miRNA sequence of miRNA/target pair (if defined, else None); 
+                                  'target': Target sequence of miRNA/target pair (if defined, else None);
             annotate (bool, optional): Add name of components to fasta sequence identifier
                                        if present.
         """

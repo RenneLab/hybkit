@@ -48,6 +48,10 @@ Changelog
         eval_types, eval_mirna, eval_target, respectively
         to differentiate from analysis module functions
       | Reimplemented analyses methods as classes.
+      | Added error checking / catching to HybFoldIter
+      | Removed Target-Region Analysis and associated files 
+        due to lack of archival database information,
+        pending furure development.
         
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
     * 0.1.9  (2020-03) Fix for Module Path Finding for Python > 3.6
