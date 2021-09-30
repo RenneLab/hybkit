@@ -18,6 +18,14 @@ FoldRecord Class
    :members:
    :undoc-members:
 
+DynamicFoldRecord Class
+-----------------------
+
+.. autoclass:: hybkit.DynamicFoldRecord
+   :members:
+   :inherited-members:
+   :undoc-members:
+
 HybFile Class
 -------------
 

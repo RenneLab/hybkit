@@ -10,7 +10,6 @@ TO FILL
    hybkit
    hybkit.settings
    hybkit.type_finder
-   hybkit.region_finder
    hybkit.analysis
    hybkit.plot
    hybkit.util
