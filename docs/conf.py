@@ -46,7 +46,7 @@ release = hybkit.__about__.__version__
 # -- PPrint Functions -----------------------------------------------------------
 import pprint
 def return_pprint_code_block(in_item, prefix_indent=8, obj_indent=1, width=92, item_name=''):
-    ret_str = '\n.. code-block::\n\n'
+    ret_str = '\n.. code-block:: python\n\n'
     ptext = pprint.pformat(in_item, indent=obj_indent, compact=False, 
                            width=width)
     if item_name and ptext.startswith('{'):
