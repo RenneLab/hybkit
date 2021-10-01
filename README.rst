@@ -118,7 +118,6 @@ Hybkit is still in beta testing. Feedback and comments are welcome to ds@ufl.edu
 
 
 Installation:
-    
     Hybkit requires Python 3.6+ and the use of the 
     `matplotlib <https://matplotlib.org/>`_ package.
     
