@@ -1,17 +1,21 @@
 
 References
 ==========
+
     .. [ViennaFormat] 
          | `ViennaRNA Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
          | `UNAFold Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
+
     .. [CTFormat] 
-         | `UNAFold CT Format Description <http://www.unafold.org/doc/formats.php#CT>`_
-         | `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
-         | `RNAStructure CT Format Description <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
+          | `UNAFold CT Format Description <http://www.unafold.org/doc/formats.php#CT>`_
+          | `RNAStructure CT Format Description 
+            <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
+          | `RNAStructure CT Format Description 
+            <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
     .. [Zuker2003] Zuker M. Mfold web server for nucleic acid folding and hybridization 
-           prediction. Nucleic Acids Res. 2003 Jul 1;31(13):3406-15. 
-           doi: `10.1093/nar/gkg595 <https://doi.org/10.1093/nar/gkg595>`_. 
-           PMID: 12824337; PMCID: PMC169194.
+          prediction. Nucleic Acids Res. 2003 Jul 1;31(13):3406-15. 
+          doi: `10.1093/nar/gkg595 <https://doi.org/10.1093/nar/gkg595>`_. 
+          PMID: 12824337; PMCID: PMC169194.
     .. [Hunter2007] J. Hunter, "Matplotlib: A 2D Graphics Environment" in Computing in 
            Science & Engineering, vol. 9, no. 03, pp. 90-95, 2007.
            doi: `10.1109/MCSE.2007.55 <https://doi.org/10.1109/MCSE.2007.55>`_
@@ -40,6 +44,16 @@ References
            J Virol. 2018 Mar 28;92(8):e02138-17. 
            doi: `10.1128/JVI.02138-17 <https://doi.org/10.1128/JVI.02138-17>`_. 
            PMID: 29386283; PMCID: PMC5874430.
+
+    * [ViennaFormat]_
+    * [CTFormat]_
+    * [Zuker2003]_
+    * [Hunter2007]_
+    * [Cock2009]_
+    * [Lorenz2011]_
+    * [Helwak2013]_
+    * [Travis2014]_
+    * [Gay2018]_
 
 
 About
