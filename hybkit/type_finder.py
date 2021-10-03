@@ -393,16 +393,29 @@ class TypeFinder(object):
                'id_map': method_id_map}
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #:   Dict of param generation methods for type finding methods
+    #: Dict of param generation methods for type finding methods
     #:   
     #:     ============== ===================================================
     #:     'hybformat'    :obj:`None`
     #:     'string_match' :meth:`make_string_match_params`
     #:     'id_map'       :meth:`make_id_map_params`
     #:     ============== ===================================================
-    parameter_methods = {
+    param_methods = {
         'hybformat': None,
         'string_match': make_string_match_params.__func__,
         'id_map': make_id_map_params.__func__,
         }
 
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #: Dict of whether parameter generation methods need an input file
+    #:   
+    #:     ============== ===================================================
+    #:     'hybformat'    :obj:`False`
+    #:     'string_match' :obj:`True`
+    #:     'id_map'       :obj:`True`
+    #:     ============== ===================================================
+    param_methods_needs_file = {
+        'hybformat': False,
+        'string_match': True,
+        'id_map': True,
+        }

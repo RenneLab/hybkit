@@ -81,8 +81,9 @@ def file_exists(file_name, required_suffixes=[]):
     Returns:
         A normalized version of the path passed to file_name.
     """
-    # Check that directory exists.
-    dir_exists(os.path.dirname(file_name))
+    # If there is a directory, check that directory exists.
+    if str(os.path.dirname(file_name)).strip():
+        dir_exists(os.path.dirname(file_name))
 
     # Check that file exists.
     if not os.path.isfile(file_name):
@@ -188,7 +189,8 @@ def out_path_exists(file_name):
         A normalized version of the path passed to file_name.
     """
     # Check that directory exists.
-    dir_exists(os.path.dirname(file_name))
+    if str(os.path.dirname(file_name)).strip():
+        dir_exists(os.path.dirname(file_name))
 
     # Normalize the file path
     file_name = os.path.normpath(file_name)
@@ -207,8 +209,9 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
 
     Args:
         in_file_name (str): Name of input file as template.
-        file_suffix (str): File type suffix.
-        add_suffix (str): Name suffix to add to indicate file is output.
+        name_suffix (str): Suffix to add to name before file type.
+        in_suffix (str): File type suffix on in_file_name (to remove).
+        out_suffix (str): File type suffix to add to final output file.
         out_dir (str): Directory path in which to place output file. 
         seg_sep (str): Separator string between file name segements.
 
@@ -224,7 +227,7 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
     full_name_suffix = name_suffix
     if out_suffix and not full_name_suffix.lower().endswith(out_suffix.lower()):
         full_name_suffix += out_suffix
-    if seg_sep and not full_name_suffix.startswith(seg_sep):
+    if seg_sep and full_name_suffix and not full_name_suffix.startswith(seg_sep):
         full_name_suffix = seg_sep + full_name_suffix
     
     out_file_basename = in_file_basename + full_name_suffix
@@ -276,7 +279,7 @@ def validate_args(args, parser=None):
 # Argument Parser : Input/Output Options
 in_hyb_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Path to hyb-format file with a ".hyb" suffix for use in the analysis.
+                 Path to hyb-format file with a ".hyb" suffix for use in the evaluation.
                  """
 in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                            metavar='PATH_TO/MY_FILE.HYB',
@@ -288,7 +291,7 @@ in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Path to one or more hyb-format files with a ".hyb" suffix for use 
-                 in the analysis.
+                 in the evaluation.
                  """
 in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                             metavar='PATH_TO/MY_FILE.HYB',
@@ -336,9 +339,24 @@ req_out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
                                 help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
+out_basenames_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Optional path to one or more basename prefixes to use for  
+                 analysis output. The appropriate suffix will be added
+                 based on the specific name.
+                 If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
+                 will be used as a template for the basename "OUT_DIR/MY_FILE".
+                 """
+out_basenames_parser.add_argument('-o', '--out_basename', type=out_path_exists,
+                                  metavar='PATH_TO/OUT_BASENAME',
+                                  # required=True,
+                                  nargs='+', 
+                                  help=_this_arg_help)
+
+# Argument Parser : Input/Output Options
 out_dir_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Path to directory for output of analysis files. 
+                 Path to directory for output of evaluation files. 
                  Defaults to the current working directory.
                  """
 out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
@@ -367,6 +385,13 @@ out_opts_parser = argparse.ArgumentParser(add_help=False,
                                                    out_suffix_parser,
                                                   ],)
 
+out_analysis_parser = argparse.ArgumentParser(add_help=False, 
+                                              parents=[
+                                                       out_basenames_parser,
+                                                       out_dir_parser,
+                                                       out_suffix_parser,
+                                                      ],)
+
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
 verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
@@ -387,6 +412,17 @@ verbosity_group.add_argument('-s', '--silent', action='store_true',
                              # nargs='+',
                              help=_this_arg_help)
 
+# Argument Parser : Record Manipulation Options
+record_manip_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Set "dataset" flag to value of the input file name.
+                 """
+record_manip_parser.add_argument('--set_dataset',
+                                 action='store_true',
+                                 # required=True,
+                                 # nargs='1',
+                                 help=_this_arg_help)
+
 
 # Argument Parser : HybRecord, HybFile, FoldRecord 
 _class_settings_groups = {}
@@ -404,6 +440,21 @@ _class_settings_groups['HybFile'] = hf_group
 foldrecord_parser = argparse.ArgumentParser(add_help=False)
 fr_group = foldrecord_parser.add_argument_group('Fold Record Settings')
 _class_settings_groups['FoldRecord'] = fr_group
+
+# Create parser for FoldRecord options
+foldfile_parser = argparse.ArgumentParser(add_help=False)
+ff_group = foldfile_parser.add_argument_group('Fold File Settings')
+_class_settings_groups['FoldFile'] = ff_group
+
+# Create parser for FoldRecord options
+hybfolditer_parser = argparse.ArgumentParser(add_help=False)
+hfi_group = hybfolditer_parser.add_argument_group('Hyb-Fold Iterator Settings')
+_class_settings_groups['HybFoldIter'] = hfi_group
+
+# Create parser for FoldRecord options
+analysis_parser = argparse.ArgumentParser(add_help=False)
+a_group = hybfolditer_parser.add_argument_group('Analysis Settings')
+_class_settings_groups['Analysis'] = a_group
 
 for _cls_name, _cls_group in _class_settings_groups.items():
     _cls_settings = getattr(settings, _cls_name + '_settings_info')
@@ -426,43 +477,43 @@ for _cls_name, _cls_group in _class_settings_groups.items():
 
 ##  ----- Task-specific Parsers -----
 
-# Argument Parser : hyb_analysis
-hyb_analysis_parser = argparse.ArgumentParser(add_help=False)
+# Argument Parser : hyb_eval
+hyb_eval_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Types of analyses to perform on input hyb file.
-                 (Note: analyses can be combined, such as "--analysis_types segtype mirna")
+                 Types of evaluations to perform on input hyb file.
+                 (Note: evaluations can be combined, such as "--eval_types type mirna")
                  """
-hyb_analysis_parser.add_argument('-t', '--analysis_types',
-                                 # required=True,
-                                 nargs='+',
-                                 default=['segtype'],
-                                 choices=['segtype', 'mirna'],
-                                 help=_this_arg_help)
+hyb_eval_parser.add_argument('-t', '--eval_types',
+                             # required=True,
+                             nargs='+',
+                             default=['type'],
+                             choices=['type', 'mirna'],
+                             help=_this_arg_help)
 
 
-# Argument Parser : hyb_analysis : segtype
-segtype_opts_group = hyb_analysis_parser.add_argument_group('segtype Analysis Options')
-# Argument Parser : hyb_analysis : segtype
+# Argument Parser : hyb_eval : type
+type_opts_group = hyb_eval_parser.add_argument_group('type Analysis Options')
+# Argument Parser : hyb_eval : type
 _this_arg_help = """
-                 Segment-type finding method to use for segtype analysis.
+                 Segment-type finding method to use for type evaluation.
                  For a description of the different methods, see the HybRecord documentation
-                 for the find_seg_types method.
+                 for the eval_types method.
                  """
-segtype_opts_group.add_argument('--segtype_method',
-                                # required=True,
-                                # nargs='?',
-                                default='hyb',
-                                choices=type_finder.TypeFinder.methods.keys(),
-                                help=_this_arg_help)
+type_opts_group.add_argument('--type_method',
+                             # required=True,
+                             # nargs='?',
+                             default='hyb',
+                             choices=type_finder.TypeFinder.methods.keys(),
+                             help=_this_arg_help)
 
-# Argument Parser : hyb_analysis : segtype
+# Argument Parser : hyb_eval : type
 _this_arg_help = """
-                 Segment-type finding paramaters to use for segtype analysis with some segtype
+                 Segment-type finding paramaters file to use for type evaluation with some type
                  finding methods: {string_match, id_map}.
                  For a description of the different methods, see the HybRecord documentation
                  for the find_seg_types method.
                  """
-segtype_opts_group.add_argument('--segtype_params', type=file_exists,
+type_opts_group.add_argument('--type_params_file', type=file_exists,
                                 metavar='PATH_TO/PARAMATERS_FILE',
                                 # required=True,
                                 # nargs='?',
@@ -484,6 +535,38 @@ hyb_filter_parser.add_argument('-m', '--filter_mode',
                                default='all',
                                choices={'all', 'any'},
                                help=_this_arg_help)
+
+# Argument Parser : hyb_analysis
+hyb_analysis_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Analysis to perform on input hyb file.
+                 """
+hyb_analysis_parser.add_argument('-a', '--analysis_type',
+                                 # required=True,
+                                 #nargs='1',
+                                 action='store',
+                                 choices=['type', 'mirna', 'summary', 'target', 'fold'],
+                                 help=_this_arg_help)
+
+_this_arg_help = """
+                 Name / title of analysis data.
+                 """
+hyb_analysis_parser.add_argument('-n', '--analysis_name',
+                                 # required=True,
+                                 #nargs='1',
+                                 #default=None,
+                                 #choices=[True, False],
+                                 help=_this_arg_help)
+
+_this_arg_help = """
+                 Create plots of analysis output.
+                 """
+hyb_analysis_parser.add_argument('-p', '--make_plots',
+                                 # required=True,
+                                 #nargs='1',
+                                 default=True,
+                                 choices=[True, False],
+                                 help=_this_arg_help)
 
 for i in range(1,4):
     _this_arg_help = """
@@ -585,18 +668,22 @@ def set_settings(nspace, verbose=False):
     
     Each setting in the following settings dictionaries are checked and set where applicable:
 
-    | HybRecord Settings: :attr:`hybkit.settings.HybRecord_settings`
-    | HybFile Settings: :attr:`hybkit.settings.HybFile_settings`
-    | FoldRecord Settings: :attr:`hybkit.settings.FoldRecord_settings`
-    | FoldFile Settings: :attr:`hybkit.settings.FoldFile_settings`
-    | Analysis Settings: :attr:`hybkit.settings.Analysis_settings`
+        ===================================== ============================================
+        :class:`~hybkit.HybRecord` Settings   :attr:`hybkit.settings.HybRecord_settings`
+        :class:`~hybkit.HybFile` Settings     :attr:`hybkit.settings.HybFile_settings`
+        :class:`~hybkit.FoldRecord` Settings  :attr:`hybkit.settings.FoldRecord_settings`
+        :class:`~hybkit.FoldFile` Settings    :attr:`hybkit.settings.FoldFile_settings`
+        :class:`~hybkit.HybFoldIter` Settings :attr:`hybkit.settings.HybFoldIter_settings`
+        :class:`~hybkit.Analysis` Settings    :attr:`hybkit.settings.Analysis_settings`
+        ===================================== ============================================
 
     Args:
         nspace (argparse.Namespace): Namespace containing settings
         verbose (bool, optional): If True, print when changing setting.
     """
     out_report = '\n'
-    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 'FoldFile', 'Analysis']:
+    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 
+                       'FoldFile', 'HybFoldIter', 'Analysis']:
         cls_settings_info = getattr(settings, class_name + '_settings_info')
         cls_settings = getattr(settings, class_name + '_settings')
         for setting_key in cls_settings:
@@ -606,7 +693,7 @@ def set_settings(nspace, verbose=False):
                     and argparse_setting != cls_settings_info[setting_key][0]):
                     out_report += 'Setting %s Setting: ' % class_name
                     out_report += '"%s" to "%s"\n' % (setting_key, str(argparse_setting))
-                    cls_settings[setting_key] = new_setting
+                    cls_settings[setting_key] = argparse_setting
 
     if verbose and out_report.strip():
         print(out_report)

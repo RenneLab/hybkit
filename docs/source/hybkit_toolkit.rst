@@ -9,7 +9,7 @@ ToFinalize
    :caption: Hybkit Toolkit Executables:
 
    toolkit/hyb_check
-   toolkit/hyb_analysis
    toolkit/hyb_filter
+   toolkit/hyb_eval
 
 

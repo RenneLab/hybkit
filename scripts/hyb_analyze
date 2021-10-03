@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+# Daniel B. Stribling
+# Renne Lab, University of Florida
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
+
+"""
+Read one or more '.hyb' format files and analyze the contained hybrid sequences.
+
+Analysis Types:
+   
+    ============================== =============================================================
+    ``type`` : Type Analysis       Analyze of segment types included in the analyzed hyb_records
+    ``mirna`` : miRNA Analysis     Analyze counts/types of miRNA in hyb records
+    ``summary`` : Summary Analysis Combined Type and miRNA Analysis
+    ``target`` : Target Analysis   Analyze sequences targeted by >= 1 individual miRNA
+    ============================== =============================================================
+"""
+
+import sys
+import os 
+import argparse
+import textwrap
+import hybkit
+from hybkit.analysis import TypeAnalysis, MirnaAnalysis, SummaryAnalysis, TargetAnalysis
+
+# Import module-level dunder-names:
+from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
+                             __email__, __license__, __maintainer__, __status__, __version__
+
+# Divide docstring into argparse and full portions.
+argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
+__doc__ += textwrap.dedent("""
+    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
+    and analyzes hybrid record properties. 
+
+    ``type`` Analysis:
+        Utilizes :class:`hybkit.analysis.TypeAnalysis to analyze hybrid types.
+
+        Requires the record flags: :ref:`seg1_type <seg1_type>` 
+        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types` 
+        method.
+
+        Example system calls:
+            ::
+            
+                $ hyb_analysis -a type -i my_file_1.hyb
+
+                $ hyb_analysis -a type -i my_file_1.hyb \\
+                           --make_plots False
+
+    ``mirna`` Analysis:
+        Utilizes :class:`hybkit.analysis.MirnaAnalysis to analyze miRNA counts 
+        and details in hyb file.
+
+        Requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        to be set by the :meth:`hybkit.HybRecord.eval_mirna` 
+        method.
+
+        Example system calls:
+            ::
+            
+                $ hyb_analysis -a mirna -i my_file_1.hyb
+
+    ``summary`` Analysis:
+        Utilizes :class:`hybkit.analysis.SummaryAnalysis to analyze hybrid types 
+        and miRNA counts / details in hyb file(s).
+
+        Requires the record flags: :ref:`seg1_type <seg1_type>` 
+        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`, 
+        and the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`. 
+
+        Example system calls:
+            ::
+            
+                $ hyb_analysis -a summary -i my_file_1.hyb
+
+    ``target`` Analysis:
+        Utilizes :class:`hybkit.analysis.TargetAnalysis to analyze hybrid types 
+        and miRNA counts / details in hyb file(s).
+
+        Requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with 
+        :ref:`miRNA_seg <miRNA_seg>` set to one of '3p' or '5p' will be evaluated. 
+        If 'allow_mirna_dimers=True', then :ref:`miRNA_seg` <miRNA_seg>` == 'B'
+        will also be included.
+
+        Example system calls:
+            ::
+            
+                $ hyb_analysis -a target -i my_file_1.hyb
+
+                $ hyb_analysis -a target -i my_file_1.hyb \\
+                           --allow_mirna_dimers True
+    """)
+
+__doc__ += hybkit.util.output_description
+
+# Create Command-line Argument Parser
+def make_parser():
+    script_args = argparse.ArgumentParser(add_help=False)
+    parser_components = [
+                         hybkit.util.in_hybs_parser,
+                         hybkit.util.out_analysis_parser,
+                         hybkit.util.hyb_analysis_parser,
+                         hybkit.util.gen_opts_parser,
+                         hybkit.util.hybrecord_parser,
+                         hybkit.util.hybfile_parser,
+                         hybkit.util.analysis_parser,
+                        ]
+    script_parser = argparse.ArgumentParser(
+         parents=parser_components,
+         description=argparse_doc.replace('|', '').replace('``', ''),
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+         allow_abbrev=False,
+         )
+
+    #script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
+
+    return script_parser
+
+# Define main script function.
+def hyb_analyze(in_hyb_files, analysis_type, 
+                out_dir='.', 
+                out_suffix=None,
+                out_basenames=None,
+                analysis_name=None,
+                make_plots=False,
+                verbose=False, silent=False):
+    """Perform main script function."""
+
+    if not silent:
+        print('\nPerforming Analysis of Hyb Files...')
+   
+    if verbose:
+        print('\nPerforming Analysis Type: ' + analysis_type)
+        if analysis_name:
+            print('Analysis Title: "%s"' % analysis_name)
+        print()
+
+    if analysis_type == 'type':
+        analysis = TypeAnalysis(name=analysis_name)
+    elif analysis_type == 'mirna':
+        analysis = MirnaAnalysis(name=analysis_name)
+    elif analysis_type == 'summary':
+        analysis = SummaryAnalysis(name=analysis_name)
+    elif analysis_type == 'target':
+        analysis = TargetAnalysis(name=analysis_name)
+
+    if out_suffix is None:
+        out_suffix = '_' + analysis_type
+    if verbose:
+        print('Using Out Suffix: "%s"' % out_suffix)
+
+    for i, in_hyb_file in enumerate(in_hyb_files):
+        file_basename = os.path.basename(in_hyb_file)
+        if out_basenames is not None:
+            out_basename = out_basenames[i]
+        else:
+            out_basename = hybkit.util.make_out_file_name(in_hyb_file,
+                                                          name_suffix=out_suffix,
+                                                          in_suffix='.hyb',
+                                                          out_suffix='',
+                                                          out_dir=out_dir,
+                                                          seg_sep='_',)
+
+
+
+        if verbose:
+            print('Analyzing File:\n    ' + in_hyb_file)
+    
+        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb:
+            for record in in_hyb:
+                analysis.add(record)
+
+        if verbose:
+            print('Outputting to basename:\n    ' + out_basename)
+
+        analysis.write(out_basename) 
+        if make_plots:
+            analysis.plot(out_basename) 
+
+    if verbose:
+        print('\nAnalysis Complete.\n')
+
+
+# Execute the script function
+if __name__ == '__main__':
+    script_parser = make_parser()
+    args = script_parser.parse_args() 
+    hybkit.util.validate_args(args, script_parser)
+    hybkit.util.set_settings(args, verbose=args.verbose)
+    hyb_analyze(args.in_hyb, 
+                args.analysis_type, 
+                args.out_dir,
+                out_suffix=args.out_suffix,
+                out_basenames=args.out_basename,
+                analysis_name=args.analysis_name,
+                make_plots=args.make_plots,
+                verbose=args.verbose,
+                silent=args.silent,
+               )
+

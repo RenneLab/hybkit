@@ -41,12 +41,13 @@ snoRNA-tRNA,27
 miscRNA-snoRNA,25
 lincRNA-tRNA,23
 lincRNA-snRNA,13
-kshv-miRNA-pseudogene,13
+KSHV-miRNA-pseudogene,13
 miscRNA-snRNA,13
-kshv-miRNA-mRNA,12
+KSHV-miRNA-mRNA,12
 Ig-mRNA,11
 lincRNA-snoRNA,8
-miRNA-kshv-miRNA,5
+KSHV-miRNA-miRNA,3
+miRNA-KSHV-miRNA,2
 lincRNA-miscRNA,1
 miRNA-Ig,1
-kshv-miRNA-kshv-miRNA,1
+KSHV-miRNA-KSHV-miRNA,1

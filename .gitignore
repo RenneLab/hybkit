@@ -4,6 +4,7 @@
 *.vienna
 *.viennad
 *.ct
+*/output_*
 */output
 *.swp
 working*

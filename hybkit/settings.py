@@ -34,7 +34,7 @@ FOLD_SUFFIXES = VIENNA_SUFFIXES + CT_SUFFIXES
 _USE_ABSPATH = False
 
 _FILTER_OUT_SUFFIX = '_filtered'
-_ANALYSIS_OUT_SUFFIX = '_analyzed'
+_EVAL_OUT_SUFFIX = '_evaluated'
 
 #: Default miRNA types for use in :func:`mirna_analysis`.
 MIRNA_TYPES = ['miRNA', 'microRNA']
@@ -246,7 +246,7 @@ HybFoldIter_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {'chioces':{'raise', 'warn_return', 'warn_skip', 'skip'}}
+        {'choices':{'raise', 'warn_return', 'warn_skip', 'skip'}}
     ],
     'max_sequential_skips': [
         20,

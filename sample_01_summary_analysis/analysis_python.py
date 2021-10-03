@@ -19,12 +19,14 @@ import hybkit
 # count_mode = 'read'    # Count reads represented by each record, instead of number of records.
 count_mode = 'record'  # Count each record/line as one, unless record is combined.
                        #   (Default count mode, but specified here for readability)
-
 hybkit.settings.Analysis_settings['count_mode'] = count_mode 
+
+# Set mirna types as custom to include KSHV-miRNAs
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
-out_dir = os.path.join(analysis_dir, 'output')
+out_dir = os.path.join(analysis_dir, 'output_python')
 input_files = [
     os.path.join(analysis_dir, 'GSM2720017_UI_BR1.hyb'),
     os.path.join(analysis_dir, 'GSM2720018_UI_BR2.hyb'),
@@ -55,7 +57,6 @@ hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
 # Tell hybkit that identifiers are in Hyb-Program standard format.
 hybkit.HybFile.settings['hybformat_id'] = True
-hybkit.HybFile.settings['hybformat_record'] = True
 
 # Initialize listto store independent analyses.
 summary_analyses = [] 
@@ -98,6 +99,8 @@ for in_file_path in input_files:
             if not use_record:
                 continue 
 
+            hyb_record.set_flag('dataset', in_file_label) 
+
             # Perform record analysis
             hyb_record.eval_mirna()
 
@@ -116,7 +119,7 @@ for in_file_path in input_files:
     summary_analyses.append(file_summary_analysis)
 
 # Create a combined summary analysis
-combined_summary_analysis = hybkit.analysis.SummaryAnalysis(name='combined_analysis')
+combined_summary_analysis = hybkit.analysis.SummaryAnalysis(name='Combined Analysis')
 for file_analysis in summary_analyses:
     combined_summary_analysis.update(file_analysis)
 

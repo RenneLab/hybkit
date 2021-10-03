@@ -23,29 +23,29 @@ __doc__ += textwrap.dedent("""
     and outputs only those records matching (/excluding) those criteria.
 
     The filter criteria and options are based on the options provided by the 
-    :func:`hybkit.HybRecord.has_property` method of the Hybkit API.
+    :func:`hybkit.HybRecord.has_prop` method of the Hybkit API.
 
     Example System Calls:
         ::
 
             hyb_filter -i my_file_1.hyb --filter has_seg_types
-            # Returns records that have completed a segtype analysis
+            # Outputs records that have completed a segtype analysis
 
             hyb_filter -i my_file_1.hyb --include seg_type mRNA
-            # Returns records with either segtype of mRNA
+            # Outputs records with either segtype of mRNA
 
             hyb_filter -i my_file_1.hyb --exclude seg_type mRNA
-            # Returns records without either segtype of mRNA
+            # Outputs records without either segtype of mRNA
 
             hyb_filter -i my_file_1.hyb --include seg1_type mRNA
-            # Returns records with only the first / |5p| segtype of mRNA
+            # Outputs records with only the first / |5p| segtype of mRNA
 
             hyb_filter -i my_file_1.hyb --include seg_type_contains RNA
-            # Returns all records with a segtype that includes 
+            # Outputs all records with a segtype that includes 
             #   the string "RNA" (case-sensitive)
 
             hyb_filter -i my_file_1.hyb --filter seg_contains kshv
-            # Returns records where either segment identifier contains the 
+            # Outputs records where either segment identifier contains the 
             #   the string: "kshv" (case-sensitive)
 
     Multiple filtering options can be used together. 
@@ -58,7 +58,7 @@ __doc__ += textwrap.dedent("""
 
             hyb_filter -i my_file_1.hyb --filter seg_contains kshv \\
                        --filter_2 seg_type miRNA
-            # Returns records with either reference identifier containing "kshv"
+            # Outputs records with either reference sequence identifier containing "kshv"
             #   and with a segtype of miRNA
 
     Example System Calls (match ANY criteria):
@@ -67,7 +67,7 @@ __doc__ += textwrap.dedent("""
             hyb_filter -i my_file_1.hyb --filter_mode any \\
                        --filter seg_type miRNA \\
                        --filter_2 seg_type lncRNA 
-            # Returns records containing either reference identifier matching 
+            # Outputs records containing either segment type matching 
             #   either "miRNA" or "lncRNA" (case-sensitive)
                                               
     """)
@@ -81,6 +81,7 @@ def make_parser():
                          hybkit.util.in_hybs_parser,
                          hybkit.util.out_opts_parser,
                          hybkit.util.hyb_filter_parser,
+                         hybkit.util.record_manip_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
@@ -101,6 +102,7 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
                out_dir='.', 
                out_suffix=hybkit.settings._FILTER_OUT_SUFFIX,
                out_hyb_files=None,
+               set_dataset=None,
                verbose=False, silent=False):
     """Perform main script function."""
 
@@ -110,11 +112,11 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
     if verbose:
         if filter_params:
             print('Records Must match %s Filter Parameters:' % filter_mode.upper())
-            print('    ' + '\n    '.join((str(p) for p in filter_params)) +'\n')
+            print('    ' + '\n    '.join((' '.join(p) for p in filter_params)) +'\n')
 
         if exclude_params:
             print('Using Exclusion Filter Parameters:')
-            print('    ' + '\n    '.join((str(p) for p in exclude_params)) +'\n')
+            print('    ' + '\n    '.join((' '.join(p) for p in exclude_params)) +'\n')
 
     allowed_modes = {'all', 'any'}
 
@@ -124,6 +126,7 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
  
     for i, in_hyb_file in enumerate(in_hyb_files):
         file_basename = os.path.basename(in_hyb_file)
+        file_label = file_basename.replace('.hyb', '')
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
@@ -136,6 +139,7 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
 
         if verbose:
             print('Filtering File:\n    ' + in_hyb_file)
+            print('Outputting to:\n    ' + out_hyb_file)
     
         include_count = 0
         exclude_count = 0
@@ -146,23 +150,27 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
                 if filter_mode == 'all':
                     use_record = True
                     for prop_type, prop_compare in filter_params:
-                        if not record.has_property(prop_type, prop_compare):
+                        if not record.has_prop(prop_type, prop_compare):
                             use_record = False
                             break
 
                 elif filter_mode == 'any':
                     use_record = False
                     for prop_type, prop_compare in filter_params:
-                        if record.has_property(prop_type, prop_compare):
+                        if record.has_prop(prop_type, prop_compare):
                             use_record = True
                             break
 
-                for prop_type, prop_compare in exclude_params:
-                    if record.has_property(prop_type, prop_compare):
-                        use_record = False
-                        break
+                if use_record:
+                    for prop_type, prop_compare in exclude_params:
+                        if record.has_prop(prop_type, prop_compare):
+                            use_record = False
+                            break
                 
                 if use_record:
+                    if set_dataset:
+                        record.set_flag('dataset', file_label)
+ 
                     out_hyb.write_record(record)
                     include_count += 1               
                 else:
@@ -182,8 +190,7 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args() 
     hybkit.util.validate_args(args, script_parser)
-    hybkit.HybRecord.set_namespace_settings(args, verbose=args.verbose)
-    hybkit.HybFile.set_namespace_settings(args, verbose=args.verbose)
+    hybkit.util.set_settings(args, verbose=args.verbose)
     filter_params = []
     for param_set in [getattr(args, key) for key in ['filter', 'filter_2', 'filter_3']]:
         if param_set is not None and bool(param_set):
@@ -214,6 +221,7 @@ if __name__ == '__main__':
                 out_dir=args.out_dir,
                 out_suffix=args.out_suffix,
                 out_hyb_files=args.out_hyb,
+                set_dataset=args.set_dataset,
                 verbose=args.verbose,
                 silent=args.silent,
                )
