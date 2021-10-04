@@ -86,9 +86,15 @@ def make_parser():
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
                         ]
+    #replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
+    use_argparse_doc = argparse_doc
+    #for q, r in replace_pairs:
+    #    use_argparse_doc = use_argparse_doc.replace(q, r)
+    #use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=argparse_doc,
+         description=use_argparse_doc,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter,
          allow_abbrev=False,
          )
@@ -140,8 +146,9 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
                                                           seg_sep='_',)
 
         if verbose:
-            print('Filtering File:\n    ' + in_hyb_file)
-            print('Outputting to:\n    ' + out_hyb_file)
+            print('Filtering File:')
+            print('    Input : ' + in_hyb_file)
+            print('    Output: ' + out_hyb_file)
     
         include_count = 0
         exclude_count = 0

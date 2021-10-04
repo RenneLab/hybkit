@@ -8,10 +8,10 @@ Read one or more '.hyb' format files and evaluate the contained hybrid sequences
 
 Evaluation Types:
    
-    ========== =========================================================
+    ========== ==========================================================
     ``type``   Assigns types to each segment within hyb records
-    ``mirna``  Assigns which segments are a miRNA based on segment types
-    ========== =========================================================
+    ``mirna``  Assigns which segments are a miRNA based on segment types.
+    ========== ==========================================================
 """
 
 import sys
@@ -86,9 +86,17 @@ def make_parser():
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
                         ]
+
+    replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."'), ('``', '"')]
+    use_argparse_doc = argparse_doc
+    for q, r in replace_pairs:
+        use_argparse_doc = use_argparse_doc.replace(q, r)
+    use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+    use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb').replace(':.', ':')
+
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=argparse_doc.replace('|', '').replace('``', ''),
+         description=use_argparse_doc,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter,
          allow_abbrev=False,
          )
@@ -168,8 +176,9 @@ def hyb_eval(in_hyb_files, eval_types,
                                                           seg_sep='_',)
 
         if verbose:
-            print('Evaluating File:\n    ' + in_hyb_file)
-            print('Outputting to:\n    ' + out_hyb_file)
+            print('Evaluating File:')
+            print('    Input : ' + in_hyb_file)
+            print('    Output: ' + out_hyb_file)
     
         with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
              hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:

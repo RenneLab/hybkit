@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-Analysis for sample_grouped_target_analysis performed as a python workflow.
+Grouped target analysis performed as a python workflow.
 
 Provided as an example of direct usage of hybkit functions. 
 File names are hardcoded, and functions are accessed directly.
@@ -22,15 +22,19 @@ count_mode = 'record'  # Count each record/line as one, unless record is combine
 hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
+
+# Tell hybkit that identifiers are in Hyb-Program standard format.
+hybkit.settings.HybFile_settings['hybformat_id'] = True
 
 # Allow mirna/mirna dimers in analysis.
 hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
-analysis_label = 'KSHV_Hyb_Combined'
-out_dir = os.path.join(analysis_dir, 'output')
+analysis_label = 'kshv_combined'
+analysis_name = 'KSHV Combined'
+out_dir = os.path.join(analysis_dir, 'output_python')
 input_files = [
     os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb'),
     os.path.join(analysis_dir, 'GSM2720021_WT_BR2.hyb'),
@@ -39,7 +43,7 @@ input_files = [
     os.path.join(analysis_dir, 'GSM2720024_D11_BR2.hyb'),
     os.path.join(analysis_dir, 'GSM2720025_D11_BR3.hyb')
 ]
-out_file_path = os.path.join(analysis_dir, 'output', analysis_label + '.hyb')
+out_file_path = os.path.join(analysis_dir, 'output_python', analysis_label + '.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
@@ -55,9 +59,6 @@ print('    ' + '\n    '.join(input_files) + '\n')
 match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
 hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
-# Set mirna types as custom to include KSHV-miRNAs
-hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
-
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
 
@@ -69,7 +70,7 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
     # Iterate through input files:
     for in_file_path in input_files:
         in_file_name = os.path.basename(in_file_path)
-        in_file_label = in_file_name.split('_')[0]
+        in_file_label = in_file_name.replace('.hyb', '')
         print('Analyzing:\n    %s' % in_file_path)
 
         with hybkit.HybFile(in_file_path, 'r') as in_file:
@@ -77,41 +78,45 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
             for hyb_record in in_file:
 
                 # Analyze only sequences where anya segment identifier contains the string "kshv"
-                if hyb_record.has_prop('any_seg_contains', 'kshv'):
-                    # Find the segment types of each record
-                    hyb_record.set_flag('dataset', in_file_label)
-                    hyb_record.eval_types()
-        
-                    # Determine if record has type that is excluded
-                    use_record = True
-                    for remove_type in remove_types:
-                        if hyb_record.has_prop('any_seg_type_is', remove_type):
-                            use_record = False
-                            break
-        
-                    # If record has an excluded type, continue to next record without analyzing.
-                    if not use_record:
-                        continue
+                if not hyb_record.has_prop('any_seg_contains', 'kshv'):
+                    continue
 
-                    # Evaluate whether hybrid contains a miRNA.
-                    hyb_record.eval_mirna()
+                # Find the segment types of each record
+                hyb_record.eval_types()
+    
+                # Determine if record has type that is excluded
+                use_record = True
+                for remove_type in remove_types:
+                    if hyb_record.has_prop('any_seg_type_is', remove_type):
+                        use_record = False
+                        break
+    
+                # If record has an excluded type, continue to next record without analyzing.
+                if not use_record:
+                    continue
 
-                    # Write the records to the output file
-                    out_kshv_file.write_record(hyb_record)
+                # Evaluate whether hybrid contains a miRNA.
+                hyb_record.eval_mirna()
+
+                # If assigned 'miRNA' does not contain string 'kshv', skip.
+                if (not hyb_record.has_prop('has_mirna') 
+                    or not hyb_record.has_prop('mirna_contains', 'kshv')):
+                    continue
+
+                hyb_record.set_flag('dataset', in_file_label)
+
+                # Write the records to the output file
+                out_kshv_file.write_record(hyb_record)
 
 print('\nPerforming Combined Target Analysis...\n')
 # Repeat iteration over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
-    # Prepare target analysis dict:
+    # Initialize target analysis:
     target_analysis = hybkit.analysis.TargetAnalysis(name=analysis_label)
 
+    # Perform target-analysis of mirna within kshv-associated data.
     for hyb_record in out_kshv_file:
-        # Perform target-analysis of mirna within kshv-associated data.
-        mirna_name = hyb_record.mirna_detail('mirna_name',
-            allow_mirna_dimers=hybkit.settings.Analysis_settings['allow_mirna_dimers']
-        )
-        if 'kshv' in mirna_name:
-            target_analysis.add(hyb_record)
+        target_analysis.add(hyb_record)
         
     # Write target information to output file
     # Set analysis basename without ".hyb" extension

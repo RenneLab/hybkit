@@ -198,7 +198,7 @@ FoldFile_settings_info = {
         None,
         {'choices':['strict','dynamic']}
     ],
-    'error_mode': [ 
+    'foldfile_error_mode': [ 
         'raise',
         """
         Mode for handling errors during reading of HybFiles 
@@ -244,7 +244,7 @@ HybFoldIter_settings_info = {
         "warn_skip": Print a warning and continue to the next iteration;
         "skip": Continue to the next iteration without any output.
         """,
-        'custom_bool_from_str',
+        'str',
         None,
         {'choices':{'raise', 'warn_return', 'warn_skip', 'skip'}}
     ],

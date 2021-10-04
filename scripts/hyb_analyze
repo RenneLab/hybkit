@@ -8,12 +8,12 @@ Read one or more '.hyb' format files and analyze the contained hybrid sequences.
 
 Analysis Types:
    
-    ============================== =============================================================
+    ============================== ==============================================================
     ``type`` : Type Analysis       Analyze of segment types included in the analyzed hyb_records
     ``mirna`` : miRNA Analysis     Analyze counts/types of miRNA in hyb records
     ``summary`` : Summary Analysis Combined Type and miRNA Analysis
-    ``target`` : Target Analysis   Analyze sequences targeted by >= 1 individual miRNA
-    ============================== =============================================================
+    ``target`` : Target Analysis   Analyze sequences targeted by >= 1 individual miRNA.
+    ============================== ==============================================================
 """
 
 import sys
@@ -43,9 +43,9 @@ __doc__ += textwrap.dedent("""
         Example system calls:
             ::
             
-                $ hyb_analysis -a type -i my_file_1.hyb
+                $ hyb_analyze -a type -i my_file_1.hyb
 
-                $ hyb_analysis -a type -i my_file_1.hyb \\
+                $ hyb_analyze -a type -i my_file_1.hyb \\
                            --make_plots False
 
     ``mirna`` Analysis:
@@ -59,7 +59,7 @@ __doc__ += textwrap.dedent("""
         Example system calls:
             ::
             
-                $ hyb_analysis -a mirna -i my_file_1.hyb
+                $ hyb_analyze -a mirna -i my_file_1.hyb
 
     ``summary`` Analysis:
         Utilizes :class:`hybkit.analysis.SummaryAnalysis to analyze hybrid types 
@@ -73,7 +73,7 @@ __doc__ += textwrap.dedent("""
         Example system calls:
             ::
             
-                $ hyb_analysis -a summary -i my_file_1.hyb
+                $ hyb_analyze -a summary -i my_file_1.hyb
 
     ``target`` Analysis:
         Utilizes :class:`hybkit.analysis.TargetAnalysis to analyze hybrid types 
@@ -88,9 +88,9 @@ __doc__ += textwrap.dedent("""
         Example system calls:
             ::
             
-                $ hyb_analysis -a target -i my_file_1.hyb
+                $ hyb_analyze -a target -i my_file_1.hyb
 
-                $ hyb_analysis -a target -i my_file_1.hyb \\
+                $ hyb_analyze -a target -i my_file_1.hyb \\
                            --allow_mirna_dimers True
     """)
 
@@ -102,15 +102,23 @@ def make_parser():
     parser_components = [
                          hybkit.util.in_hybs_parser,
                          hybkit.util.out_analysis_parser,
-                         hybkit.util.hyb_analysis_parser,
+                         hybkit.util.hyb_analyze_parser,
+                         hybkit.util.all_analyze_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
                          hybkit.util.analysis_parser,
                         ]
+    replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
+    use_argparse_doc = argparse_doc
+    for q, r in replace_pairs:
+        use_argparse_doc = use_argparse_doc.replace(q, r)
+    use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+    use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb')
+
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=argparse_doc.replace('|', '').replace('``', ''),
+         description=use_argparse_doc,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter,
          allow_abbrev=False,
          )
@@ -168,14 +176,14 @@ def hyb_analyze(in_hyb_files, analysis_type,
 
 
         if verbose:
-            print('Analyzing File:\n    ' + in_hyb_file)
-    
+            print('Analyzing File:')
+            print('    Input   : ' + in_hyb_file)
+            print('    Out Base: ' + out_basename)
+
         with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb:
             for record in in_hyb:
                 analysis.add(record)
 
-        if verbose:
-            print('Outputting to basename:\n    ' + out_basename)
 
         analysis.write(out_basename) 
         if write_individual and hasattr(analysis, 'write_individual'):

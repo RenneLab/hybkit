@@ -39,9 +39,15 @@ def make_parser():
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
                         ]
+    #replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
+    use_argparse_doc = argparse_doc
+    #for q, r in replace_pairs:
+    #    use_argparse_doc = use_argparse_doc.replace(q, r)
+    #use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+
     script_parser = argparse.ArgumentParser(
          parents=parser_components,
-         description=argparse_doc,
+         description=use_argparse_doc,
          formatter_class=argparse.ArgumentDefaultsHelpFormatter,
          allow_abbrev=False,
          )

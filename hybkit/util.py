@@ -251,6 +251,8 @@ def validate_args(args, parser=None):
     Current checks:
         | If explicit output file names supplied, be sure that they match the number of 
           input files provided.
+        | If fold files provided, make sure that they match the number of input hyb
+          files provided.
 
     Args:
         args (argparse.Namespace): The arguments produced by argparse.
@@ -275,6 +277,19 @@ def validate_args(args, parser=None):
             print(message + suffix)
             sys.exit(1)
 
+    if hasattr(args, 'in_hyb') and hasattr(args, 'in_fold'):
+        len_in_hyb = len(args.in_hyb)
+        len_in_fold = len(args.in_fold)
+        if len_in_hyb != len_out_hyb:
+            message += 'The number of input hyb files and input fold files provided '
+            message += 'do not match. ( %i and %i )' % (len_in_hyb, len_in_fold)
+            message += '\n\nInput Files:\n    '
+            message += '\n    '.join([f for f in args.in_hyb])
+            message += '\n\nOutput Files:\n    '
+            message += '\n    '.join([f for f in args.in_fold])
+            print(message + suffix)
+            sys.exit(1)
+
 
 # Argument Parser : Input/Output Options
 in_hyb_parser = argparse.ArgumentParser(add_help=False)
@@ -290,7 +305,7 @@ in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
 # Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Path to one or more hyb-format files with a ".hyb" suffix for use 
+                 REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use 
                  in the evaluation.
                  """
 in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
@@ -298,6 +313,18 @@ in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                             required=True,
                             nargs='+', 
                             help=_this_arg_help)
+
+# Argument Parser : Input/Output Options
+in_folds_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 REQUIRED path to one or more RNA secondary-structure files with a 
+                 ".vienna" or ".ct" suffix for use in the evaluation.
+                 """
+in_folds_parser.add_argument('-f', '--in_fold', type=fold_exists,
+                             metavar='PATH_TO/MY_FILE.VIENNA',
+                             required=True,
+                             nargs='+', 
+                             help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_hyb_parser = argparse.ArgumentParser(add_help=False)
@@ -369,8 +396,9 @@ out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
 # Argument Parser : Input/Output Options
 out_suffix_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Suffix to add to the name of output hyb files.
-                 (Note: If the provided suffix does not end with ".hyb", then ".hyb" will be added)
+                 Suffix to add to the name of output files, before any 
+                 file- or analysis-specific suffixes. The file-type appropriate suffix
+                 will be added automatically.
                  """
 out_suffix_parser.add_argument('-u', '--out_suffix',
                                # required=True,
@@ -536,48 +564,64 @@ hyb_filter_parser.add_argument('-m', '--filter_mode',
                                choices={'all', 'any'},
                                help=_this_arg_help)
 
-# Argument Parser : hyb_analysis
-hyb_analysis_parser = argparse.ArgumentParser(add_help=False)
+# Argument Parser : hyb_analyze
+hyb_analyze_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Analysis to perform on input hyb file.
                  """
-hyb_analysis_parser.add_argument('-a', '--analysis_type',
-                                 # required=True,
-                                 #nargs='1',
-                                 action='store',
-                                 choices=['type', 'mirna', 'summary', 'target', 'fold'],
-                                 help=_this_arg_help)
+hyb_analyze_parser.add_argument('-a', '--analysis_type',
+                                # required=True,
+                                #nargs='1',
+                                action='store',
+                                choices=['type', 'mirna', 'summary', 'target'],
+                                help=_this_arg_help)
 
+_this_arg_help = """
+                 Additionally write / plot output per individual miRNA.
+                 """
+hyb_analyze_parser.add_argument('--write_individual',
+                                # required=True,
+                                type=_bool_from_string,
+                                default=False,
+                                nargs='?',
+                                const=True,
+                                choices=[True, False],
+                                help=_this_arg_help)
+
+# Argument Parser : hyb_fold_analyze
+hyb_fold_analyze_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = """
+                 Analysis to perform on input hyb and fold files.
+                 """
+hyb_fold_analyze_parser.add_argument('-a', '--analysis_type',
+                                     # required=True,
+                                     #nargs='1',
+                                     default='fold',
+                                     action='store',
+                                     choices=['fold'],
+                                     help=_this_arg_help)
+
+# Argument Parser : all_analyze
+all_analyze_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  Name / title of analysis data.
                  """
-hyb_analysis_parser.add_argument('-n', '--analysis_name',
-                                 # required=True,
-                                 #nargs='1',
-                                 #default=None,
-                                 #choices=[True, False],
-                                 help=_this_arg_help)
+all_analyze_parser.add_argument('-n', '--analysis_name',
+                                # required=True,
+                                #nargs='1',
+                                #default=None,
+                                #choices=[True, False],
+                                help=_this_arg_help)
 
 _this_arg_help = """
                  Create plots of analysis output.
                  """
-hyb_analysis_parser.add_argument('-p', '--make_plots',
-                                 # required=True,
-                                 type=_bool_from_string,
-                                 default=True,
-                                 choices=[True, False],
-                                 help=_this_arg_help)
-_this_arg_help = """
-                 Additionally write / plot output per individual miRNA.
-                 """
-hyb_analysis_parser.add_argument('--write_individual',
-                                 # required=True,
-                                 type=_bool_from_string,
-                                 default=False,
-                                 nargs='?',
-                                 const=True,
-                                 choices=[True, False],
-                                 help=_this_arg_help)
+all_analyze_parser.add_argument('-p', '--make_plots',
+                                # required=True,
+                                type=_bool_from_string,
+                                default=True,
+                                choices=[True, False],
+                                help=_this_arg_help)
 
 for i in range(1,4):
     _this_arg_help = """
