@@ -4,7 +4,7 @@ hybkit Hyb File Specification
 
     Version: |spec_version|
 
-    The ".hyb" file format is described by [Travis2014]_ along with the Hyb software package
+    The ".hyb" (hyb file) format is described by [Travis2014]_ along with the Hyb software package
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
     mapping coordinates, and annotation information for each chimera".
     
@@ -55,11 +55,6 @@ Columns
         16 flags           Hybrid Read Analysis Details       
         == =============== ===================================================================
 
-..     These columns are respectively described in hybkit as:
-         id, seq, energy, [seg1\_]ref, [seg1\_]read_start, [seg1\_]read_end, [seg1\_]ref_start,
-         [seg1\_]ref_end, [seg1\_]score, [seg2\_]read_start, [seg2\_]read_end, [seg2\_]ref_start,
-         [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
-
 
 .. toctree::
    :maxdepth: 2
@@ -77,7 +72,8 @@ Flags
     
         .. _count_total:
         
-        :obj:`count_total` - Integer: Total represented hybrid records, if combined.
+        :obj:`count_total` - Integer: Total represented hybrid records, if records have been
+        combined.
     
         .. _count_last_clustering:
     
@@ -91,7 +87,7 @@ Flags
         
         .. _seq_IDs_in_cluster:
     
-        :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all reord IDs of hybrids
+        :obj:`seq_IDs_in_cluster` -  String: Comma-separated list of all record IDs of hybrids
         merged into this hybrid entry.
 
     hybkit Flags:
@@ -128,14 +124,14 @@ Flags
         .. _mirna_seg:
     
         :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
-        options are "N" (none), "3p" (seg1), "5p" (seg2),
+        options are "N" (none), "5p" (seg1), "3p" (seg2),
         "B" (both), or "U" (unknown).
     
         .. _target_reg:
     
         :obj:`target_reg` -  String: Assigned region of the miRNA target.
-        options are "5pUTR", "C" (coding), "3pUTR",
-        "NON" (noncoding), "N" (none), or "U" (unknown).
+        options are "5pUTR", "C" ([C]oding), "3pUTR",
+        "NON" ([NON]coding), "N" ([N]one), or "U" ([U]nknown).
     
         .. _ext:
       
