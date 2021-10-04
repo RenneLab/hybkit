@@ -175,9 +175,9 @@ class BaseAnalysis(object):
                     target_type = hyb_record.get_seg2_type()
             else:
                 mirna_details = hyb_record.mirna_detail()
-                mirna_name = mirna_details['mirna_name'] 
+                mirna_name = mirna_details['mirna_ref'] 
                 mirna_type = mirna_details['mirna_seg_type'] 
-                target_name = mirna_details['target_name'] 
+                target_name = mirna_details['target_ref'] 
                 target_type = mirna_details['target_seg_type'] 
 
         if mirna_name is not None:

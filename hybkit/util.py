@@ -453,7 +453,7 @@ _class_settings_groups['HybFoldIter'] = hfi_group
 
 # Create parser for FoldRecord options
 analysis_parser = argparse.ArgumentParser(add_help=False)
-a_group = hybfolditer_parser.add_argument_group('Analysis Settings')
+a_group = analysis_parser.add_argument_group('Analysis Settings')
 _class_settings_groups['Analysis'] = a_group
 
 for _cls_name, _cls_group in _class_settings_groups.items():
@@ -563,8 +563,19 @@ _this_arg_help = """
                  """
 hyb_analysis_parser.add_argument('-p', '--make_plots',
                                  # required=True,
-                                 #nargs='1',
+                                 type=_bool_from_string,
                                  default=True,
+                                 choices=[True, False],
+                                 help=_this_arg_help)
+_this_arg_help = """
+                 Additionally write / plot output per individual miRNA.
+                 """
+hyb_analysis_parser.add_argument('--write_individual',
+                                 # required=True,
+                                 type=_bool_from_string,
+                                 default=False,
+                                 nargs='?',
+                                 const=True,
                                  choices=[True, False],
                                  help=_this_arg_help)
 

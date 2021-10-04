@@ -112,7 +112,9 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
     if verbose:
         if filter_params:
             print('Records Must match %s Filter Parameters:' % filter_mode.upper())
-            print('    ' + '\n    '.join((' '.join(p) for p in filter_params)) +'\n')
+            for p_set in filter_params:
+                print('   ', ' '.join([x for x in p_set if x is not None]))
+
 
         if exclude_params:
             print('Using Exclusion Filter Parameters:')

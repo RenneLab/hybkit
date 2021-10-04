@@ -93,7 +93,7 @@ HybRecord_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
     'allow_unknown_seg_types': [
         False,
@@ -102,7 +102,7 @@ HybRecord_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
     'check_complete_seg_types': [
         False,
@@ -113,7 +113,7 @@ HybRecord_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
 }
 
@@ -134,7 +134,7 @@ HybFile_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
     'hybformat_ref': [ 
         False,
@@ -146,7 +146,7 @@ HybFile_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
 }
 
@@ -297,7 +297,7 @@ Analysis_settings_info = {
         """,
         'custom_bool_from_str',
         None,
-        {}
+        {'nargs': '?', 'const': True}
     ],
     'type_sep': [
         '-',

@@ -558,8 +558,8 @@ class HybRecord(object):
         Args:
             detail (str): | Type of detail to return. Options include: 
                           | 'all' : (dict of all properties, default); 
-                          | 'mirna_name'      : Identifier for Assigned miRNA;
-                          | 'target_name'     : Identifier for Assigned Target;
+                          | 'mirna_ref'      : Identifier for Assigned miRNA;
+                          | 'target_ref'     : Identifier for Assigned Target;
                           | 'mirna_seg_type'  : Assigned seg_type of miRNA;
                           | 'target_seg_type' : Assigned seg_type of target;
                           | 'mirna_seq'       : Annotated subsequence of miRNA;
@@ -584,7 +584,7 @@ class HybRecord(object):
             raise Exception(message)
 
 
-        ALLOWED_DETAILS = {'all', 'mirna_name', 'target_name', 'mirna_seg_type', 'target_seg_type', 
+        ALLOWED_DETAILS = {'all', 'mirna_ref', 'target_ref', 'mirna_seg_type', 'target_seg_type', 
                            'mirna_seq', 'target_seq', 'mirna_fold', 'target_fold',
                           } 
 
@@ -613,8 +613,8 @@ class HybRecord(object):
             print(message)
             raise Exception(message)
 
-        mirna_details['mirna_name'] = mirna_props['ref_name']
-        mirna_details['target_name'] = target_props['ref_name']
+        mirna_details['mirna_ref'] = mirna_props['ref_name']
+        mirna_details['target_ref'] = target_props['ref_name']
         mirna_details['mirna_seq'] = self._get_seg_seq(mirna_props)
         mirna_details['target_seq'] = self._get_seg_seq(target_props)
         if self.fold_record is not None:
@@ -722,7 +722,7 @@ class HybRecord(object):
             raise Exception(message)
 
         # Check if a substring compares to a desired property string.
-        if prop in self.GEN_PROPS:
+        if prop in self._GEN_PROPS_SET:
             if prop == 'has_indels':
                 self._ensure_set('full_seg_props')
                 has_indels = False
@@ -735,10 +735,13 @@ class HybRecord(object):
                 ret_val = has_indels
 
         # Check if a substring compares to a desired property string.
-        elif prop in self.STR_PROPS:
+        elif prop in self._ALL_STR_PROPS_SET:
             if not prop_compare:
                 message = 'Property: %s  requires a comparison string. ' % prop
                 message += 'Please provide an argument to prop_compare.'
+
+            if prop in self._MIRNA_STR_PROPS_SET:
+                self._ensure_set('eval_mirna')
 
             prop_split = prop.split('_')
             assert len(prop_split) in {2, 3, 4}
@@ -746,7 +749,7 @@ class HybRecord(object):
             check_type = prop_split[-1]
 
             check_info = None
-            multi_check_type = None
+            multi_check = None
             if check_attr in {'id', 'seq'}:
                 check_info = getattr(self, check_attr)
             elif check_attr == 'seg1':
@@ -767,8 +770,12 @@ class HybRecord(object):
                 self._ensure_set('eval_types')
                 check_info = (self.get_seg1_type(), self.get_seg2_type())
                 multi_check = check_attr.split('_')[0]
+            elif check_attr == 'mirna':
+                check_info = self.mirna_detail('mirna_ref', allow_mirna_dimers=True)
+            elif check_attr == 'target':
+                check_info = self.mirna_detail('target_ref', allow_mirna_dimers=True)
             else:
-                raise Exception('Unknown Field')
+                raise Exception('Unknown Field: ' + check_attr)
 
             # Wrap single check_info value in a list, if not already.
             if not multi_check:
@@ -797,7 +804,7 @@ class HybRecord(object):
                 raise Exception(prop)
 
         # Check mirna-specific properties (requires mirna-evaluation)
-        elif prop in self.MIRNA_PROPS:
+        elif prop in self._MIRNA_PROPS_SET:
             self._ensure_set('eval_mirna')
             if prop == 'has_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'5p', '3p', 'B'}
@@ -814,7 +821,7 @@ class HybRecord(object):
             else:
                 raise Exception(prop)
 
-        elif prop in self.TARGET_PROPS:
+        elif prop in self._TARGET_PROPS_SET:
             self._ensure_set('eval_target')
             if prop == 'has_target':
                 raise NotImplementedError()
@@ -1106,6 +1113,13 @@ class HybRecord(object):
         'has_mirna', 'no_mirna', 'mirna_dimer', 'mirna_not_dimer',
         '3p_mirna', '5p_mirna',
     ]
+    #: miRNA-evaluation & string-comparison properties for the :meth:`has_prop` method.
+    MIRNA_STR_PROPS = [
+        'mirna_is', 'mirna_prefix', 'mirna_suffix', 'mirna_contains',
+        'target_is', 'target_prefix', 'target_suffix', 'target_contains',
+        'mirna_type', 'mirna_type_prefix', 'mirna_type_suffix', 'mirna_type_contains',
+        'target_type', 'target_type_prefix', 'target_type_suffix', 'target_type_contains',
+    ]
     #: Target-evaluation-related properties for the :meth:`has_prop` method.
     TARGET_PROPS = [
         'target_none', 'target_unknown', 'target_ncrna', 
@@ -1113,8 +1127,14 @@ class HybRecord(object):
     ]
 
     #: All allowed properties for the :meth:`has_prop()` method.
-    HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + TARGET_PROPS
+    HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + MIRNA_STR_PROPS + TARGET_PROPS
 
+    _GEN_PROPS_SET = set(GEN_PROPS)
+    _STR_PROPS_SET = set(STR_PROPS)
+    _MIRNA_PROPS_SET = set(MIRNA_PROPS)
+    _MIRNA_STR_PROPS_SET = set(MIRNA_STR_PROPS)
+    _ALL_STR_PROPS_SET = _STR_PROPS_SET | _MIRNA_STR_PROPS_SET
+    _TARGET_PROPS_SET = set(TARGET_PROPS)
     _HAS_PROPS_SET = set(HAS_PROPS)
 
     # HybRecord : Private Methods : Initialization

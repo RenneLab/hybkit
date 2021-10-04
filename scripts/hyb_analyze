@@ -126,6 +126,7 @@ def hyb_analyze(in_hyb_files, analysis_type,
                 out_basenames=None,
                 analysis_name=None,
                 make_plots=False,
+                write_individual=False,
                 verbose=False, silent=False):
     """Perform main script function."""
 
@@ -177,8 +178,13 @@ def hyb_analyze(in_hyb_files, analysis_type,
             print('Outputting to basename:\n    ' + out_basename)
 
         analysis.write(out_basename) 
+        if write_individual and hasattr(analysis, 'write_individual'):
+            analysis.write_individual(out_basename)
+
         if make_plots:
             analysis.plot(out_basename) 
+            if write_individual and hasattr(analysis, 'plot_individual'):
+                analysis.plot_individual(out_basename)
 
     if verbose:
         print('\nAnalysis Complete.\n')
@@ -197,6 +203,7 @@ if __name__ == '__main__':
                 out_basenames=args.out_basename,
                 analysis_name=args.analysis_name,
                 make_plots=args.make_plots,
+                write_individual=args.write_individual,
                 verbose=args.verbose,
                 silent=args.silent,
                )
