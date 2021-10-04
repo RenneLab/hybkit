@@ -67,7 +67,7 @@ __doc__ += textwrap.dedent("""
 
         Requires the record flags: :ref:`seg1_type <seg1_type>` 
         and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`, 
-        and the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        and the record flag: :ref:`miRNA_seg <mirna_seg>` 
         to be set by :meth:`hybkit.HybRecord.eval_mirna`. 
 
         Example system calls:
@@ -79,10 +79,10 @@ __doc__ += textwrap.dedent("""
         Utilizes :class:`hybkit.analysis.TargetAnalysis` to analyze hybrid types 
         and miRNA counts / details in hyb file(s).
 
-        Requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        Requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
         to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with 
-        :ref:`miRNA_seg <miRNA_seg>` set to one of '3p' or '5p' will be evaluated. 
-        If 'allow_mirna_dimers=True', then :ref:`miRNA_seg` <miRNA_seg>` == 'B'
+        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated. 
+        If 'allow_mirna_dimers=True', then :ref:`miRNA_seg <mirna_seg>` == 'B'
         will also be included.
 
         Example system calls:

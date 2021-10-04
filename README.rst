@@ -50,7 +50,7 @@ Hybkit Toolkit:
         hyb_fold_analyze                    Perform a fold analysis on a hyb and a RNA secondary
                                             structure (fold) file in ".vienna" or ".ct" format
                                             on a hyb file
-        =================================== ==========================================================
+        =================================== ===========================================================
         
     These scripts are used on the command line with hyb files. For example, to filter a 
     hyb file to contain only hybrids with a sequence identifier containing the string "kshv"
