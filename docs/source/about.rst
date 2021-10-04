@@ -96,6 +96,7 @@ Changelog
       | Removed Target-Region Analysis and associated files 
         due to lack of archival database information,
         pending furure development
+      | Added DynamicFoldRecord class for non-identical fold/hybrid sequence handling
       | Implemented hyb_analysis, hyb_exclude_fold, and hyb_fold_analysis executables 
       | Added shell implementation to all example pipelines    
    
