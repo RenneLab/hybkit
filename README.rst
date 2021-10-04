@@ -152,7 +152,7 @@ Installation:
 .. _Helwak2013: https://doi.org/10.1016/j.cell.2013.03.043
 .. |Travis2014| replace:: *Travis et al. (Methods 2014)*
 .. _Travis2014: https://doi.org/10.1016/j.ymeth.2013.10.015 
-.. |Gay2018| replace:: *Gay et al. (J. Virol. 2013)*
+.. |Gay2018| replace:: *Gay et al. (J. Virol. 2018)*
 .. _Gay2018: https://doi.org/10.1128/JVI.02138-17
 .. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
