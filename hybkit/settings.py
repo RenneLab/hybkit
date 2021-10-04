@@ -186,7 +186,7 @@ FoldRecord_settings_info = {
 #: Information for settings of :class:`~hybkit.FoldFile` class.
 #: Copied into :data:`FoldFile_settings` for use at runtime.
 FoldFile_settings_info = {
-    'fold_record_type': [
+    'foldrecord_type': [
         'strict',
         """
         Type of fold record object to use. Options: "strict": FoldRecord, requires an exact sequence

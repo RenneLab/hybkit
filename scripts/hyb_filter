@@ -107,6 +107,7 @@ def make_parser():
 def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
                out_dir='.', 
                out_suffix=hybkit.settings._FILTER_OUT_SUFFIX,
+               exclusion_table=None,
                out_hyb_files=None,
                set_dataset=None,
                verbose=False, silent=False):
@@ -115,6 +116,8 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
     if not silent:
         print('\nFiltering Hyb Files...')
   
+
+
     if verbose:
         if filter_params:
             print('Records Must match %s Filter Parameters:' % filter_mode.upper())
@@ -135,6 +138,14 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
     for i, in_hyb_file in enumerate(in_hyb_files):
         file_basename = os.path.basename(in_hyb_file)
         file_label = file_basename.replace('.hyb', '')
+        if exclusion_table:
+            out_exclusion_file = hybkit.util.make_out_file_name(in_hyb_file,
+                                                                name_suffix='',
+                                                                in_suffix='.hyb',
+                                                                out_suffix='exclude.csv',
+                                                                out_dir=out_dir,
+                                                                seg_sep='_',)
+
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
@@ -149,13 +160,21 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
             print('Filtering File:')
             print('    Input : ' + in_hyb_file)
             print('    Output: ' + out_hyb_file)
+            if exclusion_table:
+                print('Outputting an Exclusion Table to:')
+                print('   ', out_exclusion_file)
     
         include_count = 0
         exclude_count = 0
 
+        if exclusion_table:
+            out_exclusion = open(out_exclusion_file, 'w')
+        else:
+            out_exclusion = None
+
         with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
              hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
-            for record in in_hyb:
+            for i, record in enumerate(in_hyb, start=1):
                 if filter_mode == 'all':
                     use_record = True
                     for prop_type, prop_compare in filter_params:
@@ -182,13 +201,22 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
  
                     out_hyb.write_record(record)
                     include_count += 1               
+                    if out_exclusion is not None:
+                        line = ','.join([str(i), '1', str(record.id)])
+                        out_exclusion.write(line + '\n')
                 else:
                     exclude_count += 1
+                    if out_exclusion is not None:
+                        line = ','.join([str(i), '0', str(record.id)])
+                        out_exclusion.write(line + '\n')
         
         total_count = include_count + exclude_count 
         if verbose:
             print('    Complete. %i Total,  ' % total_count
                   + '%i Included,  %i Excluded\n' % (include_count, exclude_count)) 
+
+        if out_exclusion is not None:
+            out_exclusion.close()
 
     if verbose:
         print('\nFiltering Complete.\n')
@@ -227,6 +255,7 @@ if __name__ == '__main__':
                 args.in_hyb, 
                 filter_params,
                 exclude_params,
+                exclusion_table=args.exclusion_table,
                 out_dir=args.out_dir,
                 out_suffix=args.out_suffix,
                 out_hyb_files=args.out_hyb,

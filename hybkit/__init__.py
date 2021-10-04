@@ -1980,7 +1980,7 @@ class FoldFile(object):
     #: Class-level settings. See :attr:`settings.FoldFile_settings` for descriptions.
     settings = hybkit.settings.FoldFile_settings
 
-    _fold_record_types = {'strict': FoldRecord, 'dynamic': DynamicFoldRecord} 
+    _foldrecord_types = {'strict': FoldRecord, 'dynamic': DynamicFoldRecord} 
 
     # FoldFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
@@ -2051,6 +2051,13 @@ class FoldFile(object):
         for write_record in write_records:
             self.write_record(write_record)
 
+    # FoldFile : Public Methods : Writing
+    def write_direct(self, write_string):
+        """
+        Write a string directly to the underlying file handle.
+        """
+        self.fh.write(write_string)
+
     # FoldFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
@@ -2099,8 +2106,8 @@ class ViennaFile(FoldFile):
         line_2 = next(self.fh)
         line_3 = next(self.fh)
         if error_mode is None:
-            error_mode = self.settings['error_mode']
-        record_type = self._fold_record_types[self.settings['fold_record_type']]
+            error_mode = self.settings['foldfile_error_mode']
+        record_type = self._foldrecord_types[self.settings['foldrecord_type']]
         record = record_type.from_vienna_lines((line_1, line_2, line_3), error_mode)
         return record
 
@@ -2140,7 +2147,7 @@ class CtFile(FoldFile):
         expected_line_num = int(header.strip().split()[0])
         for i in range(expected_line_num):
             record_lines.append(next(self.fh))
-        record_type = self._fold_record_types[self.settings['fold_record_type']]
+        record_type = self._foldrecord_types[self.settings['foldrecord_type']]
         record = record_type.from_ct_lines(record_lines, error_mode)
         return record
 

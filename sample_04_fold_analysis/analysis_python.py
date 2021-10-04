@@ -22,18 +22,17 @@ count_mode = 'record'  # Count each record/line as one, unless record is combine
 hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'microRNA', 'kshv-miRNA']
+hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
+
+# Tell hybkit that identifiers are in Hyb-Program standard format.
+hybkit.settings.HybFile_settings['hybformat_id'] = True
 
 # Allow few mismatches between hyb-record sequence and fold-record sequence.
 hybkit.settings.FoldRecord_settings['allowed_mismatches'] = 3
 
-# Return (None, lines) instead of raising an error for bad fold records.
-hybkit.settings.FoldRecord_settings['warn_bad_fold_records'] = True
-hybkit.settings.FoldRecord_settings['skip_bad_fold_records'] = True
-
-# Set fold_record as "dynamic" to work with Hyb-format *_hybrid_ua.vienna files
+# Set FoldRecord as "dynamic" to work with Hyb-format *_hybrid_ua.vienna files
 # which have a modified sequence.
-hybkit.settings.FoldFile_settings['fold_record_type'] = 'dynamic'
+hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
 
 # Allow mirna/mirna dimers in analysis.
 hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
@@ -44,7 +43,7 @@ analysis_dir = os.path.abspath(os.path.dirname(__file__))
 input_hyb_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb')
 input_vienna_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
-out_dir = os.path.join(analysis_dir, 'output')
+out_dir = os.path.join(analysis_dir, 'output_python')
 out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target.hyb')
 data_label = 'WT_BR1'
 out_analysis_basename = out_hyb_name.replace('.hyb', '')
@@ -57,10 +56,6 @@ if not os.path.isdir(out_dir):
 
 print('Using Input Files:')
 print('    ' + '\n    '.join([input_hyb_name, input_vienna_name]) + '\n')
-
-# Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.HybFile.settings['hybformat_id'] = True
-hybkit.HybFile.settings['hybformat_record'] = True
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
@@ -76,15 +71,17 @@ fold_analysis = hybkit.analysis.FoldAnalysis(name='WT_BR1')
 #   returning hyb records containing their associated fold record.
 in_file_label = os.path.basename(input_hyb_name).replace('.hyb', '')
 with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
-     hybkit.ViennaFile.open(input_vienna_name, 'r') as input_vienna,\
-     hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
+     hybkit.ViennaFile.open(input_vienna_name, 'r') as input_vienna:
+     #hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
 
     hyb_fold_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=True)
     for i, hyb_record in enumerate(hyb_fold_iter):
-        #if i > 1000:
-        #    break
         # Find Segment types
         hyb_record.eval_types()
+
+        if hyb_record.id == '43880_7':
+            print(hyb_record)
+            sys.exit()
 
         # Determine if record has type that is excluded
         use_record = True
@@ -103,10 +100,12 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
         # If the record contains a non-duplex miRNA, then analyze folding.
         # Equivalent to ('has_mirna' and not 'has_mirna_dimer')
         if hyb_record.has_prop('mirna_not_dimer'):
+            # Set dataset flag of record
+            hyb_record.set_flag('dataset', in_file_label)
             # Perform miRNA-Fold Analysis
             fold_analysis.add(hyb_record)
             # Write the record to the output hyb file.
-            out_hyb.write_record(hyb_record)
+            #out_hyb.write_record(hyb_record)
 
 # Print report after Iteration
 print()

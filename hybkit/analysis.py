@@ -260,7 +260,8 @@ class BaseAnalysis(object):
         if hyb_record.has_prop('has_mirna'):
             if hyb_record.has_prop('mirna_dimer'):
                 if allow_mirna_dimers:
-                    mirna_fold = hyb_record.fold_record._get_seg_fold(hyb_record.seg1_props)
+                    mirna_fold = hyb_record.fold_record._get_seg_fold(hyb_record.seg1_props, 
+                                                                      hyb_record)
             else:
                 mirna_fold = hyb_record.mirna_detail('mirna_fold')
 
