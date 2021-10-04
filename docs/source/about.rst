@@ -79,8 +79,7 @@ Lead Developer
 Changelog
 ---------
 
-    * | 0.3.0b (dev)     Further Refactoring:
-    * | 0.3.0a (2021-09) Major Codebase And API Overhaul. Changes include:
+    * | 0.3.0a (ongoing) Major Codebase And API Overhaul. Changes include:
       | Simplifying HybRecord API
       | Simplifying FoldRecord API
       | Unifying settings information for argparse and module
@@ -88,16 +87,18 @@ Changelog
       | Addition of "NON" value to "target_reg" flag in specification
       | Moving identifier-parsing code to module type_finder
       | Moving target region analysis code to module region_finder
-      | Moving code for settings into a "settings" module.
+      | Moving code for settings into a "settings" module
       | Renamed HybRecord type_analysis, mirna_analysis, and target_analysis to 
         eval_types, eval_mirna, eval_target, respectively
         to differentiate from analysis module functions
-      | Reimplemented analyses methods as classes.
+      | Reimplemented analyses methods as classes
       | Added error checking / catching to HybFoldIter
       | Removed Target-Region Analysis and associated files 
         due to lack of archival database information,
-        pending furure development.
-        
+        pending furure development
+      | Implemented hyb_analysis, hyb_exclude_fold, and hyb_fold_analysis executables 
+      | Added shell implementation to all example pipelines    
+   
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
     * 0.1.9  (2020-03) Fix for Module Path Finding for Python > 3.6
     * 0.1.8  (2020-03) Streamlining, PyPI / PIP Initial Release

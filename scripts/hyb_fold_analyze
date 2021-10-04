@@ -31,23 +31,24 @@ __doc__ += textwrap.dedent("""
     This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
     along with a corresponding predicted RNA secondary structure file in the 
     "Vienna" (:ref:`Vienna Format <vienna_file_format>`) or
-    "CT" (:ref:`CT_Format <ct_vile_format>`) formats,
+    "CT" (:ref:`CT_Format <ct_file_format>`) formats,
     and analyzes hybrid secondary structure properties.
 
     ``fold`` Analysis:
-        Utilizes :class:`hybkit.analysis.FoldAnalysis to analyze hybrid fold information
+        Utilizes :class:`hybkit.analysis.FoldAnalysis` to analyze hybrid fold information
         and calculated per-base complimentarity counts for the miRNA portions of identified
         miRNA / target hybrids. By default miRNA-miRNA dimer hybrids are excluded, unless the
-        :attr:`Analysis.settings['allow_mirna_dimers'] <hybkit.Analysis.settings>` option is True.
+        :attr:`FoldAnalysis.settings['allow_mirna_dimers'] <hybkit.analysis.FoldAnalysis.settings>` 
+        option is True.
 
         Iteration over both files simultaneously is performed using :class:`~hybkit.HybFoldIter`,
         including error checking. Error checking settings can be modified in 
         :attr:`HybFoldIter.settings <hybkit.HybFoldIter.settings>`.
 
-        This analysis requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        This analysis requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
         to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with 
-        :ref:`miRNA_seg <miRNA_seg>` set to one of '3p' or '5p' will be evaluated. 
-        If 'allow_mirna_dimers=True', then :ref:`miRNA_seg` <miRNA_seg>` == 'B'
+        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated. 
+        If 'allow_mirna_dimers=True', then :ref:`miRNA_seg <mirna_seg>` == 'B'
         will also be included and the '5p' segment will be considered the "miRNA".
 
         Example system calls:

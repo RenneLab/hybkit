@@ -29,10 +29,14 @@ hyb_check = imp.load_source('hyb_check',
                             os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
 hyb_filter = imp.load_source('hyb_filter',
                              os.path.abspath(os.path.join('..', 'scripts', 'hyb_filter')))
+hyb_exclude_fold = imp.load_source('hyb_exclude_fold',
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_exclude_fold')))
 hyb_eval = imp.load_source('hyb_eval',
                                 os.path.abspath(os.path.join('..', 'scripts', 'hyb_eval')))
-hyb_check = imp.load_source('hyb_check',
-                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')))
+hyb_analyze = imp.load_source('hyb_analyze',
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_analyze')))
+hyb_fold_analyze = imp.load_source('hyb_fold_analyze',
+                            os.path.abspath(os.path.join('..', 'scripts', 'hyb_fold_analyze')))
 
 
 # -- Project information -----------------------------------------------------

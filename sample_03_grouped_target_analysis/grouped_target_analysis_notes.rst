@@ -35,6 +35,6 @@ The completed output of the analysis requires ~40 MB of space.
 Grouped Target Analysis Example Output
 --------------------------------------
 
-.. image:: ../sample_03_grouped_target_analysis/example_output/KSHV_Hyb_Combined_kshv-miR-K12-1star.png
+.. image:: ../sample_03_grouped_target_analysis/example_output/kshv_combined_targets_kshv-miR-K12-1star.png
 
-.. image:: ../sample_03_grouped_target_analysis/example_output/KSHV_Hyb_Combined_kshv-miR-K12-1star_types.png
+.. image:: ../sample_03_grouped_target_analysis/example_output/kshv_combined_targets_kshv-miR-K12-1star_types.png

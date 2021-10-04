@@ -4,7 +4,7 @@ hybkit Hyb File Specification
 
     Version: |spec_version|
 
-    The ".hyb" file format is described by [Travi2014]_ along with the Hyb software package
+    The ".hyb" file format is described by [Travis2014]_ along with the Hyb software package
     as a "gff-related format that contains sequence identifiers, read sequences, 1-based
     mapping coordinates, and annotation information for each chimera".
     
@@ -125,7 +125,7 @@ Flags
     
         :obj:`seg2_det` -  String: Arbitrary detail about segment 2.
     
-        .. _miRNA_seg:
+        .. _mirna_seg:
     
         :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
         options are "N" (none), "3p" (seg1), "5p" (seg2),
@@ -171,6 +171,6 @@ Other Details
 Example
 -------
 
-An example .hyb format line (courtesy of [Gay2018])::
+An example .hyb format line (courtesy of [Gay2018]_)::
 
     2407_718	ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC	.	MIMAT0000078_MirBase_miR-23a_microRNA	1	21	1	21	0.0027	ENSG00000188229_ENST00000340384_TUBB2C_mRNA	23	49	1181	1207	1.2e-06

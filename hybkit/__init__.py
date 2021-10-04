@@ -85,7 +85,7 @@ class HybRecord(object):
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     annotations on each components. An example .hyb format line 
-    from [Gay2018]::
+    from [Gay2018]_::
  
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -1480,6 +1480,8 @@ class FoldRecord(object):
               34_151138_MIMAT0000076_MirBase_miR-21_microRNA_1_19-...
               TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
               .....((((((.((((((......)))))).))))))   (-11.1)
+
+    .. _ct_file_format:
 
     * | The .ct file format used by UNAFold_ and other packages ([CTFormat]_, [Zuker2003]_):
 

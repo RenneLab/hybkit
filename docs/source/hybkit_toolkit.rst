@@ -11,5 +11,8 @@ ToFinalize
    toolkit/hyb_check
    toolkit/hyb_filter
    toolkit/hyb_eval
+   toolkit/hyb_analyze
+   toolkit/hyb_fold_analyze
+   toolkit/hyb_exclude_fold
 
 

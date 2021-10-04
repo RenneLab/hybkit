@@ -1,11 +1,11 @@
 
-hyb_eval
+hyb_fold_analyze
 ==================================
 
-.. automodule:: hyb_eval
+.. automodule:: hyb_fold_analyze
 
 .. argparse::
-   :filename: ../scripts/hyb_eval
+   :filename: ../scripts/hyb_fold_analyze
    :func: make_parser
    :prog: hyb_analysis
    :nodescription:

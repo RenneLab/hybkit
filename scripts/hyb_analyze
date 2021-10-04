@@ -34,7 +34,7 @@ __doc__ += textwrap.dedent("""
     and analyzes hybrid record properties. 
 
     ``type`` Analysis:
-        Utilizes :class:`hybkit.analysis.TypeAnalysis to analyze hybrid types.
+        Utilizes :class:`hybkit.analysis.TypeAnalysis` to analyze hybrid types.
 
         Requires the record flags: :ref:`seg1_type <seg1_type>` 
         and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types` 
@@ -49,10 +49,10 @@ __doc__ += textwrap.dedent("""
                            --make_plots False
 
     ``mirna`` Analysis:
-        Utilizes :class:`hybkit.analysis.MirnaAnalysis to analyze miRNA counts 
+        Utilizes :class:`hybkit.analysis.MirnaAnalysis` to analyze miRNA counts 
         and details in hyb file.
 
-        Requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 
+        Requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
         to be set by the :meth:`hybkit.HybRecord.eval_mirna` 
         method.
 
@@ -62,7 +62,7 @@ __doc__ += textwrap.dedent("""
                 $ hyb_analyze -a mirna -i my_file_1.hyb
 
     ``summary`` Analysis:
-        Utilizes :class:`hybkit.analysis.SummaryAnalysis to analyze hybrid types 
+        Utilizes :class:`hybkit.analysis.SummaryAnalysis` to analyze hybrid types 
         and miRNA counts / details in hyb file(s).
 
         Requires the record flags: :ref:`seg1_type <seg1_type>` 
@@ -76,7 +76,7 @@ __doc__ += textwrap.dedent("""
                 $ hyb_analyze -a summary -i my_file_1.hyb
 
     ``target`` Analysis:
-        Utilizes :class:`hybkit.analysis.TargetAnalysis to analyze hybrid types 
+        Utilizes :class:`hybkit.analysis.TargetAnalysis` to analyze hybrid types 
         and miRNA counts / details in hyb file(s).
 
         Requires the record flag: :ref:`miRNA_seg <miRNA_seg>` 

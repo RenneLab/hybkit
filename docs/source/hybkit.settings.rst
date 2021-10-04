@@ -1,7 +1,7 @@
 hybkit.settings
 ======================
 .. automodule:: hybkit.settings
-   :members: HYB_SUFFIXES, VIENNA_SUFFIXES, CT_SUFFIXES, FOLD_SUFFIXES, MIRNA_TYPES, CODING_TYPES 
+   :members: HYB_SUFFIXES, VIENNA_SUFFIXES, CT_SUFFIXES, FOLD_SUFFIXES, MIRNA_TYPES
 
 
 .. autodata:: hybkit.settings.HybRecord_settings_info
