@@ -4,12 +4,10 @@ References
 
     .. [ViennaFormat] 
          | `ViennaRNA Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
-         | `UNAFold Vienna File Format Description <https://www.tbi.univie.ac.at/RNA/tutorial/#sec2_7>`_
+         | `UNAFold Vienna File Format Description <http://www.unafold.org/doc/formats.php#VIENNA>`_
 
     .. [CTFormat] 
           | `UNAFold CT Format Description <http://www.unafold.org/doc/formats.php#CT>`_
-          | `RNAStructure CT Format Description 
-            <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
           | `RNAStructure CT Format Description 
             <https://rna.urmc.rochester.edu/Text/File_Formats.html#CT>`_
     .. [Zuker2003] Zuker M. Mfold web server for nucleic acid folding and hybridization 
