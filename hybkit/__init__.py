@@ -737,6 +737,10 @@ class HybRecord(object):
                 check_info = self.mirna_detail('mirna_ref', allow_mirna_dimers=True)
             elif check_attr == 'target':
                 check_info = self.mirna_detail('target_ref', allow_mirna_dimers=True)
+            elif check_attr == 'mirna_seg_type':
+                check_info = self.mirna_detail('mirna_seg_type', allow_mirna_dimers=True)
+            elif check_attr == 'target_seg_type':
+                check_info = self.mirna_detail('target_seg_type', allow_mirna_dimers=True)
             else:
                 raise Exception('Unknown Field: ' + check_attr)
 
@@ -1061,7 +1065,7 @@ class HybRecord(object):
     #: * ``eval_mirna``     : miRNA_seg flag has been set
     #:
     SET_PROPS = [
-        'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 
+        'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 'eval_target', 
     ]
     _SET_PROPS_SET = set(SET_PROPS)
 
@@ -1102,8 +1106,8 @@ class HybRecord(object):
         'seg2_is', 'seg2_prefix', 'seg2_suffix', 'seg2_contains',
         'any_seg_is', 'any_seg_prefix', 'any_seg_suffix', 'any_seg_contains',
         'all_seg_is', 'all_seg_prefix', 'all_seg_suffix', 'all_seg_contains',
-        'seg1_type', 'seg1_type_prefix', 'seg1_type_suffix', 'seg1_type_contains',
-        'seg2_type', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
+        'seg1_type_is', 'seg1_type_prefix', 'seg1_type_suffix', 'seg1_type_contains',
+        'seg2_type_is', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
         'any_seg_type_is', 'any_seg_type_prefix', 'any_seg_type_suffix', 'any_seg_type_contains',
         'all_seg_type_is', 'all_seg_type_prefix', 'all_seg_type_suffix', 'all_seg_type_contains',
     ]
@@ -1142,8 +1146,10 @@ class HybRecord(object):
     MIRNA_STR_PROPS = [
         'mirna_is', 'mirna_prefix', 'mirna_suffix', 'mirna_contains',
         'target_is', 'target_prefix', 'target_suffix', 'target_contains',
-        'mirna_type', 'mirna_type_prefix', 'mirna_type_suffix', 'mirna_type_contains',
-        'target_type', 'target_type_prefix', 'target_type_suffix', 'target_type_contains',
+        'mirna_seg_type_is', 'mirna_seg_type_prefix', 
+        'mirna_seg_type_suffix', 'mirna_seg_type_contains',
+        'target_seg_type_is', 'target_seg_type_prefix', 
+        'target_seg_type_suffix', 'target_seg_type_contains',
     ]
     #: Target-evaluation-related properties for the :meth:`has_prop` method.
     #: Requires :ref:`target_reg <target_reg>` field to be set.
