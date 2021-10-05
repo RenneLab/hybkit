@@ -91,6 +91,8 @@ def test_hybrecord():
                 (hyb_record.to_fasta_str, ['target', True], {}),
             ]
 
+            print(hyb_record.flags)
+
             for fn, args, kwargs in test_conversions:
                 print(fn, args, kwargs)
                 output = fn(*args, **kwargs)
@@ -109,6 +111,28 @@ def test_hybrecord():
             assert not (hyb_record != hyb_record)
             hash(hyb_record)
             len(hyb_record)        
+
+            assert not hyb_record.has_prop('has_indels')
+
+            for prop in hybkit.HybRecord.STR_PROPS + hybkit.HybRecord.MIRNA_STR_PROPS:
+                print('Prop:', prop, hyb_record.has_prop(prop, 'AAAAAAA'))
+                assert not (hyb_record.has_prop(prop, 'AAAAAAA'))
+
+            for prop in hybkit.HybRecord.MIRNA_PROPS:
+                print('Prop:', prop, hyb_record.has_prop(prop))
+                if prop in {'has_mirna', 'mirna_not_dimer', '5p_mirna'}:
+                    assert hyb_record.has_prop(prop)
+                else:
+                    assert not hyb_record.has_prop(prop)
+
+            hyb_record.set_flag('target_reg', 'U')
+            for prop in hybkit.HybRecord.TARGET_PROPS:
+                print('Prop:', prop, hyb_record.has_prop(prop))
+                if prop == 'target_unknown':
+                    assert hyb_record.has_prop(prop)
+                else:
+                    assert not hyb_record.has_prop(prop)
+
 
             #test_props = []
             #for prefix in ['

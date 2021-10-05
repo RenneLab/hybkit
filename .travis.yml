@@ -31,5 +31,5 @@ script:
   - cd auto_tests
   - ./auto_test.sh
   - cd ../
-  - coverage run --source=. -m pytest
+  - coverage run --source=. --omit="conf*",setup.py -m pytest
   - coveralls
