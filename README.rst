@@ -13,8 +13,7 @@ hybkit
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-.. 
-   image:: https://img.shields.io/coveralls/github/RenneLab/hybkit?logo=coveralls
+.. image:: https://img.shields.io/coveralls/github/RenneLab/hybkit?logo=coveralls
    :target: https://coveralls.io/github/RenneLab/hybkit
    :alt: Coveralls Coverage
 .. image:: https://img.shields.io/pypi/pyversions/hybkit?logo=python&logoColor=white

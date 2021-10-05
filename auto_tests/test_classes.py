@@ -11,12 +11,13 @@ import os
 import sys
 import hybkit
 
-hyb_file = 'test_hybrid.hyb'
-vienna_file = 'test_hybrid.vienna'
-out_dir = os.path.join('output_autotest')
+auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
+hyb_file = os.path.join(auto_tests_dir, 'test_hybrid.hyb')
+vienna_file = os.path.join(auto_tests_dir, 'test_hybrid.vienna')
+out_dir = os.path.join(auto_tests_dir, 'output_autotest')
 out_hyb_file = os.path.join(out_dir, hyb_file.replace('.hyb', '_py.hyb'))
 out_analysis_basename = out_hyb_file.replace('.hyb', '')
-match_legend_file = os.path.join('string_match_legend.csv')
+match_legend_file = os.path.join(auto_tests_dir, 'string_match_legend.csv')
 with hybkit.HybFile.open(hyb_file, 'r') as hyb_file_obj:
     for HYB_RECORD in hyb_file_obj:
         pass
