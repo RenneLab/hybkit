@@ -1768,14 +1768,14 @@ class FoldRecord(object):
         Create a FoldRecord entry from a list of an arbitrary number of strings
         corresponding to lines in the ".ct" file format ([CTFormat]_).
 
-        Args
+        Args:
             record_lines (list or tuple): list containing lines of ct record
-            error_mode (str, optional): | Error mode. Options: 
-                                        | ``raise`` : Raise an error when 
-                                          encountered and exit program
-                                        | ``warn_return`` : Print a warning and return 
-                                          the error_value 
-                                        | ``return`` : Return the error value with no program output.
+            error_mode (str, optional):   | Error mode. Options: 
+                                          | ``raise`` : Raise an error when 
+                                            encountered and exit program
+                                          | ``warn_return`` : Print a warning and return 
+                                            the error_value 
+                                          | ``return`` : Return the error value with no program output.
         """
         header_line = record_lines[0].strip()
         if not any((x in header_line for x in ['dG', 'Energy', 'ENERGY'])):
@@ -1833,14 +1833,14 @@ class FoldRecord(object):
         Create a FoldRecord entry from a multi-line string containing information in the
         ".ct" file format ([CTFormat]_).
 
-        Args
+        Args:
             record_string (str): String containing lines of ct record
             error_mode (str, optional): | Error mode. Options: 
                                         | ``raise`` : Raise an error when 
                                           encountered and exit program
                                         | ``warn_return`` : Print a warning and return 
                                           the error_value 
-                                        | ``return`` : Return the error value with no program output.
+                                        | ``return`` : Return the error value with no program output
         """
         lines = record_string.strip().split('\n')
         return cls.from_ct_lines(lines)
