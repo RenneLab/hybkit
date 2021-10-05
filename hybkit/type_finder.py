@@ -32,6 +32,10 @@ class TypeFinder(object):
     #: Placeholder for storing active method, set with :meth:`set_method`.
     find = None
 
+    # TypeFinder : Public Attributes
+    #: Placeholder for parameters for active method, set with :meth:`set_method`.
+    params = None
+
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):

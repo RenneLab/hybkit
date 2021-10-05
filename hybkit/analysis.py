@@ -558,7 +558,7 @@ class MirnaAnalysis(BaseAnalysis):
 
         analysis_file_name = file_name_base + '_mirna_counts.csv'
         with open(analysis_file_name, 'w') as out_file:
-            out_lines = analysis_method(out_delim=out_delim)
+            out_lines = self.results(out_delim=out_delim)
             out_str = '\n'.join(out_lines) + '\n'
             out_file.write(out_str) 
     

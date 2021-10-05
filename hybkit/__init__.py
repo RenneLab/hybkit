@@ -445,6 +445,9 @@ class HybRecord(object):
         if check_complete is None:
             check_complete = self.settings['check_complete_seg_types']
 
+        if self.TypeFinder.find is None:
+            self.TypeFinder.set_method('hybformat')
+
         types = []
         for seg_props in [self.seg1_props, self.seg2_props]:
             seg_type = self.TypeFinder.find(seg_props, self.TypeFinder.params, check_complete)
