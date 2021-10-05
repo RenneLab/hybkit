@@ -23,10 +23,11 @@ python:
 
 install:
   - pip install -r requirements.txt
+  - pip install coveralls
   - python setup.py install
   - export PATH=$PATH:$PWD/scripts
 
 script:
   - cd auto_tests
   - ./auto_test.sh
-
+  - coveralls
