@@ -1091,11 +1091,13 @@ class HybRecord(object):
     #: * ``fold_record``    : record.fold_record has been set
     #: * ``eval_types``     : seg1_type and seg2_type flags have been set
     #: * ``eval_mirna``     : miRNA_seg flag has been set
+    #:
     IS_SET_PROPS = {
         'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 
     }
 
     #: General record properties for the :meth:`has_prop` method.
+    #:
     #: * ``has_indels`` : either seg1 or seg2 alignments has insertions/deltions,
     #:   shown by differing read/refernce length for the same alignment
     GEN_PROPS = [
@@ -1103,16 +1105,27 @@ class HybRecord(object):
     ]
 
     #: String-comparison properties for the :meth:`has_prop` method.
-    #: * field types:
+    #:
+    #: * Field Types:
     #:  
     #:   * ``id``           : record.id
     #:   * ``seq``          : record.seq
-    #:   * ``seg1``         : record.seg1['ref_name']
-    #:   * ``seg2``         : record.seg2['ref_name']
-    #:   * ``any_seg``      : record.seg1['ref_name'] OR record.seg1['ref_name']
-    #:   * ``all_seg``      : record.seg1['ref_name'] AND record.seg1['ref_name']
-    #:   * ``seg1_seg``      : record.seg1['ref_name'] AND record.seg1['ref_name']
-    #:   * ``any_seg_type`` : String-comparison properties for the :meth:`has_prop` method.
+    #:   * ``seg1``         : record.seg1_props['ref_name']
+    #:   * ``seg2``         : record.seg2_props['ref_name']
+    #:   * ``any_seg``      : record.seg1_props['ref_name'] OR record.seg1_props['ref_name']
+    #:   * ``all_seg``      : record.seg1_props['ref_name'] AND record.seg1_props['ref_name']
+    #:   * ``seg1_type``    : seg1_type flag 
+    #:   * ``seg2_type``    : seg2_type flag 
+    #:   * ``any_seg_type`` : seg1_type OR seg2_type flags
+    #:   * ``all_seg_type`` : seg1_type AND seg2_type flags
+    #:
+    #: * Comparisons:
+    #:
+    #:   * ``is``       : Comparison string matches field exactly
+    #:   * ``prefix``   : Comparison string matches beginning of field
+    #:   * ``suffix``   : Comparison string matches end of field 
+    #:   * ``contains`` : Comparison string is contained within field
+    #:
     STR_PROPS = [
         'id_is', 'id_prefix', 'id_suffix', 'id_contains',
         'seq_is', 'seq_prefix', 'seq_suffix', 'seq_contains',
@@ -1126,11 +1139,33 @@ class HybRecord(object):
         'all_seg_type_is', 'all_seg_type_prefix', 'all_seg_type_suffix', 'all_seg_type_contains',
     ]
     #: miRNA-evaluation-related properties for the :meth:`has_prop` method.
+    #: Requires :ref:`miRNA_seg <mirna_seg>` field to be set by :meth:`eval_mirna` method.
+    #:
+    #: * ``has_mirna``
+    #: * ``mirna_not_dimer`` :Field Types:
+    #: 
     MIRNA_PROPS = [
         'has_mirna', 'no_mirna', 'mirna_dimer', 'mirna_not_dimer',
         '3p_mirna', '5p_mirna',
     ]
+
     #: miRNA-evaluation & string-comparison properties for the :meth:`has_prop` method.
+    #: Requires :ref:`miRNA_seg <mirna_seg>` field to be set by :meth:`eval_mirna` method.
+    #:
+    #: * Field Types:
+    #:  
+    #:   * ``mirna``       : segN_props['ref_name'] for identified miRNA segN_props
+    #:   * ``target``      : segN_props['ref_name'] for identified target segN_props
+    #:   * ``mirna_type``  : segN_type for identified miRNA segN for miRNA/target hybrid
+    #:   * ``target_type`` : segN_type for identified target segN for miRNA/target hybrid
+    #:
+    #: * Comparisons:
+    #:
+    #:   * ``is``       : Comparison string matches field exactly
+    #:   * ``prefix``   : Comparison string matches beginning of field
+    #:   * ``suffix``   : Comparison string matches end of field 
+    #:   * ``contains`` : Comparison string is contained within field
+    #:
     MIRNA_STR_PROPS = [
         'mirna_is', 'mirna_prefix', 'mirna_suffix', 'mirna_contains',
         'target_is', 'target_prefix', 'target_suffix', 'target_contains',
