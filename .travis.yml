@@ -30,4 +30,5 @@ install:
 script:
   - cd auto_tests
   - ./auto_test.sh
+  - coverage run --source=../ -m pytest
   - coveralls

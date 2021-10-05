@@ -1037,7 +1037,7 @@ class HybRecord(object):
                  
         if hybformat_ref:
             for i, seg_props in enumerate([seg1_props, seg2_props], start=1):
-                ref = seg_props['ref']
+                ref = seg_props['ref_name']
                 seg_type_key = 'seg%i_type' % i
                 gene_id, transcript_id, gene_name, seg_type = cls._parse_hybformat_ref(ref)
                 if seg_type_key in flags and flags[seg_type_key] != seg_type:

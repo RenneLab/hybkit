@@ -8,11 +8,14 @@ hybkit
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
 .. image:: https://img.shields.io/travis/com/RenneLab/hybkit/master.svg?logo=travis
-   :target: https://travis-ci.com/rennelab/hybkit
+   :target: https://app.travis-ci.com/github/RenneLab/hybkit
    :alt: Travis-CI Build Status
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+.. image:: https://img.shields.io/coveralls/github/RenneLab/hybkit?logo=coveralls
+   :target: https://coveralls.io/github/RenneLab/hybkit
+   :alt: Coveralls Coverage
 .. image:: https://img.shields.io/pypi/pyversions/hybkit?logo=python&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI - Python Version
