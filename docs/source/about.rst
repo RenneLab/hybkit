@@ -43,6 +43,7 @@ Changelog
       * Added DynamicFoldRecord class for non-identical fold/hybrid sequence handling
       * Implemented hyb_analysis, hyb_exclude_fold, and hyb_fold_analysis executables 
       * Added shell implementation to all example pipelines    
+      * Remove support for Python3.6
    
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
 

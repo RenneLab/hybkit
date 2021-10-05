@@ -9,13 +9,14 @@ Package details for the hybkit project.
 
 import os
 import sys
-if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
-    from importlib import resources
-    with resources.path('hybkit', '__init__.py') as path_obj:
-        module_dir = os.path.dirname(path_obj)
-else:
-    import importlib_resources
-    module_dir = importlib_resources.files('hybkit')
+if not (sys.version_info.major >= 3 and sys.version_info.minor >= 7):
+    message = 'Python 3.7+ is required for hybkit.'
+    print(message)
+    raise Exception(message)
+
+from importlib import resources
+with resources.path('hybkit', '__init__.py') as path_obj:
+    module_dir = os.path.dirname(path_obj)
 
 project_name = 'hybkit'
 version = "0.3.0a"
@@ -58,9 +59,9 @@ classifiers = [
     'Operating System :: OS Independent',
     'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     ]
 
 info_urls = {

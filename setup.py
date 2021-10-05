@@ -73,13 +73,13 @@ setuptools.setup(
                              or os.path.basename(f).endswith('__'))]
                  },
     scripts=glob.glob('scripts/*'),
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     project_urls=about_vars['info_urls'],
     data_files=data_files,
     install_requires=[
                       'matplotlib',
                       'biopython',
-                      'importlib_resources',
+                      #'importlib_resources',
                      ],
  
    # To provide executable scripts, use entry points in preference to the

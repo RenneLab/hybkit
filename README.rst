@@ -7,6 +7,9 @@ hybkit
 .. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
+.. image:: https://img.shields.io/travis/com/RenneLab/hybkit/master.svg?logo=travis
+   :target: https://travis-ci.com/rennelab/hybkit
+   :alt: Travis-CI Build Status
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
    :target: https://hybkit.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -127,7 +130,7 @@ Pipelines:
 Installation:
     
     Dependencies:
-        * Python3.6+
+        * Python3.7+
         * `matplotlib <https://matplotlib.org/>`_ 
         * `BioPython <https://biopython.org/>`_ 
     
