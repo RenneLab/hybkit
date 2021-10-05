@@ -88,6 +88,7 @@ def test_hybrecord():
                 (hyb_record.to_fasta_record, ['mirna', True], {}),
                 (hyb_record.to_fasta_record, ['target', False], {}),
                 (hyb_record.to_fasta_record, ['target', True], {}),
+                (hyb_record.to_fasta_str, ['target', True], {}),
             ]
 
             for fn, args, kwargs in test_conversions:
@@ -103,7 +104,12 @@ def test_hybrecord():
                     output = fn(*args, **kwargs)
                 except Exception as e:
                     print(e)
-            
+    
+            assert hyb_record == hyb_record
+            assert not (hyb_record != hyb_record)
+            hash(hyb_record)
+            len(hyb_record)        
+
             #test_props = []
             #for prefix in ['
 
