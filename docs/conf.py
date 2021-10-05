@@ -22,7 +22,6 @@ import hybkit
 
 # remove TypeFinder and RegionFinder links from HybRecord class for documentation
 hybkit.HybRecord.TypeFinder = None
-hybkit.HybRecord.RegionFinder = None
 
 #import hybkit_scripts
 hyb_check = imp.load_source('hyb_check', 

@@ -38,8 +38,8 @@ information:
 |                         | information as used by UNAFold_ as                               |
 |                         | :class:`FoldRecord` objects                                      |
 +-------------------------+------------------------------------------------------------------+
-| :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and a     |
-|                         | :class:`ViennaFile` or :class:`CtFile`                           |
+| :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and       |
+|                         | one of a :class:`ViennaFile` or :class:`CtFile`                  |
 +-------------------------+------------------------------------------------------------------+
 
 Todo:
@@ -88,9 +88,10 @@ class HybRecord(object):
 
     These columns are respectively described in hybkit as:
 
-         id, seq, energy, seg1_ref, seg1_read_start, seg1_read_end, seg1_ref_start, 
-         seg1_ref_end, seg1_score, seg2_read_start, seg2_ead_end, seg2_ref_start, 
-         seg2_ref_end, seg2_score, flag1=val1;flag2=val2;flag3=val3..."
+         id, seq, energy,
+         seg1_ref_name, seg1_read_start, seg1_read_end, seg1_ref_start, seg1_ref_end, seg1_score, 
+         seg2_ref_name, seg2_read_start, seg2_read_end, seg2_ref_start, seg2_ref_end, seg2_score, 
+         flag1=val1;flag2=val2;flag3=val3..."
 
     The preferred method for reading hyb records from lines is with 
     the :func:`HybRecord.from_line` constructor::
@@ -150,7 +151,7 @@ class HybRecord(object):
             keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (dict, optional): Dict with keys of flags for the record and their associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom 
-            flags can be supplied in :attr:`settings['custom_flags'] <settings>`.
+            flags can be supplied in :attr:`settings['custom_flags'] <HybRecord.settings>`.
             This setting can also be disabled by setting 'allow_undefined_flags' 
             to :obj:`True` in :attr:`HybRecord.settings`.
         fold_record (FoldRecord, optional): Set the record's :attr:`fold_record` attribute 
@@ -205,38 +206,23 @@ class HybRecord(object):
  
     # Arbitrary details included in column 16 of the hyb format in the form:
     #   “feature1=value1;feature2=value2;..."
-    #   Flags utilized in the Hyb software package
-    _HYB_FLAGS = [
-                 'count_total',            # str(int), total represented hybrids
-                 'count_last_clustering',  # str(int), total represented hybrids at last clustring
-                 'two_way_merged',         # "0" or "1", boolean representation of whether
-                                           #   entries with mirrored 5' and 3' hybrids were merged
-                 'seq_IDs_in_cluster',     # str, comma-separated list of all ids of hybrids
-                                           #   merged into this hybrid entry.
+    #   Flags utilized in the Hyb software package, see specification.
+    _HYB_FLAGS = ['count_total',
+                  'count_last_clustering',
+                  'two_way_merged',
+                  'seq_IDs_in_cluster',
                 ]
-    # Additional flag specifications utilized by hybkit
-    _HYBKIT_FLAGS = [
-                    'read_count',   # str(int), number of sequence reads represented by record
-                                    #   if merged record, represents total for all merged entries
-                    'orient',       # str, orientation of strand in relation to transcript. Options:
-                                    #   "F" (Forward / "Sense"),     "IF" (Inferred Forward),
-                                    #   "R" (Reverse / "Antisense"), "IR" (Inferred Reverse),
-                                    #   "U" (Unknown), or "IC" (Inferred Conflicting)
-                    'seg1_type',    # str, assigned type of segment 1, ex: "miRNA" or "mRNA"
-                    'seg2_type',    # str, assigned type of segment 2, ex: "miRNA" or "mRNA"
-                    'seg1_det',     # str, arbitrary detail about segment 1
-                    'seg2_det',     # str, arbitrary detail about segment 2
-                    'miRNA_seg',    # str, indicates which (if any) segment mapping is a miRNA
-                                    #   options are "N" (none), "5p" (seg1), "3p" (seg2),
-                                    #   "B" (both), or "U" (unknown)
-                    'target_reg',   # str, assigned region of the miRNA target.
-                                    #   options are "5pUTR", "coding", "3pUTR",
-                                    #   "N" (none), or "U" (unknown)
-                    'extended',     # int, "TRUE" or "FALSE", boolean representation of whether
-                                    #   record sequences were bioinformatically extended as is
-                                    #   performed by the Hyb software package.
-                    'dataset',      # str, label for sequence dataset id (eg. source file), when 
-                                    #   combining records from different datasets.
+    # Additional flag specifications utilized by hybkit, see specificiation.
+    _HYBKIT_FLAGS = ['read_count',
+                     'orient',
+                     'seg1_type',
+                     'seg2_type',
+                     'seg1_det',
+                     'seg2_det',
+                     'miRNA_seg',
+                     'target_reg',
+                     'ext',
+                     'dataset',
                    ]
 
     #: Flags defined by the hybkit package. Flags 1-4 are utilized by the Hyb software package.
@@ -299,15 +285,15 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
-        """Set the value of record flag_key to flag_val.
+        """Set the value of record ``flag_key`` to ``flag_val``.
 
         Args:
             flag_key (str): Key for flag to set.
             flag_val : Value for flag to set.
             allow_undefined_flags (bool or None, optional): Allow inclusion of flags not  
-                defined in :attr:`ALL_FLAGS` or in :attr:`settings['custom_flags'] <settings>`.
+                defined in :attr:`ALL_FLAGS` or in :attr:`settings['custom_flags'] <HybRecord.settings>`.
                 If None (default), uses setting in 
-                :attr:`settings['allow_undefined_flags'] <settings>`.
+                :attr:`settings['allow_undefined_flags'] <HybRecord.settings>`.
         """
 
         if allow_undefined_flags is None:
@@ -327,7 +313,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg1_type(self, require=False):
-        """Return the "seg1_type" flag if defined, or return None.
+        """Return the :ref:`seg1_type` flag if defined, or return None.
 
         Args:
             require (bool, optional): If True, raise an error if seg1_type is not defined.
@@ -339,7 +325,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg2_type(self, require=False):
-        """Return the "seg2_type" flag if defined, or return None.
+        """Return the :ref:`seg2_type` flag if defined, or return None.
 
         Args:
             require (bool, optional): If True, raise an error if seg2_type is not defined.
@@ -351,7 +337,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg_types(self, require=False):
-        """Return a tuple of the ("seg1_type", "seg2_type") flags where defined, or None.
+        """Return a tuple of the :ref:`seg1_type`, ref:`seg2_type`) flags where defined, or None.
 
         Args:
             require (bool, optional): If True, raise an error if either flag is not defined.
@@ -363,8 +349,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : get_read_count
     def get_read_count(self, require=False):
-        """Return the "read_count" flag if defined, otherwise return None.
-
+        """Return the :ref:`read_count` flag if defined, otherwise return None.
 
         Args:
             require (bool, optional): If True, raise an error if the "read_count" flag 
@@ -382,10 +367,10 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def get_record_count(self, require=False):
-        """If the "count_total" flag is defined, return it, otherwise return 1 (this record).
+        """If the :ref:`count_total` flag is defined, return it, otherwise return 1 (this record).
 
         Args:
-            require (bool, optional): If True, raise an error if the "read_count" flag 
+            require (bool, optional): If True, raise an error if the "count_total" flag 
                 is not defined.
         """
         if require:
@@ -402,9 +387,9 @@ class HybRecord(object):
         """Return either of :func:`get_read_count` or :func:`get_record_count`.
 
         Args:
-            count_mode (str) : Mode for returned count: one of : {'read', 'record'}
-                If 'read', require the 'read_count' flag to be defined.
-                If 'record', return '1' if the 'count_total' flag is not defined.
+            count_mode (str) : | Mode for returned count, one of : {'read', 'record'}
+                               | ``read``   : Require the 'read_count' flag to be defined.
+                               | ``record`` : Return '1' if the 'count_total' flag is not defined.
         """
 
         if count_mode in {'read'}:
@@ -418,7 +403,7 @@ class HybRecord(object):
             raise Exception(message)
         return ret_val
 
-    # HybRecord : Public Methods : Flag_Info : find_seg_type
+    # HybRecord : Public Methods : Flag_Info : eval_type
     def eval_types(self, allow_unknown=None, check_complete=None):
         """Find the types of each segment using the the :class:`TypeFinder` class.
 
@@ -426,7 +411,7 @@ class HybRecord(object):
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
         This uses the method: :func:`TypeFinder.method`
         set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
-        :ref:`seg1_type <seg1_type>`, :ref`seg2_type <seg2_type>` flags if not already set. 
+        :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags if not already set. 
 
         To use a system other than the default, prepare the :class:`TypeFinder` class by 
         preparing and setting :attr:`TypeFinder.params` and using :func:`TypeFinder.set_method`. 
@@ -435,12 +420,12 @@ class HybRecord(object):
             allow_unknown (bool, optional): If True, allow segment types that cannot be
                 identified and set them as "unknown". Otherwise raise an error.
                 If None (default), uses setting in 
-                :attr:`settings['allow_unknown_seg_types'] <settings>`.
+                :attr:`settings['allow_unknown_seg_types'] <HybRecord.settings>`.
             check_complete (bool, optional): If True, check every possibility for the 
                 type of a given segment (where applicable), instead of 
                 stopping after finding the first type.
                 If None (default), uses setting in 
-                :attr:`settings['check_complete_seg_types'] <settings>`.
+                :attr:`settings['check_complete_seg_types'] <HybRecord.settings>`.
         """
 
         # If types already set, skip.
@@ -468,13 +453,6 @@ class HybRecord(object):
                 types.append(seg_type)
         self.set_flag('seg1_type', types[0])
         self.set_flag('seg2_type', types[1])
-
-    # HybRecord : Public Methods : eval_types
-    def find_seg_types(self, *args, **kwargs):
-        """Find_seg_types method is deprecated. Please use :func:`eval_types`"""
-        message = 'find_seg_types method is deprecated. Please use eval_types.'
-        print(message)
-        raise Exception(message)
 
     # HybRecord : Public Methods : fold_record
     def set_fold_record(self, fold_record):
@@ -513,7 +491,7 @@ class HybRecord(object):
         Args:
             mirna_types (list, tuple, or set, optional): Iterable of strings of "types" to be 
                 considered as miRNA. Otherwise, the default types are used 
-                from :attr:`settings['mirna_types'] <settings>`.
+                from :attr:`settings['mirna_types'] <HybRecord.settings>`.
         """
 
         if mirna_types is None:
@@ -554,15 +532,15 @@ class HybRecord(object):
 
         Args:
             detail (str): | Type of detail to return. Options include: 
-                          | 'all' : (dict of all properties, default); 
-                          | 'mirna_ref'      : Identifier for Assigned miRNA;
-                          | 'target_ref'     : Identifier for Assigned Target;
-                          | 'mirna_seg_type'  : Assigned seg_type of miRNA;
-                          | 'target_seg_type' : Assigned seg_type of target;
-                          | 'mirna_seq'       : Annotated subsequence of miRNA;
-                          | 'target_seq'      : Annotated subsequence of target;
-                          | 'mirna_fold'      : Annotated fold substring of miRNA (requires fold_record set);
-                          | 'target_fold'     : Annotated fold substring target (requires fold_record set);
+                          | ``all``             : (dict of all properties, default); 
+                          | ``mirna_ref``       : Identifier for Assigned miRNA;
+                          | ``target_ref``      : Identifier for Assigned Target;
+                          | ``mirna_seg_type``  : Assigned seg_type of miRNA;
+                          | ``target_seg_type`` : Assigned seg_type of target;
+                          | ``mirna_seq``       : Annotated subsequence of miRNA;
+                          | ``target_seq``      : Annotated subsequence of target;
+                          | ``mirna_fold``      : Annotated fold substring of miRNA (requires fold_record set);
+                          | ``target_fold``     : Annotated fold substring target (requires fold_record set);
             allow_mirna_dimers (bool, optional): Allow miRNA/miRNA dimers. 
                 5p-position will be assigned as miRNA.
 
@@ -630,15 +608,15 @@ class HybRecord(object):
     def is_set(self, prop):
         """
         Return True if HybRecord property "prop" is set (if relevant) and is not None.
-        Options described in :attr:`IS_SET_PROPS`.
+        Options described in :attr:`SET_PROPS`.
 
         Args:
             prop (str): Property / Analysis to check
         """
 
-        if prop not in self.IS_SET_PROPS:
+        if prop not in self._SET_PROPS_SET:
             message = 'Requested Property: %s is not defined. ' % prop
-            message += 'Available proprties are:\n' + ', '.join(self.IS_SET_PROPS)
+            message += 'Available proprties are:\n' + ', '.join(self.SET_PROPS)
             print(message)
             raise Exception(message)
 
@@ -666,50 +644,23 @@ class HybRecord(object):
  
         Check property against list of allowed properties in :attr:`PROPS`.
         If query property has a comparator, provide this in prop_compare.
-        Raises an error if property is not set (use :func:`is_set` to check).
+        Raises an error if a prerequisite field is not set 
+        (use :meth:`is_set` to check whether properties are set).
+     
+        Specific properties available to check are described in attributes:
         
+            ======================= =============================================
+            :attr:`GEN_PROPS`       General Record Properties
+            :attr:`STR_PROPS`       Field String Comparison Properties
+            :attr:`MIRNA_PROPS`     miRNA-Associated Record Properties
+            :attr:`MIRNA_STR_PROPS` miRNA-Associated String Comparison Properties
+            :attr:`TARGET_PROPS`    miRNA-Target-Associated Properties
+            ======================= =============================================
+ 
         Args:
             prop: Property to check
             prop_compare (optional): Optional comparator to check.
 
-        Examples:
-            General Record Properties::
-
-                # hyb_record = hybkit.HybRecord(id, seq....)
-                is_id = hyb_record.has_prop('id', 'target_identifier')
-                seq_is_ATCG = hyb_record.has_peroperty('seq', 'ATCG')
-                seq_endswith_ATCG = hyb_record.has_prop('seq_suffix', 'ATCG')
-                
-            Record Type Properties::
-
-                # hyb_record = hybkit.HybRecord(id, seq....)
-                has_seg_types = hyb_record.has_prop('has_seg_types')  # -> False
-                hyb_record.find_types()
-                has_seg_types = hyb_record.has_prop('has_seg_types')  # -> True
-                # Requires Type Analysis
-                is_5p_mrna = hyb_record.has_prop('seg1_type', 'mRNA') 
-                has_mRNA = hyb_record.has_prop('seg_type_contains', 'mRNA')
-
-            miRNA Properties::
-
-                # hyb_record = hybkit.HybRecord(id, seq....)
-                # hyb_record.find_types()
-                mirna_analyzed = hyb_record.has_prop('has_mirna_seg')  # -> False
-                hyb_record.eval_mirna()
-                mirna_analyzed = hyb_record.has_prop('has_mirna_seg')  # -> True
-                # Requires mirna evaluation
-                has_mirna = hyb_record.has_prop('has_mirna')  # Requires miRNA Analysis
-                has_5p_mirna = hyb_record.has_prop('5p_mirna')
-                
-            Target Region Properties::
-                # hyb_record = hybkit.HybRecord(id, seq....)
-                # hyb_record.find_types()
-                # hyb_record.eval_mirna()
-                targets_analyzed = hyb_record.has_prop('has_target_reg')  # -> False
-                hyb_record.target_region_eval()
-                targets_analyzed = hyb_record.has_prop('has_target_reg')  # -> True
-                has_coding_target = hyb_record.has_prop('target_coding') 
-               
         """
 
         if prop not in self._HAS_PROPS_SET:
@@ -1087,14 +1038,15 @@ class HybRecord(object):
     #: Properties for the :meth:`is_set` method.
     #: 
     #: * ``energy``         : record.energy is not None
-    #: * ``full_seg_props`` : Each seg props key is in seg1/seg2 dict and is not NOne 
+    #: * ``full_seg_props`` : Each seg key is in segN_props dict and is not None 
     #: * ``fold_record``    : record.fold_record has been set
     #: * ``eval_types``     : seg1_type and seg2_type flags have been set
     #: * ``eval_mirna``     : miRNA_seg flag has been set
     #:
-    IS_SET_PROPS = {
+    SET_PROPS = [
         'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 
-    }
+    ]
+    _SET_PROPS_SET = set(SET_PROPS)
 
     #: General record properties for the :meth:`has_prop` method.
     #:
@@ -1141,12 +1093,16 @@ class HybRecord(object):
     #: miRNA-evaluation-related properties for the :meth:`has_prop` method.
     #: Requires :ref:`miRNA_seg <mirna_seg>` field to be set by :meth:`eval_mirna` method.
     #:
-    #: * ``has_mirna``
-    #: * ``mirna_not_dimer`` :Field Types:
+    #: * ``has_mirna``       : Seg1 or seg2 has been identified as a miRNA
+    #: * ``no_mirna``        : Seg1 and seg2 have been identified as not a miRNA
+    #: * ``mirna_dimer``     : Both seg1 and seg2 have been identified as a miRNA
+    #: * ``mirna_not_dimer`` : Only one of seg1 or seg2 has been identifed as a miRNA
+    #: * ``5p_mirna``        : Seg1 (5p) has been identifed as a miRNA
+    #: * ``3p_mirna``        : Seg2 (3p) has been identifed as a miRNA
     #: 
     MIRNA_PROPS = [
         'has_mirna', 'no_mirna', 'mirna_dimer', 'mirna_not_dimer',
-        '3p_mirna', '5p_mirna',
+        '5p_mirna', '3p_mirna',
     ]
 
     #: miRNA-evaluation & string-comparison properties for the :meth:`has_prop` method.
@@ -1173,12 +1129,26 @@ class HybRecord(object):
         'target_type', 'target_type_prefix', 'target_type_suffix', 'target_type_contains',
     ]
     #: Target-evaluation-related properties for the :meth:`has_prop` method.
+    #: Requires :ref:`target_reg <target_reg>` field to be set.
+    #:
+    #: * ``target_none``    : Identified to have no miRNA target
+    #: * ``target_unknown`` : Unknown whether there is a miRNA target
+    #: * ``target_ncrna``   : miRNA target is identified as in a noncoding transcript
+    #: * ``target_5p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
+    #:     of a coding transcript
+    #: * ``target_3p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
+    #:     of a coding transcript
+    #: * ``target_coding``  : miRNA target is identified as in coding region 
+    #:     of a coding transcript
+    #: 
     TARGET_PROPS = [
         'target_none', 'target_unknown', 'target_ncrna', 
         'target_5p_utr', 'target_3p_utr', 'target_coding', 
     ]
 
     #: All allowed properties for the :meth:`has_prop()` method.
+    #: See :attr:`GEN_PROPS`, :attr:`STR_PROPS`, :attr:`MIRNA_PROPS`, 
+    #: :attr:`MIRNA_STR_PROPS`, and :attr:`TARGET_PROPS` for details.
     HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + MIRNA_STR_PROPS + TARGET_PROPS
 
     _GEN_PROPS_SET = set(GEN_PROPS)
@@ -2150,7 +2120,7 @@ class ViennaFile(FoldFile):
 
         Args:
             error_mode (str, optional): 'string representing the error mode.
-                If None, defaults to :attr:`settings['error_mode'] <settings>`.
+                If None, defaults to :attr:`settings['error_mode'] <ViennaFile.settings>`.
                 Options: "raise": Raise an error when encountered and exit program;
                 "warn_return": Print a warning and return the error_value ;
                 "return": Return the error value with no program output.
@@ -2188,7 +2158,7 @@ class CtFile(FoldFile):
  
         Args:
             error_mode (str, optional): 'string representing the error mode.
-                If None, defaults to :attr:`settings['error_mode'] <settings>`
+                If None, defaults to :attr:`settings['error_mode'] <CtFile.settings>`
                 Options: "raise": Raise an error when encountered and exit program;
                 "warn_return": Print a warning and return the error_value ;
                 "return": Return the error value with no program output.

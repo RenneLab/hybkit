@@ -40,13 +40,13 @@ Columns
         1  id              Hybrid Read Identifier
         2  seq             Read Nucleotide Sequence
         3  energy          Predicted Gibbs Free-Energy of Intra-Hybrid Folding
-        4  seg1_ref        Segment 1 Mapping Reference Identity
+        4  seg1_ref_name   Segment 1 Mapping Reference Identity
         5  seg1_read_start Segment 1 Mapping Start on Read 
         6  seg1_read_end   Segment 1 Mapping End on Read
         7  seg1_ref_start  Segment 1 Mapping Start on Reference
         8  seg1_ref_end    Segment 1 Mapping End on Reference
         9  seg1_score      Segment 1 Mapping Score
-        10 seg2_ref        Segment 2 Mapping Reference Identity
+        10 seg2_ref_name   Segment 2 Mapping Reference Identity
         11 seg2_read_start Segment 2 Mapping Start on Read
         12 seg2_read_end   Segment 2 Mapping End on Read
         13 seg2_ref_start  Segment 2 Mapping Start on Reference
