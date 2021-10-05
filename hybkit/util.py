@@ -292,17 +292,6 @@ def validate_args(args, parser=None):
 
 
 # Argument Parser : Input/Output Options
-in_hyb_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Path to hyb-format file with a ".hyb" suffix for use in the evaluation.
-                 """
-in_hyb_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
-                           metavar='PATH_TO/MY_FILE.HYB',
-                           required=True,
-                           # nargs='1', 
-                           help=_this_arg_help)
-
-# Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
                  REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use 
@@ -325,20 +314,6 @@ in_folds_parser.add_argument('-f', '--in_fold', type=fold_exists,
                              required=True,
                              nargs='+', 
                              help=_this_arg_help)
-
-# Argument Parser : Input/Output Options
-out_hyb_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Optional path to a hyb-format file for 
-                 output (should include a ".hyb" suffix).
-                 If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
-                 will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
-                 """
-out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
-                            metavar='PATH_TO/OUT_FILE.HYB',
-                            # required=True,
-                            # nargs='+', 
-                            help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_hybs_parser = argparse.ArgumentParser(add_help=False)
@@ -795,15 +770,18 @@ def set_settings(nspace, verbose=False):
     if verbose and out_report.strip():
         print(out_report)
 
+def _test():
+    assert _bool_from_string('yes')
+    assert not _bool_from_string('no')
+    assert dir_exists('~')
+    assert dir_exists('${PWD}')
+    assert file_exists(__file__)
+    set_settings(argparse.Namespace())
 
 # Allow execution of module for testing purposes.
-if __name__ == '__main__':
-    all_parsers = [#in_hyb_parser, 
-                   in_hybs_parser,
-                   out_hyb_parser,
-                   out_dir_parser,
-                   hybrecord_parser, hybfile_parser, foldrecord_parser]
-    test_parser = argparse.ArgumentParser(parents=all_parsers,
-                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    test_parser.print_help()
+#if __name__ == '__main__':
+#    all_parsers = [#in_hyb_parser, 
+#    test_parser = argparse.ArgumentParser(parents=all_parsers,
+#                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+#    test_parser.print_help()
 

@@ -181,4 +181,6 @@ def test_fold_analysis():
     #analysis.write(out_dir + '/py_coverage_fold') 
     #analysis.plot(out_dir + '/py_coverage_fold') 
 
- 
+
+def test_util():
+    hybkit.util._test() 
