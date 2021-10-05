@@ -100,18 +100,13 @@ def test_hybrecord():
             fail_functions = [
                 (hyb_record.get_count, None, ['blah'], {}),
             ]
-            for fn, expected, args, kwargs in test_functions:
+            for fn, expected, args, kwargs in fail_functions:
                 try:
                     print(fn, expected, args, kwargs)
                     output = fn(*args, **kwargs)
                 except Exception as e:
                     print(e)
     
-            assert hyb_record == hyb_record
-            assert not (hyb_record != hyb_record)
-            hash(hyb_record)
-            len(hyb_record)        
-
             assert not hyb_record.has_prop('has_indels')
 
             for prop in hybkit.HybRecord.STR_PROPS + hybkit.HybRecord.MIRNA_STR_PROPS:
@@ -139,17 +134,30 @@ def test_hybrecord():
 
 
 def test_foldrecord():           
-    for foldrecord_type in ['strict', 'dynamic']:
+    for foldrecord_type in ['dynamic', 'strict']:
         hybkit.settings.FoldFile_settings['foldrecord_type'] = foldrecord_type
+        if foldrecord_type == 'dynamic':
+            hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
+        else:
+            hybkit.settings.HybFoldIter_settings['error_mode'] = 'warn_skip'
         for combine in [True, False]:
             with hybkit.HybFile.open(hyb_file, 'r') as input_hyb, \
                  hybkit.ViennaFile.open(vienna_file, 'r') as input_vienna, \
                  hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
                 hf_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=combine)
                 for ret_item in hf_iter:
-                    pass
+                    print(ret_item)
                 hf_iter.report()
                 hf_iter.print_report()
+
+                
+        hyb_record, fold_record = ret_item
+        for record in [hyb_record, fold_record]:
+            assert record == record
+            assert not (record != record)
+            hash(record)
+            len(record)        
+
                 
 
 def test_analyses():
@@ -171,6 +179,7 @@ def test_analyses():
         if hasattr(analysis, 'write_individual'):
             analysis.write_individual(out_dir + '/py_coverage_' + analysis_type) 
             analysis.plot_individual(out_dir + '/py_coverage_' + analysis_type) 
+
      
 def test_fold_analysis():
     analysis = hybkit.analysis.FoldAnalysis(name='Test')
