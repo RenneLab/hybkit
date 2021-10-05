@@ -1150,11 +1150,11 @@ class HybRecord(object):
     #: * ``target_unknown`` : Unknown whether there is a miRNA target
     #: * ``target_ncrna``   : miRNA target is identified as in a noncoding transcript
     #: * ``target_5p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
-    #:     of a coding transcript
+    #:   of a coding transcript
     #: * ``target_3p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
-    #:     of a coding transcript
+    #:   of a coding transcript
     #: * ``target_coding``  : miRNA target is identified as in coding region 
-    #:     of a coding transcript
+    #:   of a coding transcript
     #: 
     TARGET_PROPS = [
         'target_none', 'target_unknown', 'target_ncrna', 
