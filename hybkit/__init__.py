@@ -13,10 +13,10 @@ chimeric sequence information and associated fold-information:
 +----------------------------+---------------------------------------------------------------+
 | :class:`HybRecord`         | Class for storage of hybrid sequence records                  |
 +----------------------------+---------------------------------------------------------------+
-| :class:`FoldRecord`        | Minimal class for storage of predicted RNA                    |
+| :class:`FoldRecord`        | Class for storage of predicted RNA                            |
 |                            | secondary structure information for chimeric sequence reads   |
 +----------------------------+---------------------------------------------------------------+
-| :class:`DynamicFoldRecord` | Minimal class for storage of predicted RNA                    |
+| :class:`DynamicFoldRecord` | Class for storage of predicted RNA                            |
 |                            | secondary structure information for sequence constructed from |
 |                            | aligned portions of chimeric sequence reads                   |
 +----------------------------+---------------------------------------------------------------+
@@ -35,7 +35,7 @@ information:
 +-------------------------+------------------------------------------------------------------+
 | :class:`CtFile`         | Class for reading Connectivity Table (.ct)-format files          |
 |                         | [CTFormat]_ containing predicted RNA secondary-structure         |
-|                         | information as used by the UNAFold_ as                           |
+|                         | information as used by UNAFold_ as                               |
 |                         | :class:`FoldRecord` objects                                      |
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and a     |
@@ -44,9 +44,6 @@ information:
 
 Todo:
     Add Hybrecord.to_csv_header()
-    Implement all sample analyses with bash workflows and individual scripts.
-    Implement all sample analyses with nextflow workflows and individual scripts.
-    Make decision and clean "extra" scripts.
 
 """
 
@@ -91,9 +88,9 @@ class HybRecord(object):
 
     These columns are respectively described in hybkit as:
 
-         id, seq, energy, [seg1\_]ref, [seg1\_]read_start, [seg1\_]read_end, [seg1\_]ref_start, 
-         [seg1\_]ref_end, [seg1\_]score, [seg2\_]read_start, [seg2\_]read_end, [seg2\_]ref_start, 
-         [seg2\_]ref_end, [seg2\_]score, [flag1=val1; flag2=val2;flag3=val3...]"
+         id, seq, energy, seg1_ref, seg1_read_start, seg1_read_end, seg1_ref_start, 
+         seg1_ref_end, seg1_score, seg2_read_start, seg2_ead_end, seg2_ref_start, 
+         seg2_ref_end, seg2_score, flag1=val1;flag2=val2;flag3=val3..."
 
     The preferred method for reading hyb records from lines is with 
     the :func:`HybRecord.from_line` constructor::
@@ -207,7 +204,7 @@ class HybRecord(object):
                       ]
  
     # Arbitrary details included in column 16 of the hyb format in the form:
-    #   “feature1=value1; feature2=value2;..."
+    #   “feature1=value1;feature2=value2;..."
     #   Flags utilized in the Hyb software package
     _HYB_FLAGS = [
                  'count_total',            # str(int), total represented hybrids
@@ -1088,8 +1085,13 @@ class HybRecord(object):
 
     # HybRecord : Private Constants
     #: Properties for the :meth:`is_set` method.
+    #: * ``energy``         : record.energy is not None
+    #: * ``full_seg_props`` : Each seg props key is in seg1/seg2 dict and is not NOne 
+    #: * ``fold_record``    : record.fold_record has been set
+    #: * ``eval_types``     : seg1_type and seg2_type flags have been set
+    #: * ``eval_mirna``     : miRNA_seg flag has been set
     IS_SET_PROPS = {
-        'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 'eval_target'
+        'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 
     }
     #: General record properties for the :meth:`has_prop` method.
     GEN_PROPS = [
