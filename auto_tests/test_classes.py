@@ -11,6 +11,11 @@ import os
 import sys
 import hybkit
 
+hybkit.settings.HybFile_settings['hybformat_id'] = True
+hybkit.settings.HybFile_settings['hybformat_ref'] = True
+hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
+hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
+
 auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
 hyb_file = os.path.join(auto_tests_dir, 'test_hybrid.hyb')
 vienna_file = os.path.join(auto_tests_dir, 'test_hybrid.vienna')
@@ -35,10 +40,6 @@ with hybkit.ViennaFile.open(vienna_file, 'r') as vienna_file_obj:
 if not os.path.isdir(out_dir):
     os.mkdir(out_dir)
 
-hybkit.settings.HybFile_settings['hybformat_id'] = True
-hybkit.settings.HybFile_settings['hybformat_ref'] = True
-hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
-hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
 
 remove_types = ['rRNA', 'mitoch-rRNA']
 match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
@@ -71,6 +72,41 @@ def test_hybrecord():
                 output = fn(*args, **kwargs)
                 print(fn, expected, output, args, kwargs)
                 assert output == expected
+            
+            test_conversions = [
+                (hyb_record.to_line, [], {}),
+                (hyb_record.to_line, [True], {}),
+                (hyb_record.to_csv, [], {}),
+                (hyb_record.to_csv, [True], {}),
+                (hyb_record.to_fasta_record, ['hybrid', False], {}),
+                (hyb_record.to_fasta_record, ['hybrid', True], {}),
+                (hyb_record.to_fasta_record, ['seg1', False], {}),
+                (hyb_record.to_fasta_record, ['seg1', True], {}),
+                (hyb_record.to_fasta_record, ['seg2', False], {}),
+                (hyb_record.to_fasta_record, ['seg2', True], {}),
+                (hyb_record.to_fasta_record, ['mirna', False], {}),
+                (hyb_record.to_fasta_record, ['mirna', True], {}),
+                (hyb_record.to_fasta_record, ['target', False], {}),
+                (hyb_record.to_fasta_record, ['target', True], {}),
+            ]
+
+            for fn, args, kwargs in test_conversions:
+                print(fn, args, kwargs)
+                output = fn(*args, **kwargs)
+
+            fail_functions = [
+                (hyb_record.get_count, None, ['blah'], {}),
+            ]
+            for fn, expected, args, kwargs in test_functions:
+                try:
+                    print(fn, expected, args, kwargs)
+                    output = fn(*args, **kwargs)
+                except Exception as e:
+                    print(e)
+            
+            #test_props = []
+            #for prefix in ['
+
 
 def test_foldrecord():           
     for foldrecord_type in ['strict', 'dynamic']:
@@ -105,4 +141,14 @@ def test_analyses():
         if hasattr(analysis, 'write_individual'):
             analysis.write_individual(out_dir + '/py_coverage_' + analysis_type) 
             analysis.plot_individual(out_dir + '/py_coverage_' + analysis_type) 
-      
+     
+def test_fold_analysis():
+    analysis = hybkit.analysis.FoldAnalysis(name='Test')
+    analysis2 = hybkit.analysis.FoldAnalysis()
+    HYB_RECORD.set_fold_record(FOLD_RECORD)
+    #analysis2.add(HYB_RECORD)
+    #analysis.update(analysis2)
+    #analysis.write(out_dir + '/py_coverage_fold') 
+    #analysis.plot(out_dir + '/py_coverage_fold') 
+
+ 

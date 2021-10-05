@@ -864,7 +864,6 @@ class HybRecord(object):
             message = 'Please install BioPython package and ensure it can be imported.'
             print(message)
             raise bio_module_error
-            
         allowed_modes = ['hybrid', 'seg1', 'seg2', 'mirna', 'target']
         allowed_modes_set = set(allowed_modes)
         if mode not in allowed_modes:
@@ -875,8 +874,8 @@ class HybRecord(object):
 
         fasta_description = ''
         if mode == 'hybrid':
-            fasta_id = self.seq_id
-            fastq_seq = self.seq
+            fasta_id = self.id
+            fasta_seq = self.seq
             if annotate:
                 if self.seg1_props['ref_name'] is not None:
                     fasta_description += ' ' + self._format_seg_props_line(self.seg1_props)
@@ -885,7 +884,7 @@ class HybRecord(object):
                 fasta_description = fasta_description.lstrip()
 
         if mode in {'mirna', 'target'}:
-            if not self._is_set('eval_mirna'):
+            if not self.is_set('eval_mirna'):
                 message = 'eval_mirna must be performed before miRNA/target fasta output'
                 print(message)
                 raise Exception(message)
@@ -915,20 +914,20 @@ class HybRecord(object):
                     mode = 'seg1'
          
         if mode in {'seg1', 'seg2'}:
-            seq_props = getattr(self, mode+'_props')
-            if any (seq_props[v] == None for v in ['read_start', 'read_end']):
+            seg_props = getattr(self, mode+'_props')
+            if any (seg_props[v] == None for v in ['read_start', 'read_end']):
                 message = 'Record %s, Segment: %s is missing one of ' % (str(self), mode)
                 message += 'read_start/read_end and cannot be converted to FASTA.'
                 print(message)
                 raise Exception(message)
-            read_start, read_end = seq_props['read_start'], seq_props['read_end']
-            fasta_name = self.seq_id + ':%i-%i' % (read_start, read_end)
+            read_start, read_end = seg_props['read_start'], seg_props['read_end']
+            fasta_id = self.id + ':%i-%i' % (read_start, read_end)
             fasta_seq = self._get_seg_seq(seg_props)
             if annotate:
-                fasta_description += self._format_seg_props_line(seq_props)
+                fasta_description += self._format_seg_props_line(seg_props)
 
         fasta_record = SeqRecord(Seq(fasta_seq), 
-                                 id=fasta_name,
+                                 id=fasta_id,
                                  description=fasta_description,
                                 )
 
@@ -1201,14 +1200,14 @@ class HybRecord(object):
         ret_string = prefix
         if seg_props['ref_name'] is not None:
             ret_string += seg_props['ref_name']
-            read_vals = (str(seg_props[key]) if seg_props[key] is not None 
-                         else '??' for key in ['read_start', 'read_end'])
-            if any((read_vals[i] != '??' for i in [0, 1])):
-                ret_string += ':%s-%s' % read_vals 
-            ref_vals = (str(seg_props[key]) if seg_props[key] is not None 
-                         else '??' for key in ['ref_start', 'ref_end'])
-            if any((ref_vals[i] != '??' for i in [0, 1])):
-                ret_string += '(%s-%s)' % ref_vals 
+            read_vals = [str(seg_props[key]) if seg_props[key] is not None 
+                         else '??' for key in ['read_start', 'read_end']]
+            if any([read_vals[i] != '??' for i in [0, 1]]):
+                ret_string += ':%s-%s' % tuple(read_vals)
+            ref_vals = [str(seg_props[key]) if seg_props[key] is not None 
+                         else '??' for key in ['ref_start', 'ref_end']]
+            if any([ref_vals[i] != '??' for i in [0, 1]]):
+                ret_string += '(%s-%s)' % tuple(ref_vals)
         ret_string += suffix
         return ret_string
 
