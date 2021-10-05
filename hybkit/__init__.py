@@ -313,7 +313,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg1_type(self, require=False):
-        """Return the :ref:`seg1_type` flag if defined, or return None.
+        """Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
 
         Args:
             require (bool, optional): If True, raise an error if seg1_type is not defined.
@@ -325,7 +325,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg2_type(self, require=False):
-        """Return the :ref:`seg2_type` flag if defined, or return None.
+        """Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
 
         Args:
             require (bool, optional): If True, raise an error if seg2_type is not defined.
@@ -337,7 +337,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg_types(self, require=False):
-        """Return a tuple of the :ref:`seg1_type`, ref:`seg2_type`) flags where defined, or None.
+        """Return :ref:`seg1_type <seg1_type>`, ref:`seg2_type <seg2_type>` flags, or None.
 
         Args:
             require (bool, optional): If True, raise an error if either flag is not defined.
@@ -349,7 +349,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : get_read_count
     def get_read_count(self, require=False):
-        """Return the :ref:`read_count` flag if defined, otherwise return None.
+        """Return the :ref:`read_count <read_count>` flag if defined, otherwise return None.
 
         Args:
             require (bool, optional): If True, raise an error if the "read_count" flag 
@@ -367,7 +367,7 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def get_record_count(self, require=False):
-        """If the :ref:`count_total` flag is defined, return it, otherwise return 1 (this record).
+        """Return :ref:`count_total <count_total>` flag if defined, or return 1 (this record).
 
         Args:
             require (bool, optional): If True, raise an error if the "count_total" flag 
