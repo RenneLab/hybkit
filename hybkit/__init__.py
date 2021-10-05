@@ -78,7 +78,7 @@ class HybRecord(object):
     """
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
-    Hyb format entries are a GFF-related file format described by [Travis2014]_.
+    Hyb file (".hyb") format entries are a GFF-related file format described by [Travis2014]_.
     that contain information about a genomic sequence read identified to be a chimera by 
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
     annotations on each components. An example .hyb format line 
@@ -100,8 +100,8 @@ class HybRecord(object):
         hyb_record = hybkit.HybRecord.from_line(line)
 
     This constructor parses hyb files using the 
-    :class:`HybFile` wrapper class described below.
-    For example, to print all hybrid identifiers in a ".hyb" file::
+    :class:`HybFile` class.
+    For example, to print all hybrid identifiers in a hyb file::
 
         with hybkit.HybFile('path/to/file.hyb', 'r') as hyb_file:
             for hyb_record in hyb_file:
@@ -116,9 +116,10 @@ class HybRecord(object):
             hyb_record_1 = hybkit.HybRecord('1_100', 'ACTG')
             hyb_record_2 = hybkit.HybRecord('2_107', 'CTAG', '-7.3')
 
-    Details about segments are provided via dict objects with the keys
+    Details about segments are provided via python dictionaries with 
+    :attr:`keys <HybRecord.SEGMENT_COLUMNS>`
     specific to each segment. Data can be provided either as strings or 
-    as floats/integers (where relevant).
+    as floats/integers (where appropriate).
     For example, to create a HybRecord object representing the example line given above:: 
 
         seg1_props = {'ref_name': 'MIMAT0000078_MirBase_miR-23a_microRNA',
@@ -145,10 +146,12 @@ class HybRecord(object):
         id (str): Identifier for the hyb record
         seq (str): Nucleotide sequence of the hyb record
         energy (str, optional): Predicted energy of sequence folding in kcal/mol
-        seg1_props (dict, optional): Properties of segment 1 of the record, containing possible:
-            keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+        seg1_props (dict, optional): Properties of segment 1 of the record, containing possible
+            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`: 
+            ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         seg2_props (dict, optional): Properties of segment 2 of the record, containing possible:
-            keys: ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`: 
+            ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (dict, optional): Dict with keys of flags for the record and their associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom 
             flags can be supplied in :attr:`settings['custom_flags'] <HybRecord.settings>`.
@@ -164,13 +167,16 @@ class HybRecord(object):
 
         seq (str): Nucleotide sequence of the hyb record
         energy (str or None): Predicted energy of folding
-        seg1_props (dict): Information on chimeric segment 1, contains keys: 
+        seg1_props (dict): Information on chimeric segment 1, contains 
+            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`: 
             'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int), 
             'ref_end' (int), and 'score' (float).
-        seg2_props (dict): Information on segment 2, contains keys:
+        seg2_props (dict): Information on segment 2, contains
+            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`: 
             'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int), 
             'ref_end' (int), and 'score' (float).
-        flags (dict): Dict of flags with possible keys and values as defined in
+        flags (dict): Dict of flags with possible 
+            :attr:`flag keys <HybRecord.ALL_FLAGS>` and values as defined in
             the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
         mirna_props (dict or None): Link to appropriate seg1_props or seg2_props dict 
             corresponding to a record's miRNA (if present), assigned by the 
@@ -316,7 +322,7 @@ class HybRecord(object):
         """Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
 
         Args:
-            require (bool, optional): If True, raise an error if seg1_type is not defined.
+            require (bool, optional): If ``True``, raise an error if seg1_type is not defined.
         """
         if require:
             return self._get_flag('seg1_type')
@@ -328,7 +334,7 @@ class HybRecord(object):
         """Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
 
         Args:
-            require (bool, optional): If True, raise an error if seg2_type is not defined.
+            require (bool, optional): If ``True``, raise an error if seg2_type is not defined.
         """
         if require:
             return self._get_flag('seg2_type')
@@ -337,10 +343,10 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg_types(self, require=False):
-        """Return :ref:`seg1_type <seg1_type>`, ref:`seg2_type <seg2_type>` flags, or None.
+        """Return :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags, or None.
 
         Args:
-            require (bool, optional): If True, raise an error if either flag is not defined.
+            require (bool, optional): If ``True``, raise an error if either flag is not defined.
         """
         if require:
             return (self._get_flag('seg1_type'), self._get_flag('seg2_type'))
@@ -352,7 +358,7 @@ class HybRecord(object):
         """Return the :ref:`read_count <read_count>` flag if defined, otherwise return None.
 
         Args:
-            require (bool, optional): If True, raise an error if the "read_count" flag 
+            require (bool, optional): If ``True``, raise an error if the "read_count" flag 
                 is not defined.
         """
         
@@ -370,7 +376,7 @@ class HybRecord(object):
         """Return :ref:`count_total <count_total>` flag if defined, or return 1 (this record).
 
         Args:
-            require (bool, optional): If True, raise an error if the "count_total" flag 
+            require (bool, optional): If ``True``, raise an error if the "count_total" flag 
                 is not defined.
         """
         if require:
@@ -413,15 +419,16 @@ class HybRecord(object):
         set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
         :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags if not already set. 
 
-        To use a system other than the default, prepare the :class:`TypeFinder` class by 
+        To use a type-finding method other than the default, 
+        prepare the :class:`TypeFinder` class by 
         preparing and setting :attr:`TypeFinder.params` and using :func:`TypeFinder.set_method`. 
 
         Args:
-            allow_unknown (bool, optional): If True, allow segment types that cannot be
+            allow_unknown (bool, optional): If ``True``, allow segment types that cannot be
                 identified and set them as "unknown". Otherwise raise an error.
                 If None (default), uses setting in 
                 :attr:`settings['allow_unknown_seg_types'] <HybRecord.settings>`.
-            check_complete (bool, optional): If True, check every possibility for the 
+            check_complete (bool, optional): If ``True``, check every possibility for the 
                 type of a given segment (where applicable), instead of 
                 stopping after finding the first type.
                 If None (default), uses setting in 
@@ -528,21 +535,26 @@ class HybRecord(object):
         """Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
         Analyze miRNA properties within the sequence record and provide a detail as ouptut.
-        Method requires record to contain a non-dimer miRNA, otherwise will produce an error.
+        Unless ``allow_mirna_dimers`` is ``True``, 
+        this method requires record to contain a non-dimer miRNA, 
+        otherwise an error will be raised.
 
         Args:
             detail (str): | Type of detail to return. Options include: 
-                          | ``all``             : (dict of all properties, default); 
-                          | ``mirna_ref``       : Identifier for Assigned miRNA;
-                          | ``target_ref``      : Identifier for Assigned Target;
-                          | ``mirna_seg_type``  : Assigned seg_type of miRNA;
-                          | ``target_seg_type`` : Assigned seg_type of target;
-                          | ``mirna_seq``       : Annotated subsequence of miRNA;
-                          | ``target_seq``      : Annotated subsequence of target;
-                          | ``mirna_fold``      : Annotated fold substring of miRNA (requires fold_record set);
-                          | ``target_fold``     : Annotated fold substring target (requires fold_record set);
+                          | ``all``             : (dict of all properties, default) 
+                          | ``mirna_ref``       : Identifier for Assigned miRNA
+                          | ``target_ref``      : Identifier for Assigned Target
+                          | ``mirna_seg_type``  : Assigned seg_type of miRNA
+                          | ``target_seg_type`` : Assigned seg_type of target
+                          | ``mirna_seq``       : Annotated subsequence of miRNA
+                          | ``target_seq``      : Annotated subsequence of target
+                          | ``mirna_fold``      : Annotated fold substring of miRNA 
+                            (requires fold_record set)
+                          | ``target_fold``     : Annotated fold substring target 
+                            (requires fold_record set)
             allow_mirna_dimers (bool, optional): Allow miRNA/miRNA dimers. 
-                5p-position will be assigned as miRNA.
+                The 5p-position will be assigned as the "miRNA", 
+                and the 3p-position will be assigned as the "target".
 
         """
 
@@ -607,7 +619,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Properties
     def is_set(self, prop):
         """
-        Return True if HybRecord property "prop" is set (if relevant) and is not None.
+        Return ``True`` if HybRecord property "prop" is set (if relevant) and is not ``None``.
         Options described in :attr:`SET_PROPS`.
 
         Args:
@@ -640,10 +652,10 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Properties
     def has_prop(self, prop, prop_compare=None):
         """
-        Check if HybRecord has property of "prop_type". 
+        Return ``True`` if HybRecord has property: ``prop``. 
  
-        Check property against list of allowed properties in :attr:`PROPS`.
-        If query property has a comparator, provide this in prop_compare.
+        Check property against list of allowed properties in :attr:`HAS_PROPS`.
+        If query property has a string comparator, provide this in prop_compare.
         Raises an error if a prerequisite field is not set 
         (use :meth:`is_set` to check whether properties are set).
      
@@ -658,8 +670,8 @@ class HybRecord(object):
             ======================= =============================================
  
         Args:
-            prop: Property to check
-            prop_compare (optional): Optional comparator to check.
+            prop (str):                   Property to check
+            prop_compare (str, optional): Comparator to check.
 
         """
 
@@ -791,12 +803,12 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False, sep='\t'):
         """
-        Return a hyb-format string representation of the Hyb record.
+        Return a hyb format string representation of the record.
 
         Args:
-            newline (bool, optional): If True, end the returned string with a newline.
-            sep (str, optional): Default: "\\\\t", Provide a different separator 
-                between fields.
+            newline (bool, optional): If ``True``, end the returned string with a newline
+            sep (str, optional): Separator between fields (Default: "\\\\t")
+
         """
         line_items = []
         for item_key in self.HYBRID_COLUMNS:
@@ -821,10 +833,10 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Parsing
     def to_csv(self, newline=False):
         """
-        Return a comma-separated hyb-format string representation of the Hyb record.
+        Return a comma-separated hyb-format string representation of the record.
 
         Args:
-            newline (bool, optional): If True, end the returned string with a newline.
+            newline (bool, optional): If ``True``, end the returned string with a newline.
         """
         return self.to_line(newline, sep=',')
 
@@ -834,18 +846,19 @@ class HybRecord(object):
         Return nucleotide sequence as BioPython SeqRecord object.
 
         Args:
-            mode (str, optional): Determines which sequence component to return. 
-                                  Undefined options will return an error. Options are:
-                                  'hybrid': Entire hybrid sequence (default); 
-                                  'seg1': Sequence 1 (if defined); 
-                                  'seg2': Sequence 2 (if defined);
-                                  'miRNA': miRNA sequence of miRNA/target pair (if defined, else None); 
-                                  'target': Target sequence of miRNA/target pair (if defined, else None);
+            mode (str, optional): | Determines which sequence component to return. Options:
+                                  | ``hybrid``: Entire hybrid sequence (default) 
+                                  | ``seg1``: Sequence 1 (if defined) 
+                                  | ``seg2``: Sequence 2 (if defined)
+                                  | ``miRNA``: miRNA sequence of miRNA/target pair 
+                                    (if defined, else None) 
+                                  | ``target``: Target sequence of miRNA/target pair 
+                                    (if defined, else None)
             annotate (bool, optional): Add name of components to fasta sequence identifier
                                        if present.
         """
         if Bio is None:
-            message = 'Please Install BioPython Package and ensure it can be imported.'
+            message = 'Please install BioPython package and ensure it can be imported.'
             print(message)
             raise bio_module_error
             
@@ -924,13 +937,14 @@ class HybRecord(object):
         Return nucleotide sequence as a fasta string.
 
         Args:
-            mode (str, optional): Determines which sequence component to return. 
-                                  Undefined options will return an error. Options are:
-                                  'hybrid': Entire hybrid sequence (default); 
-                                  'seg1': Sequence 1 (if defined); 
-                                  'seg2': Sequence 2 (if defined);
-                                  'miRNA': miRNA sequence of miRNA/target pair (if defined); 
-                                  'target': Target sequence of miRNA/target pair (if defined);
+            mode (str, optional): | Determines which sequence component to return. Options:
+                                  | ``hybrid``: Entire hybrid sequence (default) 
+                                  | ``seg1``: Sequence 1 (if defined) 
+                                  | ``seg2``: Sequence 2 (if defined)
+                                  | ``miRNA``: miRNA sequence of miRNA/target pair 
+                                    (if defined, else None) 
+                                  | ``target``: Target sequence of miRNA/target pair 
+                                    (if defined, else None)
             annotate (bool, optional): Add name of components to fasta sequence identifier
                                        if present.
         """
@@ -938,7 +952,7 @@ class HybRecord(object):
 
     # HybRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
-        """Return True if ".id" and ".seq" attributes match."""
+        """Return ``True`` if ".id" and ".seq" attributes match."""
         return (self.id == other.id and self.seq == other.seq)
 
     # HybRecord : Public MagicMethods : Comparison
@@ -953,7 +967,7 @@ class HybRecord(object):
 
     # HybRecord : Public MagicMethods : Evaluation
     def __bool__(self):
-        """Return True wherever the class is defined."""
+        """Return ``True`` wherever the class is defined."""
         return True
 
     # HybRecord : Public MagicMethods : Evaluation
@@ -970,17 +984,18 @@ class HybRecord(object):
     @classmethod
     def from_line(cls, line, hybformat_id=False, hybformat_ref=False):
         """
-        Construct a HybRecord instance from a line in ".hyb" format.
+        Construct a HybRecord instance from a single-line hyb-format string.
 
-        The Hyb Software Package contains further information in the "id" field of the
-        line that can be used to infer read counts represented by the hyb record.
-        Additionally, the Hyb Software Package also utilizes a database by default that contains 
-        further information in the names of each respective reference sequence.
+        The Hyb software package ([Travis2014]_) records read-count information 
+        in the "id" field of the record, which can be read by setting ``hybformat_id=True``.
+        Additionally, the Hyb hOH7 database contains the segment type in the
+        identifier of each reference in the 4th field, which can be read by setting
+        ``hybformat_ref=True``.
 
         Args:
-            line (str): Hyb-format line containing record information.
+            line (str): Hyb-format string containing record information.
             hybformat_id (bool, optional): Read count information from identifier in
-                "<id>_<count>" format. (Default: False)
+                "<read_id>_<read_count>" format. (Default: False)
             hybformat_ref (bool, optional): Read additional record information from 
                 identifier in "<gene_id>_<transcript_id>_<gene_name>_<seg_type>" format.
                 (Default: False)
@@ -1058,7 +1073,7 @@ class HybRecord(object):
 
     #: String-comparison properties for the :meth:`has_prop` method.
     #:
-    #: * Field Types:
+    #: * **Field Types:**
     #:  
     #:   * ``id``           : record.id
     #:   * ``seq``          : record.seq
@@ -1071,7 +1086,7 @@ class HybRecord(object):
     #:   * ``any_seg_type`` : seg1_type OR seg2_type flags
     #:   * ``all_seg_type`` : seg1_type AND seg2_type flags
     #:
-    #: * Comparisons:
+    #: * **Comparisons:**
     #:
     #:   * ``is``       : Comparison string matches field exactly
     #:   * ``prefix``   : Comparison string matches beginning of field
@@ -1494,7 +1509,7 @@ class FoldRecord(object):
 
     .. _vienna_file_format:
 
-    * | The .vienna file format used by the ViennaRNA_ package ([ViennaFormat]_; [Lorenz2011]_):
+    * | The ".vienna" file format used by the ViennaRNA_ package ([ViennaFormat]_; [Lorenz2011]_):
 
       Example:
           ::
@@ -1505,7 +1520,7 @@ class FoldRecord(object):
 
     .. _ct_file_format:
 
-    * | The .ct file format used by UNAFold_ and other packages ([CTFormat]_, [Zuker2003]_):
+    * | The ".ct" file format used by UNAFold_ and other packages ([CTFormat]_, [Zuker2003]_):
 
       Example:
           ::
@@ -1557,7 +1572,7 @@ class FoldRecord(object):
         See (:ref:`Vienna File Format <vienna_file_format>`).
 
         Args:
-            newline (bool, optional): If True, add newline character to the end of each
+            newline (bool, optional): If ``True``, add newline character to the end of each
                 returned line. (Default: False)
         """
         ret_lines = []
@@ -1585,7 +1600,7 @@ class FoldRecord(object):
         See (:ref:`Vienna File Format <vienna_file_format>`).
 
         Args:
-            newline (bool, optional): If True, terminate the returned string with a newline
+            newline (bool, optional): If ``True``, terminate the returned string with a newline
                 character. (Default: False)
         """
         if newline:
@@ -1597,10 +1612,10 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybRecord Comparison
     def count_hyb_record_mismatches(self, hyb_record):
         """
-        Count mismatches between dynamic hyb_record seq and fold_record.seq
+        Count mismatches between ``hyb_record.seq`` and ``fold_record.seq``
 
         Args:
-            hyb_record (HybRecord): hyb_record to compare.
+            hyb_record (HybRecord): hyb_record for comparison.
         """
         if (self.seq == hyb_record.seq):
             return 0
@@ -1614,7 +1629,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybFile Comparison
     def matches_hyb_record(self, hyb_record):
         """
-        Return True if self.seq == hyb_record.seq
+        Return ``True`` if self.seq == hyb_record.seq
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
@@ -1624,7 +1639,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybFile Comparison
     def ensure_matches_hyb_record(self, hyb_record):
         """
-        Return True if self.seq == hyb_record.seq
+        Ensure self.seq == hyb_record.seq
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
@@ -1638,7 +1653,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
-        """Return True if two records have matching sequences and identifiers."""
+        """Return ``True`` if two records have matching sequences and identifiers."""
         return (self.id == other.id and self.seq == other.seq)
 
     # FoldRecord : Public MagicMethods : Evaluation
@@ -1648,7 +1663,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __bool__(self):
-        """Return True wherever the class is defined."""
+        """Return ``True`` wherever the class is defined."""
         return True
 
     # FoldRecord : Public MagicMethods : Evaluation
@@ -1668,16 +1683,17 @@ class FoldRecord(object):
                           error_mode='raise',
                          ):
         """
-        Construct instance from a list of 3 strings of Vienna-format ([ViennaFormat]_) lines.
+        Construct instance from a list of 3 strings of vienna-format ([ViennaFormat]_) lines.
 
         Args:
             record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
                 vienna-format record.
-            error_mode (str, optional): 'string representing the error mode.
-                Options: "raise": Raise an error when encountered and exit program;
-                "warn_return": Print a warning and return the error_value ;
-                "return": Return the error value with no program output.
-                record is encountered.
+            error_mode (str, optional): | Error mode. Options: 
+                                        | ``raise`` : Raise an error when 
+                                          encountered and exit program
+                                        | ``warn_return`` : Print a warning and return 
+                                          the error_value 
+                                        | ``return`` : Return the error value with no program output.
         """
 
         error_mode_options = {'raise', 'warn_return', 'return'}
@@ -1729,35 +1745,37 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Vienna
     @classmethod
-    def from_vienna_string(cls, record_string, hybformat_file=False):
+    def from_vienna_string(cls, record_string, error_mode='raise'):
         """
-        Construct instance from a string representing 3 Vienna-format lines.
-
-        The Hyb Software Package contains further information in the "name" field of the
-        vienna record that can be used to infer further information about the fold divisions.
+        Construct instance from a string representing 3 vienna-format ([ViennaFormat]_) lines.
 
         Args:
-            record_lines (str or tuple): Iterable of 3 strings corresponding to lines of a
-                vienna-format record.
-            hybformat_file (bool, optional): If True, extra information stored in the 
-                record identifier by Hyb will be parsed.
+            record_string (str or tuple): 3-line string containing 
+                a vienna-format record
+            error_mode (str, optional): 'string representing the error mode.
+                Options: "raise": Raise an error when encountered and exit program;
+                "warn_return": Print a warning and return the error_value ;
+                "return": Return the error value with no program output.
+                record is encountered.
         """
         lines = record_string.strip().split('\n')[0:3]
         return cls.from_vienna_lines(lines)
 
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod
-    def from_ct_lines(cls, record_lines, error_mode=None):
+    def from_ct_lines(cls, record_lines, error_mode='raise'):
         """
         Create a FoldRecord entry from a list of an arbitrary number of strings
         corresponding to lines in the ".ct" file format ([CTFormat]_).
 
         Args
-            error_mode (str, optional): 'string representing the error mode.
-                Options: "raise": Raise an error when encountered and exit program;
-                "warn_return": Print a warning and return the error_value ;
-                "return": Return the error value with no program output.
-                record is encountered.
+            record_lines (list or tuple): list containing lines of ct record
+            error_mode (str, optional): | Error mode. Options: 
+                                        | ``raise`` : Raise an error when 
+                                          encountered and exit program
+                                        | ``warn_return`` : Print a warning and return 
+                                          the error_value 
+                                        | ``return`` : Return the error value with no program output.
         """
         header_line = record_lines[0].strip()
         if not any((x in header_line for x in ['dG', 'Energy', 'ENERGY'])):
@@ -1810,10 +1828,19 @@ class FoldRecord(object):
 
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod
-    def from_ct_string(cls, record_string):
+    def from_ct_string(cls, record_string, error_mode='raise'):
         """
-        Create a FoldRecord entry from a string containing an arbitrary number of lines
-        corresponding to lines in the ".ct" file format.
+        Create a FoldRecord entry from a multi-line string containing information in the
+        ".ct" file format ([CTFormat]_).
+
+        Args
+            record_string (str): String containing lines of ct record
+            error_mode (str, optional): | Error mode. Options: 
+                                        | ``raise`` : Raise an error when 
+                                          encountered and exit program
+                                        | ``warn_return`` : Print a warning and return 
+                                          the error_value 
+                                        | ``return`` : Return the error value with no program output.
         """
         lines = record_string.strip().split('\n')
         return cls.from_ct_lines(lines)
@@ -1839,14 +1866,13 @@ class FoldRecord(object):
         return self.fold[seg_start-1:seg_end]
 
 
-
-
 class DynamicFoldRecord(FoldRecord):
     """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
     
     Instead of expecting the nucleotide sequence to match a potential :attr:`HybRecord.seq`
-    attribute, this fold record is expected to be reconstructed from aligned regions of 
+    attribute exactly, this type of fold record is 
+    expected to be reconstructed from aligned regions of 
     a chimeric read. For chimeras with overlapping alignments, the sequence will be longer. 
     For chimeras with gapped alignments, the sequence will be shorter.
 
@@ -1880,6 +1906,7 @@ class DynamicFoldRecord(FoldRecord):
 
     | The primary diffences in this class from the base :class:`FoldRecord` class 
         include modified versions of the methods:
+    | :meth:`count_hyb_record_mismatches`
     | :meth:`matches_hyb_record`
     | :meth:`ensure_matches_hyb_record`
 
@@ -1899,10 +1926,10 @@ class DynamicFoldRecord(FoldRecord):
     # DynamicFoldRecord : Public Methods : HybRecord Comparison
     def count_hyb_record_mismatches(self, hyb_record):
         """
-        Count mismatches between dynamic hyb_record seq and fold_record.seq
+        Count mismatches between dynamic hyb_record.seq and fold_record.seq
 
         Args:
-            hyb_record (HybRecord): hyb_record to compare.
+            hyb_record (HybRecord): hyb_record for comparison
         """
         dynamic_seq = hyb_record._get_dynamic_seq()
         if (self.seq == dynamic_seq):
@@ -1919,7 +1946,7 @@ class DynamicFoldRecord(FoldRecord):
         """Calculate dynamic sequence from hyb record and compare to sequence in DynamicFoldRecord
 
         Args:
-            hyb_record (HybRecord): hyb_record to compare.
+            hyb_record (HybRecord): hyb_record for comparison
         """
         dynamic_seq = hyb_record._get_dynamic_seq()
         if (self.seq == dynamic_seq):
@@ -1937,10 +1964,10 @@ class DynamicFoldRecord(FoldRecord):
     # DynamicFoldRecord : Public Methods : HybFile Comparison
     def ensure_matches_hyb_record(self, hyb_record):
         """
-        Return True if self.seq == hyb_record.seq
+        Ensure the dynamic fold record sequence matches hyb_record.seq
 
         Args:
-            hyb_record (HybRecord): hyb_record to compare.
+            hyb_record (HybRecord): hyb_record for comparison
         """
         #if True:
         #    dynamic_seq = hyb_record._get_dynamic_seq()
