@@ -1085,6 +1085,7 @@ class HybRecord(object):
 
     # HybRecord : Private Constants
     #: Properties for the :meth:`is_set` method.
+    #: 
     #: * ``energy``         : record.energy is not None
     #: * ``full_seg_props`` : Each seg props key is in seg1/seg2 dict and is not NOne 
     #: * ``fold_record``    : record.fold_record has been set
@@ -1093,11 +1094,25 @@ class HybRecord(object):
     IS_SET_PROPS = {
         'energy', 'full_seg_props', 'fold_record', 'eval_types', 'eval_mirna', 
     }
+
     #: General record properties for the :meth:`has_prop` method.
+    #: * ``has_indels`` : either seg1 or seg2 alignments has insertions/deltions,
+    #:   shown by differing read/refernce length for the same alignment
     GEN_PROPS = [
         'has_indels'
     ]
+
     #: String-comparison properties for the :meth:`has_prop` method.
+    #: * field types:
+    #:  
+    #:   * ``id``           : record.id
+    #:   * ``seq``          : record.seq
+    #:   * ``seg1``         : record.seg1['ref_name']
+    #:   * ``seg2``         : record.seg2['ref_name']
+    #:   * ``any_seg``      : record.seg1['ref_name'] OR record.seg1['ref_name']
+    #:   * ``all_seg``      : record.seg1['ref_name'] AND record.seg1['ref_name']
+    #:   * ``seg1_seg``      : record.seg1['ref_name'] AND record.seg1['ref_name']
+    #:   * ``any_seg_type`` : String-comparison properties for the :meth:`has_prop` method.
     STR_PROPS = [
         'id_is', 'id_prefix', 'id_suffix', 'id_contains',
         'seq_is', 'seq_prefix', 'seq_suffix', 'seq_contains',
