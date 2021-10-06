@@ -34,7 +34,7 @@ test_out_dir = os.path.join(auto_tests_dir, 'output_autotest')
 hyb_file_name = os.path.join(test_out_dir, 'test_hybrid_py.hyb')
 vienna_file_name = os.path.join(test_out_dir, 'test_hybrid_py.vienna')
 out_basename = hyb_file_name.replace('.hyb', '')
-match_legend_file_name = os.path.join(auto_tests_dir, 'string_match_legend.csv')
+match_legend_file_name = os.path.join(auto_tests_dir, 'test_string_match.csv')
 bad1_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_1.csv')
 bad2_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_2.csv')
 bad3_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_3.csv')
@@ -371,13 +371,27 @@ def test_util():
     hybkit.settings._USE_ABSPATH = original_abspath
 
 def test_type_finder():
+    # Generic Tests
+    def do_nothing(*args, **kwargs):
+        pass
+    with pytest.raises(Exception):
+        hybkit.HybRecord.TypeFinder()
+        hybkit.HybRecord.TypeFinder.set_method('bad_method')
+    hybkit.HybRecord.TypeFinder.set_custom_method(do_nothing)
+
     # Defualt Hybformat
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
+    hybkit.HybRecord.TypeFinder.set_method('hybformat')
     hyb_record.eval_types()
+    with pytest.raises(Exception):
+        hybkit.HybRecord.TypeFinder()
+        hybkit.HybRecord.TypeFinder.set_method('bad_method')
     # Non-Defualt String-Match
     with pytest.raises(Exception):
         hybkit.HybRecord.TypeFinder.make_string_match_params('badfile')
+    with pytest.raises(Exception):
         hybkit.HybRecord.TypeFinder.make_string_match_params(bad1_match_legend_file_name)
+    with pytest.raises(Exception):
         hybkit.HybRecord.TypeFinder.make_string_match_params(bad2_match_legend_file_name)
     match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(
         bad3_legend_file_name)

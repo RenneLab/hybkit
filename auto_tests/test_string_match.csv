@@ -13,19 +13,9 @@
 
 # Hyb Software Reference Search Terms:
 endswith,_microRNA,miRNA
-endswith,_pseudo,pseudogene
-endswith,_rRNA,rRNA
+contains,_microRNA,miRNA
+startswith,MIMAT,miRNA
+matches,MIMAT0000078_MirBase_miR-23a_microRNA,miRNA
 endswith,_mRNA,mRNA
-endswith,_mtrRNA,mitoch-rRNA
-endswith,_tRNA,tRNA
-endswith,_snoRNA,snoRNA
-endswith,_miscRNA,miscRNA
-endswith,_snRNA,snRNA
-endswith,_pr-tr,pr-tr
-endswith,_lincRNA,lincRNA
-endswith,_Ig,Ig
-endswith,_Trec,Trec
 
 
-#custom
-startswith,kshv-miR,KSHV-miRNA
