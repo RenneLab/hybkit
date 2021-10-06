@@ -790,9 +790,7 @@ class HybRecord(object):
 
         elif prop in self._TARGET_PROPS_SET:
             self._ensure_set('eval_target')
-            if prop == 'has_target':
-                raise NotImplementedError()
-            elif prop == 'target_none':
+            if prop == 'target_none':
                 ret_val = (self._get_flag('target_reg') == 'N')
             elif prop == 'target_unknown':
                 ret_val = (self._get_flag('target_reg') == 'U')
@@ -1491,7 +1489,7 @@ class HybFile(object):
         end of each written record line.
         """
         for write_record in write_records:
-            self.fh.write_record(write_record)
+            self.write_record(write_record)
 
     # HybFile : Public Classmethods : Initialization
     @classmethod
@@ -1706,7 +1704,7 @@ class FoldRecord(object):
 
         error_mode_options = {'raise', 'warn_return', 'return'}
         if error_mode not in error_mode_options:
-            message = 'Provided error mode: %s is not in allowed options\n'
+            message = 'Provided error mode: %s is not in allowed options\n' % error_mode
             message += '    ' + ', '.join(error_mode_options)
             print(message)
             raise Exception(message)

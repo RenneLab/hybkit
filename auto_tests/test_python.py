@@ -22,6 +22,11 @@ vie_str_1 = ('>695_804_MIMAT0000078_MirBase_miR-23a_microRNA_1_21-'
              'ATCACATTGCCAGGGATTTCCATCCCCAACAATGTGAAAACGGCTGTC\n'
              '.((((((((...(((((....)))))...))))))))...........	(-15)\n'
             )
+vie_str_1_mis = ('>695_804_MIMAT0000078_MirBase_miR-23a_microRNA_1_21-'
+                 '695_804_ENSG00000188229_ENST00000340384_TUBB2C_mRNA_1181_1207\n'
+                 'ATCACATAGCCAGGGATTTCCATCCCCAACAATGTGAAAACGGCTGTC\n'
+                 '.((((((((...(((((....)))))...))))))))...........	(-15)\n'
+                )
 
 
 auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
@@ -48,6 +53,12 @@ def test_hybrecord():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
                                             hybformat_id=True, 
                                             hybformat_ref=True)
+    print(str(hyb_record))
+    assert hyb_record == hyb_record
+    assert not (hyb_record != hyb_record)
+    assert bool(hyb_record)
+    hash(hyb_record)
+    print(len(hyb_record))
     hyb_record.eval_types()
     hyb_record.eval_mirna()
     hyb_record.set_flag('count_total', 1)
@@ -94,6 +105,16 @@ def test_hybrecord():
         print(fn, args, kwargs)
         output = fn(*args, **kwargs)
 
+    with pytest.raises(Exception):
+        hyb_record.to_fasta_record('notallowed')
+    hyb_record.flags['miRNA_seg'] = None
+    with pytest.raises(Exception):
+        hyb_record.to_fasta_record('mirna')
+    hyb_record.flags['miRNA_seg'] = 'B'
+    with pytest.raises(Exception):
+        hyb_record.to_fasta_record('mirna')
+    hyb_record.flags['miRNA_seg'] = '5p'
+
     fail_functions = [
         (hyb_record.get_count, None, ['blah'], {}),
     ]
@@ -105,7 +126,9 @@ def test_hybrecord():
             print(e)
 
     with pytest.raises(Exception):
+        hyb_record.is_set('badprop')
         hyb_record.has_prop('badprop')
+        hyb_record.has_prop('any_seg_type_contains', None)
 
     assert not hyb_record.has_prop('has_indels')
 
@@ -128,6 +151,31 @@ def test_hybrecord():
         else:
             assert not hyb_record.has_prop(prop)
 
+    with pytest.raises(Exception):
+        hyb_record.set_fold_record(None)
+        hyb_record.set_fold_record('not_fold_record')
+        hyb_record.mirna_detail('disallowed_detail')
+
+    # Test Private Methods
+    hyb_record.seg1_props['read_start'] = None
+    with pytest.raises(Exception):
+        hyb_record._ensure_props_read_start_end()
+        hyb_record._get_seg_seq(self.seg1_props)
+        hyb_record._get_flag('fake_flag')
+        hyb_record._make_flags_dict('not_dict')
+        hyb_record._make_flags_dict({'bad_flag':True})
+        hyb_record._parse_hybformat_id('bad_id_name_continues_on')
+        hyb_record._parse_hybformat_ref('bad_ref_name_continues_on')
+        hyb_record._read_flags('bad_flag=B;')
+    hyb_record._get_flag_keys(reorder_flags=False)
+    hyb_record._read_flags('miRNA_seg=B;')
+    hyb_record._read_flags('bad_flag=B;', allow_undefined_flags=True)
+
+    hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
+                                            hybformat_id=True, 
+                                            hybformat_ref=True)
+    with pytest.raises(Exception):
+        hyb_record._ensure_set('type_eval')
 
 def test_hybfile():
     if not os.path.isdir(test_out_dir):
@@ -135,7 +183,10 @@ def test_hybfile():
 
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     with hybkit.HybFile.open(hyb_file_name, 'w') as hyb_file:
+        with pytest.raises(Exception):
+            hyb_file.write_record('NotRecord')
         hyb_file.write_record(hyb_record)
+        hyb_file.write_records([hyb_record, hyb_record])
     assert hybkit.util.hyb_exists(hyb_file_name)
     with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file:
         hyb_record_read = hyb_file.read_records()[0]
@@ -147,6 +198,10 @@ def test_hybfile():
 
 def test_foldrecord():           
     for TestClass in [hybkit.FoldRecord, hybkit.DynamicFoldRecord]:
+        with pytest.raises(Exception):
+            fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1, 'bad_mode')
+            fold_record = hybkit.FoldRecord.from_vienna_lines(['', '', ''], 'bad_mode')
+            fold_record = hybkit.FoldRecord.from_vienna_lines(['', '',])
         fold_record = TestClass.from_vienna_string(vie_str_1)
         print(str(fold_record))
         assert fold_record == fold_record
@@ -154,19 +209,25 @@ def test_foldrecord():
         assert bool(fold_record)
         hash(fold_record)
         print(len(fold_record))
-        #print(fold_record._get_seg_fold({'read_start':1, 'read_end':10}))
+        if not isinstance(fold_record, hybkit.DynamicFoldRecord):
+            print(fold_record._get_seg_fold({'read_start':1, 'read_end':10}))
         print(fold_record.to_vienna_lines())
         print(fold_record.to_vienna_lines(True))
         print(fold_record.to_vienna_string())
         print(fold_record.to_vienna_string(True))
-
-       
+   
 def test_viennafile():           
     fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1)
     with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
+        with pytest.raises(Exception):
+            vienna_file.write_record('NotRecord')
         vienna_file.write_record(fold_record)               
     assert hybkit.util.vienna_exists(vienna_file_name)
     assert hybkit.util.fold_exists(vienna_file_name)
+    with hybkit.FoldFile.open(vienna_file_name, 'r') as fold_file:
+        with pytest.raises(Exception):
+            fold_file.read_record()
+            fold_file._to_record_string(fold_record)
     with hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
         fold_record_read = vienna_file.read_records()[0]
 
@@ -185,6 +246,7 @@ def test_hybfolditer():
         hyb_file.write_record(hyb_record)
     fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1)
     dyn_fold_record = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1)
+    dyn_fold_record_mis = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1_mis)
     with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
         vienna_file.write_record(fold_record)               
 
@@ -198,6 +260,12 @@ def test_hybfolditer():
     assert dyn_fold_record.matches_hyb_record(hyb_record) 
     dyn_fold_record.count_hyb_record_mismatches(hyb_record) 
     dyn_fold_record.ensure_matches_hyb_record(hyb_record) 
+
+    #Compare DynamicFoldRecord With Mismatch and HybRecord
+    assert not dyn_fold_record_mis.matches_hyb_record(hyb_record) 
+    dyn_fold_record_mis.count_hyb_record_mismatches(hyb_record) 
+    with pytest.raises(Exception):
+        dyn_fold_record_mis.ensure_matches_hyb_record(hyb_record) 
 
     hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
     hybkit.settings.FoldFile_settings['foldrecord_type'] = 'strict'
