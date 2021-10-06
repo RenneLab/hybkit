@@ -278,7 +278,7 @@ class HybRecord(object):
             if read_count in flags:
                 message = '"read_count" paramater defined both in function call and flags.\n'
                 message += 'Please define only once.'
-                raise Exception(message)
+                raise RuntimeError(message)
             else:
                 self.set_flag('read_count', int(read_count))
 
@@ -313,7 +313,7 @@ class HybRecord(object):
             message = 'Flag "%s" is not defined. Please check flag key' % flag_key
             message += ' or run with: "allow_undefined_flags=True"'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         self.flags[flag_key] = flag_val
 
@@ -406,7 +406,7 @@ class HybRecord(object):
             message = 'Unrecognized Count Mode: "%s"\n' % count_mode
             message += 'Allowed options are: %s' % ', '.join(['read', 'record'])
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         return ret_val
 
     # HybRecord : Public Methods : Flag_Info : eval_type
@@ -458,7 +458,7 @@ class HybRecord(object):
                     message = 'Cannot identify segment type for segment:\n'
                     message += self._format_seg_props(seg_props, prefix=' '*2) + '\n'
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
             else:
                 types.append(seg_type)
         self.set_flag('seg1_type', types[0])
@@ -478,12 +478,12 @@ class HybRecord(object):
         if fold_record is None or (isinstance(fold_record, tuple) and fold_record[0] is None):
             message = 'Trying to assign None object as FoldRecord.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         if not isinstance(fold_record, FoldRecord):
             message = 'Supplied argument to fold_record: %s' % str(fold_record)
             message += '\n   is not a FoldRecord object.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         fold_record.ensure_matches_hyb_record(self)
         self.fold_record = fold_record
 
@@ -571,7 +571,7 @@ class HybRecord(object):
             message += 'hybrecord: %s does not meet this criteria ' % str(self)
             message += 'with miRNA_seg flag: %s' % mirna_flag
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
 
         ALLOWED_DETAILS = {'all', 'mirna_ref', 'target_ref', 'mirna_seg_type', 'target_seg_type', 
@@ -582,7 +582,7 @@ class HybRecord(object):
             message = 'Requested miRNA detail: "%s" ' % detail
             message += 'not in allowed types: \n    %s' % ', '.join(ALLOWED_DETAILS)
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         # Analyze miRNA details
         mirna_details = {}
@@ -601,7 +601,7 @@ class HybRecord(object):
             message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
             message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         mirna_details['mirna_ref'] = mirna_props['ref_name']
         mirna_details['target_ref'] = target_props['ref_name']
@@ -633,7 +633,7 @@ class HybRecord(object):
             message = 'Requested Property: %s is not defined. ' % prop
             message += 'Available proprties are:\n' + ', '.join(self.SET_PROPS)
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         if prop in {'energy', 'fold_record'}:
             ret_bool = (getattr(self, prop) is not None)
@@ -682,7 +682,7 @@ class HybRecord(object):
             message = 'Requested Property: %s is not defined. ' % prop
             message += 'Available proprties are:\n' + ', '.join(self.HAS_PROPS)
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         # Check if a substring compares to a desired property string.
         if prop in self._GEN_PROPS_SET:
@@ -702,6 +702,8 @@ class HybRecord(object):
             if not prop_compare:
                 message = 'Property: %s  requires a comparison string. ' % prop
                 message += 'Please provide an argument to prop_compare.'
+                print(message)
+                raise RuntimeError(message)
 
             if prop in self._MIRNA_STR_PROPS_SET:
                 self._ensure_set('eval_mirna')
@@ -742,7 +744,7 @@ class HybRecord(object):
             elif check_attr == 'target_seg_type':
                 check_info = self.mirna_detail('target_seg_type', allow_mirna_dimers=True)
             else:
-                raise Exception('Unknown Field: ' + check_attr)
+                raise RuntimeError('Unknown Field: ' + check_attr)
 
             # Wrap single check_info value in a list, if not already.
             if not multi_check:
@@ -754,7 +756,7 @@ class HybRecord(object):
                     message += 'value for requested property: %s' % check_attr
                     message += '\nTo allow unknown values, require_known as False.'
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
 
             if any((val is None) for val in check_info):
                 ret_val = None
@@ -768,7 +770,7 @@ class HybRecord(object):
                  ret_val = bool(prop_compare in check_info)
                 # ret_val = any((prop_copmpare == val) for val in check_info)
             else:
-                raise Exception(prop)
+                raise RuntimeError(prop)
 
         # Check mirna-specific properties (requires mirna-evaluation)
         elif prop in self._MIRNA_PROPS_SET:
@@ -786,7 +788,7 @@ class HybRecord(object):
             elif prop == '3p_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'3p', 'B'}
             else:
-                raise Exception(prop)
+                raise RuntimeError(prop)
 
         elif prop in self._TARGET_PROPS_SET:
             self._ensure_set('eval_target')
@@ -872,7 +874,7 @@ class HybRecord(object):
             message = 'Mode %s not allowed for parsing as fasta record.\n' % mode
             message += '    Allowed Modes: ' + ', '.join(allowed_modes)
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         fasta_description = ''
         if mode == 'hybrid':
@@ -889,17 +891,17 @@ class HybRecord(object):
             if not self.is_set('eval_mirna'):
                 message = 'eval_mirna must be performed before miRNA/target fasta output'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
             elif self.has_prop('no_mirna'):
                 message = 'miRNA / target cannot be output as fasta because record ' + str(self)
                 message += 'does not have a miRNA.'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
             elif self.has_prop('mirna_dimer'):
                 message = 'miRNA / target cannot be output as fasta because record ' + str(self)
                 message += 'has a miRNA dimer.'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
 
             if annotate:
                 fasta_description += mode + '--'
@@ -921,7 +923,7 @@ class HybRecord(object):
                 message = 'Record %s, Segment: %s is missing one of ' % (str(self), mode)
                 message += 'read_start/read_end and cannot be converted to FASTA.'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
             read_start, read_end = seg_props['read_start'], seg_props['read_end']
             fasta_id = self.id + ':%i-%i' % (read_start, read_end)
             fasta_seq = self._get_seg_seq(seg_props)
@@ -1046,7 +1048,7 @@ class HybRecord(object):
                     message += 'Inferred type: %s\n' % seg_type
                     message += 'Does not equal current type flag: %s' % flags[seg_string]
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
                 elif seg_type_key not in flags:
                     flags[seg_type_key] = seg_type
               
@@ -1223,9 +1225,9 @@ class HybRecord(object):
                     message = '"read_start" and "read_end" keys required to be found in the '
                     message += 'segN_prop dicts for creating a "dynamic_seq" object\n'
                     message += 'Record: %s, dict: seg%i_props' % (str(self), seg_n)
-                    message += 'is missing key: .' % key 
+                    message += 'is missing key: %s.' % key 
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
 
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_seq(self, seg_props):
@@ -1234,7 +1236,7 @@ class HybRecord(object):
             message += 'Record %s, Segment %s.\n' % (str(self), seg_props['ref_name'])
             message += 'Record segment is missing one of read_start/read_end.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         read_start, read_end = seg_props['read_start'], seg_props['read_end']
         return self.seq[read_start-1:read_end]
 
@@ -1252,7 +1254,7 @@ class HybRecord(object):
         else:
             message = 'Expected Flag Key: %s, but it is not present in record.' % flag_key
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # HybRecord : Private Methods : flags
     def _get_flag_or_none(self, flag_key):
@@ -1308,9 +1310,9 @@ class HybRecord(object):
 
         if not isinstance(flag_obj, dict):
             message = '"flag_obj" argument must be a dict obj. Defined keys are:'
-            message += (self.ALL_FLAGS + self._custom_flags).join(', ')
+            message += ', '.join(self.ALL_FLAGS + self.settings['custom_flags'])
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         if not allow_undefined_flags:
             for flag in flag_obj:
@@ -1318,9 +1320,9 @@ class HybRecord(object):
                     message = 'Flag "%s" is not defined. Please check flag key' % flag
                     message += ' or run with: "allow_undefined_flags=True"\n'
                     message += 'Defined Flags are: '
-                    message += ', '.join(self.ALL_FLAGS + self._custom_flags)
+                    message += ', '.join(self.ALL_FLAGS + self.settings['custom_flags'])
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
         return flag_obj
 
     # HybRecord : Private Methods : seg_props
@@ -1359,7 +1361,7 @@ class HybRecord(object):
             message = 'Problem with HybRecord instance: %s\n' % str(self)
             message += 'Method requries set attribute/evaluation: "%s" before use.' % prop
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # HybRecord : Private Classmethods : hybformat record parsing
     @classmethod
@@ -1370,7 +1372,7 @@ class HybRecord(object):
             message = 'Failed attempt to parse record id: %s in hyb format.\n' % record_id
             message += 'Hyb-Program format record ids have form: <read_id>_<read_count>'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         return (split_id[0], split_id[1])
 
     # HybRecord : Private Classmethods : hybformat record parsing
@@ -1386,7 +1388,7 @@ class HybRecord(object):
             message += 'Hyb-Program format record ids have form:\n'
             message += '    <gene_id>_<transcript_id>_<gene_name>_<seg_type>'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         return (split_ref[0], split_ref[1], split_ref[2], split_ref[3])
 
     # HybRecord : Private Classmethods : flags
@@ -1408,9 +1410,9 @@ class HybRecord(object):
             if not allow_undefined_flags and flag_key not in cls._flagset:
                 message = 'Problem: Unidefined Flag: %s\n' % flag_key
                 message += 'Defined Flags: '
-                message += ', '.join(self.ALL_FLAGS + self._custom_flags)
+                message += ', '.join(cls.ALL_FLAGS + cls.settings['custom_flags'])
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
             flags[flag_key] = flag_value
         return flags
 
@@ -1503,7 +1505,7 @@ class HybFile(object):
         if not isinstance(record, HybRecord):
             message = 'Item: "%s" is not a HybRecord object.' % record
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
 
 class FoldRecord(object):
@@ -1655,7 +1657,7 @@ class FoldRecord(object):
             message += 'Hyb : %s\n' % str(hyb_record.seq)
             message += 'Fold: %s\n' % str(self.seq) 
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # FoldRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
@@ -1707,7 +1709,7 @@ class FoldRecord(object):
             message = 'Provided error mode: %s is not in allowed options\n' % error_mode
             message += '    ' + ', '.join(error_mode_options)
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         fail_ret_val = (None, ''.join(record_lines))
 
@@ -1716,7 +1718,7 @@ class FoldRecord(object):
             message += '\n'.join([line.rstrip() for line in record_lines])
             message += '\n  ... are not in required 3-line format.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         rec_id = record_lines[0].strip()
         seq = record_lines[1].strip()
@@ -1734,7 +1736,7 @@ class FoldRecord(object):
            else:
                 message = 'ERROR: Improper Vienna: No Fold (Energy = 99*.*)'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
 
         if len(line_3_split) != 2:
             message = 'Provided Vienna Record Line 3:\n'
@@ -1742,7 +1744,7 @@ class FoldRecord(object):
             message += str(line_3_split) + '\n'
             message += '\n  ... does not have required "..((.))..<tab>(-1.23)" format.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         fold = line_3_split[0]
         energy = float(line_3_split[1].strip('()'))
 
@@ -1789,7 +1791,7 @@ class FoldRecord(object):
             message += '\n'.join([line.rstrip() for line in record_lines])
             message += '\n  ... do not begin with expected header.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         header_items = header_line.split('\t')
         expected_seq_len = int(header_items[0])
         expected_record_lines = expected_seq_len + 1
@@ -1800,7 +1802,7 @@ class FoldRecord(object):
             message += '\n  ... do not match the expected %i ' % expected_seq_len
             message += 'lines from the header.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
         energy_string = header_items[1]
         energy = float(energy_string.split()[-1])
@@ -1815,7 +1817,7 @@ class FoldRecord(object):
                 message += line.rstrip() + '\n'
                 message += '\n  ... does not have 6-column or 8-column format'
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
             base = line_split[1]
             seq += base
             fold_i = int(line_split[4])
@@ -1826,7 +1828,7 @@ class FoldRecord(object):
             elif fold_i < i:
                 fold_char = ')'
             else:
-                raise Exception
+                raise RuntimeError
             fold += fold_char
 
         return_obj = cls(full_name, seq, fold, energy)
@@ -2002,7 +2004,7 @@ class DynamicFoldRecord(FoldRecord):
             message += '(%i of %i)\n' % (mismatch_count, 
                                          self.settings['allowed_mismatches'])
             message += 'DynamicFoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq)) 
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # DynamicFoldRecord : Private Methods : Segment Parsing
     def _get_seg_fold(self, seg_props, hyb_record):
@@ -2023,7 +2025,7 @@ class DynamicFoldRecord(FoldRecord):
         elif (seg_start, seg_end) == (seg2_start, seg2_end):
             return seg2_fold
         else:
-            raise Exception() 
+            raise RuntimeError() 
 
 
 class FoldFile(object):
@@ -2131,7 +2133,7 @@ class FoldFile(object):
         if not isinstance(record, FoldRecord):
             message = 'Item: "%s" is not a FoldRecord object.' % record
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # FoldFile : Private Methods
     def _to_record_string(self, write_record, newline):
@@ -2307,7 +2309,7 @@ class HybFoldIter(object):
                 #            message += '(max: %i)\n' % self.settings['max_sequential_skips']
                 #            message += 'Check for misalignment of records, or disable setting.'
                 #            print(message)
-                #            raise Exception(message)
+                #            raise RuntimeError(message)
                 #        self.counters['fold_record_read_attempts'] += 1
                 #        next_fold_record = self.foldfile_handle.read_record(error_mode='return')
                 #    else:
@@ -2327,7 +2329,7 @@ class HybFoldIter(object):
             if error:
                 if self.settings['error_mode'] == 'raise':
                     error = 'ERROR: ' + error
-                    raise Exception(error)
+                    raise RuntimeError(error)
                 elif self.settings['error_mode'] == 'warn_skip':
                     print('WARNING: SkipPair:', error)
                 elif self.settings['error_mode'] == 'warn_return':
@@ -2341,7 +2343,7 @@ class HybFoldIter(object):
                         message += '(max: %i)\n' % self.settings['max_sequential_skips']
                         message += 'Check for misalignment of records, or disable setting.'
                         print(message)
-                        raise Exception(message)
+                        raise RuntimeError(message)
                     do_skip = True
 
         except StopIteration:

@@ -35,9 +35,9 @@ hyb_file_name = os.path.join(test_out_dir, 'test_hybrid_py.hyb')
 vienna_file_name = os.path.join(test_out_dir, 'test_hybrid_py.vienna')
 out_basename = hyb_file_name.replace('.hyb', '')
 match_legend_file_name = os.path.join(auto_tests_dir, 'test_string_match.csv')
-bad1_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_1.csv')
-bad2_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_2.csv')
-bad3_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_3.csv')
+bad1_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_1.csv')
+bad2_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_2.csv')
+bad3_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_3.csv')
 id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_id_map.csv')
 bad1_id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_id_map_1.csv')
 
@@ -105,13 +105,13 @@ def test_hybrecord():
         print(fn, args, kwargs)
         output = fn(*args, **kwargs)
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.to_fasta_record('notallowed')
     hyb_record.flags['miRNA_seg'] = None
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.to_fasta_record('mirna')
     hyb_record.flags['miRNA_seg'] = 'B'
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.to_fasta_record('mirna')
     hyb_record.flags['miRNA_seg'] = '5p'
 
@@ -122,14 +122,14 @@ def test_hybrecord():
         try:
             print(fn, expected, args, kwargs)
             output = fn(*args, **kwargs)
-        except Exception as e:
+        except RuntimeError as e:
             print(e)
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.is_set('badprop')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.has_prop('badprop')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.has_prop('any_seg_type_contains', None)
 
     assert not hyb_record.has_prop('has_indels')
@@ -153,30 +153,30 @@ def test_hybrecord():
         else:
             assert not hyb_record.has_prop(prop)
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.set_fold_record(None)
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.set_fold_record('not_fold_record')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.mirna_detail('disallowed_detail')
 
     # Test Private Methods
     hyb_record.seg1_props['read_start'] = None
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._ensure_props_read_start_end()
-    with pytest.raises(Exception):
-        hyb_record._get_seg_seq(self.seg1_props)
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
+        hyb_record._get_seg_seq(hyb_record.seg1_props)
+    with pytest.raises(RuntimeError):
         hyb_record._get_flag('fake_flag')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._make_flags_dict('not_dict')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._make_flags_dict({'bad_flag':True})
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._parse_hybformat_id('bad_id_name_continues_on')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._parse_hybformat_ref('bad_ref_name_continues_on')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._read_flags('bad_flag=B;')
     hyb_record._get_flag_keys(reorder_flags=False)
     hyb_record._read_flags('miRNA_seg=B;')
@@ -185,7 +185,7 @@ def test_hybrecord():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
                                             hybformat_id=True, 
                                             hybformat_ref=True)
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record._ensure_set('type_eval')
 
 def test_hybfile():
@@ -194,7 +194,7 @@ def test_hybfile():
 
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     with hybkit.HybFile.open(hyb_file_name, 'w') as hyb_file:
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             hyb_file.write_record('NotRecord')
         hyb_file.write_record(hyb_record)
         hyb_file.write_records([hyb_record, hyb_record])
@@ -209,11 +209,11 @@ def test_hybfile():
 
 def test_foldrecord():           
     for TestClass in [hybkit.FoldRecord, hybkit.DynamicFoldRecord]:
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1, 'bad_mode')
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '', ''], 'bad_mode')
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '',])
         fold_record = TestClass.from_vienna_string(vie_str_1)
         print(str(fold_record))
@@ -232,16 +232,16 @@ def test_foldrecord():
 def test_viennafile():           
     fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1)
     with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             vienna_file.write_record('NotRecord')
         vienna_file.write_record(fold_record)               
     assert hybkit.util.vienna_exists(vienna_file_name)
     assert hybkit.util.fold_exists(vienna_file_name)
     with hybkit.FoldFile.open(vienna_file_name, 'r') as fold_file:
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             fold_file.read_record()
-        with pytest.raises(Exception):
-            fold_file._to_record_string(fold_record)
+        with pytest.raises(RuntimeError):
+            fold_file._to_record_string(fold_record, False)
     with hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
         fold_record_read = vienna_file.read_records()[0]
 
@@ -267,7 +267,7 @@ def test_hybfolditer():
     #Compare FoldRecord and HybRecord
     assert not fold_record.matches_hyb_record(hyb_record) 
     fold_record.count_hyb_record_mismatches(hyb_record) 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         fold_record.ensure_matches_hyb_record(hyb_record) 
   
     #Compare DynamicFoldRecord and HybRecord
@@ -278,7 +278,7 @@ def test_hybfolditer():
     #Compare DynamicFoldRecord With Mismatch and HybRecord
     assert not dyn_fold_record_mis.matches_hyb_record(hyb_record) 
     dyn_fold_record_mis.count_hyb_record_mismatches(hyb_record) 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         dyn_fold_record_mis.ensure_matches_hyb_record(hyb_record) 
 
     hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
@@ -286,7 +286,7 @@ def test_hybfolditer():
     with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
          hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
             hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
-            with pytest.raises(Exception):
+            with pytest.raises(RuntimeError):
                 for ret_item in hf_iter:
                     print(ret_item)
 
@@ -313,20 +313,20 @@ def test_analyses():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
     hyb_record.eval_mirna()
-    with pytest.raises(Exception):
-        BaseAnalysis()
+    with pytest.raises(RuntimeError):
+        hybkit.analysis.BaseAnalysis()
+    last_analysis = None
     for analysis_type in analysis_classes:
         Analysis = analysis_classes[analysis_type]
         analysis_basename = out_basename + '_' + analysis_type
         analysis = Analysis(name='Test')
         analysis2 = Analysis()
-        #with pytest.raises(Exception):
-        #    analysis2.plot(analysis_basename)
         analysis2.plot(analysis_basename)
         analysis2.add(hyb_record)
         analysis.update(analysis2)
-        with pytest.raises(Exception):
-            analysis.update(last_analysis)
+        if last_analysis is not None:
+            with pytest.raises(RuntimeError):
+                analysis.update(last_analysis)
         print(analysis.results())
         print(analysis.results(None, True))
         analysis.write(analysis_basename) 
@@ -348,8 +348,7 @@ def test_fold_analysis():
     analysis2 = hybkit.analysis.FoldAnalysis()
     hyb_record.set_fold_record(fold_record)
     analysis_basename = out_basename + '_fold'
-    with pytest.raises(Exception):
-        analysis2.plot(analysis_basename)
+    analysis2.plot(analysis_basename)
     analysis2.add(hyb_record)
     analysis.update(analysis2)
     print(analysis.results())
@@ -364,7 +363,7 @@ def test_util():
     assert hybkit.util._bool_from_string(True)
     assert hybkit.util._bool_from_string('yes')
     assert not hybkit.util._bool_from_string('no')
-    with pytest.raises(Exception):
+    with pytest.raises(argparse.ArgumentTypeError):
         hybkit.util._bool_from_string('invalid')
     assert hybkit.util.dir_exists('~')
     assert hybkit.util.dir_exists('${PWD}')
@@ -388,9 +387,9 @@ def test_type_finder():
     # Generic Tests
     def do_nothing(*args, **kwargs):
         pass
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder()
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.set_method('bad_method')
     hybkit.type_finder.TypeFinder.set_custom_method(do_nothing)
 
@@ -398,41 +397,41 @@ def test_type_finder():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hybkit.type_finder.TypeFinder.set_method('hybformat')
     hyb_record.eval_types()
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder()
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.set_method('bad_method')
     # Non-Defualt String-Match
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.make_string_match_params('badfile')
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.make_string_match_params(bad1_match_legend_file_name)
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.make_string_match_params(bad2_match_legend_file_name)
     match_params = hybkit.type_finder.TypeFinder.make_string_match_params(
-        bad3_legend_file_name)
+        bad3_match_legend_file_name)
     hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.settings['check_complete_seg_types'] = True
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hyb_record.eval_types()
     #match_params = {'startswith':[('MIMAT', 'MIMAT')], 'endswith':[('microRNA', 'miRNA')]}
     #hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
-    #with pytest.raises(Exception):
+    #with pytest.raises(RuntimeError):
     #    hyb_record.eval_types()
     match_params = hybkit.type_finder.TypeFinder.make_string_match_params(match_legend_file_name)
     hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
     # Non-Defualt ID-Map
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.make_id_map_params()
-    with pytest.raises(Exception):
-        hybkit.type_finder.TypeFinder.make_id_map_params(id_map_legend_file_name)
-    with pytest.raises(Exception):
-        hybkit.type_finder.TypeFinder.make_id_map_params(type_file_pairs=id_map_legend_file_name)
-    with pytest.raises(Exception):
-        hybkit.type_finder.TypeFinder.make_id_map_params(bad1_id_map_legend_file_name)
+    with pytest.raises(RuntimeError):
+        hybkit.type_finder.TypeFinder.make_id_map_params('wrong_id_map_type')
+    with pytest.raises(RuntimeError):
+        hybkit.type_finder.TypeFinder.make_id_map_params(type_file_pairs='wrong_id_map_type')
+    with pytest.raises(RuntimeError):
+        hybkit.type_finder.TypeFinder.make_id_map_params([bad1_id_map_legend_file_name])
     id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params(
         type_file_pairs=[('seqtype', id_map_legend_file_name)])
     id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params([id_map_legend_file_name])
@@ -440,4 +439,6 @@ def test_type_finder():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
  
+if __name__ == '__main__':
+    test_type_finder()
 

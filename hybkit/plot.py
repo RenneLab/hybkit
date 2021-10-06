@@ -333,6 +333,12 @@ def fold(analysis,
     max_fraction = 0.0
     for seq_i, fraction in analysis.mirna_fold_frac.items():
         max_fraction = max(max_fraction, fraction)
+    
+    if max_fraction < 0.00000000000001:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
+ 
+    for seq_i, fraction in analysis.mirna_fold_frac.items():
         if seq_i > 22 and fraction/max_fraction < min_fraction_size:
             break
         labels.append(seq_i)

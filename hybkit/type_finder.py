@@ -39,7 +39,7 @@ class TypeFinder(object):
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):
-        raise Exception('WARN: TypeFinder class not intended to be initialized for use.')
+        raise RuntimeError('WARN: TypeFinder class not intended to be initialized for use.')
 
     # TypeFinder : Public Classmethods : method
     @classmethod
@@ -58,6 +58,8 @@ class TypeFinder(object):
         if method not in cls.methods:
             message = 'Selected method: %s is not defined.\n' % method
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
+            print(message)
+            raise RuntimeError(message)
         cls.find = cls.methods[method]
         cls.params = params
 
@@ -189,13 +191,11 @@ class TypeFinder(object):
             message = 'Multiple sequence types found for item: %s' % seg_name
             message += '  ' + ', '.join(sorted(list(found_types)))
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_string_match_params(
-            legend_file
-            ):
+    def make_string_match_params(legend_file):
         """Read csv and return a dict of search parameters for :meth:`method_string_match`.
 
         The my_legend.csv file should have the format::
@@ -218,6 +218,12 @@ class TypeFinder(object):
 
         ALLOWED_SEARCH_TYPES = {'startswith', 'contains', 'endswith', 'matches'}
         return_dict = {}
+        if not os.path.isfile(legend_file):
+            message = 'File: %s for make_string_match_params() method ' % legend_file
+            message += 'not found.'
+            print(message)
+            raise RuntimeError(message)
+           
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
                 # Skip Blank Lines
@@ -232,7 +238,7 @@ class TypeFinder(object):
                     message = 'Error reading legend line: \n%s\n%s' % (str(line), str(split_line))
                     message += '\nThree comma-separated entries expected.'
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
                 search_type = split_line[0]
                 search_string = split_line[1]
                 seg_type = split_line[2]
@@ -241,7 +247,7 @@ class TypeFinder(object):
                     message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES)
                     message += '\nFor legend line: \n%s\n' % (str(line))
                     print(message)
-                    raise Exception(message)
+                    raise RuntimeError(message)
 
                 if search_type not in return_dict:
                     return_dict[search_type] = []
@@ -323,7 +329,7 @@ class TypeFinder(object):
             message = 'make_seg_type_id_map function requires either a mapped_id_files '
             message += 'or type_file_pairs argument.'
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
         for arg in [mapped_id_files, type_file_pairs]:
             if ((arg is not None) 
                 and not any((isinstance(arg, allowed_type) 
@@ -332,7 +338,7 @@ class TypeFinder(object):
                 message += 'provided as a list or tuple.\n  Current passed aruement: '
                 message += str(arg)
                 print(message)
-                raise Exception(message)
+                raise RuntimeError(message)
 
         if mapped_id_files is not None:
             for mapped_id_file in mapped_id_files:
@@ -351,7 +357,7 @@ class TypeFinder(object):
                             message += '\n%s\n%s' % (str(line), str(split_line))
                             message += '\nTwo comma-separated entries expected.'
                             print(message)
-                            raise Exception(message)
+                            raise RuntimeError(message)
                         seq_id = split_line[0]
                         seg_type = split_line[1]
         
@@ -359,7 +365,7 @@ class TypeFinder(object):
                             message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
                             message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
                             print(message)
-                            raise Exception(message)
+                            raise RuntimeError(message)
                         else:
                             return_dict[seq_id] = seg_type
     
@@ -379,7 +385,7 @@ class TypeFinder(object):
                             message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
                             message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
                             print(message)
-                            raise Exception(message)
+                            raise RuntimeError(message)
                         else:
                             return_dict[seq_id] = seg_type
     

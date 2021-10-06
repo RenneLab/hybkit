@@ -53,7 +53,7 @@ class BaseAnalysis(object):
             message += '    %s (%s)\n' % (str(self), type(self))
             message += '    %s (%s)\n' % (str(cmp_obj), type(cmp_obj))
             print(message)
-            raise Exception(message)
+            raise RuntimeError(message)
 
     # BaseAnalysis : Private Methods : TypeAnalysis
     def _format_all_seg_types(self, out_delim):
@@ -135,7 +135,7 @@ class BaseAnalysis(object):
         elif hyb_record.has_prop('no_mirna'):
             self.non_mirnas += count
         else:
-            raise Exception()   
+            raise RuntimeError()   
  
     # BaseAnalysis : Private Methods : MirnaAnalysis
     def _update_mirna_analysis(self, add_analysis):
