@@ -12,4 +12,9 @@
 # Allowed search types are: "startswith", "contains", "endswith", and "matches"
 
 # Hyb Software Reference Search Terms:
+
 endswith,miRNA
+
+badlinenocomma
+
+

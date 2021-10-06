@@ -12,5 +12,5 @@
 # Allowed search types are: "startswith", "contains", "endswith", and "matches"
 
 # Hyb Software Reference Search Terms:
-startswith,_microRNA,miRNA
-startswith,_microRNA,conflict_type
+endswith,_microRNA,miRNA
+endswith,_microRNA,conflict_type

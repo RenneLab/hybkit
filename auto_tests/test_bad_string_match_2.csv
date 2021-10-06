@@ -12,4 +12,8 @@
 # Allowed search types are: "startswith", "contains", "endswith", and "matches"
 
 # Hyb Software Reference Search Terms:
+
 notallowed,_microRNA,miRNA
+
+stillnotallowed,_microRNA,miRNA
+

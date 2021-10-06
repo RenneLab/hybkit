@@ -398,6 +398,10 @@ def test_type_finder():
     hyb_record.settings['check_complete_seg_types'] = True
     with pytest.raises(Exception):
         hyb_record.eval_types()
+    #match_params = {'startswith':[('MIMAT', 'MIMAT')], 'endswith':[('microRNA', 'miRNA')]}
+    #hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
+    #with pytest.raises(Exception):
+    #    hyb_record.eval_types()
     match_params = hybkit.type_finder.TypeFinder.make_string_match_params(match_legend_file_name)
     hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)

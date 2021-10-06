@@ -324,12 +324,13 @@ class TypeFinder(object):
             message += 'or type_file_pairs argument.'
             print(message)
             raise Exception(message)
-        for argument in mapped_id_files, type_file_pairs:
-            if ((argument is not None) and not any((isinstance(argument, allowed_type) 
-                                                     for allowed_type in (list, tuple)))):
+        for arg in [mapped_id_files, type_file_pairs]:
+            if ((arg is not None) 
+                and not any((isinstance(arg, allowed_type) 
+                             for allowed_type in (list, tuple)))):
                 message = 'arguments passed to mapped_id_files and type_file_pairs must be '
                 message += 'provided as a list or tuple.\n  Current passed aruement: '
-                message += str(argument)
+                message += str(arg)
                 print(message)
                 raise Exception(message)
 
