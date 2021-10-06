@@ -1219,7 +1219,7 @@ class HybRecord(object):
     def _ensure_props_read_start_end(self):
         for seg_n, seg_props in enumerate([self.seg1_props, self.seg2_props], start=1):
             for key in ('read_start', 'read_end'):
-                if key not in seg_props:
+                if key not in seg_props or seg_props[key] is None:
                     message = '"read_start" and "read_end" keys required to be found in the '
                     message += 'segN_prop dicts for creating a "dynamic_seq" object\n'
                     message += 'Record: %s, dict: seg%i_props' % (str(self), seg_n)
@@ -1765,7 +1765,7 @@ class FoldRecord(object):
                 record is encountered.
         """
         lines = record_string.strip().split('\n')[0:3]
-        return cls.from_vienna_lines(lines)
+        return cls.from_vienna_lines(lines, error_mode)
 
     # FoldRecord : Public Classmethods : Construction : Ct
     @classmethod

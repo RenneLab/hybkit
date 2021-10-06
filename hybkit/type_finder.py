@@ -39,7 +39,7 @@ class TypeFinder(object):
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):
-        print('WARN: TypeFinder class not intended to be initialized for use.')
+        raise Exception('WARN: TypeFinder class not intended to be initialized for use.')
 
     # TypeFinder : Public Classmethods : method
     @classmethod

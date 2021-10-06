@@ -10,9 +10,7 @@ Package details for the hybkit project.
 import os
 import sys
 if not (sys.version_info.major >= 3 and sys.version_info.minor >= 7):
-    message = 'Python 3.7+ is required for hybkit.'
-    print(message)
-    raise Exception(message)
+    raise Exception('Python 3.7+ is required for hybkit.')
 
 from importlib import resources
 with resources.path('hybkit', '__init__.py') as path_obj:

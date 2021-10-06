@@ -234,13 +234,11 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
 
     out_file_full = os.path.join(out_dir, out_file_basename)
 
-    return out_file_full
-
     # If global option set, then find the absolute path.
     if settings._USE_ABSPATH:
-        file_name = os.path.abspath(file_name)
+        out_file_full = os.path.abspath(out_file_full)
 
-    return os.path.abspath(file_name)
+    return out_file_full
 
 
 # Util : Path Helper Functions 

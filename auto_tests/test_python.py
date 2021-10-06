@@ -127,7 +127,9 @@ def test_hybrecord():
 
     with pytest.raises(Exception):
         hyb_record.is_set('badprop')
+    with pytest.raises(Exception):
         hyb_record.has_prop('badprop')
+    with pytest.raises(Exception):
         hyb_record.has_prop('any_seg_type_contains', None)
 
     assert not hyb_record.has_prop('has_indels')
@@ -153,19 +155,28 @@ def test_hybrecord():
 
     with pytest.raises(Exception):
         hyb_record.set_fold_record(None)
+    with pytest.raises(Exception):
         hyb_record.set_fold_record('not_fold_record')
+    with pytest.raises(Exception):
         hyb_record.mirna_detail('disallowed_detail')
 
     # Test Private Methods
     hyb_record.seg1_props['read_start'] = None
     with pytest.raises(Exception):
         hyb_record._ensure_props_read_start_end()
+    with pytest.raises(Exception):
         hyb_record._get_seg_seq(self.seg1_props)
+    with pytest.raises(Exception):
         hyb_record._get_flag('fake_flag')
+    with pytest.raises(Exception):
         hyb_record._make_flags_dict('not_dict')
+    with pytest.raises(Exception):
         hyb_record._make_flags_dict({'bad_flag':True})
+    with pytest.raises(Exception):
         hyb_record._parse_hybformat_id('bad_id_name_continues_on')
+    with pytest.raises(Exception):
         hyb_record._parse_hybformat_ref('bad_ref_name_continues_on')
+    with pytest.raises(Exception):
         hyb_record._read_flags('bad_flag=B;')
     hyb_record._get_flag_keys(reorder_flags=False)
     hyb_record._read_flags('miRNA_seg=B;')
@@ -200,7 +211,9 @@ def test_foldrecord():
     for TestClass in [hybkit.FoldRecord, hybkit.DynamicFoldRecord]:
         with pytest.raises(Exception):
             fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1, 'bad_mode')
+        with pytest.raises(Exception):
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '', ''], 'bad_mode')
+        with pytest.raises(Exception):
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '',])
         fold_record = TestClass.from_vienna_string(vie_str_1)
         print(str(fold_record))
@@ -227,6 +240,7 @@ def test_viennafile():
     with hybkit.FoldFile.open(vienna_file_name, 'r') as fold_file:
         with pytest.raises(Exception):
             fold_file.read_record()
+        with pytest.raises(Exception):
             fold_file._to_record_string(fold_record)
     with hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
         fold_record_read = vienna_file.read_records()[0]
@@ -376,6 +390,7 @@ def test_type_finder():
         pass
     with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder()
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.set_method('bad_method')
     hybkit.type_finder.TypeFinder.set_custom_method(do_nothing)
 
@@ -385,11 +400,14 @@ def test_type_finder():
     hyb_record.eval_types()
     with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder()
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.set_method('bad_method')
     # Non-Defualt String-Match
     with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_string_match_params('badfile')
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_string_match_params(bad1_match_legend_file_name)
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_string_match_params(bad2_match_legend_file_name)
     match_params = hybkit.type_finder.TypeFinder.make_string_match_params(
         bad3_legend_file_name)
@@ -409,8 +427,11 @@ def test_type_finder():
     # Non-Defualt ID-Map
     with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_id_map_params()
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_id_map_params(id_map_legend_file_name)
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_id_map_params(type_file_pairs=id_map_legend_file_name)
+    with pytest.raises(Exception):
         hybkit.type_finder.TypeFinder.make_id_map_params(bad1_id_map_legend_file_name)
     id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params(
         type_file_pairs=[('seqtype', id_map_legend_file_name)])
