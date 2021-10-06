@@ -375,45 +375,43 @@ def test_type_finder():
     def do_nothing(*args, **kwargs):
         pass
     with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder()
-        hybkit.HybRecord.TypeFinder.set_method('bad_method')
-    hybkit.HybRecord.TypeFinder.set_custom_method(do_nothing)
+        hybkit.type_finder.TypeFinder()
+        hybkit.type_finder.TypeFinder.set_method('bad_method')
+    hybkit.type_finder.TypeFinder.set_custom_method(do_nothing)
 
     # Defualt Hybformat
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
-    hybkit.HybRecord.TypeFinder.set_method('hybformat')
+    hybkit.type_finder.TypeFinder.set_method('hybformat')
     hyb_record.eval_types()
     with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder()
-        hybkit.HybRecord.TypeFinder.set_method('bad_method')
+        hybkit.type_finder.TypeFinder()
+        hybkit.type_finder.TypeFinder.set_method('bad_method')
     # Non-Defualt String-Match
     with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder.make_string_match_params('badfile')
-    with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder.make_string_match_params(bad1_match_legend_file_name)
-    with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder.make_string_match_params(bad2_match_legend_file_name)
-    match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(
+        hybkit.type_finder.TypeFinder.make_string_match_params('badfile')
+        hybkit.type_finder.TypeFinder.make_string_match_params(bad1_match_legend_file_name)
+        hybkit.type_finder.TypeFinder.make_string_match_params(bad2_match_legend_file_name)
+    match_params = hybkit.type_finder.TypeFinder.make_string_match_params(
         bad3_legend_file_name)
-    hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
+    hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.settings['check_complete_seg_types'] = True
     with pytest.raises(Exception):
         hyb_record.eval_types()
-    match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file_name)
-    hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
+    match_params = hybkit.type_finder.TypeFinder.make_string_match_params(match_legend_file_name)
+    hybkit.type_finder.TypeFinder.set_method('string_match', match_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
     # Non-Defualt ID-Map
     with pytest.raises(Exception):
-        hybkit.HybRecord.TypeFinder.make_id_map_params()
-        hybkit.HybRecord.TypeFinder.make_id_map_params(id_map_legend_file_name)
-        hybkit.HybRecord.TypeFinder.make_id_map_params(type_file_pairs=id_map_legend_file_name)
-        hybkit.HybRecord.TypeFinder.make_id_map_params(bad1_id_map_legend_file_name)
-    id_map_params = hybkit.HybRecord.TypeFinder.make_id_map_params(
+        hybkit.type_finder.TypeFinder.make_id_map_params()
+        hybkit.type_finder.TypeFinder.make_id_map_params(id_map_legend_file_name)
+        hybkit.type_finder.TypeFinder.make_id_map_params(type_file_pairs=id_map_legend_file_name)
+        hybkit.type_finder.TypeFinder.make_id_map_params(bad1_id_map_legend_file_name)
+    id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params(
         type_file_pairs=[('seqtype', id_map_legend_file_name)])
-    id_map_params = hybkit.HybRecord.TypeFinder.make_id_map_params([id_map_legend_file_name])
-    hybkit.HybRecord.TypeFinder.set_method('id_map', id_map_params)
+    id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params([id_map_legend_file_name])
+    hybkit.type_finder.TypeFinder.set_method('id_map', id_map_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
  

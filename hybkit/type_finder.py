@@ -152,28 +152,28 @@ class TypeFinder(object):
         seg_name = seg_props['ref_name']
         found_types = set()
         check_done = False
-        if not check_done and 'startswith' in params:
+        if 'startswith' in params and (check_complete or not check_done):
             for search_string, search_type in params['startswith']:
                 if seg_name.startswith(search_string):
                     found_types.add(search_type)
                     if not check_complete:
                         check_done = True
                         break
-        if not check_done and 'contains' in params:
+        if 'contains' in params and (check_complete or not check_done):
             for search_string, search_type in params['contains']:
                 if search_string in seg_name:
                     found_types.add(search_type)
                     if not check_complete:
                         check_done = True
                         break
-        if not check_done and 'endswith' in params:
+        if 'endswith' in params and (check_complete or not check_done):
             for search_string, search_type in params['endswith']:
                 if seg_name.endswith(search_string):
                     found_types.add(search_type)
                     if not check_complete:
                         check_done = True
                         break
-        if not check_done and 'matches' in params:
+        if 'matches' in params and (check_complete or not check_done):
             for search_string, search_type in params['matches']:
                 if search_string == seg_name:
                     found_types.add(search_type)
