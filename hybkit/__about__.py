@@ -41,7 +41,11 @@ elif os.path.isdir(os.path.join(local_data_dir, 'ref_data')):
 else:
     print('WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.')
     print('prefix_data_dir', prefix_data_dir)
+    if os.path.isdir(prefix_data_dir):
+        os.listdir(prefix_data_dir)
     print('local_data_dir', local_data_dir)
+    if os.path.isdir(local_data_dir):
+        os.listdir(local_data_dir)
     hybkit_data_dir = ''
 
 ref_data_dir = os.path.join(hybkit_data_dir, 'reference_data')

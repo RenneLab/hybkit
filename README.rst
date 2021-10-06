@@ -36,7 +36,7 @@ Project components:
        analyzing, and plotting hyb-format data.
     #. The hybkit python API, an extendable documented codebase
        for creation of custom analyses of hyb-format data.
-    #. Example analysis pipelines for analysis of publically available qCLASH hybrid 
+    #. Example analysis pipelines for analysis of publicly available qCLASH hybrid 
        sequence data implemented either with toolkit scripts or the hybkit Python API.
 
 Hybkit Toolkit:

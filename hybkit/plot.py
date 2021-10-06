@@ -19,13 +19,20 @@ from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __d
                              __email__, __license__, __maintainer__, __status__, __version__
 
 # Public Constants
-DEFAULT_PIE_MATPLOTLIB_SETTINGS = {
+DEFAULT_PIE_PLOT_SETTINGS = {
     'autopct':'%1.1f%%',
     'shadow':False,
     'startangle':90,
     'counterclock':False,
     }
+DEFAULT_PIE_PLOT_TARGET_SETTINGS = copy.deepcopy(DEFAULT_PIE_PLOT_SETTINGS)
+DEFAULT_PIE_PLOT_TARGET_SETTINGS.update(
+    {'textprops':{'size':'small'}}
+    )
+
 DEFAULT_PIE_RC_PARAMS = {
+    'axes.titleweight':'bold',
+    'axes.labelweight':'bold',
     }
 DEFAULT_DPI = 600
 DEFAULT_FILE_TYPE = 'png'
@@ -33,7 +40,9 @@ DEFAULT_PIE_OTHER_THRESHHOLD = 0.1
 DEFAULT_PIE_MIN_WEDGE_SIZE = 0.04
 DEFAULT_LINE_RC_PARAMS = {
     'axes.titlesize':'x-large',
+    'axes.titleweight':'bold',
     'axes.labelsize':'large',
+    'axes.labelweight':'bold',
     'xtick.labelsize':'large',
     'ytick.labelsize':'large',
     }
@@ -62,7 +71,8 @@ def type_count(type_counter,
                min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                plot_file_type=DEFAULT_FILE_TYPE,
                dpi=DEFAULT_DPI,
-               matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+               rc_params=copy.deepcopy(DEFAULT_PIE_RC_PARAMS),
+               plot_settings=copy.deepcopy(DEFAULT_PIE_PLOT_SETTINGS)):
     """
     Plot the counts of types resulting from the :class:`~hybkit.analysis.TypeAnalysis`.
 
@@ -79,7 +89,9 @@ def type_count(type_counter,
         plot_file_type (str, optional): File type for saving of plots. Options: 
             {'png', 'ps', 'pdf', 'svg'}
         dpi (int, optional): DPI for saving of plots.
-        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+        plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function
     """
 
@@ -101,7 +113,8 @@ def type_count(type_counter,
                     min_wedge_size=min_wedge_size,
                     plot_file_type=plot_file_type,
                     dpi=dpi,
-                    matplotlib_settings=matplotlib_settings,
+                    rc_params=rc_params,
+                    plot_settings=plot_settings,
                    )
 
 
@@ -114,7 +127,8 @@ def mirna(analysis,
           min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
           plot_file_type=DEFAULT_FILE_TYPE,
           dpi=DEFAULT_DPI,
-          matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+          rc_params=copy.deepcopy(DEFAULT_PIE_RC_PARAMS),
+          plot_settings=copy.deepcopy(DEFAULT_PIE_PLOT_SETTINGS)):
     """
     Plot the results of the :class:`~hybkit.analysis.MirnaAnalysis`.
 
@@ -130,7 +144,9 @@ def mirna(analysis,
         plot_file_type (str, optional): File type for saving of plots. Options:
             {'png', 'ps', 'pdf', 'svg'}
         dpi (int, optional): DPI for saving of plots.
-        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass 
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+        plot_settings (dict, optional): Dict of keys and values of settings to pass 
             to the matplotlib.plot() function.
         """
 
@@ -159,7 +175,8 @@ def mirna(analysis,
                     min_wedge_size=(-1),
                     plot_file_type=plot_file_type,
                     dpi=dpi,
-                    matplotlib_settings=matplotlib_settings,
+                    rc_params=rc_params,
+                    plot_settings=plot_settings,
                    )
 
 
@@ -171,7 +188,8 @@ def target(mirna_counts, plot_file_name,
            min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
            plot_file_type=DEFAULT_FILE_TYPE,
            dpi=DEFAULT_DPI,
-           matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+           rc_params=copy.deepcopy(DEFAULT_PIE_RC_PARAMS),
+           plot_settings=copy.deepcopy(DEFAULT_PIE_PLOT_TARGET_SETTINGS)):
     """
     Plot the targets of a single mirna from the :class:`~hybkit.analysis.MirnaAnalysis`.
 
@@ -188,7 +206,9 @@ def target(mirna_counts, plot_file_name,
         plot_file_type (str, optional): File type for saving of plots. Options:
             {'png', 'ps', 'pdf', 'svg'}
         dpi (int, optional): DPI for saving of plots.
-        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+        plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function.
     """
 
@@ -200,10 +220,6 @@ def target(mirna_counts, plot_file_name,
 
     if name is not None:
         title = str(name) + ': ' + title
-
-    matplotlib_settings.update({'textprops':{'size':'small'},
-                               })
-
 
     # Set figsize:
     # Width set at constant 9(inches)
@@ -227,7 +243,8 @@ def target(mirna_counts, plot_file_name,
                     plot_file_type=plot_file_type,
                     dpi=dpi,
                     figsize=figsize,
-                    matplotlib_settings=matplotlib_settings,
+                    rc_params=rc_params,
+                    plot_settings=plot_settings,
                     )
 
 
@@ -239,7 +256,8 @@ def target_type(target_type_count, plot_file_name,
                 min_wedge_size=DEFAULT_PIE_MIN_WEDGE_SIZE,
                 plot_file_type=DEFAULT_FILE_TYPE,
                 dpi=DEFAULT_DPI,
-                matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+                rc_params=copy.deepcopy(DEFAULT_PIE_RC_PARAMS),
+                plot_settings=copy.deepcopy(DEFAULT_PIE_PLOT_TARGET_SETTINGS)):
     """
     Plot the targets types of a single mirna from the :class:`~hybkit.analysis.TargetAnalysis`.
 
@@ -256,7 +274,9 @@ def target_type(target_type_count, plot_file_name,
         plot_file_type (str, optional): File type for saving of plots. Options:
             {'png', 'ps', 'pdf', 'svg'}
         dpi (int, optional): DPI for saving of plots.
-        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+        plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function.                                                          """
 
     labels = []
@@ -268,9 +288,6 @@ def target_type(target_type_count, plot_file_name,
     if name is not None:
         title = str(name) + ': ' + title
 
-    matplotlib_settings.update({'textprops':{'size':'small'},
-                               })
-
     _plot_pie_chart(labels=labels,
                     sizes=counts,
                     plot_file_name=plot_file_name,
@@ -279,7 +296,8 @@ def target_type(target_type_count, plot_file_name,
                     # min_wedge_size=(0.025),
                     plot_file_type=plot_file_type,
                     dpi=dpi,
-                    matplotlib_settings=matplotlib_settings,
+                    rc_params=rc_params,
+                    plot_settings=plot_settings,
                     )
 
 # Public Methods : HybRecord miRNA Target Analysis Plotting
@@ -291,7 +309,7 @@ def fold(analysis,
          min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
          plot_file_type=DEFAULT_FILE_TYPE,
          dpi=DEFAULT_DPI,
-         matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+         rc_params=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     """
     Plot the bound percentage of mirna by base from the :class:`~hybkit.analysis.FoldAnalysis`.
 
@@ -307,9 +325,9 @@ def fold(analysis,
         plot_file_type (str, optional): File type for saving of plots. Options:
             {'png', 'ps', 'pdf', 'svg'}
         dpi (int, optional): DPI for saving of plots.
-        matplotlib_settings (dict, optional): Dict of keys and values of settings to pass
-            to the matplotlib.plot() function.                                                          """
-
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+    """
     labels = []
     fractions = []
     max_fraction = 0.0
@@ -323,9 +341,6 @@ def fold(analysis,
     if analysis.name is not None:
         title = str(analysis.name) + ': ' + title
 
-    #matplotlib_settings.update({'textprops':{'size':'small'},
-    #                           })
-
     _plot_line(labels=labels,
                sizes=fractions,
                plot_file_name=plot_file_name,
@@ -334,7 +349,7 @@ def fold(analysis,
                min_fraction_size=min_fraction_size,
                plot_file_type=plot_file_type,
                dpi=dpi,
-               matplotlib_settings=matplotlib_settings,
+               rc_params=rc_params,
                )
 
 
@@ -346,7 +361,8 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
                     plot_file_type=DEFAULT_FILE_TYPE,
                     dpi=DEFAULT_DPI,
                     figsize=DEFAULT_FIG_SIZE,
-                    matplotlib_settings=copy.deepcopy(DEFAULT_PIE_MATPLOTLIB_SETTINGS)):
+                    rc_params=copy.deepcopy(DEFAULT_PIE_RC_PARAMS),
+                    plot_settings=copy.deepcopy(DEFAULT_PIE_PLOT_SETTINGS)):
     total_size = sum(sizes)
     if total_size < 0.00000001:
         print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
@@ -369,11 +385,13 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
         use_labels.append('other')
         use_sizes.append(other_size)
 
+    plt.rcParams.update(rc_params)
+
     fig = plt.gcf()
     fig.set_size_inches(figsize)
     patches, texts, autotexts = plt.pie(use_sizes,
                                          labels=use_labels,
-                                         **matplotlib_settings)
+                                         **plot_settings)
     plt.axis('equal')
     if title is not None:
         plt.title(title, pad=TITLE_PAD)
@@ -398,7 +416,7 @@ def _plot_line(labels, sizes, plot_file_name,
                     data_format=DEFAULT_LINE_DATA_FORMAT,
                     dpi=DEFAULT_DPI,
                     figsize=DEFAULT_FIG_SIZE,
-                    matplotlib_settings=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+                    rc_params=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
     max_size = max(sizes)
     if abs(max_size) < 0.00000000000001:
         print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
@@ -411,7 +429,7 @@ def _plot_line(labels, sizes, plot_file_name,
             use_labels.append(labels[i])
             use_sizes.append(sizes[i] * 100)
 
-    plt.rcParams.update(matplotlib_settings)
+    plt.rcParams.update(rc_params)
 
     fig = plt.gcf()
     fig.set_size_inches(figsize)
