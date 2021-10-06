@@ -319,7 +319,7 @@ class TypeFinder(object):
         """
 
         return_dict = {}
-        if not any((arg is not None for arg in (mapped_id_files, type_file_pairs))):
+        if all((arg is None for arg in (mapped_id_files, type_file_pairs))):
             message = 'make_seg_type_id_map function requires either a mapped_id_files '
             message += 'or type_file_pairs argument.'
             print(message)

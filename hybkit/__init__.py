@@ -1854,19 +1854,19 @@ class FoldRecord(object):
         return cls.from_ct_lines(lines)
 
     # FoldRecord : Private Classmethods : Parsing : Output
-    @classmethod
-    def _format_seg_props(cls, seg_props, prefix='', suffix='', indent_str=''):
-        raise NotImplementedError
-        # Returns a formatted string of the sgement info information
-        ret_string = prefix
-        ret_string += indent_str + 'Map Reference:  %s\n' % seg_props['ref']
-        ret_string += indent_str + 'Read Start Pos: %s\n' % seg_props['read_start']
-        ret_string += indent_str + 'Read End Pos:   %s\n' % seg_props['read_end']
-        ret_string += indent_str + 'Map Start Pos:  %s\n' % seg_props['ref_start']
-        ret_string += indent_str + 'Map End Pos:    %s\n' % seg_props['ref_end']
-        ret_string += indent_str + 'Map Score:      %s\n' % seg_props['score']
-        ret_string += suffix
-        return ret_string
+    #@classmethod
+    #def _format_seg_props(cls, seg_props, prefix='', suffix='', indent_str=''):
+    #    raise NotImplementedError
+    #    # Returns a formatted string of the sgement info information
+    #    ret_string = prefix
+    #    ret_string += indent_str + 'Map Reference:  %s\n' % seg_props['ref']
+    #    ret_string += indent_str + 'Read Start Pos: %s\n' % seg_props['read_start']
+    #    ret_string += indent_str + 'Read End Pos:   %s\n' % seg_props['read_end']
+    #    ret_string += indent_str + 'Map Start Pos:  %s\n' % seg_props['ref_start']
+    #    ret_string += indent_str + 'Map End Pos:    %s\n' % seg_props['ref_end']
+    #    ret_string += indent_str + 'Map Score:      %s\n' % seg_props['score']
+    #    ret_string += suffix
+    #    return ret_string
 
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_fold(self, seg_props, hyb_record=None):
@@ -1908,7 +1908,7 @@ class DynamicFoldRecord(FoldRecord):
         seg2:                 222222222222222222       
         seq:  AGCTTATCAGACTGATTAGCTTATCAGACTGATG
 
-    This type of sequence is found in the Hyb program \*_hybrids_ua.hyb file type. 
+    This type of sequence is found in the Hyb program \\*_hybrids_ua.hyb file type. 
     This is primarily relevant in error-checking when setting a :obj:`HybRecord.fold_record`
     attribute.
 
@@ -2006,7 +2006,7 @@ class DynamicFoldRecord(FoldRecord):
             message += 'DynamicFoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq)) 
             raise Exception(message)
 
-    # HybRecord : Private Methods : Segment Parsing
+    # DynamicFoldRecord : Private Methods : Segment Parsing
     def _get_seg_fold(self, seg_props, hyb_record):
         hyb_record._ensure_props_read_start_end()
         seg_start, seg_end = seg_props['read_start'], seg_props['read_end']

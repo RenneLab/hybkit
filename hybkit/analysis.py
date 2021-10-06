@@ -284,11 +284,11 @@ class BaseAnalysis(object):
     # BaseAnalysis : Private Methods : FoldAnalysis
     def _update_fold_analysis(self, add_analysis):
         self.mirna_folds += add_analysis.mirna_folds
-        for i in range(len(add_analysis.mirna_fold_count)):
+        for i in add_analysis.mirna_fold_count.keys():
             if i not in self.mirna_fold_count:
                 self.mirna_fold_count[i] = 0
             self.mirna_fold_count[i] += add_analysis.mirna_fold_count[i]
-        for i in range(len(self.mirna_fold_count)):
+        for i in self.mirna_fold_count.keys():
             self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
 
     # BaseAnalysis : Private Methods : FoldAnalysis

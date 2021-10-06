@@ -770,14 +770,6 @@ def set_settings(nspace, verbose=False):
     if verbose and out_report.strip():
         print(out_report)
 
-def _test():
-    assert _bool_from_string('yes')
-    assert not _bool_from_string('no')
-    assert dir_exists('~')
-    assert dir_exists('${PWD}')
-    assert file_exists(__file__)
-    set_settings(argparse.Namespace())
-
 # Allow execution of module for testing purposes.
 #if __name__ == '__main__':
 #    all_parsers = [#in_hyb_parser, 

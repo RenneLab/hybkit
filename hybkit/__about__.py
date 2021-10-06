@@ -34,6 +34,8 @@ try:
 except NameError:
     local_data_dir = 'using_with_exec'
 
+local_prefix_data_dir = os.path.join(local_data_dir, name_and_version) 
+
 if os.path.isdir(os.path.join(prefix_data_dir, 'ref_data')):
     hybkit_data_dir = prefix_data_dir
 elif os.path.isdir(os.path.join(local_data_dir, 'ref_data')):
@@ -46,6 +48,9 @@ else:
     print('local_data_dir', local_data_dir)
     if os.path.isdir(local_data_dir):
         print(os.listdir(local_data_dir))
+    print('local_prefix_data_dir', local_prefix_data_dir)
+    if os.path.isdir(local_prefix_data_dir):
+        print(os.listdir(local_prefix_data_dir))
     hybkit_data_dir = ''
 
 ref_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
