@@ -226,7 +226,7 @@ def target(mirna_counts, plot_file_name,
     # Height 3 for >= 45 character labels, ratio of 9:3 (more rectangular)
     # Height 3 + (0.16 * count-20) for: 20 < count < 45 labels
     # Height 6.5 for <= 20 character labels, ratio of 9:6.5 (more square)
-    longest = max((len(label) for label in labels))
+    longest = max([0] + [len(label) for label in labels])
     add_count = max(longest-20, 0)  
     max_height = 6.5
     min_height = 3.0

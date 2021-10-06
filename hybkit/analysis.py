@@ -405,7 +405,7 @@ class TypeAnalysis(BaseAnalysis):
         ret_lines.append('')
         ret_lines += self._format_all_seg_types(out_delim)
         if newline:
-            for i in range(ret_lines):
+            for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
     
@@ -537,7 +537,7 @@ class MirnaAnalysis(BaseAnalysis):
         ret_lines = self._format_mirna_counts(out_delim)
 
         if newline:
-            for i in range(ret_lines):
+            for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
     
@@ -658,7 +658,7 @@ class SummaryAnalysis(BaseAnalysis):
         ret_lines += self._format_mirna_counts(out_delim)
 
         if newline:
-            for i in range(ret_lines):
+            for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
     
@@ -807,7 +807,7 @@ class TargetAnalysis(BaseAnalysis):
         ret_lines += self._format_target_analysis_totals(out_delim)
 
         if newline:
-            for i in range(ret_lines):
+            for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
 
@@ -1025,7 +1025,7 @@ class FoldAnalysis(BaseAnalysis):
         ret_lines = self._format_fold_analysis(out_delim)
 
         if newline:
-            for i in range(ret_lines):
+            for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
 

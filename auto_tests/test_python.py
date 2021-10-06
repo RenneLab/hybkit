@@ -231,23 +231,32 @@ def test_analyses():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
     hyb_record.eval_mirna()
+    with pytest.raises(Exception):
+        BaseAnalysis()
     for analysis_type in analysis_classes:
         Analysis = analysis_classes[analysis_type]
+        analysis_basename = out_basename + '_' + analysis_type
         analysis = Analysis(name='Test')
         analysis2 = Analysis()
+        #with pytest.raises(Exception):
+        #    analysis2.plot(analysis_basename)
+        analysis2.plot(analysis_basename)
         analysis2.add(hyb_record)
         analysis.update(analysis2)
         with pytest.raises(Exception):
             analysis.update(last_analysis)
         print(analysis.results())
-        analysis_basename = out_basename + '_' + analysis_type
+        print(analysis.results(None, True))
         analysis.write(analysis_basename) 
         analysis.plot(analysis_basename)
         if hasattr(analysis, 'write_individual'):
             analysis.write_individual(analysis_basename)
             analysis.plot_individual(analysis_basename)
         last_analysis = analysis
-     
+
+    analysis = hybkit.analysis.TypeAnalysis()
+       
+ 
 def test_fold_analysis():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
@@ -256,20 +265,42 @@ def test_fold_analysis():
     analysis = hybkit.analysis.FoldAnalysis(name='Test')
     analysis2 = hybkit.analysis.FoldAnalysis()
     hyb_record.set_fold_record(fold_record)
+    analysis_basename = out_basename + '_fold'
+    with pytest.raises(Exception):
+        analysis2.plot(analysis_basename)
     analysis2.add(hyb_record)
     analysis.update(analysis2)
-    analysis_basename = out_basename + '_fold'
+    print(analysis.results())
+    print(analysis.results(None, True))
     analysis.write(analysis_basename)
     analysis.plot(analysis_basename)
 
 
 def test_util():
+    original_abspath = hybkit.settings._USE_ABSPATH
+    hybkit.settings._USE_ABSPATH = True
+    assert hybkit.util._bool_from_string(True)
     assert hybkit.util._bool_from_string('yes')
     assert not hybkit.util._bool_from_string('no')
+    with pytest.raises(Exception):
+        hybkit.util._bool_from_string('invalid')
     assert hybkit.util.dir_exists('~')
     assert hybkit.util.dir_exists('${PWD}')
     assert hybkit.util.file_exists(__file__)
-    hybkit.util.set_settings(argparse.Namespace())
+    assert hybkit.util.out_path_exists(hyb_file_name)
+
+    hybkit.util.make_out_file_name(hyb_file_name, name_suffix='out', 
+        in_suffix='.hyb', out_suffix='.new', out_dir='', seg_sep='_')
+    with pytest.raises(argparse.ArgumentTypeError):
+        hybkit.util.dir_exists('nonexistent_dir')
+    with pytest.raises(argparse.ArgumentTypeError):
+        hybkit.util.file_exists('nonexistent_file')
+    with pytest.raises(argparse.ArgumentTypeError):
+        hybkit.util.hyb_exists(match_legend_file_name)
+    use_namespace = argparse.Namespace()
+    setattr(use_namespace, 'hybformat_id', True)
+    hybkit.util.set_settings(use_namespace, verbose=True)
+    hybkit.settings._USE_ABSPATH = original_abspath
 
 def test_type_finder():
     # Defualt Hybformat
