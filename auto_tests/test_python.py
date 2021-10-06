@@ -432,6 +432,10 @@ def test_type_finder():
         hybkit.type_finder.TypeFinder.make_id_map_params(type_file_pairs='wrong_id_map_type')
     with pytest.raises(RuntimeError):
         hybkit.type_finder.TypeFinder.make_id_map_params([bad1_id_map_legend_file_name])
+    with pytest.raises(RuntimeError):
+        id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params(
+            type_file_pairs=[('seq1type', id_map_legend_file_name), 
+                             ('seq2type', id_map_legend_file_name)])
     id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params(
         type_file_pairs=[('seqtype', id_map_legend_file_name)])
     id_map_params = hybkit.type_finder.TypeFinder.make_id_map_params([id_map_legend_file_name])
