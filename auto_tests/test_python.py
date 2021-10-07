@@ -15,7 +15,7 @@ import hybkit
 
 hyb_str_1 = ('695_804	ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC	.	'
              'MIMAT0000078_MirBase_miR-23a_microRNA	1	21	1	21	0.0027	'
-             'ENSG00000188229_ENST00000340384_TUBB2C_mRNA	23	49	1181	1207	1.2e-06	'
+             'ENSG00000188229_ENST00000340384_TUBB2C_mRNA	23	49	1181	1207	1.2e-06	dataset=test;'
             )
 vie_str_1 = ('>695_804_MIMAT0000078_MirBase_miR-23a_microRNA_1_21-'
              '695_804_ENSG00000188229_ENST00000340384_TUBB2C_mRNA_1181_1207\n'
@@ -53,6 +53,69 @@ def test_hybrecord():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
                                             hybformat_id=True, 
                                             hybformat_ref=True)
+    test_id = hyb_record.id
+    test_seq = hyb_record.seq
+    fold_record = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1)
+    with pytest.raises(RuntimeError):
+        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq, 
+                                        read_count=4, flags={'badflag':True},
+                                        fold_record=fold_record)
+    with pytest.raises(RuntimeError):
+        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq, 
+                                        read_count=4, flags={'read_count':4})
+    with pytest.raises(ValueError):
+        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                        seg1_props={'read_start':'not_int'}, 
+                                        read_count=4, flags={'read_count':4})
+
+    hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                    seg1_props={'ref_name':'noname1'}, 
+                                    seg2_props={'ref_name':'noname2'},
+                                    ) 
+    with pytest.raises(RuntimeError):
+        hyb_record_2._ensure_set('energy')
+    hyb_record_2.eval_types(allow_unknown=True)
+    hyb_record_2.set_flag('seg1_type', 'microRNA')
+    hyb_record_2.set_flag('seg2_type', 'microRNA')
+    hyb_record_2.eval_mirna()
+    del(hyb_record_2.flags['seg1_type'], hyb_record_2.flags['seg2_type'])
+    hyb_record_2.set_flag('seg1_type', 'mRNA')
+    hyb_record_2.set_flag('seg2_type', 'microRNA')
+    hyb_record_2.eval_mirna()
+    del(hyb_record_2.flags['seg1_type'], hyb_record_2.flags['seg2_type'])
+    hyb_record_2.set_flag('seg1_type', 'mRNA')
+    hyb_record_2.set_flag('seg2_type', 'mRNA')
+    hyb_record_2.eval_mirna()
+
+    hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
+                                            hybformat_id=True, 
+                                            hybformat_ref=True)
+    hyb_record.set_flag('miRNA_seg', 'B')
+    with pytest.raises(RuntimeError):
+        hyb_record_2.mirna_detail('all')   
+    hyb_record.mirna_detail('all', allow_mirna_dimers=True)   
+    hyb_record.set_flag('miRNA_seg', '3p')
+    hyb_record.mirna_detail('all', allow_mirna_dimers=True)   
+    hyb_record.to_fasta_record('mirna')
+    hyb_record.to_fasta_record('target')
+    hyb_record.set_flag('miRNA_seg', 'N')
+    with pytest.raises(RuntimeError):
+        hyb_record.to_fasta_record('mirna')
+    hyb_record.set_flag('miRNA_seg', 'INVALID')
+    with pytest.raises(RuntimeError):
+        hyb_record.mirna_detail('all')   
+
+    hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                    seg1_props={'ref_name':'noname1'}, 
+                                    seg2_props={},
+                                    ) 
+    with pytest.raises(RuntimeError):
+        hyb_record_2.has_prop('seg2_is', 'blah')
+    hyb_record_2.to_line()
+
+    hyb_record = hybkit.HybRecord.from_line(hyb_str_1, 
+                                            hybformat_id=True, 
+                                            hybformat_ref=True)
     print(str(hyb_record))
     assert hyb_record == hyb_record
     assert not (hyb_record != hyb_record)
@@ -62,6 +125,8 @@ def test_hybrecord():
     hyb_record.eval_types()
     hyb_record.eval_mirna()
     hyb_record.set_flag('count_total', 1)
+    print(hyb_record._format_seg_props(hyb_record.seg1_props)) 
+
     test_functions = [
         (hyb_record.get_seg1_type, 'microRNA', [], {}),
         (hyb_record.get_seg1_type, 'microRNA', [True], {}),
@@ -442,6 +507,10 @@ def test_type_finder():
     hybkit.type_finder.TypeFinder.set_method('id_map', id_map_params)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record.eval_types()
+    hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
+    hyb_record.seg1_props['ref_name'] = 'not_real_name'
+    with pytest.raises(RuntimeError):
+        hyb_record.eval_types(allow_unknown=False)
  
 if __name__ == '__main__':
     test_type_finder()

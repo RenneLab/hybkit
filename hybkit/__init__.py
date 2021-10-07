@@ -261,12 +261,7 @@ class HybRecord(object):
                  ):
         self.id = id
         self.seq = seq
-
-        if energy is not None:
-            self.energy = energy
-        else:
-            energy = self.settings['field_placeholder']
-
+        self.energy = energy
         self.seg1_props = self._make_seg_props_dict(seg1_props)
         self.seg2_props = self._make_seg_props_dict(seg2_props)
         self.flags = self._make_flags_dict(flags)
@@ -275,7 +270,7 @@ class HybRecord(object):
         self.target_props = None    # Placeholder variable for eval_mirna
 
         if read_count is not None:
-            if read_count in flags:
+            if 'read_count' in flags:
                 message = '"read_count" paramater defined both in function call and flags.\n'
                 message += 'Please define only once.'
                 raise RuntimeError(message)
@@ -743,8 +738,8 @@ class HybRecord(object):
                 check_info = self.mirna_detail('mirna_seg_type', allow_mirna_dimers=True)
             elif check_attr == 'target_seg_type':
                 check_info = self.mirna_detail('target_seg_type', allow_mirna_dimers=True)
-            else:
-                raise RuntimeError('Unknown Field: ' + check_attr)
+            #else:
+            #    raise RuntimeError('Unknown Field: ' + check_attr)
 
             # Wrap single check_info value in a list, if not already.
             if not multi_check:
@@ -754,7 +749,6 @@ class HybRecord(object):
                 if info is None:
                     message = 'HybRecord Instance: %s does not have a ' % (str(self))
                     message += 'value for requested property: %s' % check_attr
-                    message += '\nTo allow unknown values, require_known as False.'
                     print(message)
                     raise RuntimeError(message)
 
@@ -769,8 +763,8 @@ class HybRecord(object):
             elif check_type == 'is':
                  ret_val = bool(prop_compare in check_info)
                 # ret_val = any((prop_copmpare == val) for val in check_info)
-            else:
-                raise RuntimeError(prop)
+            #else:
+            #    raise RuntimeError(prop)
 
         # Check mirna-specific properties (requires mirna-evaluation)
         elif prop in self._MIRNA_PROPS_SET:
@@ -787,8 +781,8 @@ class HybRecord(object):
                 ret_val = self.flags['miRNA_seg'] in {'5p', 'B'}
             elif prop == '3p_mirna':
                 ret_val = self.flags['miRNA_seg'] in {'3p', 'B'}
-            else:
-                raise RuntimeError(prop)
+            #else:
+            #    raise RuntimeError(prop)
 
         elif prop in self._TARGET_PROPS_SET:
             self._ensure_set('eval_target')
@@ -960,11 +954,6 @@ class HybRecord(object):
     def __eq__(self, other):
         """Return ``True`` if ".id" and ".seq" attributes match."""
         return (self.id == other.id and self.seq == other.seq)
-
-    # HybRecord : Public MagicMethods : Comparison
-    def __neq__(self, other):
-        """Return False if either ".id" or ".seq" attributes mismatch."""
-        return (self.id != other.id or self.seq != other.seq)
 
     # HybRecord : Public MagicMethods : Evaluation
     def __hash__(self):
@@ -1345,7 +1334,7 @@ class HybRecord(object):
                     column_type = segment_column_types[column]
                     try:
                         return_dict[column] = column_type(seg_props_obj[column])
-                    except TypeError:
+                    except ValueError:
                         message = 'Error in setting segN_props dict.\n'
                         message += 'Entry "%s" for column: %s' % (seg_props_obj[column], column)
                         message += 'could not be converted to type: %s' % str(column_type)
