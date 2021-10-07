@@ -7,7 +7,7 @@
 Read one or more '.hyb' format files and evaluate the contained hybrid sequences.
 
 Evaluation Types:
-   
+
     ========== ==========================================================
     ``type``   Assigns types to each segment within hyb records
     ``mirna``  Assigns which segments are a miRNA based on segment types.
@@ -15,29 +15,30 @@ Evaluation Types:
 """
 
 import sys
-import os 
+import os
 import argparse
 import textwrap
 import hybkit
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
-                             __email__, __license__, __maintainer__, __status__, __version__
+from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
+                              __email__, __license__, __maintainer__, __status__, __version__)
 
 # Divide docstring into argparse and full portions.
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
-    and evaluates hybrid record properties. 
+    This utility reads in one or more files in hyb-format
+    (see the :ref:`Hybkit Hyb File Specification`)
+    and evaluates hybrid record properties.
 
     ``type`` Evaluation:
         | The 'type' evaluation utilizes the :func:`hybkit.HybRecord.eval_types` method
-          to assign the record flags: :ref:`seg1_type <seg1_type>` 
+          to assign the record flags: :ref:`seg1_type <seg1_type>`
           and :ref:`seg2_type <seg2_type>`
 
         Example system calls:
             ::
-            
+
                 $ hyb_eval -t type -i my_file_1.hyb
 
                 $ hyb_eval -t type -i my_file_1.hyb \\
@@ -47,7 +48,7 @@ __doc__ += textwrap.dedent("""
 
     ``mirna`` Evaluation:
         | The 'mirna' evaluation uses the :func:`hybkit.HybRecord.eval_mirna` method
-          to identify properties relating to mirna within the hybrids, 
+          to identify properties relating to mirna within the hybrids,
           including mirna presence and positions.
           This evaluation requires the seg_type flags to be filled, either by a type evaluation,
           or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
@@ -56,7 +57,7 @@ __doc__ += textwrap.dedent("""
 
         Example system calls:
             ::
-            
+
                 $ hyb_eval -t mirna -i my_file_1.hyb
 
                 $ hyb_eval -t mirna -i my_file_1.hyb \\
@@ -74,18 +75,18 @@ __doc__ += textwrap.dedent("""
 
 __doc__ += hybkit.util.output_description
 
+
 # Create Command-line Argument Parser
 def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [
-                         hybkit.util.in_hybs_parser,
+    parser_components = [hybkit.util.in_hybs_parser,
                          hybkit.util.out_opts_parser,
                          hybkit.util.hyb_eval_parser,
                          hybkit.util.record_manip_parser,
                          hybkit.util.gen_opts_parser,
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
-                        ]
+                         ]
 
     replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."'), ('``', '"')]
     use_argparse_doc = argparse_doc
@@ -95,31 +96,33 @@ def make_parser():
     use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb').replace(':.', ':')
 
     script_parser = argparse.ArgumentParser(
-         parents=parser_components,
-         description=use_argparse_doc,
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-         allow_abbrev=False,
-         )
+        parents=parser_components,
+        description=use_argparse_doc,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        allow_abbrev=False,
+    )
 
     script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
 
     return script_parser
 
+
 # Define main script function.
-def hyb_eval(in_hyb_files, eval_types, 
-                out_dir='.', 
-                out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
-                out_hyb_files=None,
-                type_method=None, 
-                type_params=None,  
-                type_params_file=None, 
-                set_dataset=None, 
-                verbose=False, silent=False):
+def hyb_eval(in_hyb_files, eval_types,
+             out_dir='.',
+             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
+             out_hyb_files=None,
+             type_method=None,
+             type_params=None,
+             type_params_file=None,
+             set_dataset=None,
+             verbose=False, silent=False
+             ):
     """Perform main script function."""
 
     if not silent:
         print('\nPerforming Evaluation of Hyb Files...')
-   
+
     # Set eval modes
     do_type = ('type' in eval_types)
     do_mirna = ('mirna' in eval_types)
@@ -141,16 +144,16 @@ def hyb_eval(in_hyb_files, eval_types,
             params = {}
             params_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
             if params_method is not None:
-                if type_params is None: 
+                if type_params is None:
                     if hybkit.HybRecord.TypeFinder.param_methods_needs_file[type_method]:
                         if type_params_file is None:
                             message = 'Type-Finding Parameter Method: %s ' % type_method
                             message += 'requires an input file.\nPlease set type_params or '
                             message += 'type_params_file setting.'
                             print(message)
-                            raise Exception(message) 
+                            raise Exception(message)
                         if verbose:
-                            print ('Using type parameter file: %s' % type_params_file)
+                            print('Using type parameter file: %s' % type_params_file)
                         param_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
                         type_params = param_method(type_params_file)
                 if verbose:
@@ -179,7 +182,7 @@ def hyb_eval(in_hyb_files, eval_types,
             print('Evaluating File:')
             print('    Input : ' + in_hyb_file)
             print('    Output: ' + out_hyb_file)
-    
+
         with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
              hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
             for record in in_hyb:
@@ -188,10 +191,10 @@ def hyb_eval(in_hyb_files, eval_types,
 
                 if do_type:
                     record.eval_types()
-            
+
                 if do_mirna:
                     record.eval_mirna()
-     
+
                 out_hyb.write_record(record)
 
     if verbose:
@@ -201,11 +204,11 @@ def hyb_eval(in_hyb_files, eval_types,
 # Execute the script function
 if __name__ == '__main__':
     script_parser = make_parser()
-    args = script_parser.parse_args() 
+    args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
     hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_eval(args.in_hyb, 
-             args.eval_types, 
+    hyb_eval(args.in_hyb,
+             args.eval_types,
              args.out_dir,
              out_suffix=args.out_suffix,
              out_hyb_files=args.out_hyb,
@@ -214,5 +217,4 @@ if __name__ == '__main__':
              set_dataset=args.set_dataset,
              verbose=args.verbose,
              silent=args.silent,
-            )
-
+             )

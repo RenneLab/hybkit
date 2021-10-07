@@ -7,16 +7,19 @@
 
 import copy
 
+
 # Util : Settings Helper Functions
 def _all_str_cases(in_str):
     return [in_str.lower(), in_str.title(), in_str.upper()]
+
 
 # Util : Settings Helper Functions
 def _settings_info_to_settings(settings_info_dict):
     ret_dict = {}
     for key in settings_info_dict:
-        ret_dict[key] = copy.deepcopy(settings_info_dict[key][0]) 
+        ret_dict[key] = copy.deepcopy(settings_info_dict[key][0])
     return ret_dict
+
 
 # Util : Global Variables
 #: Allowed suffixes for "Hyb" files.
@@ -40,29 +43,29 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
 # settings_info : HybRecord
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.HybRecord` class.
 #: Copied into :data:`HybRecord_settings` for use at runtime.
 HybRecord_settings_info = {
-    'mirna_types': [ 
+    'mirna_types': [
         copy.deepcopy(MIRNA_TYPES),
         '"seg_type" fields identifying a miRNA',
         'str',
         None,
-        {'nargs':'+'}
+        {'nargs': '+'}
     ],
     'custom_flags': [
         [],
         """
-        Custom flags to allow in addition to those specified in the hybkit 
+        Custom flags to allow in addition to those specified in the hybkit
         specification.
         """,
         'str',
         None,
-        {'nargs':'+'}
+        {'nargs': '+'}
     ],
     'hyb_placeholder': [
         '.',
@@ -76,7 +79,7 @@ HybRecord_settings_info = {
     'reorder_flags': [
         True,
         """
-        Re-order flags to the hybkit-specificiation order when 
+        Re-order flags to the hybkit-specificiation order when
         writing hyb records.
         """,
         'custom_bool_from_str',
@@ -86,8 +89,8 @@ HybRecord_settings_info = {
     'allow_undefined_flags': [
         False,
         """
-        Allow use of flags not definied in the hybkit-specificiation order when 
-        reading and writing hyb records. As the preferred alternative to 
+        Allow use of flags not definied in the hybkit-specificiation order when
+        reading and writing hyb records. As the preferred alternative to
         using this setting,
         the --custom_flags arguement can be be used to supply custom allowed flags.
         """,
@@ -118,30 +121,30 @@ HybRecord_settings_info = {
 }
 
 # settings_info : HybFile
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.HybFile` class.
 #: Copied into :data:`HybFile_settings` for use at runtime.
 HybFile_settings_info = {
-    'hybformat_id': [ 
+    'hybformat_id': [
         False,
         """
         The Hyb Software Package places further information in the "id" field of the
         hybrid record that can be used to infer the number of contained read counts.
-        When set to True, the identifiers will be parsed as: "<read_id>_<read_count>" 
+        When set to True, the identifiers will be parsed as: "<read_id>_<read_count>"
         """,
         'custom_bool_from_str',
         None,
         {'nargs': '?', 'const': True}
     ],
-    'hybformat_ref': [ 
+    'hybformat_ref': [
         False,
         """
         The Hyb Software Package uses a reference database with identifiers
         that contain sequence type and other sequence information.
-        When set to True, all hyb file identifiers will be parsed as: 
+        When set to True, all hyb file identifiers will be parsed as:
         "<gene_id>_<transcript_id>_<gene_name>_<seg_type>"
         """,
         'custom_bool_from_str',
@@ -151,10 +154,10 @@ HybFile_settings_info = {
 }
 
 # settings_info : FoldRecord
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.FoldRecord` class.
 #: Copied into :data:`FoldRecord_settings` for use at runtime.
 FoldRecord_settings_info = {
@@ -179,29 +182,30 @@ FoldRecord_settings_info = {
 }
 
 # settings_info : FoldFile
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.FoldFile` class.
 #: Copied into :data:`FoldFile_settings` for use at runtime.
 FoldFile_settings_info = {
     'foldrecord_type': [
         'strict',
         """
-        Type of fold record object to use. Options: "strict": FoldRecord, requires an exact sequence
-        match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence 
+        Type of fold record object to use. Options:
+        "strict": FoldRecord, requires an exact sequence
+        match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence
         match to the "dynamic" annotated regions of a HybRecord, and may be shorter/longer
         than the original sequence.
         """,
         'str',
         None,
-        {'choices':['strict','dynamic']}
+        {'choices': ['strict', 'dynamic']}
     ],
-    'foldfile_error_mode': [ 
+    'foldfile_error_mode': [
         'raise',
         """
-        Mode for handling errors during reading of HybFiles 
+        Mode for handling errors during reading of HybFiles
         (overridden by HybFoldIter.settings['error_mode'] when using HybFoldIter).
         Options: "raise": Raise an error when encountered and exit program;
         "warn_return": Print a warning and return the error_value ;
@@ -210,15 +214,15 @@ FoldFile_settings_info = {
         """,
         'str',
         None,
-        {'choices':{'raise', 'warn_return', 'return'}}
+        {'choices': {'raise', 'warn_return', 'return'}}
     ],
 }
 
 # settings_info : HybFoldIter
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.HybFoldIter` class.
 #: Copied into :data:`HybFoldIter_settings` for use at runtime.
 HybFoldIter_settings_info = {
@@ -226,19 +230,19 @@ HybFoldIter_settings_info = {
         ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'],
         """
         Error checks for simultaneous HybFile and FoldFile parsing.
-        Options: "hybrecord_indel": Error for HybRecord objects where one/both sequences have 
-        insertions/deletions in alignment, which prevents matching of sequences; 
-        "foldrecord_nofold": Error when failure in reading a fold_record object; 
-        "max_mismatch": Error when mismatch between hybrecord and foldrecord sequences is 
+        Options: "hybrecord_indel": Error for HybRecord objects where one/both sequences have
+        insertions/deletions in alignment, which prevents matching of sequences;
+        "foldrecord_nofold": Error when failure in reading a fold_record object;
+        "max_mismatch": Error when mismatch between hybrecord and foldrecord sequences is
         """,
         'str',
         None,
-        {'choices':{'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'}}
+        {'choices': {'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'}}
     ],
     'error_mode': [
         'warn_skip',
         """
-        Mode for handling errors found during error checks. Options: 
+        Mode for handling errors found during error checks. Options:
         "raise": Raise an error when encountered and exit program;
         "warn_return": Print a warning and return the value ;
         "warn_skip": Print a warning and continue to the next iteration;
@@ -246,7 +250,7 @@ HybFoldIter_settings_info = {
         """,
         'str',
         None,
-        {'choices':{'raise', 'warn_return', 'warn_skip', 'skip'}}
+        {'choices': {'raise', 'warn_return', 'warn_skip', 'skip'}}
     ],
     'max_sequential_skips': [
         20,
@@ -261,28 +265,28 @@ HybFoldIter_settings_info = {
 }
 
 # settings_info : Analysis
-# setting_info format contains structure:: 
+# setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }                   
+# }
 #: Information for settings of :class:`~hybkit.Analysis` class.
 #: Copied into :data:`Analysis_settings` for use at runtime.
 Analysis_settings_info = {
     'count_mode': [
         'record',
         """
-        Method for counting records. "read": use the number of reads per hyb record as the count 
-        (may contain PCR duplicates); "record" count the number of records represented by each 
+        Method for counting records. "read": use the number of reads per hyb record as the count
+        (may contain PCR duplicates); "record" count the number of records represented by each
         (hyb record entry 1 for "unmerged" records, >= 1 for "merged" records)
         """,
         'str',
         None,
-        {'choices':['read','record']}
+        {'choices': ['read', 'record']}
     ],
     'mirna_sort': [
         True,
         """
-        During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs. 
+        During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs.
         If False, sort alphabetically.
         """,
         'custom_bool_from_str',
@@ -349,4 +353,3 @@ HybFoldIter_settings = _settings_info_to_settings(HybFoldIter_settings_info)
 #: Settings for :class:`~hybkit.analysis.BaseAnalysis`,
 #: created from :data:`Analysis_settings_info`
 Analysis_settings = _settings_info_to_settings(Analysis_settings_info)
-

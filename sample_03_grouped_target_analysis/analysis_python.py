@@ -6,7 +6,7 @@
 """
 Grouped target analysis performed as a python workflow.
 
-Provided as an example of direct usage of hybkit functions. 
+Provided as an example of direct usage of hybkit functions.
 File names are hardcoded, and functions are accessed directly.
 For more details, see: "grouped_target_analysis_notes.rst".
 """
@@ -14,12 +14,6 @@ For more details, see: "grouped_target_analysis_notes.rst".
 import os
 import sys
 import hybkit
-
-# Set count_mode:
-# count_mode = 'read'    # Count reads represented by each record, instead of number of records.
-count_mode = 'record'  # Count each record/line as one, unless record is combined.
-                       #   (Default count mode, but specified here for readability)
-hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
 hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
@@ -83,14 +77,14 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
 
                 # Find the segment types of each record
                 hyb_record.eval_types()
-    
+
                 # Determine if record has type that is excluded
                 use_record = True
                 for remove_type in remove_types:
                     if hyb_record.has_prop('any_seg_type_is', remove_type):
                         use_record = False
                         break
-    
+
                 # If record has an excluded type, continue to next record without analyzing.
                 if not use_record:
                     continue
@@ -99,10 +93,10 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
                 hyb_record.eval_mirna()
 
                 # If assigned 'miRNA' does not contain string 'kshv', skip.
-                if (not hyb_record.has_prop('has_mirna') 
-                    or not hyb_record.has_prop('mirna_contains', 'kshv')):
+                if (not hyb_record.has_prop('has_mirna')
+                    or not hyb_record.has_prop('mirna_contains', 'kshv')
+                    ):
                     continue
-
 
                 # Set dataset flag of record
                 hyb_record.set_flag('dataset', in_file_label)
@@ -119,7 +113,7 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Perform target-analysis of mirna within kshv-associated data.
     for hyb_record in out_kshv_file:
         target_analysis.add(hyb_record)
-        
+
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb', '')
@@ -131,4 +125,3 @@ with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     target_analysis.plot(analysis_basename)
 
 print('Done\n')
-

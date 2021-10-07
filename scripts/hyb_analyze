@@ -7,7 +7,7 @@
 Read one or more '.hyb' format files and analyze the contained hybrid sequences.
 
 Analysis Types:
-   
+
     ============================== ==============================================================
     ``type`` : Type Analysis       Analyze of segment types included in the analyzed hyb_records
     ``mirna`` : miRNA Analysis     Analyze counts/types of miRNA in hyb records
@@ -17,77 +17,78 @@ Analysis Types:
 """
 
 import sys
-import os 
+import os
 import argparse
 import textwrap
 import hybkit
 from hybkit.analysis import TypeAnalysis, MirnaAnalysis, SummaryAnalysis, TargetAnalysis
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
-                             __email__, __license__, __maintainer__, __status__, __version__
+from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
+                              __email__, __license__, __maintainer__, __status__, __version__)
 
 # Divide docstring into argparse and full portions.
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
-    and analyzes hybrid record properties. 
+    This utility reads in one or more files in hyb-format
+    (see the :ref:`Hybkit Hyb File Specification`)
+    and analyzes hybrid record properties.
 
     ``type`` Analysis:
         Utilizes :class:`hybkit.analysis.TypeAnalysis` to analyze hybrid types.
 
-        Requires the record flags: :ref:`seg1_type <seg1_type>` 
-        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types` 
+        Requires the record flags: :ref:`seg1_type <seg1_type>`
+        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`
         method.
 
         Example system calls:
             ::
-            
+
                 $ hyb_analyze -a type -i my_file_1.hyb
 
                 $ hyb_analyze -a type -i my_file_1.hyb \\
                            --make_plots False
 
     ``mirna`` Analysis:
-        Utilizes :class:`hybkit.analysis.MirnaAnalysis` to analyze miRNA counts 
+        Utilizes :class:`hybkit.analysis.MirnaAnalysis` to analyze miRNA counts
         and details in hyb file.
 
-        Requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
-        to be set by the :meth:`hybkit.HybRecord.eval_mirna` 
+        Requires the record flag: :ref:`miRNA_seg <mirna_seg>`
+        to be set by the :meth:`hybkit.HybRecord.eval_mirna`
         method.
 
         Example system calls:
             ::
-            
+
                 $ hyb_analyze -a mirna -i my_file_1.hyb
 
     ``summary`` Analysis:
-        Utilizes :class:`hybkit.analysis.SummaryAnalysis` to analyze hybrid types 
+        Utilizes :class:`hybkit.analysis.SummaryAnalysis` to analyze hybrid types
         and miRNA counts / details in hyb file(s).
 
-        Requires the record flags: :ref:`seg1_type <seg1_type>` 
-        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`, 
-        and the record flag: :ref:`miRNA_seg <mirna_seg>` 
-        to be set by :meth:`hybkit.HybRecord.eval_mirna`. 
+        Requires the record flags: :ref:`seg1_type <seg1_type>`
+        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`,
+        and the record flag: :ref:`miRNA_seg <mirna_seg>`
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`.
 
         Example system calls:
             ::
-            
+
                 $ hyb_analyze -a summary -i my_file_1.hyb
 
     ``target`` Analysis:
-        Utilizes :class:`hybkit.analysis.TargetAnalysis` to analyze hybrid types 
+        Utilizes :class:`hybkit.analysis.TargetAnalysis` to analyze hybrid types
         and miRNA counts / details in hyb file(s).
 
-        Requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
-        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with 
-        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated. 
+        Requires the record flag: :ref:`miRNA_seg <mirna_seg>`
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with
+        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated.
         If 'allow_mirna_dimers=True', then :ref:`miRNA_seg <mirna_seg>` == 'B'
         will also be included.
 
         Example system calls:
             ::
-            
+
                 $ hyb_analyze -a target -i my_file_1.hyb
 
                 $ hyb_analyze -a target -i my_file_1.hyb \\
@@ -96,11 +97,11 @@ __doc__ += textwrap.dedent("""
 
 __doc__ += hybkit.util.output_description
 
+
 # Create Command-line Argument Parser
 def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [
-                         hybkit.util.in_hybs_parser,
+    parser_components = [hybkit.util.in_hybs_parser,
                          hybkit.util.out_analysis_parser,
                          hybkit.util.hyb_analyze_parser,
                          hybkit.util.all_analyze_parser,
@@ -108,7 +109,7 @@ def make_parser():
                          hybkit.util.hybrecord_parser,
                          hybkit.util.hybfile_parser,
                          hybkit.util.analysis_parser,
-                        ]
+                         ]
     replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
     use_argparse_doc = argparse_doc
     for q, r in replace_pairs:
@@ -117,19 +118,20 @@ def make_parser():
     use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb')
 
     script_parser = argparse.ArgumentParser(
-         parents=parser_components,
-         description=use_argparse_doc,
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-         allow_abbrev=False,
-         )
+        parents=parser_components,
+        description=use_argparse_doc,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        allow_abbrev=False,
+    )
 
-    #script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
+    # script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
 
     return script_parser
 
+
 # Define main script function.
-def hyb_analyze(in_hyb_files, analysis_type, 
-                out_dir='.', 
+def hyb_analyze(in_hyb_files, analysis_type,
+                out_dir='.',
                 out_suffix=None,
                 out_basenames=None,
                 analysis_name=None,
@@ -140,7 +142,7 @@ def hyb_analyze(in_hyb_files, analysis_type,
 
     if not silent:
         print('\nPerforming Analysis of Hyb Files...')
-   
+
     if verbose:
         print('\nPerforming Analysis Type: ' + analysis_type)
         if analysis_name:
@@ -173,8 +175,6 @@ def hyb_analyze(in_hyb_files, analysis_type,
                                                           out_dir=out_dir,
                                                           seg_sep='_',)
 
-
-
         if verbose:
             print('Analyzing File:')
             print('    Input   : ' + in_hyb_file)
@@ -184,13 +184,12 @@ def hyb_analyze(in_hyb_files, analysis_type,
             for record in in_hyb:
                 analysis.add(record)
 
-
-        analysis.write(out_basename) 
+        analysis.write(out_basename)
         if write_individual and hasattr(analysis, 'write_individual'):
             analysis.write_individual(out_basename)
 
         if make_plots:
-            analysis.plot(out_basename) 
+            analysis.plot(out_basename)
             if write_individual and hasattr(analysis, 'plot_individual'):
                 analysis.plot_individual(out_basename)
 
@@ -201,11 +200,11 @@ def hyb_analyze(in_hyb_files, analysis_type,
 # Execute the script function
 if __name__ == '__main__':
     script_parser = make_parser()
-    args = script_parser.parse_args() 
+    args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
     hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_analyze(args.in_hyb, 
-                args.analysis_type, 
+    hyb_analyze(args.in_hyb,
+                args.analysis_type,
                 args.out_dir,
                 out_suffix=args.out_suffix,
                 out_basenames=args.out_basename,
@@ -214,5 +213,4 @@ if __name__ == '__main__':
                 write_individual=args.write_individual,
                 verbose=args.verbose,
                 silent=args.silent,
-               )
-
+                )

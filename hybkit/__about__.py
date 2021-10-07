@@ -26,13 +26,13 @@ name_and_version = project_name + '-' + version
 
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)
 
-#Putting in try block to allow use with exec()
+# Putting in try block to allow use with exec()
 try:
     local_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 except NameError:
     local_data_dir = 'using_with_exec'
 
-local_prefix_data_dir = os.path.join(local_data_dir, name_and_version) 
+local_prefix_data_dir = os.path.join(local_data_dir, name_and_version)
 
 if os.path.isdir(os.path.join(prefix_data_dir, 'ref_data')):
     hybkit_data_dir = prefix_data_dir
@@ -71,7 +71,7 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
-    ]
+]
 
 info_urls = {
     'Download as TAR': ('https://github.com/RenneLab/hybkit/tarball/' + version),
@@ -79,7 +79,7 @@ info_urls = {
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
     'Hyb Format Specification':
     'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
-    }
+}
 
 keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
 

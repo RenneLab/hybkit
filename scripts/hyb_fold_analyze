@@ -8,28 +8,29 @@ Read one or more '.hyb' format and corresponding ".vienna" or ".ct" format files
  and analyze the fold information in the contained hybrid sequences.
 
 Analysis Types:
-   
+
     ============================== ==============================================================
     ``fold`` : Fold Analysis       Analyze folding of miRNA/target hybrids.
     ============================== ==============================================================
 """
 
 import sys
-import os 
+import os
 import argparse
 import textwrap
 import hybkit
 from hybkit.analysis import FoldAnalysis
 
 # Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
-                             __email__, __license__, __maintainer__, __status__, __version__
+from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
+                              __email__, __license__, __maintainer__, __status__, __version__)
 
 # Divide docstring into argparse and full portions.
 argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
 __doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format (see the :ref:`Hybkit Hyb File Specification`)
-    along with a corresponding predicted RNA secondary structure file in the 
+    This utility reads in one or more files in hyb-format
+    (see the :ref:`Hybkit Hyb File Specification`)
+    along with a corresponding predicted RNA secondary structure file in the
     "Vienna" (:ref:`Vienna Format <vienna_file_format>`) or
     "CT" (:ref:`CT_Format <ct_file_format>`) formats,
     and analyzes hybrid secondary structure properties.
@@ -38,22 +39,22 @@ __doc__ += textwrap.dedent("""
         Utilizes :class:`hybkit.analysis.FoldAnalysis` to analyze hybrid fold information
         and calculated per-base complimentarity counts for the miRNA portions of identified
         miRNA / target hybrids. By default miRNA-miRNA dimer hybrids are excluded, unless the
-        :attr:`FoldAnalysis.settings['allow_mirna_dimers'] <hybkit.analysis.FoldAnalysis.settings>` 
+        :attr:`FoldAnalysis.settings['allow_mirna_dimers'] <hybkit.analysis.FoldAnalysis.settings>`
         option is True.
 
         Iteration over both files simultaneously is performed using :class:`~hybkit.HybFoldIter`,
-        including error checking. Error checking settings can be modified in 
+        including error checking. Error checking settings can be modified in
         :attr:`HybFoldIter.settings <hybkit.HybFoldIter.settings>`.
 
-        This analysis requires the record flag: :ref:`miRNA_seg <mirna_seg>` 
-        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with 
-        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated. 
+        This analysis requires the record flag: :ref:`miRNA_seg <mirna_seg>`
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with
+        :ref:`miRNA_seg <mirna_seg>` set to one of '3p' or '5p' will be evaluated.
         If 'allow_mirna_dimers=True', then :ref:`miRNA_seg <mirna_seg>` == 'B'
         will also be included and the '5p' segment will be considered the "miRNA".
 
         Example system calls:
             ::
-            
+
                 $ hyb_fold_analyze -a fold -i my_file_1.hyb -f my_file_1.vienna
 
                 $ hyb_fold_analyze -a fold -i my_file_2.hyb -f my_file_2.ct \\
@@ -62,11 +63,11 @@ __doc__ += textwrap.dedent("""
 
 __doc__ += hybkit.util.output_description
 
+
 # Create Command-line Argument Parser
 def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [
-                         hybkit.util.in_hybs_parser,
+    parser_components = [hybkit.util.in_hybs_parser,
                          hybkit.util.in_folds_parser,
                          hybkit.util.out_analysis_parser,
                          hybkit.util.hyb_fold_analyze_parser,
@@ -78,7 +79,7 @@ def make_parser():
                          hybkit.util.foldfile_parser,
                          hybkit.util.analysis_parser,
                          hybkit.util.hybfolditer_parser,
-                        ]
+                         ]
     replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
     use_argparse_doc = argparse_doc
     for q, r in replace_pairs:
@@ -87,19 +88,20 @@ def make_parser():
     use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb')
 
     script_parser = argparse.ArgumentParser(
-         parents=parser_components,
-         description=use_argparse_doc,
-         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-         allow_abbrev=False,
-         )
+        parents=parser_components,
+        description=use_argparse_doc,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        allow_abbrev=False,
+    )
 
-    #script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
+    # script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
 
     return script_parser
 
+
 # Define main script function.
-def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type, 
-                     out_dir='.', 
+def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
+                     out_dir='.',
                      out_suffix=None,
                      out_basenames=None,
                      analysis_name=None,
@@ -109,7 +111,7 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
 
     if not silent:
         print('\nPerforming Folding Analysis of Hyb Files...')
-   
+
     if verbose:
         print('\nPerforming Analysis Type: ' + analysis_type)
         if analysis_name:
@@ -125,7 +127,7 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
         print('Using Out Suffix: "%s"' % out_suffix)
 
     for i, in_hyb_file in enumerate(in_hyb_files):
-        in_fold_file = in_fold_files[i] 
+        in_fold_file = in_fold_files[i]
         file_basename = os.path.basename(in_hyb_file)
         if out_basenames is not None:
             out_basename = out_basenames[i]
@@ -135,9 +137,8 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
                                                           in_suffix='.hyb',
                                                           out_suffix='',
                                                           out_dir=out_dir,
-                                                          seg_sep='_',)
-
-
+                                                          seg_sep='_',
+                                                          )
 
         if verbose:
             print('Analyzing Files:')
@@ -149,7 +150,7 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
             use_fold_class = hybkit.ViennaFile
         elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
             use_fold_class = hybkit.CTFile
-        else: 
+        else:
             message = 'Fold type of file: %s cannot be identified.' % in_fold_file
             print(message)
             raise Exception(message)
@@ -161,10 +162,10 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
             for record in hf_iter:
                 analysis.add(record)
 
-        analysis.write(out_basename) 
+        analysis.write(out_basename)
 
         if make_plots:
-            analysis.plot(out_basename) 
+            analysis.plot(out_basename)
 
     if verbose:
         print()
@@ -175,12 +176,12 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
 # Execute the script function
 if __name__ == '__main__':
     script_parser = make_parser()
-    args = script_parser.parse_args() 
+    args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
     hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_fold_analyze(args.in_hyb, 
+    hyb_fold_analyze(args.in_hyb,
                      args.in_fold,
-                     args.analysis_type, 
+                     args.analysis_type,
                      args.out_dir,
                      out_suffix=args.out_suffix,
                      out_basenames=args.out_basename,
@@ -188,5 +189,4 @@ if __name__ == '__main__':
                      make_plots=args.make_plots,
                      verbose=args.verbose,
                      silent=args.silent,
-               )
-
+                     )

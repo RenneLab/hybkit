@@ -12,15 +12,16 @@ import textwrap
 import copy
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-#Import module-level dunder-names:
-from hybkit.__about__ import __author__, __contact__, __credits__, __date__, __deprecated__, \
-                             __email__, __license__, __maintainer__, __status__, __version__
+# Import module-level dunder-names:
+from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
+                              __email__, __license__, __maintainer__, __status__, __version__)
 from hybkit import settings, type_finder
+
 
 # Util : Argparse Helper Functions
 def _bool_from_string(value):
     if isinstance(value, bool):
-       return value
+        return value
     if value.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif value.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -29,6 +30,7 @@ def _bool_from_string(value):
         raise argparse.ArgumentTypeError('Boolean value expected.')
     # Snippet Credit goes to @Maxim at https://stackoverflow.com/questions/15008758/
     #   /parsing-boolean-values-with-argparse
+
 
 _custom_types = {
     'custom_bool_from_str': _bool_from_string,
@@ -40,6 +42,7 @@ _custom_type_choices = {
     'str': None,
     'int': None,
 }
+
 
 # Util : Path Helper Functions
 def dir_exists(dir_name):
@@ -56,7 +59,7 @@ def dir_exists(dir_name):
         dir_name = os.path.expanduser(dir_name)
     if '$' in dir_name:
         dir_name = os.path.expandvars(dir_name)
-    #if not dir_name:
+    # if not dir_name:
     #    dir_name = os.getcwd()
     dir_name = dir_name.strip()
     if not os.path.isdir(dir_name):
@@ -67,7 +70,8 @@ def dir_exists(dir_name):
         dir_name = os.path.abspath(dir_name)
     return dir_name
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def file_exists(file_name, required_suffixes=[]):
     """
     Check if a file exists at the provided path, and return a normalized path.
@@ -75,7 +79,7 @@ def file_exists(file_name, required_suffixes=[]):
     Args:
         file_name (str): Name of file to check for existence.
         required_suffixes (list, optional): List of strings containing file-name suffixes.
-            If provided, a file passed to file-exists must end with one of the strings 
+            If provided, a file passed to file-exists must end with one of the strings
             provided. Otherwise an error will be raised.
 
     Returns:
@@ -89,14 +93,14 @@ def file_exists(file_name, required_suffixes=[]):
     if not os.path.isfile(file_name):
         message = 'Provided Input File: %s does not exist.' % file_name
         raise argparse.ArgumentTypeError(message)
-     
+
     # If required_suffixes provided, ensure the file has a required suffix.
     if required_suffixes:
         if not any(file_name.endswith(suffix) for suffix in required_suffixes):
             message = ('Provided Input File: %s' % file_name
                        + ' does not have an allowed suffix.'
-                       +' {%s} ' % ', '.join(required_suffixes)
-                      )
+                       + ' {%s} ' % ', '.join(required_suffixes)
+                       )
             print(message)
             raise argparse.ArgumentTypeError(message)
 
@@ -109,7 +113,8 @@ def file_exists(file_name, required_suffixes=[]):
 
     return os.path.abspath(file_name)
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def hyb_exists(file_name):
     """
     Check if a .hyb file exists at the provided path, and return a normalized path.
@@ -126,7 +131,8 @@ def hyb_exists(file_name):
     use_suffixes = settings.HYB_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def vienna_exists(file_name):
     """
     Check if a .vienna file exists at the provided path, and return a normalized path.
@@ -143,7 +149,8 @@ def vienna_exists(file_name):
     use_suffixes = settings.VIENNA_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def ct_exists(file_name):
     """
     Check if a .ct file exists at the provided path, and return a normalized path.
@@ -160,7 +167,8 @@ def ct_exists(file_name):
     use_suffixes = settings.CT_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def fold_exists(file_name):
     """
     Check if a fold-representing file exists at the provided path, and return a normalized path.
@@ -177,7 +185,8 @@ def fold_exists(file_name):
     use_suffixes = settings.FOLD_SUFFIXES
     return file_exists(file_name, use_suffixes)
 
-# Util : Path Helper Functions 
+
+# Util : Path Helper Functions
 def out_path_exists(file_name):
     """
     Check if the directory of the specified output path exists, and return a normalized path.
@@ -201,8 +210,9 @@ def out_path_exists(file_name):
 
     return os.path.abspath(file_name)
 
-# Util : Path Helper Functions 
-def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix='', 
+
+# Util : Path Helper Functions
+def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix='',
                        out_dir='', seg_sep='_'):
     """
     Given an input file name, generate an output file name.
@@ -212,7 +222,7 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
         name_suffix (str): Suffix to add to name before file type.
         in_suffix (str): File type suffix on in_file_name (to remove).
         out_suffix (str): File type suffix to add to final output file.
-        out_dir (str): Directory path in which to place output file. 
+        out_dir (str): Directory path in which to place output file.
         seg_sep (str): Separator string between file name segements.
 
     Returns:
@@ -229,7 +239,7 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
         full_name_suffix += out_suffix
     if seg_sep and full_name_suffix and not full_name_suffix.startswith(seg_sep):
         full_name_suffix = seg_sep + full_name_suffix
-    
+
     out_file_basename = in_file_basename + full_name_suffix
 
     out_file_full = os.path.join(out_dir, out_file_basename)
@@ -241,13 +251,13 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
     return out_file_full
 
 
-# Util : Path Helper Functions 
+# Util : Path Helper Functions
 def validate_args(args, parser=None):
     """
     Check supplied arguments to make sure there are no hidden contradictions.
 
     Current checks:
-        | If explicit output file names supplied, be sure that they match the number of 
+        | If explicit output file names supplied, be sure that they match the number of
           input files provided.
         | If fold files provided, make sure that they match the number of input hyb
           files provided.
@@ -255,10 +265,10 @@ def validate_args(args, parser=None):
     Args:
         args (argparse.Namespace): The arguments produced by argparse.
     """
-   
+
     message = '\nArgument validation error: '
     if parser is not None:
-        suffix = '\n\n' + parser.format_usage() + '\n' 
+        suffix = '\n\n' + parser.format_usage() + '\n'
     else:
         suffix = 'Please use the -h or --help options for input requirements.'
 
@@ -292,31 +302,31 @@ def validate_args(args, parser=None):
 # Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use 
+                 REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use
                  in the evaluation.
                  """
 in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
                             metavar='PATH_TO/MY_FILE.HYB',
                             required=True,
-                            nargs='+', 
+                            nargs='+',
                             help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 in_folds_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 REQUIRED path to one or more RNA secondary-structure files with a 
+                 REQUIRED path to one or more RNA secondary-structure files with a
                  ".vienna" or ".ct" suffix for use in the evaluation.
                  """
 in_folds_parser.add_argument('-f', '--in_fold', type=fold_exists,
                              metavar='PATH_TO/MY_FILE.VIENNA',
                              required=True,
-                             nargs='+', 
+                             nargs='+',
                              help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Optional path to one or more hyb-format file for 
+                 Optional path to one or more hyb-format file for
                  output (should include a ".hyb" suffix).
                  If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
                  will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
@@ -324,13 +334,13 @@ _this_arg_help = """
 out_hybs_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
                              metavar='PATH_TO/OUT_FILE.HYB',
                              # required=True,
-                             nargs='+', 
+                             nargs='+',
                              help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_folds_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Optional path to one or more ".vienna" or ".ct"-format files for 
+                 Optional path to one or more ".vienna" or ".ct"-format files for
                  output (should include appropriate ".vienna"/".ct" suffix).
                  If not provided, the output for input file "PATH_TO/MY_FILE.VIENNA"
                  will be used as a template for the output "OUT_DIR/MY_FILE_OUT.VIENNA".
@@ -338,7 +348,7 @@ _this_arg_help = """
 out_folds_parser.add_argument('-o', '--out_fold', type=out_path_exists,
                               metavar='PATH_TO/OUT_FILE.VIENNA',
                               # required=True,
-                              nargs='+', 
+                              nargs='+',
                               help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
@@ -349,13 +359,13 @@ _this_arg_help = """
 req_out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
                                 metavar='PATH_TO/OUT_FILE.HYB',
                                 required=True,
-                                # nargs='1', 
+                                # nargs='1',
                                 help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_basenames_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Optional path to one or more basename prefixes to use for  
+                 Optional path to one or more basename prefixes to use for
                  analysis output. The appropriate suffix will be added
                  based on the specific name.
                  If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
@@ -364,26 +374,27 @@ _this_arg_help = """
 out_basenames_parser.add_argument('-o', '--out_basename', type=out_path_exists,
                                   metavar='PATH_TO/OUT_BASENAME',
                                   # required=True,
-                                  nargs='+', 
+                                  nargs='+',
                                   help=_this_arg_help)
 
 # Argument Parser : Input/Output Options
 out_dir_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Path to directory for output of evaluation files. 
+                 Path to directory for output of evaluation files.
                  Defaults to the current working directory.
                  """
 out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
-                           # required=True,
-                           # nargs='1',
-                           default='$PWD', 
-                           help=_this_arg_help)
+                            # required=True,
+                            # nargs='1',
+                            default='$PWD',
+                            help=_this_arg_help
+                            )
 
 
 # Argument Parser : Input/Output Options
 out_suffix_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Suffix to add to the name of output files, before any 
+                 Suffix to add to the name of output files, before any
                  file- or analysis-specific suffixes. The file-type appropriate suffix
                  will be added automatically.
                  """
@@ -393,25 +404,25 @@ out_suffix_parser.add_argument('-u', '--out_suffix',
                                help=_this_arg_help)
 
 
-out_opts_parser = argparse.ArgumentParser(add_help=False, 
-                                          parents=[
-                                                   out_hybs_parser,
+out_opts_parser = argparse.ArgumentParser(add_help=False,
+                                          parents=[out_hybs_parser,
                                                    out_dir_parser,
                                                    out_suffix_parser,
-                                                  ],)
+                                                   ],
+                                          )
 
-out_fold_opts_parser = argparse.ArgumentParser(add_help=False, 
-                                               parents=[
-                                                        out_folds_parser,
+out_fold_opts_parser = argparse.ArgumentParser(add_help=False,
+                                               parents=[out_folds_parser,
                                                         out_dir_parser,
                                                         out_suffix_parser,
-                                                       ],)
-out_analysis_parser = argparse.ArgumentParser(add_help=False, 
-                                              parents=[
-                                                       out_basenames_parser,
+                                                        ],
+                                               )
+out_analysis_parser = argparse.ArgumentParser(add_help=False,
+                                              parents=[out_basenames_parser,
                                                        out_dir_parser,
                                                        out_suffix_parser,
-                                                      ],)
+                                                       ],
+                                              )
 
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
@@ -445,7 +456,7 @@ record_manip_parser.add_argument('--set_dataset',
                                  help=_this_arg_help)
 
 
-# Argument Parser : HybRecord, HybFile, FoldRecord 
+# Argument Parser : HybRecord, HybFile, FoldRecord
 _class_settings_groups = {}
 # Create parser for HybRecord options
 hybrecord_parser = argparse.ArgumentParser(add_help=False)
@@ -485,7 +496,7 @@ for _cls_name, _cls_group in _class_settings_groups.items():
         _use_args = []
         if _short_flag is not None:
             _use_args.append(_short_flag)
-        _use_args.append(_flag) 
+        _use_args.append(_flag)
         _use_kwargs = copy.deepcopy(_extra_kwargs)
         _use_kwargs['help'] = _description
         _use_kwargs['type'] = _custom_types[_type_str]
@@ -496,7 +507,7 @@ for _cls_name, _cls_group in _class_settings_groups.items():
         _cls_group.add_argument(*_use_args, **_use_kwargs)
 
 
-##  ----- Task-specific Parsers -----
+#  ----- Task-specific Parsers -----
 
 # Argument Parser : hyb_eval
 hyb_eval_parser = argparse.ArgumentParser(add_help=False)
@@ -535,17 +546,17 @@ _this_arg_help = """
                  for the find_seg_types method.
                  """
 type_opts_group.add_argument('--type_params_file', type=file_exists,
-                                metavar='PATH_TO/PARAMATERS_FILE',
-                                # required=True,
-                                # nargs='?',
-                                # default='hyb',
-                                # choices=HybRecord.find_type_methods,
-                                help=_this_arg_help)
+                             metavar='PATH_TO/PARAMATERS_FILE',
+                             # required=True,
+                             # nargs='?',
+                             # default='hyb',
+                             # choices=HybRecord.find_type_methods,
+                             help=_this_arg_help)
 
 # Argument Parser : hyb_filter
 hyb_filter_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = """
-                 Modes for evaluating multiple filters. 
+                 Modes for evaluating multiple filters.
                  The "all" mode requires all provided filters to be true for inclusion.
                  The "any" mode requires only one provided filter to be true for inclusion.
                  (Note: matching any exclusion filter is grounds for exclusion of record.)
@@ -586,7 +597,7 @@ _this_arg_help = """
                  """
 hyb_analyze_parser.add_argument('-a', '--analysis_type',
                                 # required=True,
-                                #nargs='1',
+                                # nargs='1',
                                 action='store',
                                 choices=['type', 'mirna', 'summary', 'target'],
                                 help=_this_arg_help)
@@ -610,7 +621,7 @@ _this_arg_help = """
                  """
 hyb_fold_analyze_parser.add_argument('-a', '--analysis_type',
                                      # required=True,
-                                     #nargs='1',
+                                     # nargs='1',
                                      default='fold',
                                      action='store',
                                      choices=['fold'],
@@ -623,9 +634,9 @@ _this_arg_help = """
                  """
 all_analyze_parser.add_argument('-n', '--analysis_name',
                                 # required=True,
-                                #nargs='1',
-                                #default=None,
-                                #choices=[True, False],
+                                # nargs='1',
+                                # default=None,
+                                # choices=[True, False],
                                 help=_this_arg_help)
 
 _this_arg_help = """
@@ -638,13 +649,13 @@ all_analyze_parser.add_argument('-p', '--make_plots',
                                 choices=[True, False],
                                 help=_this_arg_help)
 
-for i in range(1,4):
+for i in range(1, 4):
     _this_arg_help = """
-                     Filter criteria #%i. 
+                     Filter criteria #%i.
                      Records matching the criteria will be included in output.
                      Includes a filter type, Ex: "seg_name_contains",
                      and an argument, Ex: "ENST00000340384".
-                     (Note: not all filter types require a second argument, 
+                     (Note: not all filter types require a second argument,
                      for Example: "has_mirna_seg")
                      """ % i
     if i == 1:
@@ -659,13 +670,13 @@ for i in range(1,4):
                                    # choices={'all', 'any'},
                                    help=_this_arg_help)
 
-for i in range(1,4):
+for i in range(1, 4):
     _this_arg_help = """
-                     Exclusion filter criteria #%i. 
+                     Exclusion filter criteria #%i.
                      Records matching the criteria will be excluded from output.
                      Includes a filter type, Ex: "seg_name_contains",
                      and an argument, Ex: "ENST00000340384".
-                     (Note: not all filter types require a second argument, 
+                     (Note: not all filter types require a second argument,
                      for Example: "has_mirna_seg")
                      """ % i
     if i == 1:
@@ -688,54 +699,55 @@ Output File Naming:
 
     Automatic Name Generation:
         For output name generation, the default respective naming scheme is used::
-        
+
             hyb_script -i PATH_TO/MY_FILE_1.HYB [...]
                 -->  OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
-    
+
         This output file path can be modified with the arguments {--out_dir, --out_suffix}
         described below.
-    
-        The output directory defaults to the current working directory ``($PWD)``, and 
-        can be modified with the ``--out_dir <dir>`` argument. 
+
+        The output directory defaults to the current working directory ``($PWD)``, and
+        can be modified with the ``--out_dir <dir>`` argument.
         Note: The provided directory must exist, or an error will be raised.
         For Example::
-    
+
             hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_dir MY_OUT_DIR
                 -->  MY_OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
-    
+
         The suffix used for output files is based on the primary actions of the script.
         It can be specified using ``--out_suffix <suffix>``. This can optionally include
         the ".hyb" final suffix.
         for Example::
-    
+
             hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX
-                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB 
+                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
             #OR
             hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX.HYB
                 -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
-    
+
     Specific Output Names:
         Alternatively, specific file names can be provided via the -o/--out_hyb argument,
         ensuring that the same number of input and output files are provided. This argument
-        takes precedence over all automatic output file naming options 
+        takes precedence over all automatic output file naming options
         (--out_dir, --out_suffix), which are ignored if -o/--out_hyb is provided.
         For Example::
-    
+
             hyb_script [...] --out_hyb MY_OUT_DIR/OUT_FILE_1.HYB MY_OUT_DIR/OUT_FILE_2.HYB
                 -->  MY_OUT_DIR/OUT_FILE_1.hyb
                 -->  MY_OUT_DIR/OUT_FILE_2.hyb
-        
-        Note: The directory provided with output file paths (MY_OUT_DIR above) must exist, 
+
+        Note: The directory provided with output file paths (MY_OUT_DIR above) must exist,
         otherwise an error will be raised.
     """)
 
 # Argument Parser : hyb_type_analysis
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
 
+
 def set_settings(nspace, verbose=False):
     """
     Take a namespace object as from an argparse parser and update settings.
-    
+
     Each setting in the following settings dictionaries are checked and set where applicable:
 
         ===================================== ============================================
@@ -752,15 +764,16 @@ def set_settings(nspace, verbose=False):
         verbose (bool, optional): If True, print when changing setting.
     """
     out_report = '\n'
-    for class_name in ['HybRecord', 'HybFile', 'FoldRecord', 
+    for class_name in ['HybRecord', 'HybFile', 'FoldRecord',
                        'FoldFile', 'HybFoldIter', 'Analysis']:
         cls_settings_info = getattr(settings, class_name + '_settings_info')
         cls_settings = getattr(settings, class_name + '_settings')
         for setting_key in cls_settings:
-            if hasattr(nspace, setting_key): 
+            if hasattr(nspace, setting_key):
                 argparse_setting = getattr(nspace, setting_key)
-                if (argparse_setting is not None 
-                    and argparse_setting != cls_settings_info[setting_key][0]):
+                if (argparse_setting is not None
+                    and argparse_setting != cls_settings_info[setting_key][0]
+                    ):
                     out_report += 'Setting %s Setting: ' % class_name
                     out_report += '"%s" to "%s"\n' % (setting_key, str(argparse_setting))
                     cls_settings[setting_key] = argparse_setting
@@ -769,9 +782,8 @@ def set_settings(nspace, verbose=False):
         print(out_report)
 
 # Allow execution of module for testing purposes.
-#if __name__ == '__main__':
-#    all_parsers = [#in_hyb_parser, 
+# if __name__ == '__main__':
+#    all_parsers = [#in_hyb_parser,
 #    test_parser = argparse.ArgumentParser(parents=all_parsers,
 #                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 #    test_parser.print_help()
-

@@ -6,7 +6,7 @@
 """
 Analysis for sample_fold_analysis performed as a python workflow.
 
-Provided as an example of direct 
+Provided as an example of direct
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
 For further detail, see "fold_analysis_notes.rst".
 """
@@ -14,12 +14,6 @@ For further detail, see "fold_analysis_notes.rst".
 import os
 import sys
 import hybkit
-
-# Set count_mode:
-# count_mode = 'read'    # Count reads represented by each record, instead of number of records.
-count_mode = 'record'  # Count each record/line as one, unless record is combined.
-                       #   (Default count mode, but specified here for readability)
-hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
 hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
@@ -67,12 +61,12 @@ hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 # Initialize FoldAnalysis:
 fold_analysis = hybkit.analysis.FoldAnalysis(name='WT_BR1')
 
-# Use the combined iterator to iterate over the hyb and vienna files simultaneously, 
+# Use the combined iterator to iterate over the hyb and vienna files simultaneously,
 #   returning hyb records containing their associated fold record.
 in_file_label = os.path.basename(input_hyb_name).replace('.hyb', '')
 with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
      hybkit.ViennaFile.open(input_vienna_name, 'r') as input_vienna:
-     #hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
+    # hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
 
     hyb_fold_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=True)
     for i, hyb_record in enumerate(hyb_fold_iter):
@@ -105,7 +99,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
             # Perform miRNA-Fold Analysis
             fold_analysis.add(hyb_record)
             # Write the record to the output hyb file.
-            #out_hyb.write_record(hyb_record)
+            # out_hyb.write_record(hyb_record)
 
 # Print report after Iteration
 print()
@@ -116,5 +110,5 @@ print()
 print('Outputting Analyses to:\n    %s\n' % out_analysis_basename)
 fold_analysis.write(out_analysis_basename)
 fold_analysis.plot(out_analysis_basename)
-                            
-print('Done!') 
+
+print('Done!')

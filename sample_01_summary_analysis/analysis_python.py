@@ -6,7 +6,7 @@
 """
 Analysis for summary_analysis pipeline performed as a python workflow.
 
-Provided as an example of direct 
+Provided as an example of direct
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
 See: "summary_analysis_notes.rst" for more information.
 """
@@ -14,12 +14,6 @@ See: "summary_analysis_notes.rst" for more information.
 import os
 import sys
 import hybkit
-
-# Set count_mode:
-# count_mode = 'read'    # Count reads represented by each record, instead of number of records.
-count_mode = 'record'  # Count each record/line as one, unless record is combined.
-                       #   (Default count mode, but specified here for readability)
-hybkit.settings.Analysis_settings['count_mode'] = count_mode 
 
 # Set mirna types as custom to include KSHV-miRNAs
 hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
@@ -59,12 +53,12 @@ hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 hybkit.HybFile.settings['hybformat_id'] = True
 
 # Initialize listto store independent analyses.
-summary_analyses = [] 
+summary_analyses = []
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
 
-# Iterate over each input file, find the segment types, and save the output 
+# Iterate over each input file, find the segment types, and save the output
 #   in the output directory.
 for in_file_path in input_files:
     in_file_name = os.path.basename(in_file_path)
@@ -76,7 +70,7 @@ for in_file_path in input_files:
     print('Outputting to:\n    %s\n' % out_file_path)
     sys.stdout.flush()
 
-    # Initialize file-specific analysis 
+    # Initialize file-specific analysis
     file_summary_analysis = hybkit.analysis.SummaryAnalysis(name=in_file_label)
 
     # Open one HybFile entry for reading, and one for writing
@@ -97,9 +91,9 @@ for in_file_path in input_files:
 
             # If record has an excluded type, continue to next record without analyzing.
             if not use_record:
-                continue 
+                continue
 
-            hyb_record.set_flag('dataset', in_file_label) 
+            hyb_record.set_flag('dataset', in_file_label)
 
             # Perform record analysis
             hyb_record.eval_mirna()
@@ -107,15 +101,15 @@ for in_file_path in input_files:
             # Add record details to SummaryAnalysis
             file_summary_analysis.add(hyb_record)
 
-            # Write the modified record to the output file  
+            # Write the modified record to the output file
             out_file.write_record(hyb_record)
 
-    # Write analysis for input file to outputs. 
+    # Write analysis for input file to outputs.
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     sys.stdout.flush()
-    file_summary_analysis.write(analysis_file_basename) 
-    file_summary_analysis.plot(analysis_file_basename) 
+    file_summary_analysis.write(analysis_file_basename)
+    file_summary_analysis.plot(analysis_file_basename)
     summary_analyses.append(file_summary_analysis)
 
 # Create a combined summary analysis
@@ -127,7 +121,7 @@ for file_analysis in summary_analyses:
 combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
 print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
 sys.stdout.flush()
-combined_summary_analysis.write(combined_analysis_file_basename) 
-combined_summary_analysis.plot(combined_analysis_file_basename) 
+combined_summary_analysis.write(combined_analysis_file_basename)
+combined_summary_analysis.plot(combined_analysis_file_basename)
 
-print('Done!')  
+print('Done!')

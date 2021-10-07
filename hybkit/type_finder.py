@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-This module contains the TypeFinder class to work with :class:`HybRecord` to 
+This module contains the TypeFinder class to work with :class:`HybRecord` to
 parse sequence identifiers to idenfity sequence type.
 """
 
@@ -13,11 +13,11 @@ import io
 import types
 import csv
 import copy
-    
+
 
 class TypeFinder(object):
     """
-    Class for storing and using parsing methods to assign a sequence "type" by parsing a 
+    Class for storing and using parsing methods to assign a sequence "type" by parsing a
     sequence identifier.
 
     Designed to be used by the :class:`hybkit.HybRecord`
@@ -68,13 +68,13 @@ class TypeFinder(object):
     def set_custom_method(cls, method, params={}):
         """
         Set the method for use to find seg types.
-        
-        This method is for providing a custom function. To use the included functions, 
+
+        This method is for providing a custom function. To use the included functions,
         use :meth:`set_method`.
         Custom functions provided must have the signature::
 
             seg_type = custom_method(self, seg_props, params, check_complete)
-        
+
         This function should return the string of the assigned segment type if found, or a
         None object if the type cannot be found.
         It can also take a dictionary in the "params" argument that specifies
@@ -90,7 +90,6 @@ class TypeFinder(object):
         cls.find = types.MethodType(method, cls)
         cls.params = params
 
-
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
     def method_hybformat(seg_props, params={}, check_complete=False):
@@ -98,11 +97,11 @@ class TypeFinder(object):
 
         This method works with sequence / alignment mapping identifiers
         in the format of the reference database provided by the Hyb Software Package,
-        specifically identifiers of the format:: 
+        specifically identifiers of the format::
 
             <gene_id>_<transcript_id>_<gene_name>_<seg_type>
 
-        This method returns the last component of the identifier, 
+        This method returns the last component of the identifier,
         split by "_", as the identfied sequence type.
 
         Example:
@@ -119,12 +118,11 @@ class TypeFinder(object):
         split_id = seg_props['ref_name'].split('_')
         return split_id[-1]
 
-
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
     def method_string_match(seg_props, params={}, check_complete=False):
         """Return the type of the provided segment, or None if unidentified.
-        
+
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "startswith", "contains", "endswith", and
         "matches". The required params dict should contain a key for each desired
@@ -148,7 +146,7 @@ class TypeFinder(object):
             params (dict, optional): Dict with search paramaters as described above.
             check_complete (bool, optional): If true, the method will continue checking search
                 options after an option has been found, to ensure that no options conflict
-                (more sure method). If False, it will stop after the first match is found 
+                (more sure method). If False, it will stop after the first match is found
                 (faster method). (Default: False)
         """
         seg_name = seg_props['ref_name']
@@ -207,7 +205,7 @@ class TypeFinder(object):
 
         Search_type options include "startswith", "contains", "endswith", and "matches"
         The produced dict object contains a key for each search type, with a list of
-        2-tuples for each search-string and associated segment-type. 
+        2-tuples for each search-string and associated segment-type.
 
         For example::
 
@@ -223,7 +221,7 @@ class TypeFinder(object):
             message += 'not found.'
             print(message)
             raise RuntimeError(message)
-           
+
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
                 # Skip Blank Lines
@@ -262,7 +260,7 @@ class TypeFinder(object):
         """Return the type of the provided segment or None if it cannot be identified.
 
         This method checks to see if the identifer of the segment is present in the params dict.
-        params should be formatted as a dict with keys as 
+        params should be formatted as a dict with keys as
         sequence identifier names, and the corresponding type as the respective values.
 
         Example:
@@ -276,7 +274,7 @@ class TypeFinder(object):
         Args:
             params (dict): Dict of mapping of sequence identifiers to sequence types.
             check_complete (bool, optional): Unused in this method.
-     
+
         Returns:
            str: Identified sequence type, or None if it cannot be found.
 
@@ -285,7 +283,7 @@ class TypeFinder(object):
         if seg_name in params:
             return params[seg_name]
         else:
-            return None        
+            return None
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
@@ -293,19 +291,19 @@ class TypeFinder(object):
         """
         Read file(s) into a mapping of sequence identifiers.
 
-        This method reads one or more files into a dict for use with the 
+        This method reads one or more files into a dict for use with the
         :meth:`method_id_map` method.
         The method requires passing either a list/tuple of one or more files to mapped_id_files,
-        or a list/tuple of one or more pairs of file lists and file types 
+        or a list/tuple of one or more pairs of file lists and file types
         passed to type_file_pairs.
-        Files listed in the mapped_id_files argument should have the format:: 
+        Files listed in the mapped_id_files argument should have the format::
 
             #commentline
             #seg_id,seg_type
             seg1_unique_id,seg1_type
             seg2_unique_id,seg2_type
 
-        Entries in the list/tuple passed to type_file_pairs should have the format: 
+        Entries in the list/tuple passed to type_file_pairs should have the format:
         (seg1_type, file1_name)
 
         Example:
@@ -321,7 +319,7 @@ class TypeFinder(object):
                 to files containing id/type mapping information.
             type_file_pairs (list or tuple, optional) Iterable object containing 2-tuple pairs
                 containing id/type mapping information.
-     
+
         """
 
         return_dict = {}
@@ -331,8 +329,8 @@ class TypeFinder(object):
             print(message)
             raise RuntimeError(message)
         for arg in [mapped_id_files, type_file_pairs]:
-            if ((arg is not None) 
-                and not any((isinstance(arg, allowed_type) 
+            if ((arg is not None)
+                and not any((isinstance(arg, allowed_type)
                              for allowed_type in (list, tuple)))):
                 message = 'arguments passed to mapped_id_files and type_file_pairs must be '
                 message += 'provided as a list or tuple.\n  Current passed aruement: '
@@ -360,7 +358,7 @@ class TypeFinder(object):
                             raise RuntimeError(message)
                         seq_id = split_line[0]
                         seg_type = split_line[1]
-        
+
                         if seq_id in return_dict and seg_type != return_dict[seq_id]:
                             message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
                             message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
@@ -368,8 +366,8 @@ class TypeFinder(object):
                             raise RuntimeError(message)
                         else:
                             return_dict[seq_id] = seg_type
-    
-        if type_file_pairs is not None: 
+
+        if type_file_pairs is not None:
             for seg_type, id_file in type_file_pairs:
                 with open(id_file, 'r') as id_file_obj:
                     for line in id_file_obj:
@@ -380,7 +378,7 @@ class TypeFinder(object):
                         if line.lstrip().startswith('#'):
                             continue
                         seq_id = line.strip().split()[0]
-        
+
                         if seq_id in return_dict and seg_type != return_dict[seq_id]:
                             message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
                             message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
@@ -388,24 +386,26 @@ class TypeFinder(object):
                             raise RuntimeError(message)
                         else:
                             return_dict[seq_id] = seg_type
-    
+
         return return_dict
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     #:   Dict of provided methods available to assign segment types
-    #:   
+    #:
     #:     ============== ==================================
     #:     'hybformat'    :meth:`method_hybformat`
     #:     'string_match' :meth:`method_string_match`
     #:     'id_map'       :meth:`method_id_map`
     #:     ============== ==================================
-    methods = {'hybformat': method_hybformat,
-               'string_match': method_string_match,
-               'id_map': method_id_map}
+    methods = {
+        'hybformat': method_hybformat,
+        'string_match': method_string_match,
+        'id_map': method_id_map
+    }
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     #: Dict of param generation methods for type finding methods
-    #:   
+    #:
     #:     ============== ===================================================
     #:     'hybformat'    :obj:`None`
     #:     'string_match' :meth:`make_string_match_params`
@@ -415,11 +415,11 @@ class TypeFinder(object):
         'hybformat': None,
         'string_match': make_string_match_params.__func__,
         'id_map': make_id_map_params.__func__,
-        }
+    }
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     #: Dict of whether parameter generation methods need an input file
-    #:   
+    #:
     #:     ============== ===================================================
     #:     'hybformat'    :obj:`False`
     #:     'string_match' :obj:`True`
@@ -429,4 +429,4 @@ class TypeFinder(object):
         'hybformat': False,
         'string_match': True,
         'id_map': True,
-        }
+    }
