@@ -280,6 +280,12 @@ def test_foldrecord():
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '', ''], 'bad_mode')
         with pytest.raises(RuntimeError):
             fold_record = hybkit.FoldRecord.from_vienna_lines(['', '',])
+        with pytest.raises(RuntimeError):
+            fold_record = hybkit.FoldRecord.from_vienna_lines(['abc', '123', 'singleval'])
+        with pytest.raises(RuntimeError):
+            fold_record = hybkit.FoldRecord.from_vienna_lines(['abc', '123', '(99'])
+        fold_record = hybkit.FoldRecord.from_vienna_lines(['abc', '123', '(99'], 
+                                                          error_mode='warn_return')
         fold_record = TestClass.from_vienna_string(vie_str_1)
         print(str(fold_record))
         assert fold_record == fold_record
@@ -297,9 +303,12 @@ def test_foldrecord():
 def test_viennafile():           
     fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1)
     with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
+        vienna_file.write_direct('testval')
+    with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
         with pytest.raises(RuntimeError):
             vienna_file.write_record('NotRecord')
         vienna_file.write_record(fold_record)               
+        vienna_file.write_records([fold_record, fold_record])               
     assert hybkit.util.vienna_exists(vienna_file_name)
     assert hybkit.util.fold_exists(vienna_file_name)
     with hybkit.FoldFile.open(vienna_file_name, 'r') as fold_file:
@@ -322,12 +331,12 @@ def test_hybfolditer():
         os.mkdir(test_out_dir)
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
     with hybkit.HybFile.open(hyb_file_name, 'w') as hyb_file:
-        hyb_file.write_record(hyb_record)
+        hyb_file.write_records([hyb_record] * 30)
     fold_record = hybkit.FoldRecord.from_vienna_string(vie_str_1)
     dyn_fold_record = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1)
     dyn_fold_record_mis = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1_mis)
     with hybkit.ViennaFile.open(vienna_file_name, 'w') as vienna_file:
-        vienna_file.write_record(fold_record)               
+        vienna_file.write_records([fold_record] * 30)               
 
     #Compare FoldRecord and HybRecord
     assert not fold_record.matches_hyb_record(hyb_record) 
@@ -346,14 +355,29 @@ def test_hybfolditer():
     with pytest.raises(RuntimeError):
         dyn_fold_record_mis.ensure_matches_hyb_record(hyb_record) 
 
-    hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
     hybkit.settings.FoldFile_settings['foldrecord_type'] = 'strict'
+    hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
     with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
          hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
             hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
             with pytest.raises(RuntimeError):
                 for ret_item in hf_iter:
                     print(ret_item)
+
+    hybkit.settings.HybFoldIter_settings['error_mode'] = 'warn_skip'
+    with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
+         hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
+            hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
+            with pytest.raises(RuntimeError):
+                for ret_item in hf_iter:
+                    print(ret_item)
+
+    hybkit.settings.HybFoldIter_settings['error_mode'] = 'warn_return'
+    with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
+         hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
+            hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
+            for ret_item in hf_iter:
+                print(ret_item)
 
     hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
     for combine in [True, False]:
@@ -401,8 +425,24 @@ def test_analyses():
             analysis.plot_individual(analysis_basename)
         last_analysis = analysis
 
-    analysis = hybkit.analysis.TypeAnalysis()
-       
+    hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
+    hyb_record.eval_types()
+    type_analysis = hybkit.analysis.TypeAnalysis()
+    mirna_analysis = hybkit.analysis.MirnaAnalysis()
+    target_analysis = hybkit.analysis.TargetAnalysis()
+    type_analysis.add(hyb_record)
+    hyb_record.set_flag('miRNA_seg', '3p')    
+    type_analysis.add(hyb_record)
+    mirna_analysis.add(hyb_record)
+    hyb_record.set_flag('miRNA_seg', 'B')    
+    type_analysis.add(hyb_record)
+    mirna_analysis.add(hyb_record)
+    init_val = target_analysis.settings['allow_mirna_dimers']  
+    target_analysis.settings['allow_mirna_dimers'] = True 
+    target_analysis.add(hyb_record)
+    target_analysis.settings['allow_mirna_dimers'] = init_val 
+    hyb_record.set_flag('miRNA_seg', 'N')    
+    mirna_analysis.add(hyb_record)
  
 def test_fold_analysis():
     hyb_record = hybkit.HybRecord.from_line(hyb_str_1)
@@ -421,6 +461,12 @@ def test_fold_analysis():
     analysis.write(analysis_basename)
     analysis.plot(analysis_basename)
 
+    hyb_record.fold_record.fold = ')))' + hyb_record.fold_record.fold[3:]
+    hyb_record.set_flag('miRNA_seg', 'B')
+    init_val = analysis.settings['allow_mirna_dimers'] 
+    analysis.settings['allow_mirna_dimers'] = True 
+    analysis.add(hyb_record)
+    analysis.settings['allow_mirna_dimers'] = init_val 
 
 def test_util():
     original_abspath = hybkit.settings._USE_ABSPATH

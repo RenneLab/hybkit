@@ -268,7 +268,7 @@ class BaseAnalysis(object):
             if (('(' in mirna_fold and ')' in mirna_fold)               
                 or ('(' not in mirna_fold and ')' not in mirna_fold)
                 or len(mirna_fold) < 5):
-                message = 'WARNING: addto_mirna_fold: Record: %s, ' % str(record)
+                message = 'WARNING: addto_mirna_fold: Record: %s, ' % str(hyb_record)
                 message += 'Bad Fold: %s' % mirna_fold
                 print(message)
                 return 
@@ -987,25 +987,6 @@ class FoldAnalysis(BaseAnalysis):
         self._ensure_same_class(add_analysis)
         self._update_fold_analysis(add_analysis)
 
-    # FoldAnalysis : Public Methods
-    def process_fold_analysis(self):
-        """
-        Summarize results of the fold analysis.
-   
-        This fills the analysis variables:
-        
-            | :obj:`mirna_folds` : Dict with keys of miRNA names and values of 
-              :class:`~collections.Counter` 
-              objects, with each counter objects containing the count of fold names 
-              for that miRNA.
-            | :obj:`mirna_fold_total_counts` : :class:`~collections.Counter` 
-              with keys of miRNA names and values of miRNA total counts.
-            | :obj:`mirna_fold_type_counts` : Dict with keys of miRNA names and values of 
-              :class:`~collections.Counter` objects, with each counter object containin the count of 
-              segment types folded by that miRNA.
-        """
-        self._process_fold_analysis_info()
-    
     # FoldAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
         """
