@@ -494,6 +494,28 @@ def test_util():
     hybkit.util.set_settings(use_namespace, verbose=True)
     hybkit.settings._USE_ABSPATH = original_abspath
 
+    parser_components = [
+        hybkit.util.in_hybs_parser, 
+        hybkit.util.out_hybs_parser,
+       ]
+    script_parser = argparse.ArgumentParser(parents=parser_components)
+    args = script_parser.parse_args(
+        ['-i', hyb_file_name, hyb_file_name, '-o', hyb_file_name]
+    )
+    with pytest.raises(SystemExit):
+        hybkit.util.validate_args(args, script_parser)
+    parser_components = [
+        hybkit.util.in_hybs_parser, 
+        hybkit.util.in_folds_parser, 
+       ]
+    script_parser = argparse.ArgumentParser(parents=parser_components)
+    args = script_parser.parse_args(
+        ['-i', hyb_file_name, hyb_file_name, '-f', vienna_file_name]
+    )
+    with pytest.raises(SystemExit):
+        hybkit.util.validate_args(args, script_parser)
+
+
 def test_type_finder():
     # Generic Tests
     def do_nothing(*args, **kwargs):
