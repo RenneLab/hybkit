@@ -2003,7 +2003,7 @@ class DynamicFoldRecord(FoldRecord):
         seg1_end = hyb_record.seg1_props['read_end']
         seg1_len = seg1_end - seg1_start + 1
         seg2_start = hyb_record.seg2_props['read_start']
-        seg2_end = hyb_record.seg2_props['read_start']
+        seg2_end = hyb_record.seg2_props['read_end']
         seg1_fold = self.fold[0:seg1_len]
         seg2_fold = self.fold[seg1_len:]
         # print(seg1_fold, seg2_fold)
