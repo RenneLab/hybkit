@@ -3,9 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-'''
-Package details for the hybkit project.
-'''
+"""Package details for the hybkit project."""
 
 import os
 import sys

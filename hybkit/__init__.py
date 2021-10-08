@@ -4,6 +4,8 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
+Module storing primary hybkit classes and hybkit API.
+
 This module contains classes and methods for reading, writing, and manipulating data
 in the ".hyb" genomic sequence format ([Travis2014]_).
 
@@ -76,12 +78,12 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
 
 
 class HybRecord(object):
-    """
+    r"""
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
 
     Hyb file (".hyb") format entries are a GFF-related file format described by [Travis2014]_.
     that contain information about a genomic sequence read identified to be a chimera by
-    anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\\\t") and provides
+    anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\t") and provides
     annotations on each components. An example .hyb format line
     from [Gay2018]_::
 
@@ -285,7 +287,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : flags
     def set_flag(self, flag_key, flag_val, allow_undefined_flags=None):
-        """Set the value of record ``flag_key`` to ``flag_val``.
+        """
+        Set the value of record ``flag_key`` to ``flag_val``.
 
         Args:
             flag_key (str): Key for flag to set.
@@ -296,7 +299,6 @@ class HybRecord(object):
                 If None (default), uses setting in
                 :attr:`settings['allow_undefined_flags'] <HybRecord.settings>`.
         """
-
         if allow_undefined_flags is None:
             allow_undefined_flags = self.settings['allow_undefined_flags']
 
@@ -304,8 +306,7 @@ class HybRecord(object):
             self._flagset = set(self.ALL_FLAGS + list(self.settings.custom_flags))
 
         if (not allow_undefined_flags
-            and flag_key not in self._flagset
-            ):
+                and flag_key not in self._flagset):
             message = 'Flag "%s" is not defined. Please check flag key' % flag_key
             message += ' or run with: "allow_undefined_flags=True"'
             print(message)
@@ -315,7 +316,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg1_type(self, require=False):
-        """Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
+        """
+        Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
 
         Args:
             require (bool, optional): If ``True``, raise an error if seg1_type is not defined.
@@ -327,7 +329,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg2_type(self, require=False):
-        """Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
+        """
+        Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
 
         Args:
             require (bool, optional): If ``True``, raise an error if seg2_type is not defined.
@@ -339,7 +342,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg_types(self, require=False):
-        """Return :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags, or None.
+        """
+        Return :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags, or None.
 
         Args:
             require (bool, optional): If ``True``, raise an error if either flag is not defined.
@@ -351,13 +355,13 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : get_read_count
     def get_read_count(self, require=False):
-        """Return the :ref:`read_count <read_count>` flag if defined, otherwise return None.
+        """
+        Return the :ref:`read_count <read_count>` flag if defined, otherwise return None.
 
         Args:
             require (bool, optional): If ``True``, raise an error if the "read_count" flag
                 is not defined.
         """
-
         if require:
             ret_val = self._get_flag('read_count')
         else:
@@ -369,7 +373,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : record_count
     def get_record_count(self, require=False):
-        """Return :ref:`count_total <count_total>` flag if defined, or return 1 (this record).
+        """
+        Return :ref:`count_total <count_total>` flag if defined, or return 1 (this record).
 
         Args:
             require (bool, optional): If ``True``, raise an error if the "count_total" flag
@@ -386,14 +391,16 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info
     def get_count(self, count_mode, require=False):
-        """Return either of :func:`get_read_count` or :func:`get_record_count`.
+        """
+        Return either of :func:`get_read_count` or :func:`get_record_count`.
 
         Args:
             count_mode (str) : | Mode for returned count, one of : {'read', 'record'}
                                | ``read``   : Require the 'read_count' flag to be defined.
                                | ``record`` : Return '1' if the 'count_total' flag is not defined.
+            require (bool, optional): If ``True``, raise an error if the "count_total" flag
+                is not defined.
         """
-
         if count_mode in {'read'}:
             ret_val = self.get_read_count(require=require)
         elif count_mode in {'record'}:
@@ -407,7 +414,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Flag_Info : eval_type
     def eval_types(self, allow_unknown=None, check_complete=None):
-        """Find the types of each segment using the the :class:`TypeFinder` class.
+        """
+        Find the types of each segment using the the :class:`TypeFinder` class.
 
         This method provides :attr:`seg1_props` and :attr:`seg2_props`
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
@@ -430,7 +438,6 @@ class HybRecord(object):
                 If None (default), uses setting in
                 :attr:`settings['check_complete_seg_types'] <HybRecord.settings>`.
         """
-
         # If types already set, skip.
         if self.is_set('eval_types'):
             return
@@ -485,7 +492,8 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : eval_mirna
     def eval_mirna(self, mirna_types=None):
-        """Analyze and set mstore miRNA properties from other properties in the hyb record.
+        """
+        Analyze and set mstore miRNA properties from other properties in the hyb record.
 
         If not already done, determine whether a miRNA exists within this record and
         set the :ref:`miRNA_seg <mirna_seg>` flag.
@@ -500,7 +508,6 @@ class HybRecord(object):
                 considered as miRNA. Otherwise, the default types are used
                 from :attr:`settings['mirna_types'] <HybRecord.settings>`.
         """
-
         if mirna_types is None:
             mirna_types = self.settings['mirna_types']
 
@@ -531,7 +538,8 @@ class HybRecord(object):
                 self.target_props = self.seg1_props
 
     def mirna_detail(self, detail='all', allow_mirna_dimers=False):
-        """Provide a detail about the miRNA or target following :func:`eval_mirna`.
+        """
+        Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
         Analyze miRNA properties within the sequence record and provide a detail as ouptut.
         Unless ``allow_mirna_dimers`` is ``True``,
@@ -556,13 +564,11 @@ class HybRecord(object):
                 and the 3p-position will be assigned as the "target".
 
         """
-
         self._ensure_set('eval_mirna')
         mirna_flag = self._get_flag('miRNA_seg')
 
         if ((not self.has_prop('has_mirna'))
-            or (not allow_mirna_dimers and not self.has_prop('mirna_not_dimer'))
-            ):
+                or (not allow_mirna_dimers and not self.has_prop('mirna_not_dimer'))):
             message = 'mirna_detail method requires a hybrid containing a single mirna.\n'
             message += 'hybrecord: %s does not meet this criteria ' % str(self)
             message += 'with miRNA_seg flag: %s' % mirna_flag
@@ -618,12 +624,12 @@ class HybRecord(object):
     def is_set(self, prop):
         """
         Return ``True`` if HybRecord property "prop" is set (if relevant) and is not ``None``.
+
         Options described in :attr:`SET_PROPS`.
 
         Args:
             prop (str): Property / Analysis to check
         """
-
         if prop not in self._SET_PROPS_SET:
             message = 'Requested Property: %s is not defined. ' % prop
             message += 'Available proprties are:\n' + ', '.join(self.SET_PROPS)
@@ -671,7 +677,6 @@ class HybRecord(object):
             prop_compare (str, optional): Comparator to check.
 
         """
-
         if prop not in self._HAS_PROPS_SET:
             message = 'Requested Property: %s is not defined. ' % prop
             message += 'Available proprties are:\n' + ', '.join(self.HAS_PROPS)
@@ -801,12 +806,12 @@ class HybRecord(object):
 
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=False, sep='\t'):
-        """
+        r"""
         Return a hyb format string representation of the record.
 
         Args:
             newline (bool, optional): If ``True``, end the returned string with a newline
-            sep (str, optional): Separator between fields (Default: "\\\\t")
+            sep (str, optional): Separator between fields (Default: "\\t")
 
         """
         line_items = []
@@ -955,7 +960,7 @@ class HybRecord(object):
 
     # HybRecord : Public MagicMethods : Evaluation
     def __hash__(self):
-        """Return a hash of the record ".id" attribute"""
+        """Return a hash of the record ".id" attribute."""
         return hash(self.id)
 
     # HybRecord : Public MagicMethods : Evaluation
@@ -965,7 +970,7 @@ class HybRecord(object):
 
     # HybRecord : Public MagicMethods : Evaluation
     def __len__(self):
-        """Return the length of the genomic sequence"""
+        """Return the length of the genomic sequence."""
         return len(self.seq)
 
     # HybRecord : Public MagicMethods : Printing
@@ -996,7 +1001,6 @@ class HybRecord(object):
         Returns:
             :class:`HybRecord` instance containing record information.
         """
-
         line_items = line.strip().split('\t')
         # print(line_items)
         hyb_id = line_items[0]
@@ -1405,9 +1409,7 @@ class HybRecord(object):
 
 
 class HybFile(object):
-    """
-    File-Object wrapper that provides abiltity to return file lines as HybRecord entries.
-    """
+    """File-Object wrapper that provides abiltity to return file lines as HybRecord entries."""
 
     #: Class-level settings. See :obj:`settings.HybFile_settings` for descriptions.
     settings = hybkit.settings.HybFile_settings
@@ -1424,7 +1426,7 @@ class HybFile(object):
 
     # HybFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        """Close "with" syntax"""
+        """Close "with" syntax."""
         self.close()
 
     # HybFile : Public Methods : Initialization / Closing
@@ -1607,7 +1609,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybRecord Comparison
     def count_hyb_record_mismatches(self, hyb_record):
         """
-        Count mismatches between ``hyb_record.seq`` and ``fold_record.seq``
+        Count mismatches between ``hyb_record.seq`` and ``fold_record.seq``.
 
         Args:
             hyb_record (HybRecord): hyb_record for comparison.
@@ -1624,7 +1626,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybFile Comparison
     def matches_hyb_record(self, hyb_record):
         """
-        Return ``True`` if self.seq == hyb_record.seq
+        Return ``True`` if self.seq == hyb_record.seq.
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
@@ -1634,7 +1636,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybFile Comparison
     def ensure_matches_hyb_record(self, hyb_record):
         """
-        Ensure self.seq == hyb_record.seq
+        Ensure self.seq == hyb_record.seq.
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
@@ -1653,7 +1655,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __hash__(self):
-        """Return a hash of the record ".id" attribute"""
+        """Return a hash of the record ".id" attribute."""
         return hash(self.id)
 
     # FoldRecord : Public MagicMethods : Evaluation
@@ -1663,7 +1665,7 @@ class FoldRecord(object):
 
     # FoldRecord : Public MagicMethods : Evaluation
     def __len__(self):
-        """Return the length of the genomic sequence"""
+        """Return the length of the genomic sequence."""
         return len(self.seq)
 
     # FoldRecord : Public MagicMethods : Printing
@@ -1691,7 +1693,6 @@ class FoldRecord(object):
                                         | ``return`` : Return the error value
                                           with no program output.
         """
-
         error_mode_options = {'raise', 'warn_return', 'return'}
         if error_mode not in error_mode_options:
             message = 'Provided error mode: %s is not in allowed options\n' % error_mode
@@ -1760,8 +1761,7 @@ class FoldRecord(object):
     @classmethod
     def from_ct_lines(cls, record_lines, error_mode='raise'):
         """
-        Create a FoldRecord entry from a list of an arbitrary number of strings
-        corresponding to lines in the ".ct" file format ([CTFormat]_).
+        Create a FoldRecord from a list of record lines in ".ct" format ([CTFormat]_).
 
         Args:
             record_lines (list or tuple): list containing lines of ct record
@@ -1826,8 +1826,7 @@ class FoldRecord(object):
     @classmethod
     def from_ct_string(cls, record_string, error_mode='raise'):
         """
-        Create a FoldRecord entry from a multi-line string containing information in the
-        ".ct" file format ([CTFormat]_).
+        Create a FoldRecord entry from a multi-line string from ".ct" format ([CTFormat]_).
 
         Args:
             record_string (str): String containing lines of ct record
@@ -1864,7 +1863,7 @@ class FoldRecord(object):
 
 
 class DynamicFoldRecord(FoldRecord):
-    """
+    r"""
     Class for storing secondary structure (folding) information for a nucleotide sequence.
 
     Instead of expecting the nucleotide sequence to match a potential :attr:`HybRecord.seq`
@@ -1897,7 +1896,7 @@ class DynamicFoldRecord(FoldRecord):
         seg2:                 222222222222222222
         seq:  AGCTTATCAGACTGATTAGCTTATCAGACTGATG
 
-    This type of sequence is found in the Hyb program \\*_hybrids_ua.hyb file type.
+    This type of sequence is found in the Hyb program \*_hybrids_ua.hyb file type.
     This is primarily relevant in error-checking when setting a :obj:`HybRecord.fold_record`
     attribute.
 
@@ -1923,7 +1922,7 @@ class DynamicFoldRecord(FoldRecord):
     # DynamicFoldRecord : Public Methods : HybRecord Comparison
     def count_hyb_record_mismatches(self, hyb_record):
         """
-        Count mismatches between dynamic hyb_record.seq and fold_record.seq
+        Count mismatches between dynamic hyb_record.seq and fold_record.seq.
 
         Args:
             hyb_record (HybRecord): hyb_record for comparison
@@ -1940,7 +1939,8 @@ class DynamicFoldRecord(FoldRecord):
 
     # DynamicFoldRecord : Public Methods : HybFile Comparison
     def matches_hyb_record(self, hyb_record):
-        """Calculate dynamic sequence from hyb record and compare to sequence in DynamicFoldRecord
+        """
+        Calculate dynamic sequence from hyb record and compare to DynamicFoldRecord seq.
 
         Args:
             hyb_record (HybRecord): hyb_record for comparison
@@ -1961,7 +1961,7 @@ class DynamicFoldRecord(FoldRecord):
     # DynamicFoldRecord : Public Methods : HybFile Comparison
     def ensure_matches_hyb_record(self, hyb_record):
         """
-        Ensure the dynamic fold record sequence matches hyb_record.seq
+        Ensure the dynamic fold record sequence matches hyb_record.seq.
 
         Args:
             hyb_record (HybRecord): hyb_record for comparison
@@ -2034,7 +2034,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Initialization / Closing
     def __init__(self, *args, **kwargs):
-        """Wrapper for open() function that stores resulting file."""
+        """Wrap for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
         self._post_init_tasks()
 
@@ -2045,7 +2045,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Initialization / Closing
     def __exit__(self, type, value, traceback):
-        """Close "with" syntax"""
+        """Close "with" syntax."""
         self.close()
 
     # FoldFile : Public Methods : Initialization / Closing
@@ -2103,9 +2103,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Writing
     def write_direct(self, write_string):
-        """
-        Write a string directly to the underlying file handle.
-        """
+        """Write a string directly to the underlying file handle."""
         self.fh.write(write_string)
 
     # FoldFile : Public Classmethods : Initialization
@@ -2116,7 +2114,7 @@ class FoldFile(object):
 
     # FoldFile : Private Methods
     def _post_init_tasks(self):
-        """Stub for convenient subclassing"""
+        """Stub for convenient subclassing."""
         pass
 
     # FoldFile : Private Methods
@@ -2135,9 +2133,7 @@ class FoldFile(object):
 
 
 class ViennaFile(FoldFile):
-    """
-    Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects.
-    """
+    """Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects."""
 
     # ViennaFile : Public Methods : Reading
     def read_record(self, error_mode=None):
@@ -2168,9 +2164,7 @@ class ViennaFile(FoldFile):
 
 
 class CtFile(FoldFile):
-    """
-    Ct file wrapper that returns ".ct" file lines as FoldRecord objects.
-    """
+    """Ct file wrapper that returns ".ct" file lines as FoldRecord objects."""
 
     # CtFile : Public Methods
     def read_record(self, error_mode=None):
@@ -2249,7 +2243,7 @@ class HybFoldIter(object):
 
     # HybFoldIter : Public Methods
     def report(self):
-        """Create a report of information from iteration"""
+        """Create a report of information from iteration."""
         ret_lines = ['HybFoldIter Iteration Report:']
         add_line = 'Combined Iteration Attempts: '
         add_line += str(self.counters['total_read_attempts'])
@@ -2268,7 +2262,7 @@ class HybFoldIter(object):
 
     # HybFoldIter : Public Methods
     def print_report(self):
-        """Create a report of information from iteration"""
+        """Create a report of information from iteration."""
         ret_lines = self.report()
         print('\n'.join(ret_lines) + '\n')
 
@@ -2279,7 +2273,7 @@ class HybFoldIter(object):
 
     # HybFoldIter : Public Methods
     def __next__(self):
-        """Read and return (class:`HybRecord`, :class:`FoldRecord`)"""
+        """Read and return (class:`HybRecord`, :class:`FoldRecord`)."""
         self.counters['total_read_attempts'] += 1
         try:
             self.counters['hyb_record_read_attempts'] += 1

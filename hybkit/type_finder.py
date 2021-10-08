@@ -4,6 +4,8 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
+type_finder.py module.
+
 This module contains the TypeFinder class to work with :class:`HybRecord` to
 parse sequence identifiers to idenfity sequence type.
 """
@@ -17,8 +19,7 @@ import copy
 
 class TypeFinder(object):
     """
-    Class for storing and using parsing methods to assign a sequence "type" by parsing a
-    sequence identifier.
+    Class for parsing identifiers to identify sequence 'type'.
 
     Designed to be used by the :class:`hybkit.HybRecord`
 
@@ -39,6 +40,7 @@ class TypeFinder(object):
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):
+        """Class not used with initialization."""
         raise RuntimeError('WARN: TypeFinder class not intended to be initialized for use.')
 
     # TypeFinder : Public Classmethods : method
@@ -54,7 +56,6 @@ class TypeFinder(object):
                 for use as :meth:`find`.
             params (dict, optional): Dict object of parameters to use by set method.
         """
-
         if method not in cls.methods:
             message = 'Selected method: %s is not defined.\n' % method
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
@@ -86,14 +87,14 @@ class TypeFinder(object):
             method (method): Method to set for use.
             params (dict, optional): dict of custom parameters to set for use.
         """
-
         cls.find = types.MethodType(method, cls)
         cls.params = params
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
     def method_hybformat(seg_props, params={}, check_complete=False):
-        """Return the type of the provided segment, or None if segment cannot be identified.
+        """
+        Return the type of the provided segment, or None if segment cannot be identified.
 
         This method works with sequence / alignment mapping identifiers
         in the format of the reference database provided by the Hyb Software Package,
@@ -121,7 +122,8 @@ class TypeFinder(object):
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
     def method_string_match(seg_props, params={}, check_complete=False):
-        """Return the type of the provided segment, or None if unidentified.
+        """
+        Return the type of the provided segment, or None if unidentified.
 
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "startswith", "contains", "endswith", and
@@ -143,6 +145,8 @@ class TypeFinder(object):
             endswith,_trans,mRNA
 
         Args:
+            seg_props (dict): :class:`~hybkit.HybRecord` segment properties dict
+                to evaluate.
             params (dict, optional): Dict with search paramaters as described above.
             check_complete (bool, optional): If true, the method will continue checking search
                 options after an option has been found, to ensure that no options conflict
@@ -194,7 +198,8 @@ class TypeFinder(object):
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
     def make_string_match_params(legend_file):
-        """Read csv and return a dict of search parameters for :meth:`method_string_match`.
+        """
+        Read csv and return a dict of search parameters for :meth:`method_string_match`.
 
         The my_legend.csv file should have the format::
 
@@ -213,7 +218,6 @@ class TypeFinder(object):
                           ('_trans', 'mRNA')   ]}
 
         """
-
         ALLOWED_SEARCH_TYPES = {'startswith', 'contains', 'endswith', 'matches'}
         return_dict = {}
         if not os.path.isfile(legend_file):
@@ -257,7 +261,8 @@ class TypeFinder(object):
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     @staticmethod
     def method_id_map(seg_props, params={}, check_complete=False):
-        """Return the type of the provided segment or None if it cannot be identified.
+        """
+        Return the type of the provided segment or None if it cannot be identified.
 
         This method checks to see if the identifer of the segment is present in the params dict.
         params should be formatted as a dict with keys as
@@ -315,13 +320,13 @@ class TypeFinder(object):
         added to the mapping dictionary mapped to the provided seg_type.
 
         Args:
-            mapped_id_files (list or tuple, optional) Iterable object containing strings of paths
+            mapped_id_files (list or tuple, optional): Iterable object containing strings of paths
                 to files containing id/type mapping information.
-            type_file_pairs (list or tuple, optional) Iterable object containing 2-tuple pairs
+            type_file_pairs (list or tuple, optional): Iterable object containing 2-tuple pairs
                 containing id/type mapping information.
 
-        """
 
+        """
         return_dict = {}
         if all((arg is None for arg in (mapped_id_files, type_file_pairs))):
             message = 'make_seg_type_id_map function requires either a mapped_id_files '

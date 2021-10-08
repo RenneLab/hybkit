@@ -94,7 +94,6 @@ def type_count(type_counter,
         plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function
     """
-
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -148,8 +147,7 @@ def mirna(analysis,
             to the matplotlib.rcParams.update() method.
         plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function.
-        """
-
+    """
     # Sort hybrid_type_counts counter object in descending order
     labels = []
     counts = []
@@ -211,7 +209,6 @@ def target(mirna_counts, plot_file_name,
         plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function.
     """
-
     labels = []
     counts = []
     for ((target, target_seg_type), count) in mirna_counts.most_common():
@@ -279,7 +276,6 @@ def target_type(target_type_count, plot_file_name,
         plot_settings (dict, optional): Dict of keys and values of settings to pass
             to the matplotlib.plot() function.
     """
-
     labels = []
     counts = []
     for key, count in target_type_count.most_common():
@@ -322,7 +318,7 @@ def fold(analysis,
         name (str, optional): name to prepend to title.
         title (str, optional): Title / header for plot (replaces default title).
         data_format (str, optional): matplotlib line/data format.
-        min_fractione_size (float, optional): Minimum fraction to include at tail
+        min_fraction_size (float, optional): Minimum fraction to include at tail
             end of plot. Setting to 0 includes all bases evaluated.
         plot_file_type (str, optional): File type for saving of plots. Options:
             {'png', 'ps', 'pdf', 'svg'}

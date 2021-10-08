@@ -3,10 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-"""
-Functions for analysis of HybRecord and FoldRecord objects.
-
-"""
+"""Functions for analysis of HybRecord and FoldRecord objects."""
 
 import copy
 from collections import Counter
@@ -264,9 +261,8 @@ class BaseAnalysis(object):
                 mirna_fold = hyb_record.mirna_detail('mirna_fold')
 
             if (('(' in mirna_fold and ')' in mirna_fold)
-                or ('(' not in mirna_fold and ')' not in mirna_fold)
-                or len(mirna_fold) < 5
-                ):
+                    or ('(' not in mirna_fold and ')' not in mirna_fold)
+                    or len(mirna_fold) < 5):
                 message = 'WARNING: addto_mirna_fold: Record: %s, ' % str(hyb_record)
                 message += 'Bad Fold: %s' % mirna_fold
                 print(message)
@@ -381,11 +377,11 @@ class TypeAnalysis(BaseAnalysis):
 
     # TypeAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
-        """
+        r"""
         Return the results of a type analysis in a list of delimited lines.
 
         Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
                 If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
 
@@ -432,7 +428,7 @@ class TypeAnalysis(BaseAnalysis):
     # TypeAnalysis : Public Methods
     def plot(self, file_name_base):
         """
-        Create plots of the results using :func:`hybkit.plot.type_count`
+        Create plots of the results using :func:`hybkit.plot.type_count`.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
@@ -510,11 +506,11 @@ class MirnaAnalysis(BaseAnalysis):
 
     # MirnaAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
-        """
+        r"""
         Return the results of a miRNA analysis in a list of delimited lines.
 
         Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
                 If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
 
@@ -554,13 +550,12 @@ class MirnaAnalysis(BaseAnalysis):
     # MirnaAnalysis : Public Methods
     def plot(self, file_name_base):
         """
-        Create plots of the results using :func:`hybkit.plot.mirna`
+        Create plots of the results using :func:`hybkit.plot.mirna`.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
         """
-
         hybkit.plot.mirna(self, file_name_base + '_mirna_counts')
 
 
@@ -568,6 +563,8 @@ class MirnaAnalysis(BaseAnalysis):
 
 class SummaryAnalysis(BaseAnalysis):
     """
+    Analysis of segment types and miRNA counts in hyb records.
+
     This analysis includes the components of both the :class:`TypeAnalysis` and
     :class:`MirnaAnalysis` analyses, performed simultaneously.
 
@@ -624,11 +621,11 @@ class SummaryAnalysis(BaseAnalysis):
 
     # SummaryAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
-        """
+        r"""
         Return the results of a miRNA analysis in a list of delimited lines.
 
         Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
                 If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
 
@@ -679,13 +676,12 @@ class SummaryAnalysis(BaseAnalysis):
     # SummaryAnalysis : Public Methods
     def plot(self, file_name_base):
         """
-        Create plots of results via :func:`hybkit.plot.type_count` and :func:`hybkit.plot.mirna`
+        Create plots of results via :func:`hybkit.plot.type_count` and :func:`hybkit.plot.mirna`.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
         """
-
         hybkit.plot.type_count(self.hybrid_types, file_name_base + '_type_hybrids',
                                title='Hybrid Types', name=self.name)
         hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_segall',
@@ -701,6 +697,8 @@ class SummaryAnalysis(BaseAnalysis):
 
 class TargetAnalysis(BaseAnalysis):
     """
+    Class for analysis of targets in miRNA-containing hybrids.
+
     The mirna_target analysis provides an analysis of what sequences are targeted
     by each respective miRNA within the hyb records. The analysis dict has keys
     of each miRNA, with each value being a dict of targeted sequences and their
@@ -771,11 +769,11 @@ class TargetAnalysis(BaseAnalysis):
 
     # TargetAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
-        """
+        r"""
         Return the results of a miRNA analysis in a list of delimited lines.
 
         Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
                 If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
 
@@ -850,7 +848,7 @@ class TargetAnalysis(BaseAnalysis):
     # TargetAnalysis : Public Methnds
     def plot(self, file_name_base):
         """
-        Plot targets of all miRNAs in analysis
+        Plot targets of all miRNAs in analysis.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
@@ -877,7 +875,7 @@ class TargetAnalysis(BaseAnalysis):
     # TargetAnalysis : Public Methnds
     def plot_individual(self, file_name_base):
         """
-        Plot targets of each individual miRNA in analysis
+        Plot targets of each individual miRNA in analysis.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
@@ -907,6 +905,8 @@ class TargetAnalysis(BaseAnalysis):
 
 class FoldAnalysis(BaseAnalysis):
     """
+    Evaluate and quantify predicted miRNA binding patterns.
+
     This analysis evaluates the predicted binding of miRNA within hyb records
     that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object
     as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and
@@ -934,7 +934,6 @@ class FoldAnalysis(BaseAnalysis):
         mirna_fold_frac (dict): Dict with keys of miRNA index and values of percent of miRNAs
             folded at that index
     """
-
     # FoldAnalysis : Public Methods
     def __init__(self,
                  name=None,
@@ -946,6 +945,7 @@ class FoldAnalysis(BaseAnalysis):
     def add(self, hyb_record):
         """
         Add the information from a :class:`~hybkit.HybRecord` to a mirna_fold analysis.
+
         If the record contains a single miRNA, the miRNA fold is identified.
         miRNA Dimers are skipped unless the :attr:`settings['all_mirna_dimers'] <settings>`
         setting is True.
@@ -972,11 +972,11 @@ class FoldAnalysis(BaseAnalysis):
 
     # FoldAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
-        """
+        r"""
         Return the results of a miRNA analysis in a list of delimited lines.
 
         Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\\\t'.
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
                 If not provided, defaults to :attr:`settings['out_delim'] <settings>`
             newline (bool, optional): Terminate lines with a newline_character. Default False
 
@@ -1040,5 +1040,4 @@ class FoldAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
         """
-
         hybkit.plot.fold(self, file_name_base + '_fold_bases')

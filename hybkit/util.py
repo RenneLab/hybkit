@@ -264,8 +264,9 @@ def validate_args(args, parser=None):
 
     Args:
         args (argparse.Namespace): The arguments produced by argparse.
+        parser (argparse.ArgumentParser, optional): Argparse parser object to use for
+            verbose outputting of help message.
     """
-
     message = '\nArgument validation error: '
     if parser is not None:
         suffix = '\n\n' + parser.format_usage() + '\n'
@@ -772,8 +773,7 @@ def set_settings(nspace, verbose=False):
             if hasattr(nspace, setting_key):
                 argparse_setting = getattr(nspace, setting_key)
                 if (argparse_setting is not None
-                    and argparse_setting != cls_settings_info[setting_key][0]
-                    ):
+                        and argparse_setting != cls_settings_info[setting_key][0]):
                     out_report += 'Setting %s Setting: ' % class_name
                     out_report += '"%s" to "%s"\n' % (setting_key, str(argparse_setting))
                     cls_settings[setting_key] = argparse_setting
