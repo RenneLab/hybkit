@@ -9,6 +9,7 @@ Automatic testing of hybkit code.
 
 import os
 import sys
+import copy
 import argparse
 import pytest
 import hybkit
@@ -65,22 +66,38 @@ def test_hybrecord():
         hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
                                         seg1_props={'read_start': 'not_int'},
                                         read_count=4, flags={'read_count': 4})
+    with pytest.raises(RuntimeError):
+        hyb_record_2 = hybkit.HybRecord.from_line(hyb_str_1 + 'seg1_type=badtype', 
+                                                  hybformat_ref=True)
 
+    hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                    seg1_props=copy.deepcopy(hyb_record.seg1_props),
+                                    seg2_props=copy.deepcopy(hyb_record.seg2_props),
+                                    fold_record=fold_record,
+                                    )
     hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
                                     seg1_props={'ref_name': 'noname1'},
                                     seg2_props={'ref_name': 'noname2'},
+                                    read_count=4,
                                     )
     with pytest.raises(RuntimeError):
         hyb_record_2._ensure_set('energy')
     hyb_record_2.eval_types(allow_unknown=True)
+    hyb_record_2._flagset = None
+    hyb_record_2._make_flags_dict({})
+    hyb_record_2._flagset = None
+    hyb_record_2._get_ordered_flag_keys()
+    hyb_record_2._flagset = None
+
+    hyb_record_2 = hybkit.HybRecord.from_line(hyb_str_1)
     hyb_record_2.set_flag('seg1_type', 'microRNA')
     hyb_record_2.set_flag('seg2_type', 'microRNA')
     hyb_record_2.eval_mirna()
-    del(hyb_record_2.flags['seg1_type'], hyb_record_2.flags['seg2_type'])
+    del(hyb_record_2.flags['miRNA_seg'])
     hyb_record_2.set_flag('seg1_type', 'mRNA')
     hyb_record_2.set_flag('seg2_type', 'microRNA')
     hyb_record_2.eval_mirna()
-    del(hyb_record_2.flags['seg1_type'], hyb_record_2.flags['seg2_type'])
+    del(hyb_record_2.flags['miRNA_seg'])
     hyb_record_2.set_flag('seg1_type', 'mRNA')
     hyb_record_2.set_flag('seg2_type', 'mRNA')
     hyb_record_2.eval_mirna()

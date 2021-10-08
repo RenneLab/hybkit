@@ -598,11 +598,11 @@ class HybRecord(object):
             mirna_details['target_seg_type'] = self.get_seg1_type(require=True)
             mirna_props = self.seg2_props
             target_props = self.seg1_props
-        else:
-            message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
-            message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
-            print(message)
-            raise RuntimeError(message)
+        # else:
+        #     message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
+        #     message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
+        #     print(message)
+        #     raise RuntimeError(message)
 
         mirna_details['mirna_ref'] = mirna_props['ref_name']
         mirna_details['target_ref'] = target_props['ref_name']
@@ -1037,7 +1037,7 @@ class HybRecord(object):
                 if seg_type_key in flags and flags[seg_type_key] != seg_type:
                     message = 'Problem reading in hybformat ref for reference: %s\n' % ref
                     message += 'Inferred type: %s\n' % seg_type
-                    message += 'Does not equal current type flag: %s' % flags[seg_string]
+                    message += 'Does not equal current type flag: %s' % flags[seg_type_key]
                     print(message)
                     raise RuntimeError(message)
                 elif seg_type_key not in flags:
@@ -1215,7 +1215,7 @@ class HybRecord(object):
                 if key not in seg_props or seg_props[key] is None:
                     message = '"read_start" and "read_end" keys required to be found in the '
                     message += 'segN_prop dicts for creating a "dynamic_seq" object\n'
-                    message += 'Record: %s, dict: seg%i_props' % (str(self), seg_n)
+                    message += 'Record: %s, dict: seg%i_props ' % (str(self), seg_n)
                     message += 'is missing key: %s.' % key
                     print(message)
                     raise RuntimeError(message)
@@ -1278,7 +1278,7 @@ class HybRecord(object):
     # HybRecord : Private Methods : flags
     def _get_ordered_flag_keys(self):
         if self._flagset is None:
-            self._flagset = set(self.ALL_FLAGS + list(self.settings.custom_flags))
+            self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))
         return_list = []
         for flag in self.ALL_FLAGS + self.settings['custom_flags']:
             if flag in self.flags:
