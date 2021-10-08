@@ -34,7 +34,7 @@ DEFAULT_PIE_RC_PARAMS = {
     'axes.titleweight': 'bold',
     'axes.labelweight': 'bold',
 }
-DEFAULT_DPI = 600
+DEFAULT_DPI = 1200
 DEFAULT_FILE_TYPE = 'png'
 DEFAULT_PIE_OTHER_THRESHHOLD = 0.1
 DEFAULT_PIE_MIN_WEDGE_SIZE = 0.04
