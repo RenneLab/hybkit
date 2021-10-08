@@ -4,7 +4,7 @@ python:
   - "3.8"
   - "3.9"
   - "3.9-dev"  # 3.9 development branch
-  - "3.10"
+  # - "3.10"
   - "3.10-dev"  # 3.9 development branch
 # install:
   # command to run tests
@@ -19,9 +19,10 @@ python:
 #  only:
 #  - master
 
-#jobs:
-#  allow_failures:
-#  - os: osx
+jobs:
+  allow_failures:
+  - python:
+     "3.10-dev" # Fails due to lack of matplotlib availability
 
 install:
   - pip install -r requirements.txt
