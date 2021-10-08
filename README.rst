@@ -131,7 +131,6 @@ Pipelines:
     the |Example Pipelines| section of |docs_link|_.
 
 Installation:
-    
     Dependencies:
         * Python3.7+
         * `matplotlib <https://matplotlib.org/>`_ 
