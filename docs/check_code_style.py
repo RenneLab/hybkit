@@ -4,6 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 # Ensure code conforms to PEP8 style guide, with exceptions:
+#    Maximum Line length = 100
 #    E402 - Allow module imports after top of file. (Necessary due to code in __init__)
 #    W503 - Put binary operators at beginning of continuation lines.
 # 

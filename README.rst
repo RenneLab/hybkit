@@ -159,6 +159,13 @@ Installation:
     
     Further documentation on hybkit usage can be found in |docs_link|_.
 
+    Copyright:
+        | hybkit is a free, sharable, open-source project.
+        | All source code and executable scripts contained within this package are considered
+          part of the "hybkit" project and are distributed without any warranty or implied warranty
+          under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
+          file.
+
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
 .. |Example Pipelines| replace:: *Example Pipelines*
 .. |hybkit API| replace:: *hybkit API*
