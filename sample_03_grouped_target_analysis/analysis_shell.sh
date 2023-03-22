@@ -3,7 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-# usage: "sh ./download_data.sh"
+# usage: "bash ./analysis_shell.sh"
 
 NOTES="""
 Grouped target analysis pipeline performed using shell scripts.

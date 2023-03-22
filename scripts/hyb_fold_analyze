@@ -9,9 +9,9 @@ Read one or more '.hyb' format and corresponding ".vienna" or ".ct" format files
 
 Analysis Types:
 
-    ============================== ==============================================================
-    ``fold`` : Fold Analysis       Analyze folding of miRNA/target hybrids.
-    ============================== ==============================================================
+    =============================== ==============================================================
+    ``pattern`` : Pattern Analysis  Analyze folding pattern of miRNAs in miRNA/target hybrids.
+    =============================== ==============================================================
 """
 
 import sys
@@ -19,7 +19,7 @@ import os
 import argparse
 import textwrap
 import hybkit
-from hybkit.analysis import FoldAnalysis
+from hybkit.analysis import PatternAnalysis, FoldAnalysis
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
@@ -35,11 +35,13 @@ __doc__ += textwrap.dedent("""
     "CT" (:ref:`CT_Format <ct_file_format>`) formats,
     and analyzes hybrid secondary structure properties.
 
-    ``fold`` Analysis:
-        Utilizes :class:`hybkit.analysis.FoldAnalysis` to analyze hybrid fold information
+    ``pattern`` Analysis:
+        Utilizes :class:`hybkit.analysis.PatternAnalysis` to analyze 
+        hybrid miRNA fold pattern information
         and calculated per-base complimentarity counts for the miRNA portions of identified
         miRNA / target hybrids. By default miRNA-miRNA dimer hybrids are excluded, unless the
-        :attr:`FoldAnalysis.settings['allow_mirna_dimers'] <hybkit.analysis.FoldAnalysis.settings>`
+        :attr:`PatternAnalysis.settings['allow_mirna_dimers']
+        <hybkit.analysis.PatternAnalysis.settings>`
         option is True.
 
         Iteration over both files simultaneously is performed using :class:`~hybkit.HybFoldIter`,
@@ -55,9 +57,9 @@ __doc__ += textwrap.dedent("""
         Example system calls:
             ::
 
-                $ hyb_fold_analyze -a fold -i my_file_1.hyb -f my_file_1.vienna
+                $ hyb_fold_analyze -a pattern -i my_file_1.hyb -f my_file_1.vienna
 
-                $ hyb_fold_analyze -a fold -i my_file_2.hyb -f my_file_2.ct \\
+                $ hyb_fold_analyze -a pattern -i my_file_2.hyb -f my_file_2.ct \\
                            --allow_mirna_dimers True
     """)
 
@@ -110,7 +112,7 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
     """Perform main script function."""
 
     if not silent:
-        print('\nPerforming Folding Analysis of Hyb Files...')
+        print('\nPerforming Fold Pattern Analysis of Hyb Files...')
 
     if verbose:
         print('\nPerforming Analysis Type: ' + analysis_type)
@@ -118,7 +120,9 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
             print('Analysis Title: "%s"' % analysis_name)
         print()
 
-    if analysis_type == 'fold':
+    if analysis_type == 'pattern':
+        analysis = PatternAnalysis(name=analysis_name)
+    elif analysis_type == 'fold':
         analysis = FoldAnalysis(name=analysis_name)
 
     if out_suffix is None:

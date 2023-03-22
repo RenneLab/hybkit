@@ -30,6 +30,7 @@ vie_str_1_mis = ('>695_804_MIMAT0000078_MirBase_miR-23a_microRNA_1_21-'
                  )
 
 
+# ----- Set Testing Variables -----
 auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
 test_out_dir = os.path.join(auto_tests_dir, 'output_autotest')
 hyb_file_name = os.path.join(test_out_dir, 'test_hybrid_py.hyb')
@@ -42,54 +43,74 @@ bad3_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_matc
 id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_id_map.csv')
 bad1_id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_id_map_1.csv')
 
-
 # hybkit.settings.HybFile_settings['hybformat_id'] = True
 # hybkit.settings.HybFile_settings['hybformat_ref'] = True
 # hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
 # hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
 
-def test_hybrecord():
-    hyb_record = hybkit.HybRecord.from_line(hyb_str_1,
-                                            hybformat_id=True,
-                                            hybformat_ref=True)
-    test_id = hyb_record.id
-    test_seq = hyb_record.seq
+# Function for generating HybRecord objects for testing.
+def def_hyb_records():
+    """Generate two HybRecord objects for tests"""
+    hyb_record_1 = hybkit.HybRecord.from_line(hyb_str_1,
+                                              hybformat_id=True,
+                                              hybformat_ref=True)
     fold_record = hybkit.DynamicFoldRecord.from_vienna_string(vie_str_1)
-    with pytest.raises(RuntimeError):
-        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
-                                        read_count=4, flags={'badflag': True},
-                                        fold_record=fold_record)
-    with pytest.raises(RuntimeError):
-        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
-                                        read_count=4, flags={'read_count': 4})
-    with pytest.raises(ValueError):
-        hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
-                                        seg1_props={'read_start': 'not_int'},
-                                        read_count=4, flags={'read_count': 4})
-    with pytest.raises(RuntimeError):
-        hyb_record_2 = hybkit.HybRecord.from_line(hyb_str_1 + 'seg1_type=badtype', 
-                                                  hybformat_ref=True)
-
-    hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
-                                    seg1_props=copy.deepcopy(hyb_record.seg1_props),
-                                    seg2_props=copy.deepcopy(hyb_record.seg2_props),
+    hyb_record_2 = hybkit.HybRecord(id=hyb_record_1.id, seq=hyb_record_1.seq,
+                                    seg1_props=copy.deepcopy(hyb_record_1.seg1_props),
+                                    seg2_props=copy.deepcopy(hyb_record_1.seg2_props),
                                     fold_record=fold_record,
                                     )
+    return hyb_record_1, hyb_record_2, fold_record
+
+# ----- Set Testing Variables -----
+def test_hybrecord():
+    """Test Functions of HybRecord Class"""
+
+    # Setup test variables
+    # Test Record construction
+    hyb_record_1, hyb_record_2, fold_record = def_hyb_records()  # Reset test vars
+    test_id = hyb_record_1.id
+    test_seq = hyb_record_1.seq
+    
+    # Test execution of record construction with seg1_props_naming
     hyb_record_2 = hybkit.HybRecord(id=test_id, seq=test_seq,
                                     seg1_props={'ref_name': 'noname1'},
                                     seg2_props={'ref_name': 'noname2'},
                                     read_count=4,
                                     )
+    # Error: disallowed (bad) flag in __init__ constructor.
+    with pytest.raises(RuntimeError):
+        bad_hyb_record = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                          read_count=4, flags={'badflag': True},
+                                          fold_record=fold_record)
+    # Error: ???
+    with pytest.raises(RuntimeError):
+        bad_hyb_record = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                          read_count=4, flags={'read_count': 4})
+    # Error: ???
+    with pytest.raises(ValueError):
+        bad_hyb_record = hybkit.HybRecord(id=test_id, seq=test_seq,
+                                          seg1_props={'read_start': 'not_int'},
+                                          read_count=4, flags={'read_count': 4})
+    # Error: bad seg1_type flag 
+    with pytest.raises(RuntimeError):
+        bad_hyb_record = hybkit.HybRecord.from_line(hyb_str_1 + 'seg1_type=badtype', 
+                                                    hybformat_ref=True)
+    # Error: "Ensure" attribute "energy" not set.
     with pytest.raises(RuntimeError):
         hyb_record_2._ensure_set('energy')
+
+    # Test execution of evaluation functions and detail functions. 
+    hyb_record_1, hyb_record_2, fold_record = def_hyb_records()  # Reset test vars
     hyb_record_2.eval_types(allow_unknown=True)
     hyb_record_2._flagset = None
     hyb_record_2._make_flags_dict({})
     hyb_record_2._flagset = None
     hyb_record_2._get_ordered_flag_keys()
-    hyb_record_2._flagset = None
-
-    hyb_record_2 = hybkit.HybRecord.from_line(hyb_str_1)
+    hyb_record_2._flagset = None 
+    
+    # Test execution of eval_mirna() method with multiple segment permutations
+    hyb_record_1, hyb_record_2, fold_record = def_hyb_records()  # Reset test vars
     hyb_record_2.set_flag('seg1_type', 'microRNA')
     hyb_record_2.set_flag('seg2_type', 'microRNA')
     hyb_record_2.eval_mirna()
@@ -102,12 +123,13 @@ def test_hybrecord():
     hyb_record_2.set_flag('seg2_type', 'mRNA')
     hyb_record_2.eval_mirna()
 
-    hyb_record = hybkit.HybRecord.from_line(hyb_str_1,
-                                            hybformat_id=True,
-                                            hybformat_ref=True)
+    hyb_record_1, hyb_record_2, fold_record = def_hyb_records()  # Reset test vars
     hyb_record.set_flag('miRNA_seg', 'B')
+    # Error: Execute miRNA-detail with dimer without specifically allowing.
     with pytest.raises(RuntimeError):
-        hyb_record_2.mirna_detail('all')
+        hyb_record_2.mirna_detail('all') 
+    
+    # Class Detail-Retreival Testing
     hyb_record.mirna_detail('all', allow_mirna_dimers=True)
     hyb_record.set_flag('miRNA_seg', '3p')
     hyb_record.mirna_detail('all', allow_mirna_dimers=True)

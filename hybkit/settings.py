@@ -42,6 +42,14 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 #: Default miRNA types for use in :func:`mirna_analysis`.
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
+
+#: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis` 
+#: (range: ENERGY_MIN_BIN <= 0).
+ENERGY_MIN_BIN = '-45.0'
+
+#: Default Gibbs Free Energy bin size for use by :class:`EnergyAnalysis` ('0.1' == no binning).
+ENERGY_BIN_SIZE = '0.4'
+
 # settings_info : HybRecord
 # setting_info format contains structure::
 # {
@@ -227,7 +235,7 @@ FoldFile_settings_info = {
 #: Copied into :data:`HybFoldIter_settings` for use at runtime.
 HybFoldIter_settings_info = {
     'error_checks': [
-        ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'],
+        ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch'],
         """
         Error checks for simultaneous HybFile and FoldFile parsing.
         Options: "hybrecord_indel": Error for HybRecord objects where one/both sequences have
@@ -237,7 +245,7 @@ HybFoldIter_settings_info = {
         """,
         'str',
         None,
-        {'choices': {'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch'}}
+        {'choices': {'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch'}}
     ],
     'error_mode': [
         'warn_skip',
@@ -316,6 +324,25 @@ Analysis_settings_info = {
         ',',
         """
         Delimiter-string to place between fields in analysis output.
+        """,
+        'str',
+        None,
+        {}
+    ],
+    'energy_min_bin': [
+        ENERGY_MIN_BIN,
+        """
+        Minimum Gibbs Free Energy value for binned analysis.
+        """,
+        'str',
+        None,
+        {}
+    ],
+    'energy_bin_size': [
+        ENERGY_BIN_SIZE,
+        """
+        Size of increment to bin energy values for binned energy analysis 
+        (allowed >= 0.1). A value of '0.1' represents no value binning.
         """,
         'str',
         None,

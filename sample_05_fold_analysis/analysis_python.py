@@ -28,9 +28,8 @@ hybkit.settings.FoldRecord_settings['allowed_mismatches'] = 3
 # which have a modified sequence.
 hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
 
-# Allow mirna/mirna dimers in analysis.
-hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
-
+# Set minimum energy value to less magnitude for this dataset.
+hybkit.settings.Analysis_settings['energy_min_bin'] = '-35.0'
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -38,7 +37,7 @@ input_hyb_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.hy
 input_vienna_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 out_dir = os.path.join(analysis_dir, 'output_python')
-out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target.hyb')
+out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_qc.hyb')
 data_label = 'WT_BR1'
 out_analysis_basename = out_hyb_name.replace('.hyb', '')
 
@@ -65,17 +64,13 @@ fold_analysis = hybkit.analysis.FoldAnalysis(name='WT_BR1')
 #   returning hyb records containing their associated fold record.
 in_file_label = os.path.basename(input_hyb_name).replace('.hyb', '')
 with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
-     hybkit.ViennaFile.open(input_vienna_name, 'r') as input_vienna:
-    # hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
+     hybkit.ViennaFile.open(input_vienna_name, 'r') as input_vienna, \
+     hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
 
     hyb_fold_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=True)
     for i, hyb_record in enumerate(hyb_fold_iter):
         # Find Segment types
         hyb_record.eval_types()
-
-        if hyb_record.id == '43880_7':
-            print(hyb_record)
-            sys.exit()
 
         # Determine if record has type that is excluded
         use_record = True
@@ -96,7 +91,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
         if hyb_record.has_prop('mirna_not_dimer'):
             # Set dataset flag of record
             hyb_record.set_flag('dataset', in_file_label)
-            # Perform miRNA-Fold Analysis
+            # Perform miRNA Fold Fold Analysis
             fold_analysis.add(hyb_record)
             # Write the record to the output hyb file.
             # out_hyb.write_record(hyb_record)
@@ -106,7 +101,7 @@ print()
 hyb_fold_iter.print_report()
 print()
 
-# Write mirna_fold analysis for input file to outputs.
+# Write fold analysis for input file to outputs.
 print('Outputting Analyses to:\n    %s\n' % out_analysis_basename)
 fold_analysis.write(out_analysis_basename)
 fold_analysis.plot(out_analysis_basename)

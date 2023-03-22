@@ -115,7 +115,7 @@ Pipelines:
                                       experiment
         Grouped Target Analysis       Analyze and plot targets of a set of miRNAs from 
                                       pooled experimental replicates
-        Fold Analysis                 Analyze and plot predicted miRNA folding patterns in
+        Pattern Analysis              Analyze and plot predicted miRNA folding patterns in
                                       miRNA-containing hybrids
         ============================= ===========================================================
 

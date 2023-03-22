@@ -222,6 +222,7 @@ class HybRecord(object):
     # Additional flag specifications utilized by hybkit, see specificiation.
     _HYBKIT_FLAGS = ['read_count',
                      'orient',
+                     'det',
                      'seg1_type',
                      'seg2_type',
                      'seg1_det',
@@ -468,7 +469,7 @@ class HybRecord(object):
         self.set_flag('seg2_type', types[1])
 
     # HybRecord : Public Methods : fold_record
-    def set_fold_record(self, fold_record):
+    def set_fold_record(self, fold_record, allow_energy_mismatch=False):
         """
         Check and set provided fold_record (:class:`FoldRecord`) as :obj:`fold_record`.
 
@@ -489,6 +490,16 @@ class HybRecord(object):
             raise RuntimeError(message)
         fold_record.ensure_matches_hyb_record(self)
         self.fold_record = fold_record
+        if fold_record.energy is not None:
+            if ((not allow_energy_mismatch) 
+                and self.energy not in {None, '.'} 
+                and str(fold_record.energy) != str(self.energy)):
+                message = 'ERROR: HybRecord energy: %s ' % self.energy
+                message += 'and FoldRecord energy: %s ' % fold_record.energy 
+                message += 'do not match!'
+                print(message)
+                raise RuntimeError(message)
+            self.energy = fold_record.energy
 
     # HybRecord : Public Methods : eval_mirna
     def eval_mirna(self, mirna_types=None):
@@ -816,7 +827,10 @@ class HybRecord(object):
         """
         line_items = []
         for item_key in self.HYBRID_COLUMNS:
-            line_items.append(getattr(self, item_key, '.'))
+            item_val = getattr(self, item_key, '.')
+            if item_val is None:
+                item_val = '.'
+            line_items.append(item_val)
         for seg_dict in [self.seg1_props, self.seg2_props]:
             for item_key in self.SEGMENT_COLUMNS:
                 if item_key in seg_dict and seg_dict[item_key] is not None:
@@ -878,6 +892,7 @@ class HybRecord(object):
             fasta_id = self.id
             fasta_seq = self.seq
             if annotate:
+
                 if self.seg1_props['ref_name'] is not None:
                     fasta_description += ' ' + self._format_seg_props_line(self.seg1_props)
                 if self.seg2_props['ref_name'] is not None:
@@ -926,6 +941,9 @@ class HybRecord(object):
             fasta_seq = self._get_seg_seq(seg_props)
             if annotate:
                 fasta_description += self._format_seg_props_line(seg_props)
+
+        if annotate and 'dataset' in self.flags:
+            fasta_id = self.flags['dataset'] + ':' + fasta_id
 
         fasta_record = SeqRecord(Seq(fasta_seq),
                                  id=fasta_id,
@@ -1044,6 +1062,79 @@ class HybRecord(object):
                     flags[seg_type_key] = seg_type
 
         return_obj = cls(hyb_id, seq, energy, seg1_props, seg2_props, flags)
+        return return_obj
+
+    # HybRecord : Public Classmethods : Record Construction
+    @classmethod
+    def from_fasta_records(cls, seg1_record, seg2_record, hyb_id=None, energy=None, flags={}):
+        """
+        Construct a HybRecord instance from two BioPython SeqRecord Objects
+
+        Create artificial HybRecord from two SeqRecord Objects
+        For the hybrid:
+            id: seg1_record.id + '--' + seg2_record.id
+                (overwritten by "id" paramater if provided)
+            seq: seg1_record.seq + seg2_record
+
+        For each segment:
+            FASTA_Sequence_ID -> segN_ref_name
+            FASTA_Description -> Flags: segN_det 
+                (Overwritten if segN_det flag is provided directly)
+            
+        Optional fields to add via function arguments:
+            hyb_id
+            energy
+            flags
+
+        Args:
+            seg1_record (SeqRecord): Biopython SeqRecord object containing information
+                on the left/first/5p hybrid segnment (seg1)
+            seg2_record (SeqRecord): Biopython SeqRecord object containing information
+                on the right/second/3p hybrid segment (seg2)
+            hyb_id (str, optional): Identifier for the hyb record (overwrites generated id if provided)
+            energy (float, optional): Predicted energy of sequence folding in kcal/mol
+            flags (dict, optional): Dict with keys of flags for the record and their associated values.
+                Any flags provided overwrite default-generated flags.
+
+        Returns:
+            :class:`HybRecord` instance containing record information.
+        """
+        for segN_record in [seg1_record, seg2_record]:
+            if not isinstance(segN_record, Bio.SeqRecord.SeqRecord):
+                message = 'Record is not a valid SeqRecord Object:\n    '
+                message += str(segN_record) 
+                raise RuntimeError(message)
+
+        if hyb_id is None:
+            hyb_id = seg1_record.id + '--' + seg2_record.id
+        seq = seg1_record.seq + seg2_record.seq
+        # energy = 
+        seg1_len = len(seg1_record.seq)
+        seg2_len = len(seg2_record.seq)
+        seg1_props = {}
+        seg1_props['ref_name'] = seg1_record.id
+        seg1_props['read_start'] = 1
+        seg1_props['read_end'] = seg1_len
+        seg1_props['ref_start'] = None
+        seg1_props['ref_end'] = None
+        seg1_props['score'] = None
+        seg2_props = {}
+        seg2_props['ref_name'] = seg2_record.id
+        seg2_props['read_start'] = seg1_len + 1
+        seg2_props['read_end'] = seg1_len + seg2_len
+        seg2_props['ref_start'] = None
+        seg2_props['ref_end'] = None
+        seg2_props['score'] = None
+        if 'seg1_det' not in flags:
+            flags['seg1_det'] = seg1_record.description
+        if 'seg2_det' not in flags:
+            flags['seg2_det'] = seg2_record.description
+
+        return_obj = cls(hyb_id, seq, energy, seg1_props, seg2_props, flags)
+        #print(seg1_record)
+        #print(seg2_record)
+        #print(return_obj.to_line())
+        #input()
         return return_obj
 
     # HybRecord : Private Constants
@@ -1330,7 +1421,9 @@ class HybRecord(object):
                                 }
         for column in self.SEGMENT_COLUMNS:
             if column in seg_props_obj:
-                if seg_props_obj[column] == self.settings['hyb_placeholder']:
+                if seg_props_obj[column] is None:
+                    return_dict[column] = None
+                elif seg_props_obj[column] == self.settings['hyb_placeholder']:
                     return_dict[column] = None
                 else:
                     column_type = segment_column_types[column]
@@ -1481,6 +1574,22 @@ class HybFile(object):
         """
         for write_record in write_records:
             self.write_record(write_record)
+
+    # HybFile : Public Methods : Writing
+    def write_str(self, in_str):
+        """
+        Write a string directly to the underlying file ojbect.
+        """
+        self.fh.write(in_str)
+
+    # HybFile : Public Methods : Writing
+    def write(self, *args, **kwargs):
+        """
+        Placeholder to catch errors.
+        """
+        message = 'HybFile.write() is not implemented.\n'
+        message += 'Please Use HybFile.write_record() or HybFile.write_str()'
+        raise NotImplementedError(message)
 
     # HybFile : Public Classmethods : Initialization
     @classmethod
@@ -1793,11 +1902,25 @@ class FoldRecord(object):
             raise RuntimeError(message)
 
         energy_string = header_items[1]
+        check_energies = ["=99%i." % i for i in range(10)] 
+        if any(e in energy_string for e in check_energies):
+            message = 'Improper CT: No Fold (Energy = 99*.*)'
+            if 'return' in error_mode:
+                if 'warn' in error_mode:
+                    print('WARNING:', message)
+                return ('NOFOLD', ''.join(record_lines))
+            else:
+                print('ERROR:', message)
+                raise RuntimeError('ERROR: ' + message)
+
         energy = float(energy_string.split()[-1])
         enthalpy_string = header_items[2]
         enthalpy = float(enthalpy_string.split()[-1])
         full_name = header_items[3]
 
+
+        seq = ''
+        fold = ''
         for i, line in enumerate(record_lines[1:], 1):
             line_split = line.strip().split('\t')
             if len(line_split) not in {6, 8}:
@@ -1818,6 +1941,16 @@ class FoldRecord(object):
             else:
                 raise RuntimeError
             fold += fold_char
+
+        if not len(fold):
+            message = 'Improper CT: No Fold (Len = 0)'
+            if 'return' in error_mode:
+                if 'warn' in error_mode:
+                    print('WARNING:', message)
+                return ('NOFOLD', ''.join(record_lines))
+            else:
+                print('ERROR:', message)
+                raise RuntimeError('ERROR: ' + message)
 
         return_obj = cls(full_name, seq, fold, energy)
         return return_obj
@@ -1987,6 +2120,7 @@ class DynamicFoldRecord(FoldRecord):
             dataset = hyb_record._get_flag_or_none('dataset')
             if dataset is not None:
                 message += 'Dataset: %s\n' % dataset
+            message += 'FoldRecord Seq:        %s\t(%i)\n' % (self.seq, len(self.seq))
             message += 'HybRecord Seq:         %s\t(%i)\n' % (hyb_record.seq, len(hyb_record.seq))
             message += 'HybRecord Dynamic Seq: %s\t(%i)\n' % (dynamic_seq, len(dynamic_seq))
             message += '                       %s\t' % (match_str)
@@ -2183,10 +2317,10 @@ class CtFile(FoldFile):
                 "return": Return the error value with no program output.
                 record is encountered.
         """
-        record_lines = [header]
         if error_mode is None:
-            error_mode = self.settings['error_mode']
+            error_mode = self.settings['foldfile_error_mode']
         header = next(self.fh)
+        record_lines = [header]
         expected_line_num = int(header.strip().split()[0])
         for i in range(expected_line_num):
             record_lines.append(next(self.fh))
@@ -2276,6 +2410,7 @@ class HybFoldIter(object):
         """Read and return (class:`HybRecord`, :class:`FoldRecord`)."""
         self.counters['total_read_attempts'] += 1
         try:
+            energy_mismatch = False
             self.counters['hyb_record_read_attempts'] += 1
             next_hyb_record = self.hybfile_handle.read_record()
             self.counters['fold_record_read_attempts'] += 1
@@ -2316,6 +2451,18 @@ class HybFoldIter(object):
                     error += 'mismatches of '
                     error += '%i allowed ' % FoldRecord.settings['allowed_mismatches']
 
+            #if not error and 'energy_match' in self.settings['error_checks']:
+            if 'energy_mismatch' in self.settings['error_checks']:
+                if (next_fold_record.energy is not None
+                    and next_hyb_record.energy not in {None, '.'}
+                    and str(next_fold_record.energy) != str(next_hyb_record.energy)):
+                    if not error:
+                        error = 'HybRecord: %s ' % str(next_hyb_record)
+                    error += 'has hyb-record / fold-record energy mismatch: '
+                    error += '%s / %s\n' % (str(next_hyb_record.energy), str(next_fold_record.energy))
+                    error += next_fold_record.to_vienna_string()
+                    energy_mismatch = True
+
             if error:
                 if self.settings['error_mode'] == 'raise':
                     error = 'ERROR: ' + error
@@ -2337,6 +2484,8 @@ class HybFoldIter(object):
                         raise RuntimeError(message)
                     do_skip = True
 
+         
+
         except StopIteration:
             raise
         except BaseException:
@@ -2353,10 +2502,16 @@ class HybFoldIter(object):
             return next(self)
 
         if self.combine:
-            next_hyb_record.set_fold_record(next_fold_record)
+            next_hyb_record.set_fold_record(next_fold_record, allow_energy_mismatch=energy_mismatch)
             ret_obj = next_hyb_record
         else:
             ret_obj = (next_hyb_record, next_fold_record)
+
+        if self.settings['error_mode'] == 'warn_return':
+            if isinstance(ret_obj, tuple):
+                ret_obj = (*ret_obj, error)
+            else:
+                ret_obj = (ret_obj, error)
 
         self.last_hyb_record = next_hyb_record
         self.last_fold_record = next_fold_record

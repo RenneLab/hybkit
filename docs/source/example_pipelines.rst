@@ -25,7 +25,7 @@ Example Pipelines
                                                experiment
         :ref:`Example Grouped Target Analysis` Analyze and plot targets of a set of miRNAs from 
                                                pooled experimental replicates
-        :ref:`Example Fold Analysis`           Analyze and plot predicted miRNA 
+        :ref:`Example Pattern Analysis`        Analyze and plot predicted miRNA 
                                                folding patterns in
                                                miRNA-containing hybrids
         ====================================== ===================================================

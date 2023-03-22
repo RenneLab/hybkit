@@ -3,10 +3,10 @@
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-# usage: "sh ./download_data.sh"
+# usage: "bash ./analysis_shell.sh"
 
 NOTES="""
-Fold target analysis pipeline performed using shell scripts.
+Fold analysis pipeline performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
 File names are hardcoded, and functions are accessed directly.
@@ -57,7 +57,7 @@ hyb_eval -i ${IN_HYB_FILES[*]} --verbose \
 EVAL_FILES=( $(ls ${OUT_DIR}/*evaluated*.hyb) )
 QC_FILES=""
 for EVAL_FILE in ${EVAL_FILES[*]}; do
-  QC_FILES+="${EVAL_FILE/evaluated/mirna_target} "
+  QC_FILES+="${EVAL_FILE/evaluated/qc} "
 done
 
 # Filter records to only those where any reference contains the string "kshv"
@@ -95,6 +95,7 @@ for fn_i in "0"; do
                    -u '' \
                    --analysis_type fold \
                    --analysis_name "WT_BR1" \
+                   --energy_min_bin "-35.0" \
                    --foldrecord_type dynamic \
                    --allowed_mismatches 3
 done

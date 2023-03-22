@@ -3,7 +3,7 @@
     Renne Lab, University of Florida
     Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-Example Fold Analysis
+Example Pattern Analysis
 =====================
 
 This directory contains a sample analysis of Hyb-format and Vienna-format data, published in 
@@ -37,5 +37,5 @@ The completed output of the analysis requires ~30 MB of space.
 Fold Analysis Example Output
 --------------------------------------
 
-.. image:: ../sample_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target_fold_bases.png
+.. image:: ../sample_04_pattern_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target_pattern_bases.png
 

@@ -43,16 +43,36 @@ DEFAULT_LINE_RC_PARAMS = {
     'axes.titleweight': 'bold',
     'axes.labelsize': 'large',
     'axes.labelweight': 'bold',
-    'xtick.labelsize': 'large',
+    'xtick.labelsize': 'medium',
     'ytick.labelsize': 'large',
 }
 DEFAULT_LINE_DATA_FORMAT = '-'
 DEFAULT_LINE_MIN_FRACTION_SIZE = 0.01
+DEFAULT_BAR_RC_PARAMS = {
+    'axes.titlesize': 'x-large',
+    #'axes.titleweight': 'bold',
+    #'axes.labelsize': 'large',
+    'axes.labelweight': 'bold',
+    #'xtick.labelsize': 'large',
+    #'ytick.labelsize': 'large',
+}
+DEFAULT_ENERGY_MIN_COUNT = 0
+DEFAULT_ENERGY_MIN_DENSITY = 0.0
+DEFAULT_MATCH_MIN_COUNT = 0
+DEFAULT_BAR_WIDTH = 0.9
+DEFAULT_BAR_ALIGN = 'edge'
+DEFAULT_ENERGY_XLABEL = 'Hybrid Gibbs Free Energy (kcal/mol)'
+DEFAULT_ENERGY_YLABEL = 'Hybrid Count'
+DEFAULT_MATCH_XLABEL = 'Predicted Base-Pairs'
+DEFAULT_MATCH_YLABEL = 'Hybrid Count'
 DEFAULT_HYBRID_TYPE_COUNTS_TITLE = 'Hybrid Types'
 DEFAULT_TARGET_TITLE = 'Targets'
 DEFAULT_TARGET_TYPE_TITLE = 'Target Types'
 DEFAULT_MIRNA_COUNTS_TITLE = 'Hybrid Types'
-DEFAULT_FOLD_TITLE = 'Bound miRNA by Position'
+DEFAULT_PATTERN_TITLE = 'Bound miRNA by Position'
+DEFAULT_FOLD_ENERGY_COUNTS_TITLE = 'Hybrid Predicted Energies'
+DEFAULT_FOLD_ENERGY_DENSITIES_TITLE = 'Normalized Hybrid Predicted Energies'
+DEFAULT_FOLD_MATCH_TITLE = 'Hybrid Predicted Base Pairs'
 DEFAULT_FIG_SIZE = matplotlib.rcParams['figure.figsize']  # 6.4, 4.8 in
 TITLE_PAD = 15
 FORMAT_NAME_MAP = {'mirnas_5p': "5'_miRNA_Hybrids",
@@ -298,22 +318,23 @@ def target_type(target_type_count, plot_file_name,
                     )
 
 
-# Public Methods : HybRecord miRNA Target Analysis Plotting
-def fold(analysis,
-         plot_file_name,
-         name=None,
-         title=DEFAULT_FOLD_TITLE,
-         data_format=DEFAULT_LINE_DATA_FORMAT,
-         min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
-         plot_file_type=DEFAULT_FILE_TYPE,
-         dpi=DEFAULT_DPI,
-         rc_params=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)):
+# Public Methods : HybRecord miRNA Binding Pattern Plotting
+def pattern(analysis,
+            plot_file_name,
+            name=None,
+            title=DEFAULT_PATTERN_TITLE,
+            data_format=DEFAULT_LINE_DATA_FORMAT,
+            min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
+            plot_file_type=DEFAULT_FILE_TYPE,
+            dpi=DEFAULT_DPI,
+            rc_params=copy.deepcopy(DEFAULT_LINE_RC_PARAMS)
+            ):
     """
-    Plot the bound percentage of mirna by base from the :class:`~hybkit.analysis.FoldAnalysis`.
+    Plot the bound percentage of mirna by base from the :class:`~hybkit.analysis.PatternAnalysis`.
 
     Args:
-        analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
-            :class:`~hybkit.analysis.FoldAnalysis`.
+        analysis (~hybkit.analysis.PatternAnalysis): Analysis that includes attributes of
+            :class:`~hybkit.analysis.PatternAnalysis`.
         plot_file_name (str): File name for output plot.
         name (str, optional): name to prepend to title.
         title (str, optional): Title / header for plot (replaces default title).
@@ -355,6 +376,204 @@ def fold(analysis,
                dpi=dpi,
                rc_params=rc_params,
                )
+
+
+# Public Methods : HybRecord Fold Analysis Plotting
+def fold_energy_counts(analysis,
+                       plot_file_name,
+                       name=None,
+                       title=DEFAULT_FOLD_ENERGY_COUNTS_TITLE,
+                       min_count=DEFAULT_ENERGY_MIN_COUNT,
+                       plot_file_type=DEFAULT_FILE_TYPE,
+                       dpi=DEFAULT_DPI,
+                       rc_params=copy.deepcopy(DEFAULT_BAR_RC_PARAMS)
+                       ):
+    """
+    Plot barogram of hybrid energy counts from a `~hybkit.analysis.FoldAnalysis`.
+
+    Args:
+        analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
+            :class:`~hybkit.analysis.FoldAnalysis`.
+        plot_file_name (str): File name for output plot.
+        name (str, optional): name to prepend to title.
+        title (str, optional): Title / header for plot (replaces default title).
+        min_count (float, optional): Minimum count to include at right
+            side of plot of energy counts. Setting to 0 includes all values evaluated.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+    """
+    # Check if empty
+    max_count = 0
+    for energy, count in analysis.energy_bins.items():
+        max_count = max(max_count, count)
+
+    if max_count < 1:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
+    
+    # Plot energy bins
+    energies, counts = [], []
+    for energy, count in analysis.energy_bins.items():
+        if float(energy) < -5 and count < min_count:
+            break
+        energies.append(float(energy))
+        counts.append(count)
+
+    if analysis.name is not None:
+        title = str(analysis.name) + ': ' + title
+
+    energy_width = float(energies[1]) + 0.02
+
+    _plot_energy_bar(x_vals=energies,
+                     sizes=counts,
+                     plot_file_name=plot_file_name,
+                     title=title,
+                     width=energy_width,
+                     align=DEFAULT_BAR_ALIGN,
+                     plot_file_type=plot_file_type,
+                     dpi=dpi,
+                     rc_params=rc_params,
+                     )
+
+
+# Public Methods : HybRecord Fold Analysis Plotting
+def fold_energy_densities(analysis,
+                          plot_file_name,
+                          name=None,
+                          title=DEFAULT_FOLD_ENERGY_DENSITIES_TITLE,
+                          min_density=DEFAULT_ENERGY_MIN_DENSITY,
+                          plot_file_type=DEFAULT_FILE_TYPE,
+                          dpi=DEFAULT_DPI,
+                          rc_params=copy.deepcopy(DEFAULT_BAR_RC_PARAMS)
+                          ):
+    """
+    Plot barogram of hybrid energy counts from a `~hybkit.analysis.FoldAnalysis`.
+
+    Args:
+        analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
+            :class:`~hybkit.analysis.FoldAnalysis`.
+        plot_file_name (str): File name for output plot.
+        name (str, optional): name to prepend to title.
+        title (str, optional): Title / header for plot (replaces default title).
+        min_density (float, optional): Minimum density to include at right
+            side of plot of energy counts. Setting to 0 includes all values evaluated.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+    """
+    # Check if empty
+    max_density = 0
+    for energy, density in analysis.energy_bin_densities.items():
+        max_density = max(max_density, density)
+
+    if max_density < 0.0000001:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
+    
+    # Plot energy bins
+    energies, densities = [], []
+    for energy, density in analysis.energy_bin_densities.items():
+        if float(energy) < -5 and density < min_density:
+            break
+        energies.append(float(energy))
+        densities.append(density)
+
+    if analysis.name is not None:
+        title = str(analysis.name) + ': ' + title
+
+    energy_width = float(energies[1]) + 0.02
+
+    _plot_energy_bar(x_vals=energies,
+                     sizes=densities,
+                     plot_file_name=plot_file_name,
+                     title=title,
+                     width=energy_width,
+                     align=DEFAULT_BAR_ALIGN,
+                     plot_file_type=plot_file_type,
+                     dpi=dpi,
+                     rc_params=rc_params,
+                     )
+
+
+# Public Methods : HybRecord Fold Analysis Plotting
+def fold_matches(analysis,
+                 plot_file_name,
+                 name=None,
+                 title=DEFAULT_FOLD_MATCH_TITLE,
+                 min_count=DEFAULT_MATCH_MIN_COUNT,
+                 plot_file_type=DEFAULT_FILE_TYPE,
+                 dpi=DEFAULT_DPI,
+                 rc_params=copy.deepcopy(DEFAULT_BAR_RC_PARAMS)
+                 ):
+    """
+    Plot predicted hybrid match counts from a `~hybkit.analysis.FoldAnalysis`.
+
+    Args:
+        analysis (~hybkit.analysis.FoldAnalysis): Analysis that includes attributes of
+            :class:`~hybkit.analysis.FoldAnalysis`.
+        plot_file_name (str): File name for output plot.
+        name (str, optional): name to prepend to title.
+        title (str, optional): Title / header for plot (replaces default title).
+        min_count (float, optional): Minimum count to include at right
+            side of plot of energy counts. Setting to 0 includes all values evaluated.
+        plot_file_type (str, optional): File type for saving of plots. Options:
+            {'png', 'ps', 'pdf', 'svg'}
+        dpi (int, optional): DPI for saving of plots.
+        rc_params (dict, optional): Dict of keys and values of settings to pass
+            to the matplotlib.rcParams.update() method.
+    """
+    # Check if empty
+    max_count = 0
+    for base, count in analysis.match_counts.items():
+        max_count = max(max_count, count)
+
+    if max_count < 1:
+        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        return
+    
+    # Plot match count bins
+    total_count = sum(analysis.match_counts.values())
+    bases, counts, densities = [], [], []
+    for base, count in analysis.match_counts.items():
+        if base > 10 and count < min_count:
+            break
+        bases.append(base)
+        counts.append(count)
+        densities.append(count/total_count)
+ 
+    density_title = 'Normalized ' + title
+    if analysis.name is not None:
+        title = str(analysis.name) + ': ' + title
+        density_title = str(analysis.name) + ': ' + density_title
+
+    counts_plot_file_name = plot_file_name + '_counts' 
+    densities_plot_file_name = plot_file_name + '_densities' 
+
+    _plot_match_bar(x_vals=bases,
+                    sizes=counts,
+                    plot_file_name=counts_plot_file_name,
+                    title=title,
+                    align='center',
+                    plot_file_type=plot_file_type,
+                    dpi=dpi,
+                    rc_params=rc_params,
+                    )
+
+    _plot_match_bar(x_vals=bases,
+                    sizes=densities,
+                    plot_file_name=densities_plot_file_name,
+                    title=density_title,
+                    ylabel='Normalized ' + DEFAULT_MATCH_YLABEL,
+                    align='center',
+                    plot_file_type=plot_file_type,
+                    dpi=dpi,
+                    rc_params=rc_params,
+                    )
 
 
 # Private Methods : Pie Chart
@@ -413,7 +632,7 @@ def _plot_pie_chart(labels, sizes, plot_file_name,
     # plt.show()
 
 
-# Private Methods : Pie Chart
+# Private Methods : Plot Line Graph
 def _plot_line(labels, sizes, plot_file_name,
                title=None,
                min_fraction_size=DEFAULT_LINE_MIN_FRACTION_SIZE,
@@ -447,6 +666,87 @@ def _plot_line(labels, sizes, plot_file_name,
     plt.xlabel('miRNA Base Index')
     plt.yticks(range(10, 110, 10))
     plt.ylabel('Percent Bound')
+    if title is not None:
+        plt.title(title, pad=TITLE_PAD)
+    if not plot_file_name.endswith(plot_file_type):
+        plot_file_name += '.' + plot_file_type
+    plt.savefig(plot_file_name, dpi=dpi)
+    plt.clf()
+    plt.close()
+    matplotlib.rcdefaults()
+
+    # patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
+    # plt.legend(patches, labels, loc="best")
+    # plt.axis('equal')
+    # plt.tight_layout()
+    # plt.show()
+
+# Private Methods : Plot Energy Bar Graph
+def _plot_energy_bar(x_vals, sizes, plot_file_name,
+                     title=None,
+                     width=DEFAULT_BAR_WIDTH,
+                     align=DEFAULT_BAR_ALIGN,
+                     xlabel=DEFAULT_ENERGY_XLABEL,
+                     ylabel=DEFAULT_ENERGY_YLABEL,
+                     plot_file_type=DEFAULT_FILE_TYPE,
+                     dpi=DEFAULT_DPI,
+                     figsize=DEFAULT_FIG_SIZE,
+                     rc_params=copy.deepcopy(DEFAULT_BAR_RC_PARAMS)
+                     ):
+
+    plt.rcParams.update(rc_params)
+
+    fig = plt.gcf()
+    fig.set_size_inches(figsize)
+    bars = plt.bar(x_vals, sizes, width=width, align=align)
+    ax = plt.gca()
+    ax.invert_xaxis()
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+    plt.xlim(left=0)
+    plt.xticks(range(0, (int(x_vals[-1])-1), (-2)), rotation=-30)
+    plt.xlabel(xlabel)
+    #plt.yticks(range(10, 110, 10))
+    ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+    plt.ylabel(ylabel)
+    if title is not None:
+        plt.title(title, pad=TITLE_PAD)
+    if not plot_file_name.endswith(plot_file_type):
+        plot_file_name += '.' + plot_file_type
+    plt.savefig(plot_file_name, dpi=dpi)
+    plt.clf()
+    plt.close()
+    matplotlib.rcdefaults()
+
+    # patches, texts = plt.pie(sizes, colors=colors, shadow=True, startangle=90)
+    # plt.legend(patches, labels, loc="best")
+    # plt.axis('equal')
+    # plt.tight_layout()
+    # plt.show()
+
+# Private Methods : Plot Bases Bar Graph
+def _plot_match_bar(x_vals, sizes, plot_file_name,
+                    title=None,
+                    width=DEFAULT_BAR_WIDTH,
+                    align=DEFAULT_BAR_ALIGN,
+                    xlabel=DEFAULT_MATCH_XLABEL,
+                    ylabel=DEFAULT_MATCH_YLABEL,
+                    plot_file_type=DEFAULT_FILE_TYPE,
+                    dpi=DEFAULT_DPI,
+                    figsize=DEFAULT_FIG_SIZE,
+                    rc_params=copy.deepcopy(DEFAULT_BAR_RC_PARAMS)
+                    ):
+
+    plt.rcParams.update(rc_params)
+
+    fig = plt.gcf()
+    fig.set_size_inches(figsize)
+    bars = plt.bar(x_vals, sizes, width=width, align=align)
+    ax = plt.gca()
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+    plt.xlim(left=1)
+    plt.xlabel(xlabel)
+    ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+    plt.ylabel(ylabel)
     if title is not None:
         plt.title(title, pad=TITLE_PAD)
     if not plot_file_name.endswith(plot_file_type):

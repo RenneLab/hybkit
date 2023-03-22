@@ -1,0 +1,31 @@
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
+# Renne Lab, University of Florida
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
+# 
+# Custom legend for the make_string_match_params function, for use with 
+# the method_string_match method in type_finder.py.
+#
+# Notes:
+# Spaces are included in search terms.
+# Commas are reserved and separate entries
+# Each line should contain: "search_type,search_string,seg_type"
+# Allowed search types are: "startswith", "contains", "endswith", and "matches"
+
+# Hyb Software Reference Search Terms:
+endswith,_microRNA,miRNA
+endswith,_pseudo,pseudogene
+endswith,_rRNA,rRNA
+endswith,_mRNA,mRNA
+endswith,_mtrRNA,mitoch-rRNA
+endswith,_tRNA,tRNA
+endswith,_snoRNA,snoRNA
+endswith,_miscRNA,miscRNA
+endswith,_snRNA,snRNA
+endswith,_pr-tr,pr-tr
+endswith,_lincRNA,lincRNA
+endswith,_Ig,Ig
+endswith,_Trec,Trec
+
+
+#custom
+startswith,kshv-miR,KSHV-miRNA

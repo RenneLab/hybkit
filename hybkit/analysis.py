@@ -5,27 +5,15 @@
 
 """Functions for analysis of HybRecord and FoldRecord objects."""
 
+import sys
 import copy
 from collections import Counter
 import hybkit
+import numpy as np
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
-
-# Public Constants
-MIRNA_COUNT_ANALYSIS_KEYS = ['5p_mirna_hybrids', '3p_mirna_hybrids', 'mirna_dimer_hybrids',
-                             'all_mirna_hybrids', 'no_mirna_hybrids']
-
-DEFAULT_COUNT_MODE = 'record'
-DEFAULT_HYBRID_TYPE_SEP = '-'
-DEFAULT_ENTRY_SEP = ','
-DEFAULT_FILE_SUFFIX = '.csv'
-DEFAULT_WRITE_MULTI_FILES = False
-DEFAULT_TARGET_SPACER_LINE = True
-DEFAULT_MAKE_PLOTS = True
-DEFAULT_MAX_MIRNA = 10
-
 
 # --- Base Analysis --- #
 class BaseAnalysis(object):
@@ -238,14 +226,14 @@ class BaseAnalysis(object):
             ret_lines.append(out_delim.join([mirna_name, mirna_total_count]))
         return ret_lines
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _init_fold_analysis(self):
+    # BaseAnalysis : Private Methods : PatternAnalysis
+    def _init_pattern_analysis(self):
         self.mirna_folds = 0
         self.mirna_fold_count = {i: 0 for i in range(1, 25)}
         self.mirna_fold_frac = {i: 0.0 for i in range(1, 25)}
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _add_fold_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
+    # BaseAnalysis : Private Methods : PatternAnalysis
+    def _add_pattern_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
         hyb_record._ensure_set('eval_mirna')
         hyb_record._ensure_set('fold_record')
         count = hyb_record.get_count(count_mode)
@@ -276,8 +264,8 @@ class BaseAnalysis(object):
             for i in self.mirna_fold_count:
                 self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _update_fold_analysis(self, add_analysis):
+    # BaseAnalysis : Private Methods : PatternAnalysis
+    def _update_pattern_analysis(self, add_analysis):
         self.mirna_folds += add_analysis.mirna_folds
         for i in add_analysis.mirna_fold_count.keys():
             if i not in self.mirna_fold_count:
@@ -286,8 +274,8 @@ class BaseAnalysis(object):
         for i in self.mirna_fold_count.keys():
             self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _format_fold_analysis(self, out_delim):
+    # BaseAnalysis : Private Methods : PatternAnalysis
+    def _format_pattern_analysis(self, out_delim):
         ret_lines = [out_delim.join(['data', 'count'])]
         ret_lines.append(out_delim.join(['mirna_folds', str(self.mirna_folds)]))
         ret_lines.append('')
@@ -309,6 +297,111 @@ class BaseAnalysis(object):
 
         return ret_lines
 
+    # -- Fold Analysis Methods --
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _init_fold_analysis(self):
+        self.energies = Counter()
+        self.match_counts = Counter()
+        self.energy_bins = None
+        self.energy_bin_densities = None
+        for i in range(26):
+            self.match_counts[i] = 0
+        self._energy_bin_strf = '%.1f'
+        energy_bin_size = int(round(((float(self.settings['energy_bin_size']) + 0.0001) * 10), 0))
+        energy_strs_num = int((-10 * float(self.settings['energy_min_bin'])) + 0.0001)
+       
+        # Initialize bins sorted by least -> most magnitude
+        self._energy_bins = [(-1 * i/10) for i 
+                             in range(0, ((energy_strs_num) + 1), energy_bin_size)] 
+        self._energy_bin_strs = [(self._energy_bin_strf % f) for f in self._energy_bins]
+        # Reverse bins into lowest -> highest order
+        self._energy_bins.reverse()
+
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _add_fold_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
+        hyb_record._ensure_set('fold_record')
+        count = hyb_record.get_count(count_mode)
+
+        record_energy = hyb_record.fold_record.energy
+        if record_energy is None:
+            message = 'ERROR: add_fold_analysis: Record: %s, ' % str(hyb_record)
+            message += 'Bad Energy: %s' % record_energy
+            print(message)
+            raise RuntimeError(message)
+
+        self.energies[record_energy] += count
+
+        record_fold = hyb_record.fold_record.fold
+        l_matches = record_fold.count('(')
+        r_matches = record_fold.count(')')
+        if l_matches != r_matches:
+            message = 'ERROR: add_fold_analysis: Record: %s, ' % str(hyb_record)
+            message += 'Malformed Fold, L/R Matches do not match: %s' % record_fold
+            print(message)
+            raise RuntimeError(message)
+        self.match_counts[l_matches] += count       
+        
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _update_fold_analysis(self, add_analysis):
+        self.energies += add_analysis.energies
+        self.match_counts += add_analysis.match_counts
+        self.energy_bins = None
+        self.energy_bin_densities = None
+
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _process_fold_analysis(self):
+        # Create binned energy analysis with counts
+        energies = [float(i) for i in self.energies.keys()]
+        weights = [i for i in self.energies.values()]
+        bin_vals, keys = np.histogram(energies, bins=self._energy_bins, weights=weights)
+        # Reverse Histogram to put in low -> high magnitude order
+        bin_vals = bin_vals[::-1]
+        keys = keys[::-1]
+        energy_bins = {}
+        for i in range(len(bin_vals)):
+            energy_bins[self._energy_bin_strf % keys[i]] = bin_vals[i]
+        energy_bins[keys[-1]] = 0
+
+        self.energy_bins = energy_bins
+
+        # Create binned energy analysis with density
+        bin_vals, keys = np.histogram(energies, bins=self._energy_bins, weights=weights, 
+                         density=True)
+        # Reverse Histogram to put in low -> high magnitude order
+        bin_vals = bin_vals[::-1]
+        keys = keys[::-1]
+        energy_bin_densities = {}
+        for i in range(len(bin_vals)):
+            energy_bin_densities[self._energy_bin_strf % keys[i]] = bin_vals[i]
+        energy_bin_densities[keys[-1]] = 0
+
+        self.energy_bin_densities = energy_bin_densities
+        
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _format_fold_analysis_matches(self, out_delim):
+        ret_lines = [out_delim.join(['data'] + [str(i) for i in self.match_counts.keys()])]
+        out_line = ['hybrid_match_counts']
+        out_line += [str(v) for v in self.match_counts.values()]
+        ret_lines.append(out_delim.join(out_line))
+        return ret_lines
+
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _format_fold_analysis_energies(self, out_delim):
+        ret_lines = [out_delim.join(['data'] + self._energy_bin_strs)]
+        out_line = ['hybrid_energies']
+        out_line += [str(v) for v in self.energy_bins.values()]
+        ret_lines.append(out_delim.join(out_line))
+        return ret_lines
+
+    # BaseAnalysis : Private Methods : FoldAnalysis
+    def _format_fold_analysis_energy_densities(self, out_delim):
+        ret_lines = [out_delim.join(['data'] + self._energy_bin_strs)]
+        out_line = ['hybrid_energy_densities']
+        out_line += ['%.4f' % v for v in self.energy_bin_densities.values()]
+        ret_lines.append(out_delim.join(out_line))
+        return ret_lines
+    
+    
     # BaseAnalysis : Private Classmethods
     @classmethod
     def _sanitize_name(self, file_name):
@@ -326,7 +419,7 @@ class TypeAnalysis(BaseAnalysis):
     :ref:`seg2_type <seg2_type>` flags must be set for the hyb_record,
     as is done by :func:`hybkit.HybRecord.eval_types`.
     A count is added to
-    the analysis dict for each hybrid type (Ex: "miRNA-mRNA") with
+    the analysis class object for each hybrid type (Ex: "miRNA-mRNA") with
     segments placed in sorted order for non-redundant type-combinations.
     The analysis additionally reports the number of individual segment
     types.
@@ -700,7 +793,7 @@ class TargetAnalysis(BaseAnalysis):
     Class for analysis of targets in miRNA-containing hybrids.
 
     The mirna_target analysis provides an analysis of what sequences are targeted
-    by each respective miRNA within the hyb records. The analysis dict has keys
+    by each respective miRNA within the hyb records. The attribute has keys
     of each miRNA, with each value being a dict of targeted sequences and their
     associated count of times targeted.
 
@@ -901,9 +994,9 @@ class TargetAnalysis(BaseAnalysis):
                                     )
 
 
-# --- miRNA Fold Analysis --- #
+# --- miRNA Pattern Analysis --- #
 
-class FoldAnalysis(BaseAnalysis):
+class PatternAnalysis(BaseAnalysis):
     """
     Evaluate and quantify predicted miRNA binding patterns.
 
@@ -917,12 +1010,6 @@ class FoldAnalysis(BaseAnalysis):
     :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
     methods.
 
-    The analysis dict contains the keys:
-        | :obj:`mirna_folds`: Number of miRNA folds represented.
-        | :obj:`mirna_fold_counts`: A by-index count of
-          whether a miRNA is predicted to be base-paired
-        | :obj:`mirna_fold_frac`: A by-index count of the percent of miRNAs paird at each index
-
     Args:
         name (str, optional): Analysis name
 
@@ -934,17 +1021,17 @@ class FoldAnalysis(BaseAnalysis):
         mirna_fold_frac (dict): Dict with keys of miRNA index and values of percent of miRNAs
             folded at that index
     """
-    # FoldAnalysis : Public Methods
+    # PatternAnalysis : Public Methods
     def __init__(self,
                  name=None,
                  ):
         self.name = name
-        self._init_fold_analysis()
+        self._init_pattern_analysis()
 
-    # FoldAnalysis : Public Methods
+    # PatternAnalysis : Public Methods
     def add(self, hyb_record):
         """
-        Add the information from a :class:`~hybkit.HybRecord` to a mirna_fold analysis.
+        Add the information from a :class:`~hybkit.HybRecord` to a pattern analysis.
 
         If the record contains a single miRNA, the miRNA fold is identified.
         miRNA Dimers are skipped unless the :attr:`settings['all_mirna_dimers'] <settings>`
@@ -957,20 +1044,20 @@ class FoldAnalysis(BaseAnalysis):
         """
         count_mode = self.settings['count_mode']
         allow_mirna_dimers = self.settings['allow_mirna_dimers']
-        self._add_fold_analysis(hyb_record, count_mode, allow_mirna_dimers)
+        self._add_pattern_analysis(hyb_record, count_mode, allow_mirna_dimers)
 
-    # FoldAnalysis : Public Methods
+    # PatternAnalysis : Public Methods
     def update(self, add_analysis):
         """
-        Add another FoldAnalysis object to this one by combining counts.
+        Add another PatternAnalysis object to this one by combining counts.
 
         Args:
-            add_analysis (FoldAnalysis): :class:`FoldAnalysis` object to add.
+            add_analysis (PatternAnalysis): :class:`PatternAnalysis` object to add.
         """
         self._ensure_same_class(add_analysis)
-        self._update_fold_analysis(add_analysis)
+        self._update_pattern_analysis(add_analysis)
 
-    # FoldAnalysis : Public Methods
+    # PatternAnalysis : Public Methods
     def results(self, out_delim=None, newline=False):
         r"""
         Return the results of a miRNA analysis in a list of delimited lines.
@@ -986,17 +1073,17 @@ class FoldAnalysis(BaseAnalysis):
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
-        ret_lines = self._format_fold_analysis(out_delim)
+        ret_lines = self._format_pattern_analysis(out_delim)
 
         if newline:
             for i in range(len(ret_lines)):
                 ret_lines[i] += '\n'
         return ret_lines
 
-    # FoldAnalysis : Public Methods
+    # PatternAnalysis : Public Methods
     def write(self, file_name_base, out_delim=None):
         """
-        Write the results of the fold analysis to files.
+        Write the results of the pattern analysis to files.
 
         Args:
             file_name_base (str): "Base" name for output files. Final file names will be generated
@@ -1007,10 +1094,10 @@ class FoldAnalysis(BaseAnalysis):
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
-        fold_counts_name = file_name_base + '_fold_counts.csv'
-        with open(fold_counts_name, 'w') as fold_counts_file:
-            fold_counts_file.write(out_delim.join(['data', 'count']) + '\n')
-            fold_counts_file.write(out_delim.join(['mirna_folds', str(self.mirna_folds)]) + '\n')
+        pattern_counts_name = file_name_base + '_pattern_counts.csv'
+        with open(pattern_counts_name, 'w') as pattern_counts_file:
+            pattern_counts_file.write(out_delim.join(['data', 'count']) + '\n')
+            pattern_counts_file.write(out_delim.join(['mirna_folds', str(self.mirna_folds)]) + '\n')
 
         line_values = ['index']
         max_i = 24
@@ -1027,9 +1114,152 @@ class FoldAnalysis(BaseAnalysis):
         line_values += ["%f.3" % self.mirna_fold_frac[i] for i in range(1, (max_i + 1))]
         write_lines.append(out_delim.join(line_values))
 
-        fold_bases_name = file_name_base + '_fold_bases.csv'
-        with open(fold_bases_name, 'w') as fold_bases_file:
-            fold_bases_file.write('\n'.join(write_lines) + '\n')
+        pattern_bases_name = file_name_base + '_pattern_bases.csv'
+        with open(pattern_bases_name, 'w') as pattern_bases_file:
+            pattern_bases_file.write('\n'.join(write_lines) + '\n')
+
+    # PatternAnalysis : Public Methods
+    def plot(self, file_name_base):
+        """
+        Create plots of the results.
+
+        Args:
+            file_name_base (str): "Base" name for output files. Final file names will be generated
+                based on analysis type and provided parameters.
+        """
+        hybkit.plot.pattern(self, file_name_base + '_pattern_bases')
+
+
+# --- Hybrid Fold Analysis --- #
+
+class FoldAnalysis(BaseAnalysis):
+    """
+    Evaluate hybrid fold energy and match count characteristics.
+
+    This analysis evaluates the predicted Gibbs Free Energy of folding 
+    and count of predicted Watson-Crick Base Pairing Interactions within
+    hyb records that have an associated :class:`~hybkit.FoldRecord` object
+    as the attribute :attr:`~hybkit.HybRecord.energy_record`. 
+
+    Args:
+        name (str, optional): Analysis name
+
+    Attributes:
+        name (str): Analysis name
+        energies (collections.Counter): Python counter object containing strings representing
+            hybrid energy counts.
+        matches (collections.Counter): Python counter object containing counts of hybrids
+            with a predicted number of match interactions.
+
+    """
+    # FoldAnalysis : Public Methods
+    def __init__(self,
+                 name=None,
+                 ):
+        self.name = name
+        self._init_fold_analysis()
+    
+    
+    # FoldAnalysis : Public Methods
+    def add(self, hyb_record):
+        """
+        Add the information from a :class:`~hybkit.HybRecord` to the fold analysis.
+       
+        Fold values > 0.0 are assumed to be artifacts and are capped at 0.0. 
+
+        Args:
+            hyb_record (HybRecord): Record with information to add.
+        """
+        count_mode = self.settings['count_mode']
+        self._add_fold_analysis(hyb_record, count_mode)
+
+    # FoldAnalysis : Public Methods
+    def update(self, add_analysis):
+        """
+        Add another FoldAnalysis object to this one by combining counts.
+
+        Args:
+            add_analysis (FoldAnalysis): :class:`FoldAnalysis` object to add.
+        """
+        self._ensure_same_class(add_analysis)
+        self._update_fold_analysis(add_analysis)
+
+    # FoldAnalysis : Public Methods
+    def process_fold_analysis(self):
+        """
+        Calculate binned results of fold analysis.
+
+        This fills the analysis variables:
+
+            | :obj:`energy_bins` : `dict` with keys of a Gibbs Free Energy quantity 
+              and values of counts of hybrids with that predicted energy
+            | :obj:`energy_bin_densities` : `dict` with keys of a Gibbs Free Energy quantity 
+              and values of counts of hybrids with that predicted energy normalized by total
+              counts
+        """
+        self._process_fold_analysis()
+
+    # FoldAnalysis : Public Methods
+    def results(self, out_delim=None, newline=False):
+        r"""
+        Return the results of a FoldAnalysis in a list of delimited lines.
+
+        Args:
+            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
+                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
+            newline (bool, optional): Terminate lines with a newline_character. Default False
+
+        Returns:
+            list of string objects representing the results of the analysis.
+        """
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        if self.energy_bins is None:
+            self.process_fold_analysis()
+
+        ret_lines = self._format_fold_analysis_matches(out_delim)
+        ret_lines += [''] + self._format_fold_analysis_energies(out_delim)
+        ret_lines += [''] + self._format_fold_analysis_energy_densities(out_delim)
+
+        if newline:
+            for i in range(len(ret_lines)):
+                ret_lines[i] += '\n'
+        return ret_lines
+
+    # FoldAnalysis : Public Methods
+    def write(self, file_name_base, out_delim=None):
+        """
+        Write the results of the FoldAnalysis to files.
+
+        Args:
+            file_name_base (str): "Base" name for output files. Final file names will be generated
+                based on analysis type and provided parameters.
+            out_delim (str, optional): Delimiter to write between fields.
+                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
+        """
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        if self.energy_bins is None:
+            self.process_fold_analysis()
+
+        matches_name = file_name_base + '_fold_match.csv'
+        energies_name = file_name_base + '_fold_energy.csv'
+        energy_densities_name = file_name_base + '_fold_energy_densities.csv'
+
+        with open(matches_name, 'w') as matches_file:
+            write_lines = self._format_fold_analysis_matches(out_delim)
+            matches_file.write('\n'.join(write_lines) + '\n')
+
+        with open(energies_name, 'w') as energies_file:
+            write_lines = self._format_fold_analysis_energies(out_delim)
+            energies_file.write('\n'.join(write_lines) + '\n')
+
+        with open(energy_densities_name, 'w') as energy_densities_file:
+            write_lines = self._format_fold_analysis_energy_densities(out_delim)
+            energy_densities_file.write('\n'.join(write_lines) + '\n')
+
 
     # FoldAnalysis : Public Methods
     def plot(self, file_name_base):
@@ -1040,4 +1270,8 @@ class FoldAnalysis(BaseAnalysis):
             file_name_base (str): "Base" name for output files. Final file names will be generated
                 based on analysis type and provided parameters.
         """
-        hybkit.plot.fold(self, file_name_base + '_fold_bases')
+        hybkit.plot.fold_energy_counts(self, file_name_base + '_fold_energy_counts')
+        hybkit.plot.fold_energy_densities(self, file_name_base + '_fold_energy_densities')
+        hybkit.plot.fold_matches(self, file_name_base + '_fold_match_counts')
+
+

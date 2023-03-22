@@ -474,17 +474,17 @@ foldrecord_parser = argparse.ArgumentParser(add_help=False)
 fr_group = foldrecord_parser.add_argument_group('Fold Record Settings')
 _class_settings_groups['FoldRecord'] = fr_group
 
-# Create parser for FoldRecord options
+# Create parser for FoldFile options
 foldfile_parser = argparse.ArgumentParser(add_help=False)
 ff_group = foldfile_parser.add_argument_group('Fold File Settings')
 _class_settings_groups['FoldFile'] = ff_group
 
-# Create parser for FoldRecord options
+# Create parser for HybFoldIter options
 hybfolditer_parser = argparse.ArgumentParser(add_help=False)
 hfi_group = hybfolditer_parser.add_argument_group('Hyb-Fold Iterator Settings')
 _class_settings_groups['HybFoldIter'] = hfi_group
 
-# Create parser for FoldRecord options
+# Create parser for Analysis options
 analysis_parser = argparse.ArgumentParser(add_help=False)
 a_group = analysis_parser.add_argument_group('Analysis Settings')
 _class_settings_groups['Analysis'] = a_group
@@ -625,7 +625,7 @@ hyb_fold_analyze_parser.add_argument('-a', '--analysis_type',
                                      # nargs='1',
                                      default='fold',
                                      action='store',
-                                     choices=['fold'],
+                                     choices=['fold', 'pattern'],
                                      help=_this_arg_help)
 
 # Argument Parser : all_analyze
