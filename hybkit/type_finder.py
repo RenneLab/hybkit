@@ -31,7 +31,7 @@ class TypeFinder(object):
 
     # TypeFinder : Public Attributes
     #: Placeholder for storing active method, set with :meth:`set_method`.
-    find = None
+    find_with_params = None
 
     # TypeFinder : Public Attributes
     #: Placeholder for parameters for active method, set with :meth:`set_method`.
@@ -66,6 +66,50 @@ class TypeFinder(object):
 
     # TypeFinder : Public Classmethods : method
     @classmethod
+    def method_is_set(cls):
+        """
+        Return whether a TypeFinder method has been set.
+
+        Methods should be set with :meth:`set_method`.
+
+        Returns:
+            bool: True if a method has been set, False otherwise.
+        """
+        return cls.find_with_params is not None
+
+    # TypeFinder : Public Classmethods : method
+    @classmethod
+    def check_set_method(cls):
+        """
+        Check wether a TypeFinder method has been set, and if not then set the default method
+        of :attr:`default_method`.
+        """
+        if not cls.method_is_set():
+            cls.set_method(cls.default_method)
+
+    # TypeFinder : Public Classmethods : method
+    @classmethod
+    def find(cls, seg_props):
+        """
+        If a TypeFinder method has been set with :meth:`set_method`.
+        use the current paramaters set in 
+        :attr:`params` to find the type of the provided segment by calling::
+
+            seg_type = :meth:`TypeFinder.find_custom_method`(seg_props, :attr`TypeFinder.params`)
+
+        Args:
+            seg_props (dict): :obj:`seg_props` from :class:`hybkit.HybRecord`
+
+        Returns:
+            str: Type of the provided segment, or None if a type cannot be identified.
+        """
+        if cls.find_with_params is None:
+            raise RuntimeError('TypeFinder method has not been set.')
+        return cls.find_with_params(seg_props, cls.params)
+        
+
+    # TypeFinder : Public Classmethods : method
+    @classmethod
     def set_custom_method(cls, method, params={}):
         """
         Set the method for use to find seg types.
@@ -74,25 +118,23 @@ class TypeFinder(object):
         use :meth:`set_method`.
         Custom functions provided must have the signature::
 
-            seg_type = custom_method(self, seg_props, params, check_complete)
+            seg_type = custom_method(self, seg_props, params)
 
         This function should return the string of the assigned segment type if found, or a
         None object if the type cannot be found.
         It can also take a dictionary in the "params" argument that specifies
         additional or dynamic search properties, as desired.
-        The if check_complete is true, the function should search for all possibilities for
-        a given sequence, instead of stopping after the first is found.
 
         Args:
             method (method): Method to set for use.
             params (dict, optional): dict of custom parameters to set for use.
         """
-        cls.find = types.MethodType(method, cls)
+        cls.find_with_params = types.MethodType(method, cls)
         cls.params = params
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def method_hybformat(seg_props, params={}, check_complete=False):
+    def method_hybformat(seg_props, params={}):
         """
         Return the type of the provided segment, or None if segment cannot be identified.
 
@@ -113,21 +155,20 @@ class TypeFinder(object):
         Args:
             seg_props (dict): :obj:`seg_props` from :class:`hybkit.HybRecord`
             params (dict, optional): Unused in this method.
-            check_complete (bool, optional): Unused in this method.
-
         """
         split_id = seg_props['ref_name'].split('_')
         return split_id[-1]
 
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
-    def method_string_match(seg_props, params={}, check_complete=False):
+    def method_string_match(seg_props, params={}):
         """
         Return the type of the provided segment, or None if unidentified.
 
         This method attempts to find a string matching a specific pattern within the identifier
         of the aligned segment. Search options include "startswith", "contains", "endswith", and
-        "matches". The required params dict should contain a key for each desired
+        "matches", and returns the first type matching the criteria.
+        The required params dict should contain a key for each desired
         search type, with a list of 2-tuples for each search-string with assigned-type.
 
         Example:
@@ -148,52 +189,32 @@ class TypeFinder(object):
             seg_props (dict): :class:`~hybkit.HybRecord` segment properties dict
                 to evaluate.
             params (dict, optional): Dict with search paramaters as described above.
-            check_complete (bool, optional): If true, the method will continue checking search
-                options after an option has been found, to ensure that no options conflict
-                (more sure method). If False, it will stop after the first match is found
-                (faster method). (Default: False)
         """
         seg_name = seg_props['ref_name']
-        found_types = set()
+        found_type = None
         check_done = False
-        if 'startswith' in params and (check_complete or not check_done):
+        if 'startswith' in params and found_type:
             for search_string, search_type in params['startswith']:
                 if seg_name.startswith(search_string):
-                    found_types.add(search_type)
-                    if not check_complete:
-                        check_done = True
-                        break
-        if 'contains' in params and (check_complete or not check_done):
+                    found_type = search_type
+                    break
+        if 'contains' in params and not found_type:
             for search_string, search_type in params['contains']:
                 if search_string in seg_name:
-                    found_types.add(search_type)
-                    if not check_complete:
-                        check_done = True
-                        break
-        if 'endswith' in params and (check_complete or not check_done):
+                    found_type = search_type
+                    break
+        if 'endswith' in params and not found_type:
             for search_string, search_type in params['endswith']:
                 if seg_name.endswith(search_string):
-                    found_types.add(search_type)
-                    if not check_complete:
-                        check_done = True
-                        break
-        if 'matches' in params and (check_complete or not check_done):
+                    found_type = search_type
+                    break
+        if 'matches' in params and not found_type:
             for search_string, search_type in params['matches']:
                 if search_string == seg_name:
-                    found_types.add(search_type)
-                    if not check_complete:
-                        check_done = True
-                        break
+                    found_type = search_type
+                    break
 
-        if not found_types:
-            return None
-        elif len(found_types) == 1:
-            return next(iter(found_types))
-        elif len(found_types) > 1:
-            message = 'Multiple sequence types found for item: %s' % seg_name
-            message += '  ' + ', '.join(sorted(list(found_types)))
-            print(message)
-            raise RuntimeError(message)
+        return found_type
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
@@ -260,7 +281,7 @@ class TypeFinder(object):
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     @staticmethod
-    def method_id_map(seg_props, params={}, check_complete=False):
+    def method_id_map(seg_props, params={}):
         """
         Return the type of the provided segment or None if it cannot be identified.
 
@@ -278,7 +299,6 @@ class TypeFinder(object):
 
         Args:
             params (dict): Dict of mapping of sequence identifiers to sequence types.
-            check_complete (bool, optional): Unused in this method.
 
         Returns:
            str: Identified sequence type, or None if it cannot be found.
@@ -393,6 +413,10 @@ class TypeFinder(object):
                             return_dict[seq_id] = seg_type
 
         return return_dict
+
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #:   Default method assigned using :meth:`check_set_method` 
+    default_method = 'hybformat'
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     #:   Dict of provided methods available to assign segment types

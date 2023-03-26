@@ -7,13 +7,17 @@
 
 import os
 import sys
-if not (sys.version_info.major >= 3 and sys.version_info.minor >= 7):
-    raise RuntimeError('Python 3.7+ is required for hybkit.')
-
 from importlib import resources
+
+# Check Python version and throw error if not 3.8+
+if not (sys.version_info.major >= 3 and sys.version_info.minor >= 8):
+    raise RuntimeError('Python 3.8+ is required for hybkit.')
+
+# Set hybkit module directory
 with resources.path('hybkit', '__init__.py') as path_obj:
     module_dir = os.path.dirname(path_obj)
 
+# Hybkit information
 project_name = 'hybkit'
 version = "0.3.0a"
 description = 'Toolkit for analysis of hybrid genomic sequence data.'
@@ -24,14 +28,12 @@ name_and_version = project_name + '-' + version
 
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)
 
-# Putting in try block to allow use with exec()
+# Identify paths for data files used in hybkit
 try:
     local_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 except NameError:
     local_data_dir = 'using_with_exec'
-
 local_prefix_data_dir = os.path.join(local_data_dir, name_and_version)
-
 if os.path.isdir(os.path.join(prefix_data_dir, 'ref_data')):
     hybkit_data_dir = prefix_data_dir
 elif os.path.isdir(os.path.join(local_data_dir, 'ref_data')):
@@ -54,6 +56,7 @@ else:
 ref_data_dir = os.path.join(hybkit_data_dir, 'reference_data')
 docs_dir = os.path.join(hybkit_data_dir, 'docs')
 
+# Python package classifiers for PyPI
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -65,8 +68,6 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Operating System :: OS Independent',
     'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
@@ -92,4 +93,5 @@ __license__ = "GPLv3+"
 __maintainer__ = "Renne Group, University of Florida"
 __status__ = "Development"
 __version__ = version
-spec_version = __version__  # Optionally define separate specification version.
+# Hyb file specification version.
+spec_version = __version__  

@@ -13,6 +13,7 @@ private*
 *.nextflow*
 */work/*
 deprecated*
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
