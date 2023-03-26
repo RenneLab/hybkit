@@ -362,9 +362,9 @@ class HybRecord(object):
                  id,
                  seq,
                  energy=None,
-                 seg1_props={},
-                 seg2_props={},
-                 flags={},
+                 seg1_props=None,
+                 seg2_props=None,
+                 flags=None,
                  read_count=None,
                  fold_record=None,
                  ):
@@ -373,14 +373,24 @@ class HybRecord(object):
             message = 'HybRecord initialization requires "id" and "seq" parameters to be defined.\n'
             message += 'ID: "%s", Seq: "%s"' % (id, seq)
             _print_and_error(message)
-
-        self.id = id
-        self.seq = seq
-        self.energy = energy
-        self.seg1_props = self._make_seg_props_dict(seg1_props)
-        self.seg2_props = self._make_seg_props_dict(seg2_props)
-        self.flags = self._make_flags_dict(flags)
-
+        self.id = self._ensure_attr_types(id, 'id')
+        self.seq = self._ensure_attr_types(seq, 'seq')
+        self.energy = self._ensure_attr_types(energy, 'energy')
+        if seg1_props is None:
+            seg1_props = {}
+        else:
+            seg1_props = copy.deepcopy(seg1_props)
+        self.seg1_props = self._ensure_attr_types(self._make_seg_props_dict(seg1_props), 'seg_props')
+        if seg2_props is None:
+            seg2_props = {}
+        else:
+            seg2_props = copy.deepcopy(seg2_props)
+        self.seg2_props = self._ensure_attr_types(self._make_seg_props_dict(seg2_props), 'seg_props')
+        if flags is None:
+            flags = {}
+        else:
+            flags = copy.deepcopy(flags)
+        self.flags = self._ensure_attr_types(self._make_flags_dict(flags), 'flags')
         self.fold_record = None     # Placeholder variable for fold_record
 
         if read_count is not None:
@@ -1129,7 +1139,11 @@ class HybRecord(object):
             :class:`HybRecord` instance containing record information.
         """
         line_items = line.strip().split('\t')
-        # print(line_items)
+        if len(line_items) < 15 or len(line_items) > 16:
+            message = 'Hyb record lines require 15 or 16 fields separated by tab ("\\t") characters, '
+            message += 'but only %i were found.\n' % len(line_items)
+            message += 'Line:\n%s' % line
+            _print_and_error(message)
         hyb_id = line_items[0]
         seq = line_items[1]
         energy = line_items[2]
@@ -1248,6 +1262,7 @@ class HybRecord(object):
         return return_obj
 
     # HybRecord : Private Constants
+    _SEG_PROPS_SET = set(SEGMENT_COLUMNS)
     _SET_PROPS_SET = set(SET_PROPS)
     _GEN_PROPS_SET = set(GEN_PROPS)
     _STR_PROPS_SET = set(STR_PROPS)
@@ -1264,6 +1279,90 @@ class HybRecord(object):
     def _post_init_tasks(self):
         # Stub for subclassing
         pass
+
+    # HybRecord : Private Methods : Record Parsing
+    # Ensure attributes passed to constructor are valid for the respective HybRecord attributes
+    def _ensure_attr_types(self, value, attribute):
+        err_message = None
+        # Value is checked for placeholder value: '.' and converted to None if found.
+        if value == '.':
+            value = None
+        if attribute == 'id':
+            if not isinstance(value, str):
+                err_message = 'id must be a string. Provided id is type %s: %s' % (type(value), value)
+            elif not value.strip():
+                err_message = 'id must be a non-empty string. Provided id: "%s" is an empty string' % value
+        elif attribute == 'seq':
+            if not isinstance(value, str):
+                err_message = 'seq must be a string. Provided seq is type %s: %s' % (type(value), value)
+            elif not value.strip():
+                err_message = 'seq must be a non-empty string. Provided seq: "%s" is an empty string' % value
+            elif not value.isalpha():
+                err_message = 'seq must be alphabetic. Provided seq is non-alphabetic: %s' % value
+        elif attribute == 'energy':
+            if not isinstance(value, (float, int, type(None), str)):
+                err_message = 'energy must be a float, int, numeric str, or None. Provided energy: "%s" is type %s' % (value, type(value)) 
+            if isinstance(value, str):
+                if not value.strip():
+                    err_message = 'energy must be a float, int, numeric str, or None. Provided energy is empty string: "%s"' % value
+                elif '_' in value:
+                    err_message = 'energy must be a float, int, numeric str, or None. Provided energy is non-numeric string: "%s"' % value
+                else:
+                    try:
+                        float(value)
+                    except ValueError:
+                        err_message = 'energy must be a float, int, numeric str, or None. Provided energy is non-numeric string: "%s"' % value        
+        elif attribute == 'seg_props':
+            if not isinstance(value, (dict, type(None))):
+                err_message = 'segN_props must be a dict. Provided segN_props is type %s: %s' % (type(value), value)
+            else:
+                for prop_key, prop_val in value.items():
+                    if prop_key == 'ref_name':
+                        if not isinstance(prop_val, (str, type(None))):
+                            err_message = 'segN_props ref_name must be a string (or None). Provided ref_name is type %s: %s' % (type(prop_val), prop_val)
+                            break
+                        elif isinstance(prop_val, str) and not prop_val.strip():
+                            err_message = 'segN_props ref_name must be a non-empty string (or None). Provided ref_name is empty string: "%s"' % prop_val
+                            break
+                    elif prop_key in {'read_start', 'read_end', 'ref_start', 'ref_end'}:
+                        if not isinstance(prop_val, (int, str, type(None))):
+                            err_message = 'segN_props %s must be an int (or None). Provided read_start: "%s" is type %s: %s' % (prop_key, prop_val, type(prop_val), prop_val)
+                            break
+                        elif isinstance(prop_val, str):
+                            if not prop_val.strip():
+                                err_message = 'segN_props %s must be an int (or None). Provided %s is empty string: "%s"' % (prop_key, prop_key, prop_val)
+                                break
+                            elif prop_val == '.':
+                                value[prop_key] = None
+                            elif '_' in prop_val:
+                                err_message = 'segN_props %s must be an int (or None). Provided %s is non-numeric string: "%s"' % (prop_key, prop_key, prop_val)
+                                break
+                            else:
+                                try:
+                                    value[prop_key] = int(prop_val)
+                                except ValueError:
+                                    err_message = 'segN_props %s must be an int (or None). Provided %s is non-numeric string: "%s"' % (prop_key, prop_key, prop_val)
+                                    break
+                    elif prop_key == 'score':
+                        if not isinstance(prop_val, (float, int, str, type(None))):
+                            err_message = 'segN_props score must be a float, int, numeric str, or None. Provided score: "%s" is type %s" %s' % (prop_val, type(prop_val), prop_val)
+                            break
+                    else:
+                        err_message = 'segN_props must be have only keys: ref_name, read_start, read_end, ref_start, ref_end, score. Provided segN_props has key %s' % key
+                        break
+
+        elif attribute == 'flags':
+            if not isinstance(value, dict):
+                err_message = 'flags must be a dict. Provided flags is type %s: %s' % (type(value), value)
+            else:
+                for key, val in value.items():
+                    if not isinstance(val, str):
+                        err_message = 'flags values must be str. Provided value for flag: %s is type %s: %s' % (key, type(val), val)
+                        break
+        if err_message is not None:
+            _print_and_error(err_message)
+        else:
+            return value
 
     # HybRecord : Private Methods : Record Parsing
     def _format_seg_props(self, seg_props, prefix='', suffix='', indent_str=''):
@@ -1396,35 +1495,25 @@ class HybRecord(object):
         return {k: str(v) for k, v in flag_obj.items()}
 
     # HybRecord : Private Methods : seg_props
-    def _make_seg_props_dict(self, seg_props_obj={}):
-        # Create a dictionary with mapping entries, ensuring each read data point is either a
-        #   placeholder or is of the correct data type.
+    def _make_seg_props_dict(self, seg_props_obj=None):
+        # Create a dictionary with mapping entries for all segment properties.
         return_dict = {}
-        segment_column_types = {'ref_name': str,
-                                'read_start': int,
-                                'read_end': int,
-                                'ref_start': int,
-                                'ref_end': int,
-                                'score': str,
-                                }
-        for column in self.SEGMENT_COLUMNS:
-            if column in seg_props_obj:
-                if seg_props_obj[column] is None:
-                    return_dict[column] = None
-                elif seg_props_obj[column] == self.settings['hyb_placeholder']:
-                    return_dict[column] = None
-                else:
-                    column_type = segment_column_types[column]
-                    try:
-                        return_dict[column] = column_type(seg_props_obj[column])
-                    except ValueError:
-                        message = 'Error in setting segN_props dict.\n'
-                        message += 'Entry "%s" for column: %s' % (seg_props_obj[column], column)
-                        message += 'could not be converted to type: %s' % str(column_type)
-                        print(message)
-                        raise
+        if seg_props_obj is None:
+            seg_props_obj = {}
+        elif not isinstance(seg_props_obj, dict):
+            message = 'seg_props_ must be a dict object. Provided: "%s"' % seg_props_obj
+            _print_and_error(message)
+        # Check for extra keys in provided seg props dict
+        elif (set((*seg_props_obj.keys(),)) - set(self._SEG_PROPS_SET)):
+            message = 'seg_props_ must be a dict object with keys in: '
+            message += ', '.join(self.SEGMENT_COLUMNS)
+            message += '. Provided: "%s"' % str(*seg_props_obj.keys())
+            _print_and_error(message)
+        for prop_key in self.SEGMENT_COLUMNS:
+            if prop_key in seg_props_obj:
+                return_dict[prop_key] = seg_props_obj[prop_key]
             else:
-                return_dict[column] = None
+                return_dict[prop_key] = None
         return return_dict
 
     # HybRecord : Private Methods : properties

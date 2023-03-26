@@ -43,7 +43,7 @@ ART_HYB_PROPS_1 = {
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
         'ARTSEG1_SOURCE_NAME_microRNA	1	20	1	20	0.001	'
         'ARTSEG2_SOURCE_NAME_microRNA	21	40	21	40	0.001	'
-        'dataset=artificial;'
+        'dataset=artificial'
     ),
     'seg1_type': 'microRNA',
     'seg2_type': 'microRNA',
@@ -96,7 +96,7 @@ ART_HYB_PROPS_2 = {
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
         'ARTSEG1_SOURCE_NAME_microRNA	1	20	1	20	0.001	'
         'ARTSEG2_SOURCE_NAME_coding	21	40	21	40	0.001	'
-        'dataset=artificial;'
+        'dataset=artificial'
     ),
     'seg1_type': 'microRNA',
     'seg2_type': 'coding',
@@ -147,7 +147,7 @@ ART_HYB_PROPS_3 = {
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
         'ARTSEG1_SOURCE_NAME_coding	1	20	1	20	0.001	'
         'ARTSEG2_SOURCE_NAME_microRNA	21	40	21	40	0.001	'
-        'dataset=artificial;'
+        'dataset=artificial'
     ),
     'seg1_type': 'coding',
     'seg2_type': 'microRNA',
@@ -198,7 +198,7 @@ ART_HYB_PROPS_4 = {
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
         'ARTSEG1_SOURCE_NAME_coding	1	20	1	20	0.001	'
         'ARTSEG2_SOURCE_NAME_coding	21	40	21	40	0.001	'
-        'dataset=artificial;'
+        'dataset=artificial'
     ),
     'seg1_type': 'coding',
     'seg2_type': 'coding',
@@ -303,7 +303,6 @@ ART_HYB_STR_PROPS['false_prop_argsets'] = [ \
 ]
 
 
-
 # Empty seg_props dictionary for testing.
 EMPTY_SEG_PROPS = {
     'ref_name': None,
@@ -375,18 +374,18 @@ TEST_OBJECTS = {
     'dict_rand_key': {TEST_HYBID_STR: True},
     'seg_props_dict': copy.deepcopy(EMPTY_SEG_PROPS),
 }
-NONSPACE_STRS = ['id_str', 'dot_str', 'int_str', 'float_str', 'test_seq_str']
+NONSPACE_STRS = ['id_str', 'int_str', 'float_str', 'test_seq_str']
 ALL_STRS = ['empty_str', 'space_str', 'tab_str', *NONSPACE_STRS]
-id_allowed_types = {*NONSPACE_STRS}
-seq_allowed_types = {'test_seq_str'}
-energy_allowed_types = {'float_str', 'float', 'dot_str'}
-seg_props_allowed_types = {'seg_props_dict', 'empty_dict'}
-ref_name_allowed_types = {'None', *NONSPACE_STRS}
-read_start_allowed_types = {'None', 'int_str', 'int'}
-read_end_allowed_types = {'None', 'int_str', 'int'}
-ref_start_allowed_types = {'None', 'int_str', 'int'}
-ref_end_allowed_types = {'None', 'int_str', 'int'}
-score_allowed_types = {*ALL_STRS}
+ID_ALLOWED_TYPES = {*NONSPACE_STRS}
+SEQ_ALLOWED_TYPES = {'test_seq_str'}
+ENERGY_ALLOWED_TYPES = {'int_str', 'int', 'float_str', 'float', 'dot_str', 'None'}
+SEG_PROPS_ALLOWED_TYPES = {'seg_props_dict', 'empty_dict', 'None'}
+REF_NAME_ALLOWED_TYPES = {'None', 'dot_str', *NONSPACE_STRS}
+READ_START_ALLOWED_TYPES = {'None', 'dot_str', 'int_str', 'int'}
+READ_END_ALLOWED_TYPES = {'None', 'dot_str', 'int_str', 'int'}
+REF_START_ALLOWED_TYPES = {'None', 'dot_str', 'int_str', 'int'}
+REF_END_ALLOWED_TYPES = {'None', 'dot_str', 'int_str', 'int'}
+SCORE_ALLOWED_TYPES = {'None', 'dot_str', *ALL_STRS, 'int', 'float'}
 
 # ----- Set Testing File Paths -----
 auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
@@ -446,7 +445,11 @@ def get_expected_result_context(expect_str, error_types = (TypeError, RuntimeErr
     if expect_str == 'Pass':
         return does_not_raise()
     elif expect_str == 'Raise':
-        return pytest.raises((*error_types))
+        if isinstance(error_types, list):
+            error_types = tuple(error_types)
+        elif not isinstance(error_types, tuple):
+            error_types = (error_types,)
+        return pytest.raises(error_types)
 
 # ----- HybRecord Constructor Tests - Minimal -----
 def test_hybrecord_constructor_minimal():
@@ -611,11 +614,11 @@ default_constructor_args = {
     'seg2_props': test_seg_props,
 }
 field_allowed_types = {
-    'id': id_allowed_types,
-    'seq': seq_allowed_types,
-    'energy': energy_allowed_types,
-    'seg1_props': seg_props_allowed_types,
-    'seg2_props': seg_props_allowed_types,
+    'id': ID_ALLOWED_TYPES,
+    'seq': SEQ_ALLOWED_TYPES,
+    'energy': ENERGY_ALLOWED_TYPES,
+    'seg1_props': SEG_PROPS_ALLOWED_TYPES,
+    'seg2_props': SEG_PROPS_ALLOWED_TYPES,
 }
 test_parameters = []
 # Setup test constructor types for each attribute in default_constructor_args:
@@ -647,7 +650,6 @@ def test_hybrecord_obj_types(test_field, test_name, expect_str, test_input):
 
 # ----- HybRecord Type Tests - Segment Property Attributes -----
 # Setup test constructor types for seg_props attributes:
-test_seg_props = get_empty_seg_props()
 default_seg_props = {
     'ref_name': 'test_ref',
     'read_start': 1,
@@ -664,12 +666,12 @@ default_constructor_args = {
     'seg2_props': default_seg_props,
 }
 props_allowed_types = {
-    'ref_name': ref_name_allowed_types,
-    'read_start': read_start_allowed_types,
-    'read_end': read_end_allowed_types,
-    'ref_start': ref_start_allowed_types,
-    'ref_end': ref_end_allowed_types,
-    'score': score_allowed_types,
+    'ref_name': REF_NAME_ALLOWED_TYPES,
+    'read_start': READ_START_ALLOWED_TYPES,
+    'read_end': READ_END_ALLOWED_TYPES,
+    'ref_start': REF_START_ALLOWED_TYPES,
+    'ref_end': REF_END_ALLOWED_TYPES,
+    'score': SCORE_ALLOWED_TYPES,
 }
 test_parameters = []
 # Setup test constructor types for each segN_props dict
@@ -678,7 +680,7 @@ for prop_set in ['seg1_props', 'seg2_props']:
         # Setup testing of each possible data type for each field
         for test_name, test_object in TEST_OBJECTS.items():
             # Get types allowed for this field
-            allowed_types = field_allowed_types[constructor_field]
+            allowed_types = props_allowed_types[prop_field]
             # Setup constructor arguments for this test
             constructor_args = copy.deepcopy(default_constructor_args)
             seg_args = copy.deepcopy(default_seg_props)
@@ -687,15 +689,16 @@ for prop_set in ['seg1_props', 'seg2_props']:
             # Determine Error vs. Null Context for this test
             expect_result = get_expected_result_string(test_name in allowed_types)
             test_param_set = (
-                constructor_field, 
+                prop_set,
+                prop_field, 
                 test_name, 
                 expect_result,
                 constructor_args, 
             )
             test_parameters.append(test_param_set)
 
-@pytest.mark.parametrize("test_field,test_name,expect_str,test_input",[*test_parameters])
-def test_hybrecord_obj_types_seg_props(test_field, test_name, expect_str, test_input):
+@pytest.mark.parametrize("prop_set,prop_field,test_name,expect_str,test_input",[*test_parameters])
+def test_hybrecord_obj_types_seg_props(prop_set, prop_field, test_name, expect_str, test_input):
     expect_context = get_expected_result_context(expect_str)
     with expect_context:
         print(test_input)
@@ -713,6 +716,10 @@ test_parameters = [
 @pytest.mark.parametrize("test_name,test_params",[*test_parameters])
 def test_hybrecord_type_mirna(test_name, test_params):
     """Test Hybrecord type_eval(), eval_mirna(), mirna-associated prop(), and mirna_detail() values"""    
+    test_record = hybkit.HybRecord.from_line(
+        line=test_params['hyb_str'],
+    )
+    assert test_record.to_line() == test_params['hyb_str']
     test_record = hybkit.HybRecord.from_line(
         line=test_params['hyb_str'],
         hybformat_id=True,
@@ -848,50 +855,50 @@ def test_hybrecord_magic_methods():
     assert hash(test_record_1)
     assert len(test_record_1) == 40
 
+
 # ----- HybRecord misc disallowed option tests -----
-def test_hybrecord_misc_disallowed():
+test_parameters = [
+    ('to_fasta_record', ('notallowed',)),
+    ('is_set', ('badprop',)),
+    ('prop', ('badprop',)),
+    ('prop', ('any_seg_type_contains', None)),
+    ('set_fold_record', (None,)),
+    ('set_fold_record', ('not_fold_record',)),
+    ('mirna_detail', ('disallowed_detail',)),
+    ('_get_flag', ('fake_flag', True)),
+    ('_make_flags_dict', ('not_dict',)),
+    ('_make_flags_dict', ({'bad_flag': True},)),
+    ('_parse_hybformat_id', ('bad_id_name_continues_on',)),
+    ('_parse_hybformat_ref', ('bad_ref_name_continues_on',)),
+    ('_read_flags', ('bad_flag=B;bad_flag2=C;',)),
+]
+#TODO: assert not test_record.prop('has_indels')
+
+@pytest.mark.parametrize("method,badval",[*test_parameters])
+def test_hybrecord_misc_disallowed(method, badval):
     test_record = hybkit.HybRecord.from_line(
         ART_HYB_PROPS_1['hyb_str'], 
         hybformat_id=True, 
         hybformat_ref=True
     )
+    with pytest.raises(RuntimeError):
+        getattr(test_record, method)(*badval)
 
-    with pytest.raises(RuntimeError):
-        test_record.to_fasta_record('notallowed')
-    with pytest.raises(RuntimeError):
-        test_record.is_set('badprop')
-    with pytest.raises(RuntimeError):
-        test_record.prop('badprop')
-    with pytest.raises(RuntimeError):
-        test_record.prop('any_seg_type_contains', None)
-    with pytest.raises(RuntimeError):
-        test_record.set_fold_record(None)
-    with pytest.raises(RuntimeError):
-        test_record.set_fold_record('not_fold_record')
-    with pytest.raises(RuntimeError):
-        test_record.mirna_detail('disallowed_detail')
-
-    #TODO
-    #assert not test_record.prop('has_indels')
-
-   # Test Private Methods
+test_parameters = [
+    ('_ensure_props_read_start_end', tuple()),
+    ('to_fasta_record', ('seg1',)),
+ ]
+@pytest.mark.parametrize("method,badval",[*test_parameters])
+def test_hybrecord_bad_seg_props(method, badval):
+    test_record = hybkit.HybRecord.from_line(
+        ART_HYB_PROPS_1['hyb_str'], 
+        hybformat_id=True, 
+        hybformat_ref=True
+    )
     test_record.seg1_props['read_start'] = None
     with pytest.raises(RuntimeError):
-        test_record._ensure_props_read_start_end()
-    with pytest.raises(RuntimeError):
-        test_record._get_seg_seq(test_record.seg1_props)
-    with pytest.raises(RuntimeError):
-        test_record._get_flag('fake_flag', require=True)
-    with pytest.raises(RuntimeError):
-        test_record._make_flags_dict('not_dict')
-    with pytest.raises(RuntimeError):
-        test_record._make_flags_dict({'bad_flag': True})
-    with pytest.raises(RuntimeError):
-        test_record._parse_hybformat_id('bad_id_name_continues_on')
-    with pytest.raises(RuntimeError):
-        test_record._parse_hybformat_ref('bad_ref_name_continues_on')
-    with pytest.raises(RuntimeError):
-        test_record._read_flags('bad_flag=B;')
+        getattr(test_record, method)(*badval)
+
 
 # ----- HybRecord misc private_function_tests -----
 def test_hybrecord_misc_private():
@@ -903,8 +910,8 @@ def test_hybrecord_misc_private():
     read_flags = test_record._read_flags('bad_flag=B;', allow_undefined_flags=True)
     assert read_flags['bad_flag'] == 'B'
 
-# ----- Begin Old Section -----
 
+# ----- Begin Old Section -----
 def old_test_hybfile():
     if not os.path.isdir(test_out_dir):
         os.mkdir(test_out_dir)
