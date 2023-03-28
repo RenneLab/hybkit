@@ -187,17 +187,7 @@ FoldRecord_settings_info = {
         None,
         {}
     ],
-}
-
-# settings_info : FoldFile
-# setting_info format contains structure::
-# {
-#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
-# }
-#: Information for settings of :class:`~hybkit.FoldFile` class.
-#: Copied into :data:`FoldFile_settings` for use at runtime.
-FoldFile_settings_info = {
-    'foldrecord_type': [
+    'seq_type': [
         'strict',
         """
         Type of fold record object to use. Options:
@@ -210,7 +200,7 @@ FoldFile_settings_info = {
         None,
         {'choices': ['strict', 'dynamic']}
     ],
-    'foldfile_error_mode': [
+    'error_mode': [
         'raise',
         """
         Mode for handling errors during reading of HybFiles
@@ -224,6 +214,16 @@ FoldFile_settings_info = {
         None,
         {'choices': {'raise', 'warn_return', 'return'}}
     ],
+}
+
+# settings_info : FoldFile
+# setting_info format contains structure::
+# {
+#     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
+# }
+#: Information for settings of :class:`~hybkit.FoldFile` class.
+#: Copied into :data:`FoldFile_settings` for use at runtime.
+FoldFile_settings_info = {
 }
 
 # settings_info : HybFoldIter
