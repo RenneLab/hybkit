@@ -1141,7 +1141,7 @@ class HybRecord(object):
         line_items = line.strip().split('\t')
         if len(line_items) < 15 or len(line_items) > 16:
             message = 'Hyb record lines require 15 or 16 fields separated by tab ("\\t") characters, '
-            message += 'but only %i were found.\n' % len(line_items)
+            message += 'but only %i were found:\n"%s"' % (len(line_items), line.strip())
             message += 'Line:\n%s' % line
             _print_and_error(message)
         hyb_id = line_items[0]
@@ -1289,75 +1289,117 @@ class HybRecord(object):
             value = None
         if attribute == 'id':
             if not isinstance(value, str):
-                err_message = 'id must be a string. Provided id is type %s: %s' % (type(value), value)
+                err_message = (
+                    'id must be a string. Provided id is type '
+                    '%s: %s' % (type(value), value)
+                )
             elif not value.strip():
-                err_message = 'id must be a non-empty string. Provided id: "%s" is an empty string' % value
+                err_message = ('id must be a non-empty string. '
+                               'Provided id: "%s" is an empty string' % value)
         elif attribute == 'seq':
             if not isinstance(value, str):
-                err_message = 'seq must be a string. Provided seq is type %s: %s' % (type(value), value)
+                err_message = ('seq must be a string. Provided seq is type %s: %s' %
+                               (type(value), value))
             elif not value.strip():
-                err_message = 'seq must be a non-empty string. Provided seq: "%s" is an empty string' % value
+                err_message = ('seq must be a non-empty string. Provided seq: "%s" is an empty '
+                               'string' % value)
             elif not value.isalpha():
                 err_message = 'seq must be alphabetic. Provided seq is non-alphabetic: %s' % value
         elif attribute == 'energy':
             if not isinstance(value, (float, int, type(None), str)):
-                err_message = 'energy must be a float, int, numeric str, or None. Provided energy: "%s" is type %s' % (value, type(value)) 
+                err_message = ('energy must be a float, int, numeric str, or None. '
+                               'Provided energy: "%s" is type %s' % (value, type(value)))
             if isinstance(value, str):
                 if not value.strip():
-                    err_message = 'energy must be a float, int, numeric str, or None. Provided energy is empty string: "%s"' % value
+                    err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                   'Provided energy is empty string: "%s"' % value)
                 elif '_' in value:
-                    err_message = 'energy must be a float, int, numeric str, or None. Provided energy is non-numeric string: "%s"' % value
+                    err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                   'Provided energy is non-numeric string: "%s"' % value)
                 else:
                     try:
                         float(value)
                     except ValueError:
-                        err_message = 'energy must be a float, int, numeric str, or None. Provided energy is non-numeric string: "%s"' % value        
+                        err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                       'Provided energy is non-numeric string: "%s"' % value)
         elif attribute == 'seg_props':
             if not isinstance(value, (dict, type(None))):
-                err_message = 'segN_props must be a dict. Provided segN_props is type %s: %s' % (type(value), value)
+                err_message = ('segN_props must be a dict. Provided segN_props is type '
+                               '%s: %s' % (type(value), value))
             else:
                 for prop_key, prop_val in value.items():
                     if prop_key == 'ref_name':
                         if not isinstance(prop_val, (str, type(None))):
-                            err_message = 'segN_props ref_name must be a string (or None). Provided ref_name is type %s: %s' % (type(prop_val), prop_val)
+                            err_message = ('segN_props ref_name must be a string (or None). '
+                                           'Provided ref_name is type '
+                                           '%s: %s' % (type(prop_val), prop_val))
                             break
                         elif isinstance(prop_val, str) and not prop_val.strip():
-                            err_message = 'segN_props ref_name must be a non-empty string (or None). Provided ref_name is empty string: "%s"' % prop_val
+                            err_message = ('segN_props ref_name must be a non-empty string '
+                                           '(or None). Provided ref_name is empty string: '
+                                           '"%s"' % prop_val)
                             break
                     elif prop_key in {'read_start', 'read_end', 'ref_start', 'ref_end'}:
                         if not isinstance(prop_val, (int, str, type(None))):
-                            err_message = 'segN_props %s must be an int (or None). Provided read_start: "%s" is type %s: %s' % (prop_key, prop_val, type(prop_val), prop_val)
+                            err_message = ('segN_props %s must be an int (or None). '
+                                           'Provided read_start: '
+                                           '"%s" is type %s: %s' % (prop_key, prop_val, 
+                                                                    type(prop_val), prop_val)
+                                    )
                             break
                         elif isinstance(prop_val, str):
                             if not prop_val.strip():
-                                err_message = 'segN_props %s must be an int (or None). Provided %s is empty string: "%s"' % (prop_key, prop_key, prop_val)
+                                err_message = (
+                                    'segN_props %s must be an int (or None). Provided %s is '
+                                    'empty string: "%s"' % (prop_key, prop_key, prop_val)
+                                )
                                 break
                             elif prop_val == '.':
                                 value[prop_key] = None
                             elif '_' in prop_val:
-                                err_message = 'segN_props %s must be an int (or None). Provided %s is non-numeric string: "%s"' % (prop_key, prop_key, prop_val)
+                                err_message = (
+                                    'segN_props %s must be an int (or None). Provided %s is '
+                                    'non-numeric string: "%s"' % (prop_key, prop_key, prop_val)
+                                )
                                 break
                             else:
                                 try:
                                     value[prop_key] = int(prop_val)
                                 except ValueError:
-                                    err_message = 'segN_props %s must be an int (or None). Provided %s is non-numeric string: "%s"' % (prop_key, prop_key, prop_val)
+                                    err_message = (
+                                        'segN_props %s must be an int (or None). Provided %s '
+                                        'is non-numeric string: "%s"'
+                                        '' % (prop_key, prop_key, prop_val)
+                                    )
                                     break
                     elif prop_key == 'score':
                         if not isinstance(prop_val, (float, int, str, type(None))):
-                            err_message = 'segN_props score must be a float, int, numeric str, or None. Provided score: "%s" is type %s" %s' % (prop_val, type(prop_val), prop_val)
+                            err_message = (
+                                'segN_props score must be a float, int, numeric str, or None. '
+                                'Provided score: "%s" is type %s" '
+                                '%s' % (prop_val, type(prop_val), prop_val)
+                            )
                             break
                     else:
-                        err_message = 'segN_props must be have only keys: ref_name, read_start, read_end, ref_start, ref_end, score. Provided segN_props has key %s' % key
+                        err_message = (
+                            'segN_props must be have only keys: ref_name, read_start, read_end, '
+                            'ref_start, ref_end, score. Provided segN_props has key %s' % key
+                        )
                         break
 
         elif attribute == 'flags':
             if not isinstance(value, dict):
-                err_message = 'flags must be a dict. Provided flags is type %s: %s' % (type(value), value)
+                err_message = (
+                    'flags must be a dict. Provided flags is type '
+                    '%s: %s' % (type(value), value)
+                )
             else:
                 for key, val in value.items():
                     if not isinstance(val, str):
-                        err_message = 'flags values must be str. Provided value for flag: %s is type %s: %s' % (key, type(val), val)
+                        err_message = (
+                            'flags values must be str. Provided value for flag: '
+                            '%s is type %s: %s' % (key, type(val), val)
+                        )
                         break
         if err_message is not None:
             _print_and_error(err_message)
@@ -1608,9 +1650,14 @@ class HybFile(object):
         """Wrapper for open() function that stores resulting file."""
         self.fh = open(*args, **kwargs)
         if hybformat_id is None:
-            hybformat_id = self.settings['hybformat_id']
+            self.hybformat_id = self.settings['hybformat_id']
+        else:
+            self.hybformat_id = hybformat_id
         if hybformat_ref is None:
-            hybformat_ref = self.settings['hybformat_ref']
+            self.hybformat_ref = self.settings['hybformat_ref']
+        else:
+            self.hybformat_ref = hybformat_ref
+
 
     # HybFile : Public Methods : Initialization / Closing
     def __enter__(self, *args, **kwargs):
@@ -1630,8 +1677,11 @@ class HybFile(object):
     # HybFile : Public Methods : Reading
     def __next__(self):
         """Return next line as HybRecord object."""
+        next_line = self.fh.__next__()
+        while not next_line.strip():
+            next_line = self.fh.__next__()
         return HybRecord.from_line(
-            self.fh.__next__(),
+            next_line,
             hybformat_id=self.hybformat_id,
             hybformat_ref=self.hybformat_ref,
         )
@@ -1771,11 +1821,15 @@ class FoldRecord(object):
     settings = hybkit.settings.FoldRecord_settings
 
     # FoldRecord : Public Methods : Initialization
-    def __init__(self, id, seq, fold, energy):
-        self.id = id                 # Sequence Identifier (often seg1name-seg2name)
-        self.seq = seq               # Genomic Sequence
-        self.fold = fold             # Fold Representation, str of '(', '.', and ')' characters
-        self.energy = float(energy)  # Predicted energy of folding
+    def __init__(self, id, seq, fold, energy=None):
+        # Sequence Identifier (often seg1name-seg2name)
+        self.id = self._ensure_attr_types(id, 'id')  
+        # Genomic Sequence
+        self.seq = self._ensure_attr_types(seq, 'seq')
+        # Fold Representation, str of '(', '.', and ')' characters
+        self.fold = self._ensure_attr_types(fold, 'fold')
+        # Predicted energy of folding
+        self.energy = self._ensure_attr_types(energy, 'energy')
 
     # FoldRecord : Public Methods : Parsing : Vienna
     def to_vienna_lines(self, newline=False):
@@ -1792,11 +1846,18 @@ class FoldRecord(object):
         suffix = ''
         if newline:
             suffix = '\n'
-        ret_lines.append(self.id + suffix)   # Add line 1, id
+        ret_id = self.id
+        if not ret_id.startswith('>'):
+            ret_id = '>' + ret_id
+        ret_lines.append(ret_id + suffix)   # Add line 1, id
         ret_lines.append(self.seq + suffix)  # Add line 2, sequence
 
-        # Create formatted energy string which uses no decimal places for integer numbers
-        if abs(self.energy - round(self.energy)) > 0.00001:
+        # If necessary, create formatted energy string which uses no decimal places for integer numbers
+        if isinstance(self.energy, type(None)):
+            energy_str = '.'
+        elif isinstance(self.energy, str):
+            energy_str = self.energy
+        elif abs(self.energy - round(self.energy)) > 0.00001:
             energy_str = ("%.5f" % self.energy).rstrip('0')
         else:
             energy_str = "%i" % int(round(self.energy))
@@ -1924,7 +1985,7 @@ class FoldRecord(object):
             _print_and_error(message)
 
 
-        rec_id = record_lines[0].strip()
+        rec_id = record_lines[0].strip().lstrip('>')
         seq = record_lines[1].strip()
         line_3 = record_lines[2].strip()
         line_3_split = line_3.split('\t')
@@ -1949,7 +2010,7 @@ class FoldRecord(object):
             _print_and_error(message)
 
         fold = line_3_split[0]
-        energy = float(line_3_split[1].strip('()'))
+        energy = line_3_split[1].strip('()')
 
         return_obj = cls(rec_id, seq, fold, energy)
         return return_obj
@@ -2078,7 +2139,64 @@ class FoldRecord(object):
         """
         lines = record_string.strip().split('\n')
         return cls.from_ct_lines(lines)
-
+    
+    # FoldRecord : Private Methods : Record Parsing
+    # Ensure attributes passed to constructor are valid for the respective FoldRecord attributes
+    def _ensure_attr_types(self, value, attribute):
+        err_message = None
+        # Value is checked for placeholder value: '.' and converted to None if found.
+        if value == '.':
+            value = None
+        if attribute == 'id':
+            if not isinstance(value, str):
+                err_message = (
+                    'id must be a string. Provided id is type '
+                    '%s: %s' % (type(value), value)
+                )
+            elif not value.strip():
+                err_message = ('id must be a non-empty string. '
+                               'Provided id: "%s" is an empty string' % value)
+        elif attribute == 'seq':
+            if not isinstance(value, str):
+                err_message = ('seq must be a string. Provided seq is type %s: %s' %
+                               (type(value), value))
+            elif not value.strip():
+                err_message = ('seq must be a non-empty string. Provided seq: "%s" is an empty '
+                               'string' % value)
+            elif not value.isalpha():
+                err_message = 'seq must be alphabetic. Provided seq is non-alphabetic: %s' % value
+        elif attribute == 'energy':
+            if not isinstance(value, (float, int, type(None), str)):
+                err_message = ('energy must be a float, int, numeric str, or None. '
+                               'Provided energy: "%s" is type %s' % (value, type(value)))
+            if isinstance(value, str):
+                if not value.strip():
+                    err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                   'Provided energy is empty string: "%s"' % value)
+                elif '_' in value:
+                    err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                   'Provided energy is non-numeric string: "%s"' % value)
+                else:
+                    try:
+                        float(value)
+                    except ValueError:
+                        err_message = ('energy must be a float, int, numeric str, or None. ' 
+                                       'Provided energy is non-numeric string: "%s"' % value)
+        elif attribute == 'fold':
+            if not isinstance(value, str):
+                err_message = ('fold must be a string. Provided fold is type %s: %s' %
+                                 (type(value), value))
+            elif not value.strip():
+                err_message = ('fold must be a non-empty string. Provided fold: "%s" is an empty '
+                                 'string' % value)
+            elif not all(c in '().-' for c in value):
+                err_message = ('fold must be a string of characters in "().-". '
+                                    'Provided fold: "%s" contains invalid characters' % value)
+        if err_message is not None:
+            _print_and_error(err_message)
+        else:
+            return value
+        
     # FoldRecord : Private Classmethods : Parsing : Output
     # @classmethod
     # def _format_seg_props(cls, seg_props, prefix='', suffix='', indent_str=''):
