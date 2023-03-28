@@ -58,8 +58,13 @@ def test_hybfile_io(test_name, expectation, hyb_strs):
                 assert hyb_record_str in hyb_strs
 
     if expectation.lower() == 'pass':
+        with hybkit.HybFile.open(hyb_autotest_file_name, 'r') as hyb_autotest_file:
+            first_record = hyb_autotest_file.read_record()
+        with hybkit.HybFile.open(hyb_autotest_file_name, 'r') as hyb_autotest_file:
+            all_records = hyb_autotest_file.read_records()
+        assert first_record == all_records[0]
         with hybkit.HybFile(hyb_autotest_file_name, 'w') as hyb_autotest_file:
             hyb_autotest_file.write_records([hyb_record, hyb_record])
             hyb_autotest_file.write_record(hyb_record)
-            hyb_autotest_file.write_str(all_hyb_strs)
+            hyb_autotest_file.write_fh(all_hyb_strs)
 
