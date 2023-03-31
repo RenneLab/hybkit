@@ -375,20 +375,36 @@ ART_HYB_VIENNA_PROPS_2 = {
     ],
 }
 
+# Static Seq mismatched
 ART_BAD_HYB_VIENNA_PROPS_1 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
 ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
 ART_BAD_HYB_VIENNA_PROPS_1['mismatches'] = 3
 
+# Correct dynamic but flagged as static
 ART_BAD_HYB_VIENNA_PROPS_2 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
 ART_BAD_HYB_VIENNA_PROPS_2['overlapping'] = False
 ART_BAD_HYB_VIENNA_PROPS_2['mismatches'] = 3
 
+# Dynamic with Mismatched Seq
 ART_BAD_HYB_VIENNA_PROPS_3 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
 ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
 ART_BAD_HYB_VIENNA_PROPS_3['mismatches'] = 3
 
+# Mismatched Energy Values
 ART_BAD_HYB_VIENNA_PROPS_4 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
 ART_BAD_HYB_VIENNA_PROPS_4['vienna_str'] = ART_BAD_HYB_VIENNA_PROPS_4['vienna_str'].replace('(-10.0)','(-15.0)')
+
+# Missing vienna string
+ART_BAD_HYB_VIENNA_PROPS_5 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
+ART_BAD_HYB_VIENNA_PROPS_5['vienna_str'] = '\n\n'
+
+# Bad vienna string
+ART_BAD_HYB_VIENNA_PROPS_6 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
+ART_BAD_HYB_VIENNA_PROPS_6['vienna_str'] = 'bad\nvienna\nstring'
+
+# Energy 99 Error
+ART_BAD_HYB_VIENNA_PROPS_7 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
+ART_BAD_HYB_VIENNA_PROPS_7['vienna_str'] = ART_BAD_HYB_VIENNA_PROPS_7['vienna_str'].replace('(-10.0)','(99.0)')
 
 
 

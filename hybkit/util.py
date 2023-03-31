@@ -865,13 +865,21 @@ def set_setting(setting, set_value, verbose=False):
                        'FoldFile', 'HybFoldIter', 'Analysis']:
         cls_settings_info = getattr(settings, class_name + '_settings_info')
         cls_settings = getattr(settings, class_name + '_settings')
+        do_check_list = isinstance(set_value, list)
         if setting in cls_settings:
             old_setting = cls_settings[setting]
             if 'choices' in cls_settings_info[setting][4]:
                 choices = cls_settings_info[setting][4]['choices']
             else:
                 choices = None
-            if choices is not None and set_value not in choices:
+            if choices is not None:
+                if do_check_list:
+                    for check_value in set_value:
+                        if check_value not in choices:
+                            message = 'Invalid value for %s setting: %s' % (setting, check_value)
+                            message += '\nChoices are: %s' % str(choices)
+                            raise RuntimeError(message)
+                elif set_value not in choices:
                 message = 'Invalid value for %s setting: %s' % (setting, set_value)
                 message += '\nChoices are: %s' % str(choices)
                 raise RuntimeError(message)

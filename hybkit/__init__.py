@@ -2209,21 +2209,25 @@ class FoldRecord(object):
 
         # If no fold was created, potentially due to low-complexity sequence
         if "(99" in line_3:
+            error = 'Improper Vienna: No Fold (Energy = 99*.*)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    message = 'WARNING: Improper Vienna: No Fold (Energy = 99*.*)'
-                    print(message)
+                    print('WARNING: ' + error)
                 return ('NOFOLD', ''.join(record_lines))
             else:
-                message = 'ERROR: Improper Vienna: No Fold (Energy = 99*.*)'
-                _print_and_error(message)
+                _print_and_error('ERROR: ' + error)
 
         if len(line_3_split) != 2:
-            message = 'Provided Vienna Record Line 3:\n'
-            message += line_3.rstrip() + '\n'
-            message += str(line_3_split) + '\n'
-            message += '\n  ... does not have required "..((.))..<tab>(-1.23)" format.'
-            _print_and_error(message)
+            error = 'Provided Vienna Record Line 3:\n'
+            error += line_3.rstrip() + '\n'
+            error += str(line_3_split) + '\n'
+            error += '\n  ... does not have required "..((.))..<tab>(-1.23)" format.'
+            if 'return' in error_mode:
+                if 'warn' in error_mode:
+                    print('WARNING: ' + error)
+                return ('NOFOLD', ''.join(record_lines))
+            else:
+                _print_and_error('ERROR: ' + error)
 
         fold = line_3_split[0]
         energy = line_3_split[1].strip('()')
