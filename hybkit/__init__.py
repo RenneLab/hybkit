@@ -2843,7 +2843,7 @@ class HybFoldIter(object):
             self.counters['hyb_record_read_attempts'] += 1
             next_hyb_record = self.hybfile_handle.read_record()
             self.counters['fold_record_read_attempts'] += 1
-            next_fold_record = self.foldfile_handle.read_record()
+            next_fold_record = self.foldfile_handle.read_record(override_error_mode='return')
             error = ''
             do_skip = False
             if 'foldrecord_nofold' in self.settings['error_checks']:
@@ -2867,7 +2867,7 @@ class HybFoldIter(object):
                     error += '%i allowed ' % FoldRecord.settings['allowed_mismatches']
 
             #if not error and 'energy_match' in self.settings['error_checks']:
-            if 'energy_mismatch' in self.settings['error_checks']:
+            if not error and 'energy_mismatch' in self.settings['error_checks']:
                 if (next_fold_record.energy is not None
                     and next_hyb_record.energy not in {None, '.'}
                     and str(next_fold_record.energy) != str(next_hyb_record.energy)):

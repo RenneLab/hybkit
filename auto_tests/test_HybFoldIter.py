@@ -48,7 +48,9 @@ test_param_sets.append(('Mismatch_Energy', 'Raise', ART_BAD_HYB_VIENNA_PROPS_4, 
 test_param_sets.append(('Missing_Vienna', 'Raise', ART_BAD_HYB_VIENNA_PROPS_5, False))
 test_param_sets.append(('Bad_Vienna', 'Raise', ART_BAD_HYB_VIENNA_PROPS_6, True))
 test_param_sets.append(('Error99', 'Raise', ART_BAD_HYB_VIENNA_PROPS_7, True))
-test_param_sets.append(('InDel', 'Raise', ART_BAD_HYB_VIENNA_PROPS_8, True))
+test_param_sets.append(('Insertion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_8, True))
+test_param_sets.append(('Deletion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_9, True))
+
 
 
 test_parameters = []
@@ -129,7 +131,6 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
             with pytest.raises(RuntimeError):
                 fold_record.ensure_matches_hyb_record(hyb_record)
 
-
 # Test iter_error_mode values:
 raise_error_modes = ['raise']
 allow_error_modes = ['warn_return', 'warn_skip', 'skip', 'return']
@@ -141,6 +142,11 @@ test_names_allowed = {
     'MismatchSeqStatic': allow_error_modes,
     'MismatchSeqDynamic': allow_error_modes,
     'MismatchEnergy': allow_error_modes,
+    'Missing_Vienna': allow_error_modes,
+    'Bad_Vienna': allow_error_modes,
+    'Error99': allow_error_modes,
+    'Insertion': allow_error_modes,
+    'Deletion': allow_error_modes,
 }
 test_param_sets = {
     'StaticAllowed': ART_HYB_VIENNA_PROPS_1,
@@ -149,6 +155,11 @@ test_param_sets = {
     'MismatchSeqStatic': ART_BAD_HYB_VIENNA_PROPS_1,
     'MismatchSeqDynamic': ART_BAD_HYB_VIENNA_PROPS_3,
     'MismatchEnergy': ART_BAD_HYB_VIENNA_PROPS_4,
+    'Missing_Vienna': ART_BAD_HYB_VIENNA_PROPS_5,
+    'Bad_Vienna': ART_BAD_HYB_VIENNA_PROPS_6,
+    'Error99': ART_BAD_HYB_VIENNA_PROPS_7,
+    'Insertion': ART_BAD_HYB_VIENNA_PROPS_8,
+    'Deletion': ART_BAD_HYB_VIENNA_PROPS_9,
 }
 test_seq_types = {
     'StaticAllowed': 'static',
@@ -157,6 +168,11 @@ test_seq_types = {
     'MismatchSeqStatic': 'static',
     'MismatchSeqDynamic': 'dynamic',
     'MismatchEnergy': 'dynamic',
+    'Missing_Vienna': 'dynamic',
+    'Bad_Vienna': 'dynamic',
+    'Error99': 'dynamic',
+    'Insertion': 'dynamic',
+    'Deletion': 'dynamic',
 }
 test_parameters = []
 for test_name, test_props in test_param_sets.items():
@@ -203,10 +219,10 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
     vienna_str = test_props['vienna_str']
     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
         for i in range(num_skips):
-            hyb_autotest_file.write(hyb_str + '\n')
+            hyb_autotest_file.write(hyb_str)
     with open(vienna_autotest_file_name, 'w') as vienna_autotest_file:
         for i in range(num_skips):
-            vienna_autotest_file.write(vienna_str + '\n')
+            vienna_autotest_file.write(vienna_str)
 
     hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'r')
     fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'r')
@@ -216,8 +232,11 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
         iter_error_mode=iter_error_mode,
     )
     with expect_context:
+        ret_items = None
         for ret_items in use_iter:
             pass
+        if 'skip' not in iter_error_mode:
+            assert ret_items
 
 # # ----- Start CT-Format HybFoldIter Tests -----
 # test_param_sets = []

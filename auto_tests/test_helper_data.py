@@ -400,11 +400,11 @@ ART_BAD_HYB_VIENNA_PROPS_4['vienna_str'] = ART_BAD_HYB_VIENNA_PROPS_4['vienna_st
 
 # Missing vienna string
 ART_BAD_HYB_VIENNA_PROPS_5 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
-ART_BAD_HYB_VIENNA_PROPS_5['vienna_str'] = '\n\n'
+ART_BAD_HYB_VIENNA_PROPS_5['vienna_str'] = '\n\n\n'
 
 # Bad vienna string
 ART_BAD_HYB_VIENNA_PROPS_6 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
-ART_BAD_HYB_VIENNA_PROPS_6['vienna_str'] = 'bad\nvienna\nstring'
+ART_BAD_HYB_VIENNA_PROPS_6['vienna_str'] = 'bad\nvienna\nstring\n'
 
 # Energy 99 Error
 ART_BAD_HYB_VIENNA_PROPS_7 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
@@ -416,6 +416,14 @@ ART_BAD_HYB_VIENNA_PROPS_8['hyb_str'] = (
     ART_BAD_HYB_VIENNA_PROPS_8['hyb_str'].replace(
         '1	24	1	24',
         '1	24	1	22'
+    )
+)
+# Deletion in read
+ART_BAD_HYB_VIENNA_PROPS_9 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
+ART_BAD_HYB_VIENNA_PROPS_9['hyb_str'] = (
+    ART_BAD_HYB_VIENNA_PROPS_9['hyb_str'].replace(
+        '1	24	1	24',
+        '1	24	1	26'
     )
 )
 
