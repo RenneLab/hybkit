@@ -188,17 +188,17 @@ FoldRecord_settings_info = {
         {}
     ],
     'seq_type': [
-        'strict',
+        'static',
         """
         Type of fold record object to use. Options:
-        "strict": FoldRecord, requires an exact sequence
+        "static": FoldRecord, requires an exact sequence
         match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence
         match to the "dynamic" annotated regions of a HybRecord, and may be shorter/longer
         than the original sequence.
         """,
         'str',
         None,
-        {'choices': ['strict', 'dynamic']}
+        {'choices': ['static', 'dynamic']}
     ],
     'error_mode': [
         'raise',
@@ -212,7 +212,7 @@ FoldRecord_settings_info = {
         """,
         'str',
         None,
-        {'choices': {'raise', 'warn_return', 'return'}}
+        {'choices': ['raise', 'warn_return', 'return']}
     ],
 }
 
@@ -245,20 +245,21 @@ HybFoldIter_settings_info = {
         """,
         'str',
         None,
-        {'choices': {'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch'}}
+        {'choices': ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch']}
     ],
-    'error_mode': [
+    'iter_error_mode': [
         'warn_skip',
         """
         Mode for handling errors found during error checks. Options:
         "raise": Raise an error when encountered and exit program;
         "warn_return": Print a warning and return the value ;
         "warn_skip": Print a warning and continue to the next iteration;
-        "skip": Continue to the next iteration without any output.
+        "skip": Continue to the next iteration without any output;
+        "return": return the value without any output.
         """,
         'str',
         None,
-        {'choices': {'raise', 'warn_return', 'warn_skip', 'skip'}}
+        {'choices': ['raise', 'warn_return', 'warn_skip', 'skip']}
     ],
     'max_sequential_skips': [
         20,

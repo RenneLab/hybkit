@@ -36,7 +36,7 @@ information:
 |                         | [ViennaFormat]_ containing RNA secondary structure information   |
 |                         | dot-bracket format as :class:`FoldRecord` objects                |
 +-------------------------+------------------------------------------------------------------+
-| :class:`CtFile`         | Class for reading Connectivity Table (.ct)-format files          |
+| :class:`CtFile`         | -BETA- Class for reading Connectivity Table (.ct)-format files   |
 |                         | [CTFormat]_ containing predicted RNA secondary-structure         |
 |                         | information as used by UNAFold_ as                               |
 |                         | :class:`FoldRecord` objects                                      |
@@ -50,24 +50,22 @@ Todo:
     Overhaul from_vienna_lines
     Overhaul from_ct_lines
     Overhaul HybFoldIter
+    Check static/dynamic FoldRecord methods
 
 """
 
 import os
 import sys
-import io
-import types
-import csv
 import copy
 from collections import Counter
 try:
     import Bio
-    from Bio import SeqIO
+    #from Bio import SeqIO
     from Bio.Seq import Seq
     from Bio.SeqRecord import SeqRecord
     bio_module_error = None
 except ModuleNotFoundError as bio_module_error:
-    Bio, SeqIO, Seq, SeqRecord = None, None, None, None
+    Bio, Seq, SeqRecord = None, None, None
 
 
 # Perform *Initial* hybkit submodule imports, remainder at code end.
@@ -80,7 +78,7 @@ import hybkit.__about__
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-
+# Start HybRecord Class
 class HybRecord(object):
     r"""
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
@@ -188,7 +186,7 @@ class HybRecord(object):
         fold_record (FoldRecord): Information on the predicted secondary structure of the sequence
             set by :func:`set_fold_record`.
     """
-
+    # Start HybRecord Attributes
     # HybRecord : Class-Level Constants
     #: Record columns 1-3 defining parameters of the overall hybrid, defined by the Hyb format
     HYBRID_COLUMNS = ['id',      #: str, Hybrid read identifier, ex: "1257_12"
@@ -359,6 +357,7 @@ class HybRecord(object):
     #: :attr:`MIRNA_STR_PROPS`, and :attr:`TARGET_PROPS` for details.
     HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + MIRNA_STR_PROPS + TARGET_PROPS
 
+    # Start HybRecord Public Methods
     # HybRecord : Public Methods : Initialization
     def __init__(self,
                  id,
@@ -603,7 +602,9 @@ class HybRecord(object):
             _print_and_error('Trying to assign None object as FoldRecord.')
 
         if isinstance(fold_record, FoldRecord):
-            use_fold_Record = fold_record
+            use_fold_record = fold_record
+        elif isinstance(fold_record, tuple) and isinstance(fold_record[0], FoldRecord):
+            use_fold_record = fold_record[0]
         else:
             message = 'Supplied argument to fold_record: %s' % str(fold_record)
             message += '\n   is not a FoldRecord object.'
@@ -1093,6 +1094,7 @@ class HybRecord(object):
         """
         return self.to_fasta_record(mode=mode, annotate=annotate).format('fasta')
 
+    # Start HybRecord Magic Methods
     # HybRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
         """Return ``True`` if ".id" and ".seq" attributes match."""
@@ -1118,6 +1120,7 @@ class HybRecord(object):
         """Print the identifier of the record."""
         return '<HybRecord ID: %s>' % self.id
 
+    # Start HybRecord Public Classmethods
     # HybRecord : Public Classmethods : Record Construction
     @classmethod
     def from_line(cls, line, hybformat_id=False, hybformat_ref=False):
@@ -1263,6 +1266,7 @@ class HybRecord(object):
         #input()
         return return_obj
 
+    # Start HybRecord Private Constants
     # HybRecord : Private Constants
     _SEG_PROPS_SET = set(SEGMENT_COLUMNS)
     _SET_PROPS_SET = set(SET_PROPS)
@@ -1277,6 +1281,7 @@ class HybRecord(object):
     # Placeholder for set of allowed flags filled on first use.
     _flagset = None
 
+    # Start HybRecord Private Methods
     # HybRecord : Private Methods : Initialization
     def _post_init_tasks(self):
         # Stub for subclassing
@@ -1568,7 +1573,7 @@ class HybRecord(object):
             _print_and_error(message)
         return True
 
-
+    # Start HybRecord Private Classmethods
     # HybRecord : Private Classmethods : hybformat record parsing
     @classmethod
     def _parse_hybformat_id(cls, record_id):
@@ -1622,7 +1627,7 @@ class HybRecord(object):
             flags[flag_key] = str(flag_value)
         return flags
 
-
+# Start HybFile Class
 class HybFile(object):
     """
     Wrapper for a *.hyb -format text file which returns entries (lines) as HybRecord objects.
@@ -1646,6 +1651,7 @@ class HybFile(object):
     #: Class-level settings. See :obj:`settings.HybFile_settings` for descriptions.
     settings = hybkit.settings.HybFile_settings
 
+    # Start HybFile Public Methods
     # HybFile : Public Methods : Initialization / Closing
     def __init__(self, *args, hybformat_id=None, hybformat_ref=None, **kwargs):
         """Wrapper for open() function that stores resulting file."""
@@ -1750,6 +1756,7 @@ class HybFile(object):
         message += 'Please Use HybFile.write_record() or HybFile.write_fh() instead.'
         raise NotImplementedError(message)
 
+    # Start HybFile Public Classmethods
     # HybFile : Public Classmethods : Initialization
     @classmethod
     def open(cls, *args, **kwargs):
@@ -1763,7 +1770,7 @@ class HybFile(object):
             _print_and_error('Item: "%s" is not a HybRecord object.' % record)
 
 
-
+# Start FoldRecord Class
 class FoldRecord(object):
     """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
@@ -1879,6 +1886,7 @@ class FoldRecord(object):
     _seq_type_choices = set(hybkit.settings.FoldRecord_settings_info['seq_type'][4]['choices'])
     _error_mode_choices = set(hybkit.settings.FoldRecord_settings_info['error_mode'][4]['choices'])
 
+    # Start FoldRecord Public Methods
     # FoldRecord : Public Methods : Initialization
     def __init__(self, id, seq, fold, energy=None, seq_type=None):
         # Sequence Identifier (often seg1name-seg2name)
@@ -2118,6 +2126,7 @@ class FoldRecord(object):
             message += 'dynamic FoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq))
             _print_and_error(message)
 
+    # Start FoldRecord Magic Methods
     # FoldRecord : Public MagicMethods : Comparison
     def __eq__(self, other):
         """Return ``True`` if two records have matching sequences and identifiers."""
@@ -2143,6 +2152,7 @@ class FoldRecord(object):
         """Print the identifier of the record."""
         return '<FoldRecord ID: %s>' % self.id
 
+    # Start FoldRecord Public Classmethods
     # FoldRecord : Public Classmethods : Construction
     _ERROR_MODE_ARGS_SUFFIX = (
         """
@@ -2428,6 +2438,7 @@ class FoldRecord(object):
     #    ret_string += suffix
     #    return ret_string
 
+    # Start FoldRecord Private Methods
     # FoldRecord : Private Methods : Segment Parsing
     def _get_seg_fold(self, seg_props, hyb_record=None):
         if self.seq_type == 'static':
@@ -2463,7 +2474,7 @@ class FoldRecord(object):
         else:
             raise RuntimeError()
 
-
+# Start FoldFile Class
 FOLD_FILE_COMMON_ARGS_ATTRS = (
     """
 
@@ -2472,10 +2483,11 @@ FOLD_FILE_COMMON_ARGS_ATTRS = (
             'static', or 'dynamic'
             (if not provided, uses :attr:`settings.FoldRecord_settings['seq_type']`).
         error_mode (:obj:`str`, optional): 'string representing the error mode.
-                If None, defaults to :attr:`settings['error_mode'] <FoldFile.settings>`.
+                If None, defaults to the value set in
+                :attr:`settings['error_mode'] <FoldRecord.settings>`.
                 Options: 
                 "raise": Raise an error when encountered and exit program;
-                "warn_return": Print a warning and return the error_value ;
+                "warn_return": Print a warning and return the error_value;
                 "return": Return the error value with no program output.
         *args: Passed to :func:`open()`.
         **kwargs: Passed to :func:`open()`.
@@ -2502,6 +2514,7 @@ class FoldFile(object):
     _foldrecord_seq_type_choices = set(_foldrecord_settings_info['seq_type'][4]['choices'])
     _error_mode_choices = set(_foldrecord_settings_info['error_mode'][4]['choices'])
     
+    # Start FoldFile Public Methods
     # FoldFile : Public Methods : Initialization / Closing
     def __init__(self, *args, seq_type=None, error_mode=None, **kwargs):
         """Wrap for open() function that stores resulting file."""
@@ -2595,9 +2608,9 @@ class FoldFile(object):
             self.write_record(write_record)
 
     # FoldFile : Public Methods : Writing
-    def write(self, *args, **kwargs):
-        """Write to the underlying file handle."""
-        self.write_direct(*args, **kwargs)
+    def write_fh(self, *args, **kwargs):
+        """Write directly to the underlying file handle."""
+        self.fh.write(*args, **kwargs)
 
     # FoldFile : Public Classmethods : Initialization
     @classmethod
@@ -2605,6 +2618,7 @@ class FoldFile(object):
         """Return a new FoldFile object."""
         return cls(*args, **kwargs)
 
+    # Start FoldFile Private Methods
     # FoldFile : Private Methods
     def _post_init_tasks(self):
         """Stub for subclassing. Raise error on base class."""
@@ -2627,7 +2641,7 @@ class FoldFile(object):
 # Append common FoldFile Args and Attributes description to docstring:
 FoldFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
-
+# ---- Start ViennaFile Class -----
 class ViennaFile(FoldFile):
     """
     Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects.
@@ -2636,17 +2650,27 @@ class ViennaFile(FoldFile):
     """
     # Args/Attrs Description in FOLD_FILE_COMMON_ARGS_ATTRS
 
+    # Start ViennaFile Methods
     # ViennaFile : Public Methods : Reading
-    def read_record(self):
+    def read_record(self, override_error_mode=None):
         """
         Read next three lines and return output as FoldRecord object.
+
+        Args:
+            override_error_mode (str): Override the error_mode set in the
+                :class:`ViennaFile` object. See :class:`ViennaFile` for more
+                information on allowed error modes.
         """
         line_1 = next(self.fh)
         line_2 = next(self.fh)
         line_3 = next(self.fh)
+        if override_error_mode is None:
+            use_error_mode = self.error_mode
+        else:
+            use_error_mode = override_error_mode
         record = FoldRecord.from_vienna_lines(
             (line_1, line_2, line_3),
-            error_mode=self.error_mode,
+            error_mode=override_error_mode,
             seq_type=self.foldrecord_seq_type,
         )
         
@@ -2665,6 +2689,7 @@ class ViennaFile(FoldFile):
 # Append common FoldFile Args and Attributes description to docstring:
 ViennaFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
+# Start CtFile Class
 class CtFile(FoldFile):
     """
     Ct file wrapper that returns ".ct" file lines as FoldRecord objects.
@@ -2676,6 +2701,7 @@ class CtFile(FoldFile):
     """
     # Args/Attrs Description in FOLD_FILE_COMMON_ARGS_ATTRS
 
+    # Start CtFile Methods
     # CtFile : Public Methods
     def read_record(self):
         """
@@ -2713,6 +2739,7 @@ class CtFile(FoldFile):
 # Append common FoldFile Args and Attributes description to docstring:
 CtFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
+# Start HybFoldIter Class
 class HybFoldIter(object):
     """
     Iterator for simultaneous iteration over a :class:`HybFile` and :class:`FoldFile` object.
@@ -2729,6 +2756,10 @@ class HybFoldIter(object):
         foldfile_handle (FoldFile) : FoldFile object for iteration
         combine (:obj:`bool`, optional) : Use HybRecord.set_fold_record(FoldRecord)
             and return only the HybRecord.
+        override_error_mode (str, optional) : Error mode to use for reading :class:`FoldRecord`
+            objects. If set, overrides the value in 
+            :attr:`settings['error_mode'] <FoldRecord.settings>`.
+            See :class:`FoldRecord` for more information on allowed error modes.
 
     Returns:
         (:class:`HybRecord`, :class:`FoldRecord`)
@@ -2737,9 +2768,16 @@ class HybFoldIter(object):
     #: Class-level settings. See :attr:`settings.HybFoldIter_settings` for descriptions.
     settings = hybkit.settings.HybFoldIter_settings
 
+    # Start HybFoldIter Methods
     # HybFoldIter : Public Methods
     def __init__(self, hybfile_handle, foldfile_handle, combine=False):
         """Please see :class:`HybFoldIter` for initialization information."""
+        if not isinstance(hybfile_handle, HybFile):
+            message = 'hybfile_handle must be an instance of a HybFile object.'
+            _print_and_error(message)
+        if not isinstance(foldfile_handle, FoldFile):
+            message = 'foldfile_handle must be an instance of a FoldFile object.'
+            _print_and_error(message)
         self.hybfile_handle = hybfile_handle
         self.foldfile_handle = foldfile_handle
         self.counters = Counter()
@@ -2780,14 +2818,16 @@ class HybFoldIter(object):
 
     # HybFoldIter : Public Methods
     def __next__(self):
-        """Read and return (class:`HybRecord`, :class:`FoldRecord`)."""
+        """Read and return (:class:`HybRecord`, :class:`FoldRecord`)."""
         self.counters['total_read_attempts'] += 1
+        next_hyb_record = None
+        next_fold_record = None
         try:
             energy_mismatch = False
             self.counters['hyb_record_read_attempts'] += 1
             next_hyb_record = self.hybfile_handle.read_record()
             self.counters['fold_record_read_attempts'] += 1
-            next_fold_record = self.foldfile_handle.read_record(error_mode='return')
+            next_fold_record = self.foldfile_handle.read_record()
             error = ''
             do_skip = False
             if 'foldrecord_nofold' in self.settings['error_checks']:
@@ -2863,8 +2903,10 @@ class HybFoldIter(object):
             message += '%s\n' % self.counters['total_read_attempts']
             message += 'Last HybRecord: %s\n' % str(self.last_hyb_record)
             message += 'Last FoldRecord: %s\n' % str(self.last_fold_record)
-            message += 'Next HybRecord: %s\n' % str(next_hyb_record)
-            message += 'Next FoldRecord: %s\n' % str(next_fold_record)
+            if next_hyb_record is not None:
+                message += 'Next HybRecord: %s\n' % str(next_hyb_record)
+            if next_fold_record is not None:
+                message += 'Next FoldRecord: %s\n' % str(next_fold_record)
             print(message)
             raise
 

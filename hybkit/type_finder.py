@@ -4,17 +4,13 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-type_finder.py module.
-
 This module contains the TypeFinder class to work with :class:`HybRecord` to
 parse sequence identifiers to idenfity sequence type.
 """
 
 import os
-import io
 import types
-import csv
-import copy
+
 
 
 class TypeFinder(object):
@@ -30,13 +26,46 @@ class TypeFinder(object):
     """
 
     # TypeFinder : Public Attributes
-    #: Placeholder for storing active method, set with :meth:`set_method`.
+    #: Placeholder for storing active method, set with :meth:`set_method`
+    #: (see :meth:`set_method` for details).
     find_with_params = None
 
     # TypeFinder : Public Attributes
-    #: Placeholder for parameters for active method, set with :meth:`set_method`.
+    #: Placeholder for parameters for active method, set with :meth:`set_method`
+    #: (see :meth:`set_method` for details).
     params = None
 
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #:   Default method assigned using :meth:`check_set_method` 
+    default_method = 'hybformat'
+
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #:   Dict of provided methods available to assign segment types
+    #:
+    #:     ============== ==================================
+    #:     'hybformat'    :meth:`method_hybformat`
+    #:     'string_match' :meth:`method_string_match`
+    #:     'id_map'       :meth:`method_id_map`
+    #:     ============== ==================================
+    methods = {
+        'hybformat': 'method_hybformat',
+        'string_match': 'method_string_match',
+        'id_map': 'method_id_map'
+    }
+
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #: Dict of param generation methods for type finding methods
+    #:
+    #:     ============== ===================================================
+    #:     'hybformat'    'N/A'
+    #:     'string_match' :meth:`make_string_match_params`
+    #:     'id_map'       :meth:`make_id_map_params`
+    #:     ============== ===================================================
+    param_methods = {
+        'hybformat': 'N/A',
+        'string_match': 'make_string_match_params',
+        'id_map': 'make_id_map_params'
+    }
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):
@@ -61,7 +90,7 @@ class TypeFinder(object):
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
             print(message)
             raise RuntimeError(message)
-        cls.find = cls.methods[method]
+        cls.find_with_params = getattr(cls, cls.methods[method])
         cls.params = params
 
     # TypeFinder : Public Classmethods : method
@@ -145,7 +174,8 @@ class TypeFinder(object):
             <gene_id>_<transcript_id>_<gene_name>_<seg_type>
 
         This method returns the last component of the identifier,
-        split by "_", as the identfied sequence type.
+        split by "_", as the identfied sequence type. 
+        (returns :obj:`None` if the segment identifier does not contain "_").
 
         Example:
             ::
@@ -156,8 +186,16 @@ class TypeFinder(object):
             seg_props (dict): :obj:`seg_props` from :class:`hybkit.HybRecord`
             params (dict, optional): Unused in this method.
         """
-        split_id = seg_props['ref_name'].split('_')
-        return split_id[-1]
+        if params:
+            message = 'method_hybformat does not use params, but params were provided:\n'
+            message += str(params)
+            print(message)
+            raise RuntimeError(message)
+        if '_' not in seg_props['ref_name']:
+            return None
+        else:
+            split_id = seg_props['ref_name'].split('_')
+            return split_id[-1]
 
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
@@ -190,6 +228,10 @@ class TypeFinder(object):
                 to evaluate.
             params (dict, optional): Dict with search paramaters as described above.
         """
+        if not params:
+            message = 'method_string_match requires params, but none were provided.'
+            print(message)
+            raise RuntimeError(message)
         seg_name = seg_props['ref_name']
         found_type = None
         check_done = False
@@ -255,16 +297,14 @@ class TypeFinder(object):
                 # Skip Commented Lines
                 if line.lstrip().startswith('#'):
                     continue
-                line = line.rstrip()
+                line = line.strip()
                 split_line = line.split(',')
                 if len(split_line) != 3:
                     message = 'Error reading legend line: \n%s\n%s' % (str(line), str(split_line))
                     message += '\nThree comma-separated entries expected.'
                     print(message)
                     raise RuntimeError(message)
-                search_type = split_line[0]
-                search_string = split_line[1]
-                seg_type = split_line[2]
+                search_type, search_string, seg_type = split_line
                 if search_type not in ALLOWED_SEARCH_TYPES:
                     message = 'Read Search type: "%s"\n' % search_type
                     message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES)
@@ -312,150 +352,71 @@ class TypeFinder(object):
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_id_map_params(mapped_id_files=None, type_file_pairs=None):
+    def make_id_map_params(mapped_id_files):
         """
         Read file(s) into a mapping of sequence identifiers.
 
         This method reads one or more files into a dict for use with the
         :meth:`method_id_map` method.
-        The method requires passing either a list/tuple of one or more files to mapped_id_files,
-        or a list/tuple of one or more pairs of file lists and file types
-        passed to type_file_pairs.
+        The method requires passing a file path (or list/tuple of file paths)
+        of mapped_id_files.
         Files listed in the mapped_id_files argument should have the format::
 
             #commentline
             #seg_id,seg_type
-            seg1_unique_id,seg1_type
-            seg2_unique_id,seg2_type
-
-        Entries in the list/tuple passed to type_file_pairs should have the format:
-        (seg1_type, file1_name)
-
-        Example:
-            ::
-
-                [(seg1_type, file1_name), (seg2_type, file2_name),]
-
-        The first entry in each (non-commented, non-blank) file line will be read and
-        added to the mapping dictionary mapped to the provided seg_type.
+            segA_unique_id,segA_type
+            segB_unique_id,segB_type
 
         Args:
-            mapped_id_files (list or tuple, optional): Iterable object containing strings of paths
+            mapped_id_files (:obj:`str`, :obj:`list`, or :obj:`tuple`): Iterable object containing strings of paths
                 to files containing id/type mapping information.
-            type_file_pairs (list or tuple, optional): Iterable object containing 2-tuple pairs
-                containing id/type mapping information.
-
 
         """
         return_dict = {}
-        if all((arg is None for arg in (mapped_id_files, type_file_pairs))):
-            message = 'make_seg_type_id_map function requires either a mapped_id_files '
-            message += 'or type_file_pairs argument.'
+        if not isinstance(mapped_id_files, (str, list, tuple)):
+            message = 'arguments passed to mapped_id_files and type_file_pairs must be '
+            message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files) 
             print(message)
             raise RuntimeError(message)
-        for arg in [mapped_id_files, type_file_pairs]:
-            if ((arg is not None)
-                and not any((isinstance(arg, allowed_type)
-                             for allowed_type in (list, tuple)))):
-                message = 'arguments passed to mapped_id_files and type_file_pairs must be '
-                message += 'provided as a list or tuple.\n  Current passed aruement: '
-                message += str(arg)
-                print(message)
-                raise RuntimeError(message)
+        if isinstance(mapped_id_files, str):
+            mapped_id_files = [mapped_id_files]
 
-        if mapped_id_files is not None:
-            for mapped_id_file in mapped_id_files:
-                with open(mapped_id_file, 'r') as mapped_id_file_obj:
-                    for line in mapped_id_file_obj:
-                        # Skip Blank Lines
-                        if not line.split():
-                            continue
-                        # Skip Commented Lines
-                        if line.lstrip().startswith('#'):
-                            continue
-                        line = line.rstrip()
-                        split_line = line.split(',')
-                        if len(split_line) != 2:
-                            message = 'Error reading mapped-id line: '
-                            message += '\n%s\n%s' % (str(line), str(split_line))
-                            message += '\nTwo comma-separated entries expected.'
-                            print(message)
-                            raise RuntimeError(message)
-                        seq_id = split_line[0]
-                        seg_type = split_line[1]
+        for mapped_id_file in mapped_id_files:
+            with open(mapped_id_file, 'r') as mapped_id_file_obj:
+                for line in mapped_id_file_obj:
+                    # Skip Blank Lines
+                    line = line.strip()
+                    if not line.split():
+                        continue
+                    # Skip Commented Lines
+                    if line.startswith('#'):
+                        continue
+                    split_line = line.split(',')
+                    if len(split_line) != 2:
+                        message = 'Error reading mapped-id line: '
+                        message += '\n%s\n%s' % (str(line), str(split_line))
+                        message += '\nTwo comma-separated entries expected.'
+                        print(message)
+                        raise RuntimeError(message)
+                    seq_id, seg_type = split_line
 
-                        if seq_id in return_dict and seg_type != return_dict[seq_id]:
-                            message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
-                            message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
-                            print(message)
-                            raise RuntimeError(message)
-                        else:
-                            return_dict[seq_id] = seg_type
-
-        if type_file_pairs is not None:
-            for seg_type, id_file in type_file_pairs:
-                with open(id_file, 'r') as id_file_obj:
-                    for line in id_file_obj:
-                        # Skip Blank Lines
-                        if not line.split():
-                            continue
-                        # Skip Commented Lines
-                        if line.lstrip().startswith('#'):
-                            continue
-                        seq_id = line.strip().split()[0]
-
-                        if seq_id in return_dict and seg_type != return_dict[seq_id]:
-                            message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
-                            message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
-                            print(message)
-                            raise RuntimeError(message)
-                        else:
-                            return_dict[seq_id] = seg_type
+                    if seq_id in return_dict and seg_type != return_dict[seq_id]:
+                        message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
+                        message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
+                        print(message)
+                        raise RuntimeError(message)
+                    else:
+                        return_dict[seq_id] = seg_type
 
         return return_dict
 
-    # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #:   Default method assigned using :meth:`check_set_method` 
-    default_method = 'hybformat'
+    # TypeFinder : Private classmethods : find_seg_type
+    @classmethod
+    def _reset(cls):
+        """
+        Reset the class to its initial state.
 
-    # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #:   Dict of provided methods available to assign segment types
-    #:
-    #:     ============== ==================================
-    #:     'hybformat'    :meth:`method_hybformat`
-    #:     'string_match' :meth:`method_string_match`
-    #:     'id_map'       :meth:`method_id_map`
-    #:     ============== ==================================
-    methods = {
-        'hybformat': method_hybformat,
-        'string_match': method_string_match,
-        'id_map': method_id_map
-    }
-
-    # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #: Dict of param generation methods for type finding methods
-    #:
-    #:     ============== ===================================================
-    #:     'hybformat'    :obj:`None`
-    #:     'string_match' :meth:`make_string_match_params`
-    #:     'id_map'       :meth:`make_id_map_params`
-    #:     ============== ===================================================
-    param_methods = {
-        'hybformat': None,
-        'string_match': make_string_match_params.__func__,
-        'id_map': make_id_map_params.__func__,
-    }
-
-    # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #: Dict of whether parameter generation methods need an input file
-    #:
-    #:     ============== ===================================================
-    #:     'hybformat'    :obj:`False`
-    #:     'string_match' :obj:`True`
-    #:     'id_map'       :obj:`True`
-    #:     ============== ===================================================
-    param_methods_needs_file = {
-        'hybformat': False,
-        'string_match': True,
-        'id_map': True,
-    }
+        This method is used for testing purposes.
+        """
+        cls.find_with_params = None
+        cls.params = None

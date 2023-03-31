@@ -27,10 +27,7 @@ def _bool_from_string(value):
     elif value.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-    # Snippet Credit goes to @Maxim at https://stackoverflow.com/questions/15008758/
-    #   /parsing-boolean-values-with-argparse
-
+        raise argparse.ArgumentTypeError('Boolean value expected. Provided: %s' % value)
 
 _custom_types = {
     'custom_bool_from_str': _bool_from_string,
@@ -47,7 +44,7 @@ _custom_type_choices = {
 # Util : Path Helper Functions
 def dir_exists(dir_name):
     """
-    Check if a directory exists at the provided path, and return a normalized path.
+    Check if a directory exists at the provided path (else raise), and return a normalized path.
 
     Args:
         dir_name (str): Name of directory to check for existence.
@@ -302,160 +299,207 @@ def validate_args(args, parser=None):
 
 # Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use
-                 in the evaluation.
-                 """
-in_hybs_parser.add_argument('-i', '--in_hyb', type=hyb_exists,
-                            metavar='PATH_TO/MY_FILE.HYB',
-                            required=True,
-                            nargs='+',
-                            help=_this_arg_help)
+_this_arg_help = (
+    """
+    REQUIRED path to one or more hyb-format files with a ".hyb" suffix for use
+    in the evaluation.
+    """
+)
+in_hybs_parser.add_argument(
+    '-i', '--in_hyb', type=hyb_exists,
+    metavar='PATH_TO/MY_FILE.HYB',
+    required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 in_folds_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 REQUIRED path to one or more RNA secondary-structure files with a
-                 ".vienna" or ".ct" suffix for use in the evaluation.
-                 """
-in_folds_parser.add_argument('-f', '--in_fold', type=fold_exists,
-                             metavar='PATH_TO/MY_FILE.VIENNA',
-                             required=True,
-                             nargs='+',
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    REQUIRED path to one or more RNA secondary-structure files with a
+    ".vienna" or ".ct" suffix for use in the evaluation.
+    """
+)
+in_folds_parser.add_argument(
+    '-f', '--in_fold', type=fold_exists,
+    metavar='PATH_TO/MY_FILE.VIENNA',
+    required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 out_hybs_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Optional path to one or more hyb-format file for
-                 output (should include a ".hyb" suffix).
-                 If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
-                 will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
-                 """
-out_hybs_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
-                             metavar='PATH_TO/OUT_FILE.HYB',
-                             # required=True,
-                             nargs='+',
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    Optional path to one or more hyb-format file for
+    output (should include a ".hyb" suffix).
+    If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
+    will be used as a template for the output "OUT_DIR/MY_FILE_OUT.HYB".
+    """
+)
+out_hybs_parser.add_argument(
+    '-o', '--out_hyb', type=out_path_exists,
+    metavar='PATH_TO/OUT_FILE.HYB',
+    # required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 out_folds_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Optional path to one or more ".vienna" or ".ct"-format files for
-                 output (should include appropriate ".vienna"/".ct" suffix).
-                 If not provided, the output for input file "PATH_TO/MY_FILE.VIENNA"
-                 will be used as a template for the output "OUT_DIR/MY_FILE_OUT.VIENNA".
-                 """
-out_folds_parser.add_argument('-o', '--out_fold', type=out_path_exists,
-                              metavar='PATH_TO/OUT_FILE.VIENNA',
-                              # required=True,
-                              nargs='+',
-                              help=_this_arg_help)
+_this_arg_help = (
+    """
+    Optional path to one or more ".vienna" or ".ct"-format files for
+    output (should include appropriate ".vienna"/".ct" suffix).
+    If not provided, the output for input file "PATH_TO/MY_FILE.VIENNA"
+    will be used as a template for the output "OUT_DIR/MY_FILE_OUT.VIENNA".
+    """
+)
+out_folds_parser.add_argument(
+    '-o', '--out_fold', type=out_path_exists,
+    metavar='PATH_TO/OUT_FILE.VIENNA',
+    # required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 req_out_hyb_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Path to hyb-format file for output (should include a ".hyb" suffix).
-                 """
-req_out_hyb_parser.add_argument('-o', '--out_hyb', type=out_path_exists,
-                                metavar='PATH_TO/OUT_FILE.HYB',
-                                required=True,
-                                # nargs='1',
-                                help=_this_arg_help)
+_this_arg_help = (
+    """
+    Path to hyb-format file for output (should include a ".hyb" suffix).
+    """
+)
+req_out_hyb_parser.add_argument(
+    '-o', '--out_hyb', type=out_path_exists,
+    metavar='PATH_TO/OUT_FILE.HYB',
+    required=True,
+    # nargs='1',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 out_basenames_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Optional path to one or more basename prefixes to use for
-                 analysis output. The appropriate suffix will be added
-                 based on the specific name.
-                 If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
-                 will be used as a template for the basename "OUT_DIR/MY_FILE".
-                 """
-out_basenames_parser.add_argument('-o', '--out_basename', type=out_path_exists,
-                                  metavar='PATH_TO/OUT_BASENAME',
-                                  # required=True,
-                                  nargs='+',
-                                  help=_this_arg_help)
+_this_arg_help = (
+    """
+    Optional path to one or more basename prefixes to use for
+    analysis output. The appropriate suffix will be added
+    based on the specific name.
+    If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
+    will be used as a template for the basename "OUT_DIR/MY_FILE".
+    """
+)
+out_basenames_parser.add_argument(
+    '-o', '--out_basename', type=out_path_exists,
+    metavar='PATH_TO/OUT_BASENAME',
+    # required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Input/Output Options
 out_dir_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Path to directory for output of evaluation files.
-                 Defaults to the current working directory.
-                 """
-out_dir_parser.add_argument('-d', '--out_dir', type=dir_exists,
-                            # required=True,
-                            # nargs='1',
-                            default='$PWD',
-                            help=_this_arg_help
-                            )
+_this_arg_help = (
+    """
+    Path to directory for output of evaluation files.
+    Defaults to the current working directory.
+    """
+)
+out_dir_parser.add_argument(
+    '-d', '--out_dir', type=dir_exists,
+    # required=True,
+    # nargs='1',
+    default='$PWD',
+    help=_this_arg_help
+)
 
 
 # Argument Parser : Input/Output Options
 out_suffix_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Suffix to add to the name of output files, before any
-                 file- or analysis-specific suffixes. The file-type appropriate suffix
-                 will be added automatically.
-                 """
-out_suffix_parser.add_argument('-u', '--out_suffix',
-                               # required=True,
-                               # nargs='1',
-                               help=_this_arg_help)
+_this_arg_help = (
+    """
+    Suffix to add to the name of output files, before any
+    file- or analysis-specific suffixes. The file-type appropriate suffix
+    will be added automatically.
+    """
+)
+out_suffix_parser.add_argument(
+    '-u', '--out_suffix',
+    # required=True,
+    # nargs='1',
+    help=_this_arg_help
+)
 
+out_opts_parser = argparse.ArgumentParser(
+    add_help=False,
+    parents=[
+        out_hybs_parser,
+        out_dir_parser,
+        out_suffix_parser,
+    ],
+)
 
-out_opts_parser = argparse.ArgumentParser(add_help=False,
-                                          parents=[out_hybs_parser,
-                                                   out_dir_parser,
-                                                   out_suffix_parser,
-                                                   ],
-                                          )
-
-out_fold_opts_parser = argparse.ArgumentParser(add_help=False,
-                                               parents=[out_folds_parser,
-                                                        out_dir_parser,
-                                                        out_suffix_parser,
-                                                        ],
-                                               )
-out_analysis_parser = argparse.ArgumentParser(add_help=False,
-                                              parents=[out_basenames_parser,
-                                                       out_dir_parser,
-                                                       out_suffix_parser,
-                                                       ],
-                                              )
+out_fold_opts_parser = argparse.ArgumentParser(
+    add_help=False,
+    parents=[
+        out_folds_parser,
+        out_dir_parser,
+        out_suffix_parser,
+    ],
+)
+out_analysis_parser = argparse.ArgumentParser(
+    add_help=False,
+    parents=[
+        out_basenames_parser,
+        out_dir_parser,
+        out_suffix_parser,
+    ],
+)
 
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
 verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
 
 # Argument Parser : General Options
-_this_arg_help = """
-                 Print verbose output during run.
-                 """
-verbosity_group.add_argument('-v', '--verbose', action='store_true',
-                             # nargs='+',
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    Print verbose output during run.
+    """
+)
+verbosity_group.add_argument(
+    '-v', '--verbose', action='store_true',
+    # nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : General Options
-_this_arg_help = """
-                 Print no output during run.
-                 """
-verbosity_group.add_argument('-s', '--silent', action='store_true',
-                             # nargs='+',
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    Print no output during run.
+    """
+)
+verbosity_group.add_argument(
+    '-s', '--silent', action='store_true',
+    # nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : Record Manipulation Options
 record_manip_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Set "dataset" flag to value of the input file name.
-                 """
-record_manip_parser.add_argument('--set_dataset',
-                                 action='store_true',
-                                 # required=True,
-                                 # nargs='1',
-                                 help=_this_arg_help)
-
+_this_arg_help = (
+    """
+    Set "dataset" flag to value of the input file name.
+    """
+)
+record_manip_parser.add_argument(
+    '--set_dataset',
+    action='store_true',
+    # required=True,
+    # nargs='1',
+    help=_this_arg_help
+)
 
 # Argument Parser : HybRecord, HybFile, FoldRecord
 _class_settings_groups = {}
@@ -508,189 +552,240 @@ for _cls_name, _cls_group in _class_settings_groups.items():
         _cls_group.add_argument(*_use_args, **_use_kwargs)
 
 
-#  ----- Task-specific Parsers -----
+#  ----- Begin Task-specific Parsers -----
 
 # Argument Parser : hyb_eval
 hyb_eval_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Types of evaluations to perform on input hyb file.
-                 (Note: evaluations can be combined, such as "--eval_types type mirna")
-                 """
-hyb_eval_parser.add_argument('-t', '--eval_types',
-                             # required=True,
-                             nargs='+',
-                             default=['type'],
-                             choices=['type', 'mirna'],
-                             help=_this_arg_help)
-
+_this_arg_help = (
+    """
+    Types of evaluations to perform on input hyb file.
+    (Note: evaluations can be combined, such as "--eval_types type mirna")
+    """
+)
+hyb_eval_parser.add_argument(
+    '-t', '--eval_types',
+    # required=True,
+    nargs='+',
+    default=['type'],
+    choices=['type', 'mirna'],
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_eval : type
 type_opts_group = hyb_eval_parser.add_argument_group('type Analysis Options')
 # Argument Parser : hyb_eval : type
-_this_arg_help = """
-                 Segment-type finding method to use for type evaluation.
-                 For a description of the different methods, see the HybRecord documentation
-                 for the eval_types method.
-                 """
-type_opts_group.add_argument('--type_method',
-                             # required=True,
-                             # nargs='?',
-                             default='hyb',
-                             choices=type_finder.TypeFinder.methods.keys(),
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    Segment-type finding method to use for type evaluation.
+    For a description of the different methods, see the HybRecord documentation
+    for the eval_types method.
+    """
+)
+type_opts_group.add_argument(
+    '--type_method',
+    # required=True,
+    # nargs='?',
+    default='hyb',
+    choices=type_finder.TypeFinder.methods.keys(),
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_eval : type
-_this_arg_help = """
-                 Segment-type finding paramaters file to use for type evaluation with some type
-                 finding methods: {string_match, id_map}.
-                 For a description of the different methods, see the HybRecord documentation
-                 for the find_seg_types method.
-                 """
-type_opts_group.add_argument('--type_params_file', type=file_exists,
-                             metavar='PATH_TO/PARAMATERS_FILE',
-                             # required=True,
-                             # nargs='?',
-                             # default='hyb',
-                             # choices=HybRecord.find_type_methods,
-                             help=_this_arg_help)
+_this_arg_help = (
+    """
+    Segment-type finding paramaters file to use for type evaluation with some type
+    finding methods: {string_match, id_map}.
+    For a description of the different methods, see the HybRecord documentation
+    for the find_seg_types method.
+    """
+)
+type_opts_group.add_argument(
+    '--type_params_file', type=file_exists,
+    metavar='PATH_TO/PARAMATERS_FILE',
+    # required=True,
+    # nargs='?',
+    # default='hyb',
+    # choices=HybRecord.find_type_methods,
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_filter
 hyb_filter_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Modes for evaluating multiple filters.
-                 The "all" mode requires all provided filters to be true for inclusion.
-                 The "any" mode requires only one provided filter to be true for inclusion.
-                 (Note: matching any exclusion filter is grounds for exclusion of record.)
-                 """
-hyb_filter_parser.add_argument('-m', '--filter_mode',
-                               # required=True,
-                               # nargs='+',
-                               default='all',
-                               choices={'all', 'any'},
-                               help=_this_arg_help)
+_this_arg_help = (
+    """
+    Modes for evaluating multiple filters.
+    The "all" mode requires all provided filters to be true for inclusion.
+    The "any" mode requires only one provided filter to be true for inclusion.
+    (Note: matching any exclusion filter is grounds for exclusion of record.)
+    """
+)
+hyb_filter_parser.add_argument(
+    '-m', '--filter_mode',
+    # required=True,
+    # nargs='+',
+    default='all',
+    choices={'all', 'any'},
+    help=_this_arg_help
+)
 
-_this_arg_help = """
-                 Output an "exclusion table" for use with hyb_filter_fold.
-                 """
-hyb_filter_parser.add_argument('--exclusion_table',
-                               # required=True,
-                               nargs='?',
-                               default=False,
-                               const=True,
-                               type=_bool_from_string,
-                               choices=[True, False],
-                               help=_this_arg_help)
+_this_arg_help = (
+    """
+    Output an "exclusion table" for use with hyb_filter_fold.
+    """
+)
+hyb_filter_parser.add_argument(
+    '--exclusion_table',
+    # required=True,
+    nargs='?',
+    default=False,
+    const=True,
+    type=_bool_from_string,
+    choices=[True, False],
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_exclude_fold
 hyb_exclude_fold_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Exclusion table(s) corresponding to input files, generated by hyb_filter
-                 """
-hyb_exclude_fold_parser.add_argument('-e', '--exclusion_table',
-                                     required=True,
-                                     nargs='+',
-                                     help=_this_arg_help)
+_this_arg_help = (
+    """
+    Exclusion table(s) corresponding to input files, generated by hyb_filter
+    """
+)
+hyb_exclude_fold_parser.add_argument(
+    '-e', '--exclusion_table',
+    required=True,
+    nargs='+',
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_analyze
 hyb_analyze_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Analysis to perform on input hyb file.
-                 """
-hyb_analyze_parser.add_argument('-a', '--analysis_type',
-                                # required=True,
-                                # nargs='1',
-                                action='store',
-                                choices=['type', 'mirna', 'summary', 'target'],
-                                help=_this_arg_help)
+_this_arg_help = (
+    """
+    Analysis to perform on input hyb file.
+    """
+)
+hyb_analyze_parser.add_argument(
+    '-a', '--analysis_type',
+    # required=True,
+    # nargs='1',
+    action='store',
+    choices=['type', 'mirna', 'summary', 'target'],
+    help=_this_arg_help
+)
 
-_this_arg_help = """
-                 Additionally write / plot output per individual miRNA.
-                 """
-hyb_analyze_parser.add_argument('--write_individual',
-                                # required=True,
-                                type=_bool_from_string,
-                                default=False,
-                                nargs='?',
-                                const=True,
-                                choices=[True, False],
-                                help=_this_arg_help)
+_this_arg_help = (
+    """
+    Additionally write / plot output per individual miRNA.
+    """
+)
+hyb_analyze_parser.add_argument(
+    '--write_individual',
+    # required=True,
+    type=_bool_from_string,
+    default=False,
+    nargs='?',
+    const=True,
+    choices=[True, False],
+    help=_this_arg_help
+)
 
 # Argument Parser : hyb_fold_analyze
 hyb_fold_analyze_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Analysis to perform on input hyb and fold files.
-                 """
-hyb_fold_analyze_parser.add_argument('-a', '--analysis_type',
-                                     # required=True,
-                                     # nargs='1',
-                                     default='fold',
-                                     action='store',
-                                     choices=['fold', 'pattern'],
-                                     help=_this_arg_help)
+_this_arg_help = (
+    """
+    Analysis to perform on input hyb and fold files.
+    """
+)
+hyb_fold_analyze_parser.add_argument(
+    '-a', '--analysis_type',
+    # required=True,
+    # nargs='1',
+    default='fold',
+    action='store',
+    choices=['fold', 'pattern'],
+    help=_this_arg_help
+)
 
 # Argument Parser : all_analyze
 all_analyze_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = """
-                 Name / title of analysis data.
-                 """
-all_analyze_parser.add_argument('-n', '--analysis_name',
-                                # required=True,
-                                # nargs='1',
-                                # default=None,
-                                # choices=[True, False],
-                                help=_this_arg_help)
+_this_arg_help = (
+    """
+    Name / title of analysis data.
+    """
+)
+all_analyze_parser.add_argument(
+    '-n', '--analysis_name',
+    # required=True,
+    # nargs='1',
+    # default=None,
+    # choices=[True, False],
+    help=_this_arg_help
+)
 
-_this_arg_help = """
-                 Create plots of analysis output.
-                 """
-all_analyze_parser.add_argument('-p', '--make_plots',
-                                # required=True,
-                                type=_bool_from_string,
-                                default=True,
-                                choices=[True, False],
-                                help=_this_arg_help)
+_this_arg_help = (
+    """
+    Create plots of analysis output.
+    """
+)
+all_analyze_parser.add_argument(
+    '-p', '--make_plots',
+    # required=True,
+    type=_bool_from_string,
+    default=True,
+    choices=[True, False],
+    help=_this_arg_help
+)
 
 for i in range(1, 4):
-    _this_arg_help = """
-                     Filter criteria #%i.
-                     Records matching the criteria will be included in output.
-                     Includes a filter type, Ex: "seg_name_contains",
-                     and an argument, Ex: "ENST00000340384".
-                     (Note: not all filter types require a second argument,
-                     for Example: "has_mirna_seg")
-                     """ % i
+    _this_arg_help = (
+        """
+        Filter criteria #%i.
+        Records matching the criteria will be included in output.
+        Includes a filter type, Ex: "seg_name_contains",
+        and an argument, Ex: "ENST00000340384".
+        (Note: not all filter types require a second argument,
+        for Example: "has_mirna_seg")
+        """ % i
+    )
     if i == 1:
         flag_suffix = ''
     else:
         flag_suffix = '_' + str(i)
 
-    hyb_filter_parser.add_argument('--filter' + flag_suffix,
-                                   # required=True,
-                                   nargs='+',
-                                   # default='all',
-                                   # choices={'all', 'any'},
-                                   help=_this_arg_help)
+    hyb_filter_parser.add_argument(
+        '--filter' + flag_suffix,
+        # required=True,
+        nargs='+',
+        # default='all',
+        # choices={'all', 'any'},
+        help=_this_arg_help
+    )
 
 for i in range(1, 4):
-    _this_arg_help = """
-                     Exclusion filter criteria #%i.
-                     Records matching the criteria will be excluded from output.
-                     Includes a filter type, Ex: "seg_name_contains",
-                     and an argument, Ex: "ENST00000340384".
-                     (Note: not all filter types require a second argument,
-                     for Example: "has_mirna_seg")
-                     """ % i
+    _this_arg_help = (
+        """
+        Exclusion filter criteria #%i.
+        Records matching the criteria will be excluded from output.
+        Includes a filter type, Ex: "seg_name_contains",
+        and an argument, Ex: "ENST00000340384".
+        (Note: not all filter types require a second argument,
+        for Example: "has_mirna_seg")
+        """ % i
+    )
     if i == 1:
         flag_suffix = ''
     else:
         flag_suffix = '_' + str(i)
 
-    hyb_filter_parser.add_argument('--exclude' + flag_suffix,
-                                   # required=True,
-                                   nargs='+',
-                                   # default='all',
-                                   # choices={'all', 'any'},
-                                   help=_this_arg_help)
+    hyb_filter_parser.add_argument(
+        '--exclude' + flag_suffix,
+        # required=True,
+        nargs='+',
+        # default='all',
+        # choices={'all', 'any'},
+        help=_this_arg_help
+    )
 
 # Argument Parser : Standardized Documentation Settings
 output_description = textwrap.dedent("""
@@ -744,8 +839,8 @@ Output File Naming:
 # Argument Parser : hyb_type_analysis
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
 
-
-def set_settings(nspace, verbose=False):
+# ------ Begin Settings Manipulation Functions ------
+def set_setting(setting, set_value, verbose=False):
     """
     Take a namespace object as from an argparse parser and update settings.
 
@@ -761,8 +856,44 @@ def set_settings(nspace, verbose=False):
         ===================================== ============================================
 
     Args:
+        setting (str): Name of setting to change
+        set_value (str): New value for setting
+        verbose (:obj:`bool`, optional): If True, print when changing setting.
+    """
+    out_report = '\n'
+    for class_name in ['HybRecord', 'HybFile', 'FoldRecord',
+                       'FoldFile', 'HybFoldIter', 'Analysis']:
+        cls_settings_info = getattr(settings, class_name + '_settings_info')
+        cls_settings = getattr(settings, class_name + '_settings')
+        if setting in cls_settings:
+            old_setting = cls_settings[setting]
+            if 'choices' in cls_settings_info[setting][4]:
+                choices = cls_settings_info[setting][4]['choices']
+            else:
+                choices = None
+            if choices is not None and set_value not in choices:
+                message = 'Invalid value for %s setting: %s' % (setting, set_value)
+                message += '\nChoices are: %s' % str(choices)
+                raise RuntimeError(message)
+            if old_setting is not None and set_value != old_setting:
+                out_report += 'Setting %s Setting: ' % class_name
+                out_report += '"%s" to "%s"\n' % (setting, str(set_value))
+                cls_settings[setting] = set_value
+                
+    if verbose and out_report.strip():
+        print(out_report)
+    return out_report
+
+
+def set_settings_from_namespace(nspace, verbose=False):
+    """
+    Take a namespace object as from an argparse parser and update settings.
+
+    See :func:`set_setting` for details
+
+    Args:
         nspace (argparse.Namespace): Namespace containing settings
-        verbose (bool, optional): If True, print when changing setting.
+        verbose (:obj:`bool`, optional): If True, print when changing setting.
     """
     out_report = '\n'
     for class_name in ['HybRecord', 'HybFile', 'FoldRecord',
@@ -772,11 +903,7 @@ def set_settings(nspace, verbose=False):
         for setting_key in cls_settings:
             if hasattr(nspace, setting_key):
                 argparse_setting = getattr(nspace, setting_key)
-                if (argparse_setting is not None
-                        and argparse_setting != cls_settings_info[setting_key][0]):
-                    out_report += 'Setting %s Setting: ' % class_name
-                    out_report += '"%s" to "%s"\n' % (setting_key, str(argparse_setting))
-                    cls_settings[setting_key] = argparse_setting
+                out_report += set_setting(setting_key, argparse_setting, verbose=False)
 
     if verbose and out_report.strip():
         print(out_report)
