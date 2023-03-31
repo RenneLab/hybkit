@@ -2839,25 +2839,30 @@ class HybFoldIter(object):
         next_fold_record = None
         iter_error_mode = self.iter_error_mode
         try:
-            energy_mismatch = False
+            # Attempt to read next HybRecord
             self.counters['hyb_record_read_attempts'] += 1
             next_hyb_record = self.hybfile_handle.read_record()
+            # Attempt to read next FoldRecord
             self.counters['fold_record_read_attempts'] += 1
             next_fold_record = self.foldfile_handle.read_record(override_error_mode='return')
+            # Set initial loop variables
             error = ''
             do_skip = False
+            # Check for "NoFold" error
             if 'foldrecord_nofold' in self.settings['error_checks']:
                 if isinstance(next_fold_record, tuple) and next_fold_record[0] == 'NOFOLD':
                     error = 'Improper FoldRecord: No Fold (Energy = 99*.*)'
 
-            # always-disallowed errors
+            # Check for "NoEnergy" error
             if not error and isinstance(next_fold_record, tuple) and next_fold_record[0] == 'NOENERGY':
                 error = 'Improper FoldRecord: No Energy (no <Tab> in 3rd line)'
 
+            # Check for "InDel" errors
             if not error and 'hybrecord_indel' in self.settings['error_checks']:
                 if next_hyb_record.has_prop('has_indels'):
                     error = 'HybRecord: %s has InDels.' % str(next_hyb_record)
-                    
+            
+            # Check for "Mismatch" errors
             if not error and 'max_mismatch' in self.settings['error_checks']:
                 hyb_fold_mismatches = next_fold_record.count_hyb_record_mismatches(next_hyb_record)
                 if hyb_fold_mismatches > FoldRecord.settings['allowed_mismatches']:
@@ -2866,7 +2871,7 @@ class HybFoldIter(object):
                     error += 'mismatches of '
                     error += '%i allowed ' % FoldRecord.settings['allowed_mismatches']
 
-            #if not error and 'energy_match' in self.settings['error_checks']:
+            # Check for "EnergyMismatch" errors
             if not error and 'energy_mismatch' in self.settings['error_checks']:
                 if (next_fold_record.energy is not None
                     and next_hyb_record.energy not in {None, '.'}
@@ -2876,8 +2881,8 @@ class HybFoldIter(object):
                     error += 'has hyb-record / fold-record energy mismatch: '
                     error += '%s / %s\n' % (str(next_hyb_record.energy), str(next_fold_record.energy))
                     error += next_fold_record.to_vienna_string()
-                    energy_mismatch = True
 
+            # If an error exists, deal with it depending on the value of iter_error_mode
             if error:
                 if iter_error_mode == 'raise':
                     _print_and_error('ERROR: ' + error)
@@ -2915,7 +2920,7 @@ class HybFoldIter(object):
             return next(self)
 
         if self.combine:
-            next_hyb_record.set_fold_record(next_fold_record, allow_energy_mismatch=energy_mismatch)
+            next_hyb_record.set_fold_record(next_fold_record, allow_energy_mismatch=True)
             ret_obj = next_hyb_record
         else:
             ret_obj = (next_hyb_record, next_fold_record)
