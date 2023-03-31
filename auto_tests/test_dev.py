@@ -16,8 +16,20 @@ import pytest
 import hybkit
 
 
-# ----- Import Testing Variables -----
+# ----- Import Testing Helper Data -----
 from auto_tests.test_helper_data import *
+# Includes the following variables:
+# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
+# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
+# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
+# test_out_dir, hyb_autotest_file_name, hyb_file_name
+
+
+# ----- Import Testing Helper Functions -----
+from auto_tests.test_helper_functions import *
+# Includes the following functions:
+# get_expected_result_string(is_allowed=False)
+# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 # ----- Begin old tests -----
 def old_test_viennafile():
