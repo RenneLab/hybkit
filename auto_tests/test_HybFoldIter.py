@@ -111,39 +111,65 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str):
                 fold_record.ensure_matches_hyb_record(hyb_record)
 
 
-# TODO Add tests for different error modes
-def old_test_hybfolditer():
-    hybkit.settings.FoldFile_settings['foldrecord_type'] = 'strict'
-    hybkit.settings.HybFoldIter_settings['error_mode'] = 'raise'
-    with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
-         hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
-        hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
-        with pytest.raises(RuntimeError):
-            for ret_item in hf_iter:
-                print(ret_item)
+# Test iter_error_mode values:
+raise_error_modes = ['raise']
+allow_error_modes = ['warn_return', 'warn_skip', 'skip', 'return']
+all_iter_error_modes = [*raise_error_modes, *allow_error_modes]
+test_names_allowed = {
+    'StaticAllowed': all_iter_error_modes,
+    'StaticDisallowed': allow_error_modes,
+    'DynamicAllowed': all_iter_error_modes,
+    'MismatchSeqStatic': allow_error_modes,
+    'MismatchSeqDynamic': allow_error_modes,
+    'MismatchEnergy': allow_error_modes,
+}
+test_param_sets = {
+    'StaticAllowed': ART_HYB_VIENNA_PROPS_1,
+    'StaticDisallowed': ART_HYB_VIENNA_PROPS_2,
+    'DynamicAllowed': ART_HYB_VIENNA_PROPS_2,
+    'MismatchSeqStatic': ART_BAD_HYB_VIENNA_PROPS_1,
+    'MismatchSeqDynamic': ART_BAD_HYB_VIENNA_PROPS_3,
+    'MismatchEnergy': ART_BAD_HYB_VIENNA_PROPS_4,
+}
+test_seq_types = {
+    'StaticAllowed': 'static',
+    'StaticDisallowed': 'static',
+    'DynamicAllowed': 'dynamic',
+    'MismatchSeqStatic': 'static',
+    'MismatchSeqDynamic': 'dynamic',
+    'MismatchEnergy': 'dynamic',
+}
+test_parameters = []
+for test_name, test_props in test_param_sets.items():
+    allowed_errors = test_names_allowed[test_name]
+    seq_type = test_seq_types[test_name]
+    for iter_error_mode in all_iter_error_modes:
+        if iter_error_mode in allowed_errors:
+            expectation = 'Pass'
+        else:
+            expectation = 'Raise'
+        test_parameters.append((test_name, iter_error_mode, expectation, seq_type, test_props))
 
-    hybkit.settings.HybFoldIter_settings['error_mode'] = 'warn_skip'
-    with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
-         hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
-        hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
-        with pytest.raises(RuntimeError):
-            for ret_item in hf_iter:
-                print(ret_item)
+@pytest.mark.parametrize("test_name,iter_error_mode,expectation,seq_type,test_props",[*test_parameters])
+def test_hybfolditer_iter_error_mode(test_name, iter_error_mode, expectation, seq_type, test_props):
+    expect_context = get_expected_result_context(expectation)
+    hyb_str = test_props['hyb_str']
+    vienna_str = test_props['vienna_str']
+    with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
+        hyb_autotest_file.write(hyb_str)
+    with open(vienna_autotest_file_name, 'w') as vienna_autotest_file:
+        vienna_autotest_file.write(vienna_str)
 
-    hybkit.settings.HybFoldIter_settings['error_mode'] = 'warn_return'
-    with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
-         hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
-        hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file)
-        for ret_item in hf_iter:
-            print(ret_item)
-
-    hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
-    for combine in [True, False]:
-        with hybkit.HybFile.open(hyb_file_name, 'r') as hyb_file, \
-             hybkit.ViennaFile.open(vienna_file_name, 'r') as vienna_file:
-            hf_iter = hybkit.HybFoldIter(hyb_file, vienna_file, combine=combine)
-            for ret_item in hf_iter:
-                print(ret_item)
+    hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'r')
+    fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'r', seq_type=seq_type)
+    use_iter = hybkit.HybFoldIter(
+        hyb_file,
+        fold_file,
+        iter_error_mode=iter_error_mode,
+    )
+    with expect_context:
+        for ret_items in use_iter:
+            pass
 
 
 # if __name__ == '__main__':

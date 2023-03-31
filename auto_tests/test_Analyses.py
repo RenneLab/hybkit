@@ -32,8 +32,6 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 # ----- Begin old tests -----
-
-
 def old_test_analyses():
     analysis_classes = {
         'type': hybkit.analysis.TypeAnalysis,

@@ -78,7 +78,7 @@ import hybkit.__about__
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-# Start HybRecord Class
+# ----- Begin HybRecord Class -----
 class HybRecord(object):
     r"""
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
@@ -1627,7 +1627,7 @@ class HybRecord(object):
             flags[flag_key] = str(flag_value)
         return flags
 
-# Start HybFile Class
+# ----- Begin HybFile Class -----
 class HybFile(object):
     """
     Wrapper for a *.hyb -format text file which returns entries (lines) as HybRecord objects.
@@ -1770,7 +1770,7 @@ class HybFile(object):
             _print_and_error('Item: "%s" is not a HybRecord object.' % record)
 
 
-# Start FoldRecord Class
+# ----- Begin FoldRecord Class -----
 class FoldRecord(object):
     """
     Class for storing secondary structure (folding) information for a nucleotide sequence.
@@ -2474,7 +2474,7 @@ class FoldRecord(object):
         else:
             raise RuntimeError()
 
-# Start FoldFile Class
+# ----- Begin FoldFile Class -----
 FOLD_FILE_COMMON_ARGS_ATTRS = (
     """
 
@@ -2641,7 +2641,7 @@ class FoldFile(object):
 # Append common FoldFile Args and Attributes description to docstring:
 FoldFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
-# ---- Start ViennaFile Class -----
+# ----- Begin ViennaFile Class -----
 class ViennaFile(FoldFile):
     """
     Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects.
@@ -2689,7 +2689,7 @@ class ViennaFile(FoldFile):
 # Append common FoldFile Args and Attributes description to docstring:
 ViennaFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
-# Start CtFile Class
+# ----- Begin CtFile Class -----
 class CtFile(FoldFile):
     """
     Ct file wrapper that returns ".ct" file lines as FoldRecord objects.
@@ -2739,7 +2739,7 @@ class CtFile(FoldFile):
 # Append common FoldFile Args and Attributes description to docstring:
 CtFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS 
 
-# Start HybFoldIter Class
+# ----- Begin HybFoldIter Class -----
 class HybFoldIter(object):
     """
     Iterator for simultaneous iteration over a :class:`HybFile` and :class:`FoldFile` object.
@@ -2756,10 +2756,9 @@ class HybFoldIter(object):
         foldfile_handle (FoldFile) : FoldFile object for iteration
         combine (:obj:`bool`, optional) : Use HybRecord.set_fold_record(FoldRecord)
             and return only the HybRecord.
-        override_error_mode (str, optional) : Error mode to use for reading :class:`FoldRecord`
-            objects. If set, overrides the value in 
-            :attr:`settings['error_mode'] <FoldRecord.settings>`.
-            See :class:`FoldRecord` for more information on allowed error modes.
+        iter_error_mode (str, optional) : Error mode to use for reading :class:`FoldRecord`
+            objects. If not set, defaults to the value in 
+            :attr:`settings['iter_error_mode'] <HybFoldIter.settings>`.
 
     Returns:
         (:class:`HybRecord`, :class:`FoldRecord`)
@@ -2768,9 +2767,11 @@ class HybFoldIter(object):
     #: Class-level settings. See :attr:`settings.HybFoldIter_settings` for descriptions.
     settings = hybkit.settings.HybFoldIter_settings
 
+    _iter_error_modes = set(hybkit.settings.HybFoldIter_settings_info['iter_error_mode'][4]['choices'])
+
     # Start HybFoldIter Methods
     # HybFoldIter : Public Methods
-    def __init__(self, hybfile_handle, foldfile_handle, combine=False):
+    def __init__(self, hybfile_handle, foldfile_handle, combine=False, iter_error_mode=None):
         """Please see :class:`HybFoldIter` for initialization information."""
         if not isinstance(hybfile_handle, HybFile):
             message = 'hybfile_handle must be an instance of a HybFile object.'
@@ -2778,6 +2779,14 @@ class HybFoldIter(object):
         if not isinstance(foldfile_handle, FoldFile):
             message = 'foldfile_handle must be an instance of a FoldFile object.'
             _print_and_error(message)
+        if iter_error_mode is None:
+            self.iter_error_mode = self.settings['iter_error_mode']
+        elif iter_error_mode not in self._iter_error_modes:
+            message = 'iter_error_mode must be one of the following: '
+            message += ', '.join(self._iter_error_modes)
+            _print_and_error(message)
+        else:
+            self.iter_error_mode = iter_error_mode
         self.hybfile_handle = hybfile_handle
         self.foldfile_handle = foldfile_handle
         self.counters = Counter()
@@ -2822,6 +2831,7 @@ class HybFoldIter(object):
         self.counters['total_read_attempts'] += 1
         next_hyb_record = None
         next_fold_record = None
+        iter_error_mode = self.iter_error_mode
         try:
             energy_mismatch = False
             self.counters['hyb_record_read_attempts'] += 1
@@ -2834,8 +2844,8 @@ class HybFoldIter(object):
                 if isinstance(next_fold_record, tuple) and next_fold_record[0] == 'NOFOLD':
                     error = 'Improper FoldRecord: No Fold (Energy = 99*.*)'
                 # while isinstance(next_fold_record, tuple) and next_fold_record[0] =='NOFOLD':
-                #    if 'skip' in self.settings['error_mode']:
-                #        if self.settings['error_mode'] == 'warn_skip':
+                #    if 'skip' in iter_error_mode:
+                #        if iter_error_mode == 'warn_skip':
                 #            print('WARNING: SkipFold: Improper FoldRecord: '
                 #            print('    No Fold (Energy = 99*.*)')
                 #        self.sequential_skips += 1
@@ -2877,14 +2887,14 @@ class HybFoldIter(object):
                     energy_mismatch = True
 
             if error:
-                if self.settings['error_mode'] == 'raise':
-                    _print_and_error('ERROR: ' + message)
-                elif self.settings['error_mode'] == 'warn_skip':
+                if iter_error_mode == 'raise':
+                    _print_and_error('ERROR: ' + error)
+                elif iter_error_mode == 'warn_skip':
                     print('WARNING: SkipPair:', error)
-                elif self.settings['error_mode'] == 'warn_return':
+                elif iter_error_mode == 'warn_return':
                     print('WARNING:', error)
 
-                if 'skip' in self.settings['error_mode']:
+                if 'skip' in iter_error_mode:
                     self.sequential_skips += 1
                     self.counters['pair_skips'] += 1
                     if self.sequential_skips > self.settings['max_sequential_skips']:
@@ -2919,7 +2929,7 @@ class HybFoldIter(object):
         else:
             ret_obj = (next_hyb_record, next_fold_record)
 
-        if self.settings['error_mode'] == 'warn_return':
+        if iter_error_mode == 'warn_return':
             if isinstance(ret_obj, tuple):
                 ret_obj = (*ret_obj, error)
             else:

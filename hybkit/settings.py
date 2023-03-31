@@ -242,6 +242,8 @@ HybFoldIter_settings_info = {
         insertions/deletions in alignment, which prevents matching of sequences;
         "foldrecord_nofold": Error when failure in reading a fold_record object;
         "max_mismatch": Error when mismatch between hybrecord and foldrecord sequences is
+        greater than FoldRecord "allowed_mismatches" setting; "energy_mismatch": Error when
+        a mismatch exists between HybRecord and FoldRecord energy values.
         """,
         'str',
         None,
@@ -250,16 +252,18 @@ HybFoldIter_settings_info = {
     'iter_error_mode': [
         'warn_skip',
         """
-        Mode for handling errors found during error checks. Options:
-        "raise": Raise an error when encountered and exit program;
-        "warn_return": Print a warning and return the value ;
+        Mode for handling errors found during error checks.
+        Overrides HybRecord "error_mode" setting when using HybFoldIter.
+        Options:
+        "raise": Raise an error when encountered;
+        "warn_return": Print a warning and return the value;
         "warn_skip": Print a warning and continue to the next iteration;
         "skip": Continue to the next iteration without any output;
-        "return": return the value without any output.
+        "return": return the value without any error output;
         """,
         'str',
         None,
-        {'choices': ['raise', 'warn_return', 'warn_skip', 'skip']}
+        {'choices': ['raise', 'warn_return', 'warn_skip', 'skip', 'return']}
     ],
     'max_sequential_skips': [
         20,

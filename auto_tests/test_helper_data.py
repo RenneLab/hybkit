@@ -329,7 +329,7 @@ ART_HYB_VIENNA_PROPS_1 = {
     'vienna_str': (
         '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_mRNA\n'
         'GGGCCCCCCCCCCCCCCGGGAAAGGGGGGGGGGGGGGAAA\n'
-        '...((((((((((((((......))))))))))))))...	(-15)'
+        '...((((((((((((((......))))))))))))))...	(-10.0)'
     ),
     'overlapping': False,
     'mismatches': 0,
@@ -357,7 +357,7 @@ ART_HYB_VIENNA_PROPS_2 = {
     'vienna_str': (
         '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_mRNA\n'
         'GGGCCCCCCCCCCCCCCGGGAAAGCGGGAAAGGGGGGGGGGGGGGAAA\n'
-        '...((((((((((((((......()......))))))))))))))...	(-15)'
+        '...((((((((((((((......()......))))))))))))))...	(-10.0)'
     ),
     'overlapping': True,
     'mismatches': 0,
@@ -384,8 +384,11 @@ ART_BAD_HYB_VIENNA_PROPS_2['overlapping'] = False
 ART_BAD_HYB_VIENNA_PROPS_2['mismatches'] = 3
 
 ART_BAD_HYB_VIENNA_PROPS_3 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
-ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_2['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
+ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
 ART_BAD_HYB_VIENNA_PROPS_3['mismatches'] = 3
+
+ART_BAD_HYB_VIENNA_PROPS_4 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
+ART_BAD_HYB_VIENNA_PROPS_4['vienna_str'] = ART_BAD_HYB_VIENNA_PROPS_4['vienna_str'].replace('(-10.0)','(-15.0)')
 
 
 
