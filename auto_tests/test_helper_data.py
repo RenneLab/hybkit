@@ -13,7 +13,7 @@ import hybkit
 import pytest
 from contextlib import nullcontext as does_not_raise
 
-# Real data examples for testing.
+# ----- Start Real Hyb/Vienna Data Examples -----
 # Example hyb record string for testing.
 HYB_STR_1 = (
     '695_804	ATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC	.	'
@@ -36,7 +36,7 @@ VIENNA_STR_1_MIS = (
     '.((((((((...(((((....)))))...))))))))...........	(-15)\n'
 )
 
-# Artificial Hyb record strings and parameters for eval_type and eval_mirna testing.
+# ----- Start Artificial Hyb Data Examples -----
 ART_HYB_PROPS_1 = {
     'hyb_str': (
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
@@ -93,11 +93,11 @@ ART_HYB_PROPS_2 = {
     'hyb_str': (
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
         'ARTSEG1_SOURCE_NAME_microRNA	1	20	1	20	0.001	'
-        'ARTSEG2_SOURCE_NAME_coding	21	40	21	40	0.001	'
+        'ARTSEG2_SOURCE_NAME_mRNA	21	40	21	40	0.001	'
         'dataset=artificial'
     ),
     'seg1_type': 'microRNA',
-    'seg2_type': 'coding',
+    'seg2_type': 'mRNA',
     'seg1_seq': 'AAAAAAAAAAAAAAAAAAAA',
     'seg2_seq': 'GGGGGGGGGGGGGGGGGGGG',
     'hybrid_fasta_id': '1_1000',
@@ -105,7 +105,7 @@ ART_HYB_PROPS_2 = {
     'seg1_fasta_id': '1_1000:1-20',
     'seg1_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_microRNA',
     'seg2_fasta_id': '1_1000:21-40',
-    'seg2_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_coding',
+    'seg2_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_mRNA',
     'miRNA_seg': '5p',
     'true_prop_argsets': [
         ('has_mirna',),
@@ -130,31 +130,31 @@ ART_HYB_PROPS_2 = {
     'one_mirna_error': False,
     'two_mirna_error': False,
     'mirna_seg_type': 'microRNA',
-    'target_seg_type': 'coding',
+    'target_seg_type': 'mRNA',
     'mirna_ref': 'ARTSEG1_SOURCE_NAME_microRNA',
-    'target_ref': 'ARTSEG2_SOURCE_NAME_coding',
+    'target_ref': 'ARTSEG2_SOURCE_NAME_mRNA',
     'mirna_seq': 'AAAAAAAAAAAAAAAAAAAA',
     'target_seq': 'GGGGGGGGGGGGGGGGGGGG',
     'mirna_fasta_id': '1_1000:1-20',
     'mirna_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_microRNA',
     'target_fasta_id': '1_1000:21-40',
-    'target_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_coding',
+    'target_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_mRNA',
 }
 ART_HYB_PROPS_3 = {
     'hyb_str': (
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
-        'ARTSEG1_SOURCE_NAME_coding	1	20	1	20	0.001	'
+        'ARTSEG1_SOURCE_NAME_mRNA	1	20	1	20	0.001	'
         'ARTSEG2_SOURCE_NAME_microRNA	21	40	21	40	0.001	'
         'dataset=artificial'
     ),
-    'seg1_type': 'coding',
+    'seg1_type': 'mRNA',
     'seg2_type': 'microRNA',
     'seg1_seq': 'AAAAAAAAAAAAAAAAAAAA',
     'seg2_seq': 'GGGGGGGGGGGGGGGGGGGG',
     'hybrid_fasta_id': '1_1000',
     'hybrid_fasta_id_annotate': 'artificial:1_1000',
     'seg1_fasta_id': '1_1000:1-20',
-    'seg1_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_coding',
+    'seg1_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_mRNA',
     'seg2_fasta_id': '1_1000:21-40',
     'seg2_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_microRNA',
     'miRNA_seg': '3p',
@@ -181,33 +181,33 @@ ART_HYB_PROPS_3 = {
     'one_mirna_error': False,
     'two_mirna_error': False,
     'mirna_seg_type': 'microRNA',
-    'target_seg_type': 'coding',
+    'target_seg_type': 'mRNA',
     'mirna_ref': 'ARTSEG2_SOURCE_NAME_microRNA',
-    'target_ref': 'ARTSEG1_SOURCE_NAME_coding',
+    'target_ref': 'ARTSEG1_SOURCE_NAME_mRNA',
     'mirna_seq': 'GGGGGGGGGGGGGGGGGGGG',
     'target_seq': 'AAAAAAAAAAAAAAAAAAAA',
     'mirna_fasta_id': '1_1000:21-40',
     'mirna_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_microRNA',
     'target_fasta_id': '1_1000:1-20',
-    'target_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_coding',
+    'target_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_mRNA',
 }
 ART_HYB_PROPS_4 = {
     'hyb_str': (
         '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	-10.0	'
-        'ARTSEG1_SOURCE_NAME_coding	1	20	1	20	0.001	'
-        'ARTSEG2_SOURCE_NAME_coding	21	40	21	40	0.001	'
+        'ARTSEG1_SOURCE_NAME_mRNA	1	20	1	20	0.001	'
+        'ARTSEG2_SOURCE_NAME_mRNA	21	40	21	40	0.001	'
         'dataset=artificial'
     ),
-    'seg1_type': 'coding',
-    'seg2_type': 'coding',
+    'seg1_type': 'mRNA',
+    'seg2_type': 'mRNA',
     'seg1_seq': 'AAAAAAAAAAAAAAAAAAAA',
     'seg2_seq': 'GGGGGGGGGGGGGGGGGGGG',
     'hybrid_fasta_id': '1_1000',
     'hybrid_fasta_id_annotate': 'artificial:1_1000',
     'seg1_fasta_id': '1_1000:1-20',
-    'seg1_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_coding',
+    'seg1_fasta_id_annotate': 'artificial:1_1000:1-20:ARTSEG1_SOURCE_NAME_mRNA',
     'seg2_fasta_id': '1_1000:21-40',
-    'seg2_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_coding',
+    'seg2_fasta_id_annotate': 'artificial:1_1000:21-40:ARTSEG2_SOURCE_NAME_mRNA',
     'miRNA_seg': 'N',
     'true_prop_argsets': [
         ('no_mirna',),
@@ -260,42 +260,42 @@ ART_HYB_STR_PROPS['true_prop_argsets'] = [
     ('seg1_prefix', 'ARTSEG1_SOURCE_NAME'),
     ('seg1_suffix', 'microRNA'),
     ('seg1_contains', '_SOURCE_NAME_m'),
-    ('seg2_is', 'ARTSEG2_SOURCE_NAME_coding'),
+    ('seg2_is', 'ARTSEG2_SOURCE_NAME_mRNA'),
     ('seg2_prefix', 'ARTSEG2_SOURCE_NAME'),
-    ('seg2_suffix', 'coding'),
-    ('seg2_contains', '_SOURCE_NAME_c'),
-    ('any_seg_is', 'ARTSEG2_SOURCE_NAME_coding'),
+    ('seg2_suffix', 'mRNA'),
+    ('seg2_contains', '_SOURCE_NAME_mR'),
+    ('any_seg_is', 'ARTSEG2_SOURCE_NAME_mRNA'),
     ('any_seg_prefix', 'ARTSEG2_SOURCE_NAME'),
-    ('any_seg_suffix', 'coding'),
-    ('any_seg_contains', '_SOURCE_NAME_c'),
+    ('any_seg_suffix', 'mRNA'),
+    ('any_seg_contains', '_SOURCE_NAME_mR'),
     ('seg1_type_is', 'microRNA'),
     ('seg1_type_prefix', 'micro'),
     ('seg1_type_suffix', 'RNA'),
     ('seg1_type_contains', 'icro'),
-    ('seg2_type_is', 'coding'),
-    ('seg2_type_prefix', 'cod'),
-    ('seg2_type_suffix', 'ing'),
-    ('seg2_type_contains', 'od'),
-    ('any_seg_type_is', 'coding'),
-    ('any_seg_type_prefix', 'cod'),
-    ('any_seg_type_suffix', 'ing'),
-    ('any_seg_type_contains', 'od'),
+    ('seg2_type_is', 'mRNA'),
+    ('seg2_type_prefix', 'mR'),
+    ('seg2_type_suffix', 'NA'),
+    ('seg2_type_contains', 'RN'),
+    ('any_seg_type_is', 'mRNA'),
+    ('any_seg_type_prefix', 'mR'),
+    ('any_seg_type_suffix', 'NA'),
+    ('any_seg_type_contains', 'RNA'),
     ('mirna_is', 'ARTSEG1_SOURCE_NAME_microRNA'),
     ('mirna_prefix', 'ARTSEG1_SOURCE_NAME'),
     ('mirna_suffix', 'microRNA'),
     ('mirna_contains', '_SOURCE_NAME_m'),
-    ('target_is', 'ARTSEG2_SOURCE_NAME_coding'),
+    ('target_is', 'ARTSEG2_SOURCE_NAME_mRNA'),
     ('target_prefix', 'ARTSEG2_SOURCE_NAME'),
-    ('target_suffix', 'coding'),
-    ('target_contains', '_SOURCE_NAME_c'),
+    ('target_suffix', 'mRNA'),
+    ('target_contains', '_SOURCE_NAME_mR'),
     ('mirna_seg_type_is', 'microRNA'),
     ('mirna_seg_type_prefix', 'micro'),
     ('mirna_seg_type_suffix', 'RNA'),
     ('mirna_seg_type_contains', 'icro'),
-    ('target_seg_type_is', 'coding'),
-    ('target_seg_type_prefix', 'cod'),
-    ('target_seg_type_suffix', 'ing'),
-    ('target_seg_type_contains', 'od'),
+    ('target_seg_type_is', 'mRNA'),
+    ('target_seg_type_prefix', 'mR'),
+    ('target_seg_type_suffix', 'NA'),
+    ('target_seg_type_contains', 'RN'),
 ]
 
 ART_HYB_STR_PROPS['false_prop_argsets'] = [ \
@@ -318,20 +318,21 @@ del(items[4])
 bad_hyb_str = '\t'.join(items)
 ART_BAD_HYB_STRS.append(bad_hyb_str)
 
-# Example Artificial Hyb / Viennarecord strings and parameters for eval_type and eval_mirna testing.
+# ----- Start Artificial Vienna Data -----
 ART_HYB_VIENNA_PROPS_1 = {
     'hyb_str': (
         '1_1000	GGGCCCCCCCCCCCCCCGGGAAAGGGGGGGGGGGGGGAAA	-10.0	'
         'ARTSEG1_SOURCE_NAME_microRNA	1	20	1	20	0.001	'
-        'ARTSEG2_SOURCE_NAME_coding	21	40	21	40	0.001	'
+        'ARTSEG2_SOURCE_NAME_mRNA	21	40	21	40	0.001	'
         'dataset=artificial'
     ),
     'vienna_str': (
-        '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_coding\n'
+        '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_mRNA\n'
         'GGGCCCCCCCCCCCCCCGGGAAAGGGGGGGGGGGGGGAAA\n'
         '...((((((((((((((......))))))))))))))...	(-15)'
     ),
     'overlapping': False,
+    'mismatches': 0,
     'seg1_seq':  'GGGCCCCCCCCCCCCCCGGG',
     'seg2_seq':  'AAAGGGGGGGGGGGGGGAAA',
     'seg1_fold': '...((((((((((((((...',
@@ -350,15 +351,16 @@ ART_HYB_VIENNA_PROPS_2 = {
     'hyb_str': (
         '1_1000	GGGCCCCCCCCCCCCCCGGGAAAGGGGGGGGGGGGGGAAA	-10.0	'
         'ARTSEG1_SOURCE_NAME_microRNA	1	24	1	24	0.001	'
-        'ARTSEG2_SOURCE_NAME_coding	17	40	17	40	0.001	'
+        'ARTSEG2_SOURCE_NAME_mRNA	17	40	17	40	0.001	'
         'dataset=artificial'
     ),
     'vienna_str': (
-        '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_coding\n'
+        '>1_1000_ARTSEG1_SOURCE_NAME_microRNA-ARTSEG2_SOURCE_NAME_mRNA\n'
         'GGGCCCCCCCCCCCCCCGGGAAAGCGGGAAAGGGGGGGGGGGGGGAAA\n'
         '...((((((((((((((......()......))))))))))))))...	(-15)'
     ),
     'overlapping': True,
+    'mismatches': 0,
     'seg1_seq': 'GGGCCCCCCCCCCCCCCGGGAAAG',
     'seg2_seq': 'CGGGAAAGGGGGGGGGGGGGGAAA',
     'seg1_fold': '...((((((((((((((......(',
@@ -374,13 +376,20 @@ ART_HYB_VIENNA_PROPS_2 = {
 }
 
 ART_BAD_HYB_VIENNA_PROPS_1 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
-ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'].replace('1_1000','1_1000XXX')
+ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_1['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
+ART_BAD_HYB_VIENNA_PROPS_1['mismatches'] = 3
 
-ART_BAD_HYB_VIENNA_PROPS_2 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
-ART_BAD_HYB_VIENNA_PROPS_2['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_2['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
+ART_BAD_HYB_VIENNA_PROPS_2 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
+ART_BAD_HYB_VIENNA_PROPS_2['overlapping'] = False
+ART_BAD_HYB_VIENNA_PROPS_2['mismatches'] = 3
+
+ART_BAD_HYB_VIENNA_PROPS_3 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
+ART_BAD_HYB_VIENNA_PROPS_3['hyb_str'] = ART_BAD_HYB_VIENNA_PROPS_2['hyb_str'].replace('CCCGGGA','CCCGGGAXXX')
+ART_BAD_HYB_VIENNA_PROPS_3['mismatches'] = 3
 
 
-# Empty seg_props dictionary for testing.
+
+# ----- Start Hyb Properties -----
 EMPTY_SEG_PROPS = {
     'ref_name': None,
     'read_start': None,
@@ -468,17 +477,131 @@ REF_START_ALLOWED_TYPES = {*NONE_OBJS, 'int_str', 'int'}
 REF_END_ALLOWED_TYPES = {*NONE_OBJS, 'int_str', 'int'}
 SCORE_ALLOWED_TYPES = {*NONE_OBJS, *ALL_STRS, 'int', 'float'}
 
-# ----- Set Testing File Paths -----
+# ----- Start Testing File Paths -----
 auto_tests_dir = os.path.abspath(os.path.dirname(__file__))
 test_out_dir = os.path.join(auto_tests_dir, 'output_autotest')
-hyb_file_name = os.path.join(test_out_dir, 'test_hybrid_py.hyb')
-vienna_file_name = os.path.join(test_out_dir, 'test_hybrid_py.vienna')
+test_data_dir = os.path.join(auto_tests_dir, 'test_data_files')
+test_hyb_file_name = os.path.join(test_data_dir, 'test_hybrid.hyb')
+test_vienna_file_name = os.path.join(test_data_dir, 'test_hybrid.vienna')
+test_ct_file_name = os.path.join(test_data_dir, 'test_hybrid_placeholder.ct')
 hyb_autotest_file_name = os.path.join(test_out_dir, 'test_hybrid_py_autotest.hyb')
-out_basename = hyb_file_name.replace('.hyb', '')
-out_flag_string_name = os.path.join(test_out_dir, 'flag_string.txt')
-match_legend_file_name = os.path.join(auto_tests_dir, 'test_string_match.csv')
-bad1_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_1.csv')
-bad2_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_2.csv')
-bad3_match_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_string_match_3.csv')
-id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_id_map.csv')
-bad1_id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_id_map_1.csv')
+vienna_autotest_file_name = os.path.join(test_out_dir, 'test_vienna_py_autotest.vienna')
+make_params_autotest_file_name = os.path.join(test_out_dir, 'make_params_autotest.csv')
+#out_basename = hyb_file_name.replace('.hyb', '')
+#out_flag_string_name = os.path.join(test_out_dir, 'flag_string.txt')
+#id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_id_map.csv')
+#bad1_id_map_legend_file_name = os.path.join(auto_tests_dir, 'test_bad_id_map_1.csv')
+
+# ----- Start TypeFinder Testing Data -----
+STRING_MATCH_PARAMS_1 = {
+    'params_str': (
+        """
+        # Hyb Software Reference Search Terms:
+        endswith,_microRNA,microRNA
+        contains,_microRNA,microRNA
+        startswith,MIMAT,microRNA
+        matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        endswith,_mRNA,mRNA
+        """
+    ),
+    'params_dict': {
+        'endswith': [('_microRNA', 'microRNA'), ('_mRNA', 'mRNA')],
+        'contains': [('_microRNA', 'microRNA')],
+        'startswith': [('MIMAT', 'microRNA')],
+        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+    }
+}
+
+BAD_STRING_MATCH_PARAMS_1 = {
+    'params_str': (
+        """
+        # Hyb Software Reference Search Terms:
+        equalto,_microRNA,microRNA
+        endswith,_microRNA,microRNA
+        contains,_microRNA,microRNA
+        startswith,MIMAT,microRNA
+        matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        endswith,_mRNA,mRNA
+        """
+    ),
+    'params_dict': {
+        'equalto': [('_microRNA', 'microRNA')],
+        'endswith': [('_microRNA', 'microRNA'), ('_mRNA', 'mRNA')],
+        'contains': [('_microRNA', 'microRNA')],
+        'startswith': [('MIMAT', 'microRNA')],
+        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+    }
+}
+
+BAD_STRING_MATCH_PARAMS_2 = {
+    'params_str': (
+        """
+        # Hyb Software Reference Search Terms:
+        endswith,_microRNA
+        contains,_microRNA,microRNA
+        startswith,MIMAT,microRNA
+        matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        endswith,_mRNA,mRNA
+        """
+    ),
+    'params_dict': {
+        'endswith': [('_microRNA', None), ('_mRNA', 'mRNA')],
+        'contains': [('_microRNA', 'microRNA')],
+        'startswith': [('MIMAT', 'microRNA')],
+        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+    }
+}
+
+ID_MAP_PARAMS_1 = {
+    'params_str': (
+        """
+        #seg_id,seg_type
+        MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        ENSG00000188229_ENST00000340384_TUBB2C_mRNA,mRNA
+        ARTSEG1_SOURCE_NAME_microRNA,microRNA
+        ARTSEG2_SOURCE_NAME_microRNA,microRNA
+        ARTSEG2_SOURCE_NAME_mRNA,mRNA
+        ARTSEG1_SOURCE_NAME_mRNA,mRNA
+        """
+    ),
+    'params_dict': {
+        'MIMAT0000078_MirBase_miR-23a_microRNA': 'microRNA',
+        'ENSG00000188229_ENST00000340384_TUBB2C_mRNA': 'mRNA',
+        'ARTSEG1_SOURCE_NAME_microRNA': 'microRNA',
+        'ARTSEG2_SOURCE_NAME_microRNA': 'microRNA',
+        'ARTSEG2_SOURCE_NAME_mRNA': 'mRNA',
+        'ARTSEG1_SOURCE_NAME_mRNA': 'mRNA',
+    }
+}
+
+BAD_ID_MAP_PARAMS_1 = {
+    'params_str': (
+        """
+        #seg_id,seg_type
+        MIMAT0000078_MirBase_miR-23a_microRNA
+        ENSG00000188229_ENST00000340384_TUBB2C_mRNA,mRNA
+        ARTSEG1_SOURCE_NAME_microRNA,microRNA
+        ARTSEG2_SOURCE_NAME_microRNA,microRNA
+        ARTSEG2_SOURCE_NAME_mRNA,mRNA
+        ARTSEG1_SOURCE_NAME_mRNA,mRNA
+        """
+    ),
+    'params_dict': {
+        'MIMAT0000078_MirBase_miR-23a_microRNA': None,
+        'ENSG00000188229_ENST00000340384_TUBB2C_mRNA': 'mRNA',
+        'ARTSEG1_SOURCE_NAME_microRNA': 'microRNA',
+        'ARTSEG2_SOURCE_NAME_microRNA': 'microRNA',
+        'ARTSEG2_SOURCE_NAME_mRNA': 'mRNA',
+        'ARTSEG1_SOURCE_NAME_mRNA': 'mRNA',
+    }
+}
+
+ART_HYB_NOTYPE_PROPS = {
+    'hyb_str': (
+        '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	.	'
+        'Notype1	.	.	.	.	.	'
+        'Notype2	.	.	.	.	.'
+    ),
+    'seg1_type': None,
+    'seg2_type': None
+}

@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-Automatic testing of the hybkig HybRecord class.
+Automatic testing of the hybkit HybRecord class.
 """
 
 import os
@@ -28,6 +28,7 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+# Start HybRecord Tests
 # ----- HybRecord Constructor Tests - Minimal -----
 def test_hybrecord_constructor_minimal():
     """Test construction of HybRecord class with minimal information."""

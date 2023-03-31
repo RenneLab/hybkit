@@ -49,7 +49,7 @@ def test_hybfile_io(test_name, expectation, hyb_strs):
     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
         hyb_autotest_file.write(all_hyb_strs + '\n')
 
-    assert hybkit.util.hyb_exists(hyb_file_name)
+    assert hybkit.util.hyb_exists(hyb_autotest_file_name)
 
     with expect_context:
         with hybkit.HybFile.open(hyb_autotest_file_name, 'r') as hyb_autotest_file:
