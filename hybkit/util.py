@@ -17,7 +17,7 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 from hybkit import settings, type_finder
 
-
+# ----- Begin Argparse Helper Functions -----
 # Util : Argparse Helper Functions
 def _bool_from_string(value):
     if isinstance(value, bool):
@@ -39,7 +39,6 @@ _custom_type_choices = {
     'str': None,
     'int': None,
 }
-
 
 # Util : Path Helper Functions
 def dir_exists(dir_name):
@@ -296,7 +295,7 @@ def validate_args(args, parser=None):
             print(message + suffix)
             sys.exit(1)
 
-
+# ----- Begin Argparse Parsers -----
 # Argument Parser : Input/Output Options
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
@@ -553,7 +552,6 @@ for _cls_name, _cls_group in _class_settings_groups.items():
 
 
 #  ----- Begin Task-specific Parsers -----
-
 # Argument Parser : hyb_eval
 hyb_eval_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
@@ -880,9 +878,9 @@ def set_setting(setting, set_value, verbose=False):
                             message += '\nChoices are: %s' % str(choices)
                             raise RuntimeError(message)
                 elif set_value not in choices:
-                message = 'Invalid value for %s setting: %s' % (setting, set_value)
-                message += '\nChoices are: %s' % str(choices)
-                raise RuntimeError(message)
+                    message = 'Invalid value for %s setting: %s' % (setting, set_value)
+                    message += '\nChoices are: %s' % str(choices)
+                    raise RuntimeError(message)
             if old_setting is not None and set_value != old_setting:
                 out_report += 'Setting %s Setting: ' % class_name
                 out_report += '"%s" to "%s"\n' % (setting, str(set_value))

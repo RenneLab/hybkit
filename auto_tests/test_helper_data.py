@@ -64,6 +64,7 @@ ART_HYB_PROPS_1 = {
     'false_prop_argsets': [
         ('no_mirna',),
         ('mirna_not_dimer',),
+        ('has_indels',),
     ],
     'true_is_set_argsets' : [
         ('energy',),
@@ -116,6 +117,7 @@ ART_HYB_PROPS_2 = {
         ('no_mirna',),
         ('3p_mirna',),
         ('mirna_dimer',),
+        ('has_indels',),
     ],
     'true_is_set_argsets' : [
         ('energy',),
@@ -167,6 +169,7 @@ ART_HYB_PROPS_3 = {
         ('no_mirna',),
         ('5p_mirna',),
         ('mirna_dimer',),
+        ('has_indels',),
     ],
     'true_is_set_argsets' : [
         ('energy',),
@@ -218,6 +221,7 @@ ART_HYB_PROPS_4 = {
         ('3p_mirna',),
         ('mirna_not_dimer',),
         ('mirna_dimer',),
+        ('has_indels',),
     ],
     'true_is_set_argsets' : [
         ('energy',),
@@ -406,6 +410,14 @@ ART_BAD_HYB_VIENNA_PROPS_6['vienna_str'] = 'bad\nvienna\nstring'
 ART_BAD_HYB_VIENNA_PROPS_7 = copy.deepcopy(ART_HYB_VIENNA_PROPS_1)
 ART_BAD_HYB_VIENNA_PROPS_7['vienna_str'] = ART_BAD_HYB_VIENNA_PROPS_7['vienna_str'].replace('(-10.0)','(99.0)')
 
+# Insertion in read
+ART_BAD_HYB_VIENNA_PROPS_8 = copy.deepcopy(ART_HYB_VIENNA_PROPS_2)
+ART_BAD_HYB_VIENNA_PROPS_8['hyb_str'] = (
+    ART_BAD_HYB_VIENNA_PROPS_8['hyb_str'].replace(
+        '1	24	1	24',
+        '1	24	1	22'
+    )
+)
 
 
 # ----- Start Hyb Properties -----

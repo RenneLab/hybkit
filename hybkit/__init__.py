@@ -46,12 +46,7 @@ information:
 +-------------------------+------------------------------------------------------------------+
 
 Todo:
-    Add Hybrecord.to_csv_header()
-    Overhaul from_vienna_lines
-    Overhaul from_ct_lines
-    Overhaul HybFoldIter
     Check static/dynamic FoldRecord methods
-
 """
 
 import os
@@ -821,7 +816,9 @@ class HybRecord(object):
         # Check if a substring compares to a desired property string.
         if prop in self._GEN_PROPS_SET:
             if prop == 'has_indels':
-                self._ensure_set('full_seg_props')
+                if not self.is_set('full_seg_props'):
+                    message = 'Checking for indels requires full_seg_props to be set.'
+                    _print_and_error(message)
                 has_indels = False
                 for seg_props in (self.seg1_props, self.seg2_props):
                     read_len = seg_props['read_end'] - seg_props['read_start']
@@ -2197,10 +2194,15 @@ class FoldRecord(object):
         fail_ret_val = (None, ''.join(record_lines))
 
         if len(record_lines) != 3:
-            message = 'Provided Vienna Record Lines:\n'
-            message += '\n'.join([line.rstrip() for line in record_lines])
-            message += '\n  ... are not in required 3-line format.'
-            _print_and_error(message)
+            error = 'Provided Vienna Record Lines:\n'
+            error += '\n'.join([line.rstrip() for line in record_lines])
+            error += '\n  ... are not in required 3-line format.'
+            if 'return' in error_mode:
+                if 'warn' in error_mode:
+                    print('WARNING: ' + error)
+                return fail_ret_val
+            else:
+                _print_and_error('ERROR: ' + error)
 
         rec_id = record_lines[0].strip().lstrip('>')
         seq = record_lines[1].strip()
@@ -2217,7 +2219,7 @@ class FoldRecord(object):
             else:
                 _print_and_error('ERROR: ' + error)
 
-        if len(line_3_split) != 2:
+        if len(line_3_split) != 2 or not line_3_split[1].strip('()'):
             error = 'Provided Vienna Record Line 3:\n'
             error += line_3.rstrip() + '\n'
             error += str(line_3_split) + '\n'
@@ -2225,7 +2227,7 @@ class FoldRecord(object):
             if 'return' in error_mode:
                 if 'warn' in error_mode:
                     print('WARNING: ' + error)
-                return ('NOFOLD', ''.join(record_lines))
+                return ('NOENERGY', ''.join(record_lines))
             else:
                 _print_and_error('ERROR: ' + error)
 
@@ -2776,7 +2778,7 @@ class HybFoldIter(object):
     # Start HybFoldIter Methods
     # HybFoldIter : Public Methods
     def __init__(self, hybfile_handle, foldfile_handle, combine=False, iter_error_mode=None):
-        """Please see :class:`HybFoldIter` for initialization information."""
+        """Please see :class:`HybFoldIfter` for initialization information."""
         if not isinstance(hybfile_handle, HybFile):
             message = 'hybfile_handle must be an instance of a HybFile object.'
             _print_and_error(message)
@@ -2847,29 +2849,15 @@ class HybFoldIter(object):
             if 'foldrecord_nofold' in self.settings['error_checks']:
                 if isinstance(next_fold_record, tuple) and next_fold_record[0] == 'NOFOLD':
                     error = 'Improper FoldRecord: No Fold (Energy = 99*.*)'
-                # while isinstance(next_fold_record, tuple) and next_fold_record[0] =='NOFOLD':
-                #    if 'skip' in iter_error_mode:
-                #        if iter_error_mode == 'warn_skip':
-                #            print('WARNING: SkipFold: Improper FoldRecord: '
-                #            print('    No Fold (Energy = 99*.*)')
-                #        self.sequential_skips += 1
-                #        self.counters['fold_only_skips'] += 1
-                #        if self.sequential_skips > self.settings['max_sequential_skips']:
-                #            message = 'ERROR: Skipped %i ' % self.sequential_skips
-                #            message += 'records in a row '
-                #            message += '(max: %i)\n' % self.settings['max_sequential_skips']
-                #            message += 'Check for misalignment of records, or disable setting.'
-                #            print(message)
-                #            raise RuntimeError(message)
-                #        self.counters['fold_record_read_attempts'] += 1
-                #        next_fold_record = self.foldfile_handle.read_record(error_mode='return')
-                #    else:
-                #        error = 'Improper FoldRecord: No Fold (Energy = 99*.*)'
+
+            # always-disallowed errors
+            if not error and isinstance(next_fold_record, tuple) and next_fold_record[0] == 'NOENERGY':
+                error = 'Improper FoldRecord: No Energy (no <Tab> in 3rd line)'
 
             if not error and 'hybrecord_indel' in self.settings['error_checks']:
                 if next_hyb_record.has_prop('has_indels'):
                     error = 'HybRecord: %s has InDels.' % str(next_hyb_record)
-
+                    
             if not error and 'max_mismatch' in self.settings['error_checks']:
                 hyb_fold_mismatches = next_fold_record.count_hyb_record_mismatches(next_hyb_record)
                 if hyb_fold_mismatches > FoldRecord.settings['allowed_mismatches']:
@@ -2907,7 +2895,6 @@ class HybFoldIter(object):
                         message += '(max: %i)\n' % self.settings['max_sequential_skips']
                         message += 'Check for misalignment of records, or disable setting.'
                         _print_and_error(message)
-
                     do_skip = True
 
         except StopIteration:

@@ -32,7 +32,7 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 
-
+# ----- Begin FoldRecord tests -----
 # ----- FoldRecord Constructor Tests - Minimal -----
 def test_foldrecord_constructor_minimal():
     """Test construction of FoldRecord class with minimal information."""
@@ -103,7 +103,7 @@ def test_foldrecord_obj_types(test_field, test_name, expect_str, test_input):
         print(test_input)
         assert hybkit.FoldRecord(**test_input) is not None
 
-
+# ----- Begin Vienna-format FoldRecord tests -----
 # ----- FoldRecord test reading/writing of vienna-format records. -----
 test_parameters = [
     ('NonOverlapping', 'Pass', ART_HYB_VIENNA_PROPS_1),
@@ -156,4 +156,59 @@ test_parameters = [
 @pytest.mark.parametrize("test_name,test_kws",[*test_parameters])
 def test_foldrecord_vienna_io_warnings(test_name, test_kws):
     hybkit.FoldRecord.from_vienna_lines(**test_kws)
+
+# ----- Begin CT-format FoldRecord tests -----
+#TODO: Implement CT format tests
+# # ----- FoldRecord test reading/writing of ct-format records. -----
+# test_parameters = [
+#     ('NonOverlapping', 'Pass', ART_HYB_CT_PROPS_1),
+#     ('Overlapping', 'Pass', ART_HYB_CT_PROPS_2),
+# ]
+# @pytest.mark.parametrize("test_name,expectation,test_props",[*test_parameters])
+# def test_foldrecord_ct_io(test_name, expectation, test_props):
+#     hyb_str = test_props['hyb_str']
+#     ct_str = test_props['ct_str']
+#     ct_id = ct_str.splitlines()[0].split()[0].lstrip('>')
+#     ct_lines = ct_str.splitlines()
+#     ct_lines_mod_last = copy.deepcopy(ct_lines)
+#     ct_lines_mod_last[-1] = ct_lines_mod_last[-1] + '\n'
+#     full_seq = test_props['seg1_seq'] + test_props['seg2_seq']
+#     full_fold = test_props['seg1_fold'] + test_props['seg2_fold']
+#     energy = test_props['ct_str'].splitlines()[-1].split()[-1].strip('()')
+
+#     fold_records = [
+#          hybkit.FoldRecord.from_ct_string(ct_str),
+#          hybkit.FoldRecord.from_ct_lines(ct_str.splitlines())
+#     ]
+#     for fold_record in fold_records:
+#         assert fold_record.id == ct_id
+#         assert fold_record.seq == full_seq
+#         assert fold_record.fold == full_fold
+#         assert fold_record.energy == energy
+    
+#     assert fold_record.to_ct_lines() == ct_lines
+#     assert ''.join(fold_record.to_ct_lines(True)) == '\n'.join(ct_lines_mod_last)
+#     assert fold_record.to_ct_string() == ct_str
+#     assert fold_record.to_ct_string(True) == (ct_str + '\n')
+
+
+# # ----- FoldRecord test reading ct-format records with errors. -----
+# test_parameters = [
+#     ('empty3', {'record_lines': ['', '', '']}),
+#     ('empty2', {'record_lines': ['', '']}),
+#     ('empty1', {'record_lines': ['abc', '123', 'singleval']}),
+#     ('empty0', {'record_lines': ['abc', '123', '(99']}),
+# ]
+# @pytest.mark.parametrize("test_name,test_kws",[*test_parameters])
+# def test_foldrecord_ct_io_errors(test_name, test_kws):
+#     with pytest.raises(RuntimeError):
+#         hybkit.FoldRecord.from_ct_lines(**test_kws)
+
+# # ----- FoldRecord test reading ct-format records with allowed errors. -----
+# test_parameters = [
+#     ('warn-99', {'record_lines': ['abc', '123', '(99'], 'error_mode': 'warn_return'}),
+# ]
+# @pytest.mark.parametrize("test_name,test_kws",[*test_parameters])
+# def test_foldrecord_ct_io_warnings(test_name, test_kws):
+#     hybkit.FoldRecord.from_ct_lines(**test_kws)
 
