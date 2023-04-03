@@ -42,8 +42,10 @@ for prop_set in [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]:
         (test_name, 'Pass', prop_set)
     )
 
-@pytest.mark.parametrize("test_name,expectation,test_props",[*test_parameters])
-def test_viennafile_io(test_name, expectation, test_props):
+
+@pytest.mark.parametrize("test_name,expectation,test_props", [*test_parameters])
+def test_viennafile_io(test_name, expectation, test_props, tmp_path):
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     if not os.path.isdir(test_out_dir):
         os.mkdir(test_out_dir)
     expect_context = get_expected_result_context(expectation)

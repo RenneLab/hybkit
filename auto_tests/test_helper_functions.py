@@ -37,6 +37,7 @@ import test_helper_data
 #     )
 #     return hyb_record_1, hyb_record_2, fold_record
 
+
 # Get expected result string for exception testing.
 def get_expected_result_string(is_allowed=False):
     """Return string identifying expected pass/error result"""
@@ -44,9 +45,10 @@ def get_expected_result_string(is_allowed=False):
         return 'Pass'
     else:
         return 'Raise'
-    
+
+
 # Get expected result context for exception testing.
-def get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError)):
+def get_expected_result_context(expect_str, error_types=(TypeError, RuntimeError)):
     """Return context for testing allowed types."""
     if expect_str.lower() == 'pass':
         return does_not_raise()

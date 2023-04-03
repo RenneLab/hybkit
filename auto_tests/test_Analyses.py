@@ -15,7 +15,6 @@ import argparse
 import pytest
 import hybkit
 
-
 # ----- Import Testing Helper Data -----
 from auto_tests.test_helper_data import *
 # Includes the following variables:
@@ -31,8 +30,10 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+
 # ----- Begin old tests -----
 def old_test_analyses():
+    out_basename = None
     analysis_classes = {
         'type': hybkit.analysis.TypeAnalysis,
         'mirna': hybkit.analysis.MirnaAnalysis,
@@ -86,6 +87,7 @@ def old_test_analyses():
 
 
 def old_test_fold_analysis():
+    out_basename = None
     hyb_record = hybkit.HybRecord.from_line(HYB_STR_1)
     hyb_record.eval_types()
     hyb_record.eval_mirna()
@@ -108,7 +110,6 @@ def old_test_fold_analysis():
     analysis.settings['allow_mirna_dimers'] = True
     analysis.add(hyb_record)
     analysis.settings['allow_mirna_dimers'] = init_val
-
 
 
 # if __name__ == '__main__':

@@ -43,7 +43,7 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
 
-#: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis` 
+#: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
 #: (range: ENERGY_MIN_BIN <= 0).
 ENERGY_MIN_BIN = '-45.0'
 
@@ -346,7 +346,7 @@ Analysis_settings_info = {
     'energy_bin_size': [
         ENERGY_BIN_SIZE,
         """
-        Size of increment to bin energy values for binned energy analysis 
+        Size of increment to bin energy values for binned energy analysis
         (allowed >= 0.1). A value of '0.1' represents no value binning.
         """,
         'str',

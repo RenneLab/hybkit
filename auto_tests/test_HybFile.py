@@ -40,21 +40,23 @@ for i, bad_hyb_str in enumerate(ART_BAD_HYB_STRS, start=1):
         ('Bad-Record-' + str(i), 'Raise', [bad_hyb_str])
     )
 
-@pytest.mark.parametrize("test_name,expectation,hyb_strs",[*test_parameters])
-def test_hybfile_io(test_name, expectation, hyb_strs):
+
+@pytest.mark.parametrize("test_name,expectation,hyb_strs", [*test_parameters])
+def test_hybfile_io(test_name, expectation, hyb_strs, tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
     if not os.path.isdir(test_out_dir):
         os.mkdir(test_out_dir)
     expect_context = get_expected_result_context(expectation)
-    all_hyb_strs = '\n'.join(hyb_strs)
+    all_hyb_strs = ''.join(hyb_strs)
     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
-        hyb_autotest_file.write(all_hyb_strs + '\n')
+        hyb_autotest_file.write(all_hyb_strs)
 
     assert hybkit.util.hyb_exists(hyb_autotest_file_name)
 
     with expect_context:
         with hybkit.HybFile.open(hyb_autotest_file_name, 'r') as hyb_autotest_file:
             for hyb_record in hyb_autotest_file:
-                hyb_record_str = hyb_record.to_line()
+                hyb_record_str = hyb_record.to_line(newline=True)
                 assert hyb_record_str in hyb_strs
 
     if expectation.lower() == 'pass':
@@ -67,4 +69,3 @@ def test_hybfile_io(test_name, expectation, hyb_strs):
             hyb_autotest_file.write_records([hyb_record, hyb_record])
             hyb_autotest_file.write_record(hyb_record)
             hyb_autotest_file.write_fh(all_hyb_strs)
-

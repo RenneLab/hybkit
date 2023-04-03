@@ -28,42 +28,43 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+
 # Start HybRecord Tests
 # ----- HybRecord Constructor Tests - Minimal -----
 def test_hybrecord_constructor_minimal():
     """Test construction of HybRecord class with minimal information."""
     # Test HybRecord Minimal Constructor:
     test_record = hybkit.HybRecord(id=TEST_HYBID_STR, seq=TEST_SEQ_STR)
-    # Test "seq_id" attribute 
+    # Test "seq_id" attribute
     assert test_record.id == TEST_HYBID_STR
     # Test "seq" attribute
-    assert test_record.seq == TEST_SEQ_STR  
+    assert test_record.seq == TEST_SEQ_STR
     # Test "seg1_props" attribute
-    assert test_record.seg1_props == EMPTY_SEG_PROPS  
+    assert test_record.seg1_props == EMPTY_SEG_PROPS
     # Test "seg2_props" attribute
-    assert test_record.seg2_props == EMPTY_SEG_PROPS 
+    assert test_record.seg2_props == EMPTY_SEG_PROPS
     # Test "flags" attribute
-    assert test_record.flags == {}  
+    assert test_record.flags == {}
     # Test "fold_record" attribute
-    assert test_record.fold_record is None  
+    assert test_record.fold_record is None
     # Test "get_seg1_type" method
-    assert test_record.get_seg1_type() == None  
+    assert test_record.get_seg1_type() is None
     # Test "get_seg1_type" method empty error
     with pytest.raises(RuntimeError):
-        test_record.get_seg1_type(require=True)  
+        test_record.get_seg1_type(require=True)
     # Test "get_seg2_type" method
-    assert test_record.get_seg2_type() == None  
+    assert test_record.get_seg2_type() is None
     # Test "get_seg2_type" method empty error
     with pytest.raises(RuntimeError):
         test_record.get_seg2_type(require=True)
     # Test "get_seg_types" method
-    assert test_record.get_seg_types() == (None, None)  
+    assert test_record.get_seg_types() == (None, None)
     # Test "get_seg_types" method empty error
     with pytest.raises(RuntimeError):
         test_record.get_seg_types(require=True)
     # Test "get_read_count" method
-    assert test_record.get_read_count() is None  
-    # Test "get_read_count" method empty error 
+    assert test_record.get_read_count() is None
+    # Test "get_read_count" method empty error
     with pytest.raises(RuntimeError):
         test_record.get_read_count(require=True)
     # Test "get_record_count" method
@@ -78,13 +79,14 @@ def test_hybrecord_constructor_minimal():
     with pytest.raises(RuntimeError):
         hybkit.HybRecord(id=TEST_HYBID_STR, seq=None)
 
+
 # ----- HybRecord Constructor Failure Tests -----
 default_params = [
-    TEST_HYBID_STR, TEST_SEQ_STR, TEST_ENERGY_STR, TEST_SEG_PROPS_STR, 
+    TEST_HYBID_STR, TEST_SEQ_STR, TEST_ENERGY_STR, TEST_SEG_PROPS_STR,
     TEST_SEG_PROPS_STR, TEST_FLAGS_STR, TEST_READ_COUNT_STR
 ]
 test_parameters = []
-#TEST_FLAGS_STR is 7th parameter
+# TEST_FLAGS_STR is 7th parameter
 # Test undefined flag in constructor.
 error_params = [''] + copy.deepcopy(default_params)
 error_params[7] = {'badflag': True}
@@ -97,9 +99,12 @@ test_parameters.append(tuple(error_params))
 error_params = [''] + copy.deepcopy(default_params)
 error_params[7] = {'seg1_type': 'badtype'}
 test_parameters.append(tuple(error_params))
+arg_string = "test_name,test_id,test_seq,test_energy,test_seg1_props,"
+arg_string += "test_seg2_props,test_flags,test_read_count"
 
-@pytest.mark.parametrize("test_name,test_id,test_seq,test_energy,test_seg1_props,test_seg2_props,test_flags,test_read_count",[*test_parameters])
-def test_hybrecord_constructor_errors(test_name, test_id, test_seq, test_energy, test_seg1_props, 
+
+@pytest.mark.parametrize(arg_string, [*test_parameters])
+def test_hybrecord_constructor_errors(test_name, test_id, test_seq, test_energy, test_seg1_props,
                                       test_seg2_props, test_flags, test_read_count):
     """Test construction of HybRecord class with full complement of information."""
     # Test HybRecord Minimal Constructor:
@@ -113,7 +118,7 @@ def test_hybrecord_constructor_errors(test_name, test_id, test_seq, test_energy,
             flags=test_flags,
             read_count=test_read_count,
         )
-        
+
 
 # ----- HybRecord Type Tests - Main Attributes -----
 test_seg_props = copy.deepcopy(EMPTY_SEG_PROPS)
@@ -145,19 +150,21 @@ for constructor_field in default_constructor_args.keys():
         # Determine Error vs. Null Context for this test
         expect_result = get_expected_result_string(test_name in allowed_types)
         test_param_set = (
-            constructor_field, 
-            test_name, 
+            constructor_field,
+            test_name,
             expect_result,
-            constructor_args, 
+            constructor_args,
         )
         test_parameters.append(test_param_set)
 
-@pytest.mark.parametrize("test_field,test_name,expect_str,test_input",[*test_parameters])
+
+@pytest.mark.parametrize("test_field,test_name,expect_str,test_input", [*test_parameters])
 def test_hybrecord_obj_types(test_field, test_name, expect_str, test_input):
     expect_context = get_expected_result_context(expect_str)
     with expect_context:
         print(test_input)
         assert hybkit.HybRecord(**test_input) is not None
+
 
 # ----- HybRecord Type Tests - Segment Property Attributes -----
 # Setup test constructor types for seg_props attributes:
@@ -201,14 +208,15 @@ for prop_set in ['seg1_props', 'seg2_props']:
             expect_result = get_expected_result_string(test_name in allowed_types)
             test_param_set = (
                 prop_set,
-                prop_field, 
-                test_name, 
+                prop_field,
+                test_name,
                 expect_result,
-                constructor_args, 
+                constructor_args,
             )
             test_parameters.append(test_param_set)
 
-@pytest.mark.parametrize("prop_set,prop_field,test_name,expect_str,test_input",[*test_parameters])
+
+@pytest.mark.parametrize("prop_set,prop_field,test_name,expect_str,test_input", [*test_parameters])
 def test_hybrecord_obj_types_seg_props(prop_set, prop_field, test_name, expect_str, test_input):
     expect_context = get_expected_result_context(expect_str)
     with expect_context:
@@ -224,9 +232,10 @@ test_parameters = [
     ('coding-coding', ART_HYB_PROPS_4),
 ]
 
-@pytest.mark.parametrize("test_name,test_params",[*test_parameters])
+
+@pytest.mark.parametrize("test_name,test_params", [*test_parameters])
 def test_hybrecord_type_mirna(test_name, test_params):
-    """Test Hybrecord type_eval(), eval_mirna(), mirna-associated prop(), and mirna_detail() values"""    
+    """Test Hybrecord type_eval(), eval_mirna(), mirna-associated prop(), and mirna_detail()"""
     test_record = hybkit.HybRecord.from_line(
         line=test_params['hyb_str'],
     )
@@ -321,13 +330,16 @@ def test_hybrecord_type_mirna(test_name, test_params):
         assert mirna_detail_dict['mirna_seq'] == test_params['mirna_seq']
         assert mirna_detail_dict['target_seq'] == test_params['target_seq']
 
+
 # ----- HybRecord properties tests -----
 test_parameters = [
     ('miRNA-coding-props', ART_HYB_STR_PROPS),
 ]
-@pytest.mark.parametrize("test_name,test_params",[*test_parameters])
+
+
+@pytest.mark.parametrize("test_name,test_params", [*test_parameters])
 def test_hybrecord_props(test_name, test_params):
-    """Test Hybrecord type_eval(), eval_mirna(), mirna-associated prop(), and mirna_detail() values"""    
+    """Test Hybrecord type_eval(), eval_mirna(), mirna-associated prop(), and mirna_detail()"""
     test_record = hybkit.HybRecord.from_line(
         line=test_params['hyb_str'],
         hybformat_id=True,
@@ -344,16 +356,17 @@ def test_hybrecord_props(test_name, test_params):
     for prop in test_params['false_is_set_argsets']:
         assert test_record.not_set(*prop)
 
+
 # ----- HybRecord Magic Methods tests -----
 def test_hybrecord_magic_methods():
     test_record_1 = hybkit.HybRecord.from_line(
-        ART_HYB_PROPS_1['hyb_str'], 
-        hybformat_id=True, 
+        ART_HYB_PROPS_1['hyb_str'],
+        hybformat_id=True,
         hybformat_ref=True
     )
     test_record_2 = hybkit.HybRecord.from_line(
-        ART_HYB_PROPS_2['hyb_str'], 
-        hybformat_id=True, 
+        ART_HYB_PROPS_2['hyb_str'],
+        hybformat_id=True,
         hybformat_ref=True
     )
     test_record_2.id = 'NewID'
@@ -383,27 +396,31 @@ test_parameters = [
     ('_parse_hybformat_ref', ('bad_ref_name_continues_on',)),
     ('_read_flags', ('bad_flag=B;bad_flag2=C;',)),
 ]
-#TODO: assert not test_record.prop('has_indels')
+# TODO: assert not test_record.prop('has_indels')
 
-@pytest.mark.parametrize("method,badval",[*test_parameters])
+
+@pytest.mark.parametrize("method,badval", [*test_parameters])
 def test_hybrecord_misc_disallowed(method, badval):
     test_record = hybkit.HybRecord.from_line(
-        ART_HYB_PROPS_1['hyb_str'], 
-        hybformat_id=True, 
-        hybformat_ref=True
+        ART_HYB_PROPS_1['hyb_str'],
+        hybformat_id=True,
+        hybformat_ref=True,
     )
     with pytest.raises(RuntimeError):
         getattr(test_record, method)(*badval)
 
+
 test_parameters = [
     ('_ensure_props_read_start_end', tuple()),
     ('to_fasta_record', ('seg1',)),
- ]
-@pytest.mark.parametrize("method,badval",[*test_parameters])
+]
+
+
+@pytest.mark.parametrize("method,badval", [*test_parameters])
 def test_hybrecord_bad_seg_props(method, badval):
     test_record = hybkit.HybRecord.from_line(
-        ART_HYB_PROPS_1['hyb_str'], 
-        hybformat_id=True, 
+        ART_HYB_PROPS_1['hyb_str'],
+        hybformat_id=True,
         hybformat_ref=True
     )
     test_record.seg1_props['read_start'] = None
@@ -414,8 +431,8 @@ def test_hybrecord_bad_seg_props(method, badval):
 # ----- HybRecord misc private_function_tests -----
 def test_hybrecord_misc_private():
     test_record = hybkit.HybRecord.from_line(
-        ART_HYB_PROPS_1['hyb_str'], 
-        hybformat_id=True, 
+        ART_HYB_PROPS_1['hyb_str'],
+        hybformat_id=True,
         hybformat_ref=True
     )
     read_flags = test_record._read_flags('bad_flag=B;', allow_undefined_flags=True)

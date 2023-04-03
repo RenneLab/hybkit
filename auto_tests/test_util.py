@@ -31,6 +31,7 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+
 # ----- Start Test Util -----
 def test_util_misc():
     original_abspath = hybkit.settings._USE_ABSPATH
@@ -72,12 +73,12 @@ def test_util_misc():
     # Test hybkit.util.ct_exists
     assert hybkit.util.ct_exists(test_ct_file_name)
     with pytest.raises(argparse.ArgumentTypeError):
-       hybkit.util.ct_exists(test_hyb_file_name)
+        hybkit.util.ct_exists(test_hyb_file_name)
     with pytest.raises(argparse.ArgumentTypeError):
-      hybkit.util.ct_exists('nonexistent_file')
+        hybkit.util.ct_exists('nonexistent_file')
     with pytest.raises(argparse.ArgumentTypeError):
-      hybkit.util.ct_exists(test_vienna_file_name)
-     
+        hybkit.util.ct_exists(test_vienna_file_name)
+
     # Test hybkit.util.fold_exists
     assert hybkit.util.fold_exists(test_vienna_file_name)
     assert hybkit.util.fold_exists(test_ct_file_name)
@@ -101,7 +102,7 @@ def test_util_misc():
     )
     # In name: 'test_hybrid.hyb' -> 'test_hybrid_out.new'
     assert test_path_1 == os.path.join(os.path.abspath('.'), 'test_hybrid_out.new')
-    
+
     test_path_2 = hybkit.util.make_out_file_name(
         test_hyb_file_name,
         name_suffix='out',
@@ -113,6 +114,7 @@ def test_util_misc():
     # In name: 'test_hybrid.hyb' -> 'test_hybrid_out.new'
     expected_name = os.path.join(test_out_dir, 'test_hybrid.out.new')
     assert test_path_2 == expected_name
+
 
 # ----- Test hybkit.util.set_settings -----
 settings_info_dicts = [
@@ -138,7 +140,8 @@ for settings_info_dict in settings_info_dicts:
         if bad_choice is not None:
             test_parameters.append((setting, 'Raise', bad_choice, settings_info_dict[setting]))
 
-@pytest.mark.parametrize("setting,expectation,set_val,setting_props",[*test_parameters])
+
+@pytest.mark.parametrize("setting,expectation,set_val,setting_props", [*test_parameters])
 def test_util_set_settings(setting, expectation, set_val, setting_props):
     expect_context = get_expected_result_context(expectation)
     use_namespace = argparse.Namespace()

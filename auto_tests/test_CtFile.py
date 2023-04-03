@@ -32,7 +32,7 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 # ----- Start CtFile Test IO of Ct Strings / FoldRecords -----
-#TODO: Implement CT File Tests
+# TODO: Implement CT File Tests
 # test_parameters = []
 # for prop_set in [ART_HYB_Ct_PROPS_1, ART_HYB_Ct_PROPS_2]:
 #     if prop_set['overlapping']:

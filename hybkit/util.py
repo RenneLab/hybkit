@@ -17,6 +17,7 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 from hybkit import settings, type_finder
 
+
 # ----- Begin Argparse Helper Functions -----
 # Util : Argparse Helper Functions
 def _bool_from_string(value):
@@ -29,6 +30,7 @@ def _bool_from_string(value):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected. Provided: %s' % value)
 
+
 _custom_types = {
     'custom_bool_from_str': _bool_from_string,
     'str': str,
@@ -39,6 +41,7 @@ _custom_type_choices = {
     'str': None,
     'int': None,
 }
+
 
 # Util : Path Helper Functions
 def dir_exists(dir_name):
@@ -294,6 +297,7 @@ def validate_args(args, parser=None):
             message += '\n    '.join([f for f in args.in_fold])
             print(message + suffix)
             sys.exit(1)
+
 
 # ----- Begin Argparse Parsers -----
 # Argument Parser : Input/Output Options
@@ -837,6 +841,7 @@ Output File Naming:
 # Argument Parser : hyb_type_analysis
 hyb_type_analysis_parser = argparse.ArgumentParser(add_help=False)
 
+
 # ------ Begin Settings Manipulation Functions ------
 def set_setting(setting, set_value, verbose=False):
     """
@@ -885,7 +890,7 @@ def set_setting(setting, set_value, verbose=False):
                 out_report += 'Setting %s Setting: ' % class_name
                 out_report += '"%s" to "%s"\n' % (setting, str(set_value))
                 cls_settings[setting] = set_value
-                
+
     if verbose and out_report.strip():
         print(out_report)
     return out_report

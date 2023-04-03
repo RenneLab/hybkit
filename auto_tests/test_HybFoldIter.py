@@ -52,14 +52,18 @@ test_param_sets.append(('Insertion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_8, True))
 test_param_sets.append(('Deletion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_9, True))
 
 
-
 test_parameters = []
 for test_param_set in test_param_sets:
     for combine in ['Combine', 'Separate']:
         test_parameters.append((*test_param_set, combine))
+arg_string = 'test_name,expectation,test_props,combine_str,skip_match_check'
 
-@pytest.mark.parametrize("test_name,expectation,test_props,combine_str,skip_match_check",[*test_parameters])
-def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_match_check):
+
+@pytest.mark.parametrize(arg_string, [*test_parameters])
+def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
+                        skip_match_check, tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     if not os.path.isdir(test_out_dir):
         os.mkdir(test_out_dir)
     expect_context = get_expected_result_context(expectation)
@@ -70,7 +74,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
         seq_type = 'dynamic'
     else:
         seq_type = 'static'
-        
+
     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
         hyb_autotest_file.write(hyb_str)
     with open(vienna_autotest_file_name, 'w') as vienna_autotest_file:
@@ -80,7 +84,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
     assert hybkit.util.vienna_exists(vienna_autotest_file_name)
 
     with pytest.raises(RuntimeError):
-        use_iter= hybkit.HybFoldIter(
+        use_iter = hybkit.HybFoldIter(
             hyb_autotest_file_name,
             vienna_autotest_file_name,
             combine=combine
@@ -88,7 +92,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
 
     hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'r')
     fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'r', seq_type=seq_type)
-    use_iter= hybkit.HybFoldIter(
+    use_iter = hybkit.HybFoldIter(
         hyb_file,
         fold_file,
         combine=combine,
@@ -110,7 +114,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
             assert fold_record.count_hyb_record_mismatches(hyb_record) == 0
             fold_record.ensure_matches_hyb_record(hyb_record)
 
-        #Print iteration report
+        # Print iteration report
         print(use_iter.report())
         use_iter.print_report()
 
@@ -121,15 +125,16 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_ma
     if expectation == 'Raise':
         hyb_record = hybkit.HybFile(hyb_autotest_file_name, 'r').read_record()
         fold_record = hybkit.ViennaFile(
-            vienna_autotest_file_name, 
-            'r', 
-            seq_type=seq_type, 
+            vienna_autotest_file_name,
+            'r',
+            seq_type=seq_type,
         ).read_record(override_error_mode='return')
         if not isinstance(fold_record, tuple) and not skip_match_check:
             assert not fold_record.matches_hyb_record(hyb_record)
             assert fold_record.count_hyb_record_mismatches(hyb_record) >= test_props['mismatches']
             with pytest.raises(RuntimeError):
                 fold_record.ensure_matches_hyb_record(hyb_record)
+
 
 # Test iter_error_mode values:
 raise_error_modes = ['raise']
@@ -184,9 +189,14 @@ for test_name, test_props in test_param_sets.items():
         else:
             expectation = 'Raise'
         test_parameters.append((test_name, iter_error_mode, expectation, seq_type, test_props))
+arg_string = 'test_name,iter_error_mode,expectation,seq_type,test_props'
 
-@pytest.mark.parametrize("test_name,iter_error_mode,expectation,seq_type,test_props",[*test_parameters])
-def test_hybfolditer_iter_error_mode(test_name, iter_error_mode, expectation, seq_type, test_props):
+
+@pytest.mark.parametrize(arg_string, [*test_parameters])
+def test_hybfolditer_iter_error_mode(test_name, iter_error_mode,
+                                     expectation, seq_type, test_props, tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     expect_context = get_expected_result_context(expectation)
     hyb_str = test_props['hyb_str']
     vienna_str = test_props['vienna_str']
@@ -212,8 +222,14 @@ test_parameters = [
     ('Allowed_Skips', 'warn_skip', 'Pass', ART_BAD_HYB_VIENNA_PROPS_1, (default_skips - 1)),
     ('Disallowed_Skips', 'warn_skip', 'Raise', ART_BAD_HYB_VIENNA_PROPS_1, (default_skips + 2))
 ]
-@pytest.mark.parametrize("test_name,iter_error_mode,expectation,test_props,num_skips",[*test_parameters])
-def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, test_props, num_skips):
+arg_string = 'test_name,iter_error_mode,expectation,test_props,num_skips'
+
+
+@pytest.mark.parametrize(arg_string, [*test_parameters])
+def test_hybfolditer_iter_num_skips(test_name, iter_error_mode,
+                                    expectation, test_props, num_skips, tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     expect_context = get_expected_result_context(expectation)
     hyb_str = test_props['hyb_str']
     vienna_str = test_props['vienna_str']
@@ -263,7 +279,8 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
 #     for combine in ['Combine', 'Separate']:
 #         test_parameters.append((*test_param_set, combine))
 
-# @pytest.mark.parametrize("test_name,expectation,test_props,combine_str,skip_match_check",[*test_parameters])
+# @pytest.mark.parametrize("test_name,expectation,test_props,
+# combine_str,skip_match_check", [*test_parameters])
 # def test_hybfolditer_io(test_name, expectation, test_props, combine_str, skip_match_check):
 #     if not os.path.isdir(test_out_dir):
 #         os.mkdir(test_out_dir)
@@ -275,7 +292,7 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
 #         seq_type = 'dynamic'
 #     else:
 #         seq_type = 'static'
-        
+
 #     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:
 #         hyb_autotest_file.write(hyb_str)
 #     with open(ct_autotest_file_name, 'w') as ct_autotest_file:
@@ -326,13 +343,14 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
 #     if expectation == 'Raise':
 #         hyb_record = hybkit.HybFile(hyb_autotest_file_name, 'r').read_record()
 #         fold_record = hybkit.CTFile(
-#             ct_autotest_file_name, 
-#             'r', 
-#             seq_type=seq_type, 
+#             ct_autotest_file_name,
+#             'r',
+#             seq_type=seq_type,
 #         ).read_record(override_error_mode='return')
 #         if not isinstance(fold_record, tuple) and not skip_match_check:
 #             assert not fold_record.matches_hyb_record(hyb_record)
-#             assert fold_record.count_hyb_record_mismatches(hyb_record) >= test_props['mismatches']
+#             assert (fold_record.count_hyb_record_mismatches(hyb_record)
+#                       >= test_props['mismatches'])
 #             with pytest.raises(RuntimeError):
 #                 fold_record.ensure_matches_hyb_record(hyb_record)
 
@@ -376,8 +394,10 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
 #             expectation = 'Raise'
 #         test_parameters.append((test_name, iter_error_mode, expectation, seq_type, test_props))
 
-# @pytest.mark.parametrize("test_name,iter_error_mode,expectation,seq_type,test_props",[*test_parameters])
-# def test_hybfolditer_iter_error_mode(test_name, iter_error_mode, expectation, seq_type, test_props):
+# @pytest.mark.parametrize("test_name,iter_error_mode,expectation,
+# seq_type,test_props", [*test_parameters])
+# def test_hybfolditer_iter_error_mode(test_name, iter_error_mode,
+# expectation, seq_type, test_props):
 #     expect_context = get_expected_result_context(expectation)
 #     hyb_str = test_props['hyb_str']
 #     ct_str = test_props['ct_str']
@@ -400,11 +420,15 @@ def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, tes
 
 # default_skips = hybkit.settings.HybFoldIter_settings_info['max_sequential_skips'][0]
 # test_parameters = [
-#     ('Allowed_Skips', 'warn_skip', 'Pass', ART_BAD_HYB_CT_PROPS_1, (default_skips - 1)),
-#     ('Disallowed_Skips', 'warn_skip', 'Raise', ART_BAD_HYB_CT_PROPS_1, (default_skips + 2))
+#     ('Allowed_Skips', 'warn_skip', 'Pass',
+# ART_BAD_HYB_CT_PROPS_1, (default_skips - 1)),
+#     ('Disallowed_Skips', 'warn_skip', 'Raise',
+# ART_BAD_HYB_CT_PROPS_1, (default_skips + 2))
 # ]
-# @pytest.mark.parametrize("test_name,iter_error_mode,expectation,test_props,num_skips",[*test_parameters])
-# def test_hybfolditer_iter_num_skips(test_name, iter_error_mode, expectation, test_props, num_skips):
+# @pytest.mark.parametrize("test_name,iter_error_mode,
+# expectation,test_props,num_skips", [*test_parameters])
+# def test_hybfolditer_iter_num_skips(test_name, iter_error_mode,
+# expectation, test_props, num_skips):
 #     expect_context = get_expected_result_context(expectation)
 #     hyb_str = test_props['hyb_str']
 #     ct_str = test_props['ct_str']
