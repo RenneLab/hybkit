@@ -1,0 +1,93 @@
+version: 2.1
+orbs:
+  python: circleci/python@2.1.1
+
+executors:
+  bash-env:
+    machine:
+      image: ubuntu-2004:202111-02
+
+jobs:
+  python-test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run pytest tests
+          command: python -m pytest
+
+  bash-prep-data:
+    executor: bash-env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - data2-cache
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment
+          command: |
+            pwd
+            #cd ./programs
+            #ls
+            #echo "export PATH=\$PATH:$PWD" >> $BASH_ENV
+            #echo "export PATH=\$PATH:$PWD/miniconda/condabin/" >> $BASH_ENV
+      - run:
+          name: Setup Reference Data
+          command: |
+            #echo "" ; ls ; echo ""
+            #cd ./test_pipe
+            pwd
+
+  bash-prep-data:
+    executor: bash-env
+    steps:
+      - restore_cache:
+          keys:
+            - programs-cache
+      - run:
+          name: Download and Install Programs
+          command: |
+            pwd
+      - save_cache:
+          key: sample_01
+          paths:
+            - sample_01_summary_analysis
+      - save_cache:
+          key: sample_02
+          paths:
+            - sample_02_target_analysis
+      - save_cache:
+          key: sample_03
+          paths:
+            - sample_03_grouped_target_analysis
+      - save_cache:
+          key: sample_04
+          paths:
+            - sample_04_pattern_analysis
+      - save_cache:
+          key: sample_05
+          paths:
+            - sample_05_fold_analysis
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - sample_01_summary_analysis
+            - sample_02_target_analysis
+            - sample_03_grouped_target_analysis
+            - sample_04_pattern_analysis
+            - sample_05_fold_analysis
+
+workflows:
+  test-python:
+    jobs:
+      - python-test
+  test-bash:
+      jobs:
+        - bash-prep-data
+        - test-bash:
+            requires:
+              - bash-prep-data
