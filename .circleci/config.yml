@@ -88,6 +88,6 @@ workflows:
   test-bash:
       jobs:
         - bash_prep_data
-        - test_bash:
+        - bash_test:
             requires:
               - bash_prep_data
