@@ -8,7 +8,7 @@ executors:
       image: ubuntu-2004:202111-02
 
 jobs:
-  python-test:
+  python_test:
     executor: python/default
     steps:
       - checkout
@@ -18,7 +18,7 @@ jobs:
           name: Run pytest tests
           command: python -m pytest
 
-  bash-prep-data:
+  bash_test:
     executor: bash-env
     steps:
       - checkout
@@ -42,7 +42,7 @@ jobs:
             #cd ./test_pipe
             pwd
 
-  bash-prep-data:
+  bash_prep_data:
     executor: bash-env
     steps:
       - restore_cache:
@@ -84,10 +84,10 @@ jobs:
 workflows:
   test-python:
     jobs:
-      - python-test
+      - python_test
   test-bash:
       jobs:
-        - bash-prep-data
-        - test-bash:
+        - bash_prep_data
+        - test_bash:
             requires:
-              - bash-prep-data
+              - bash_prep_data
