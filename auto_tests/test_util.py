@@ -171,9 +171,11 @@ def test_util_validate_args():
     args = script_parser.parse_args(
         ['-i', test_hyb_file_name, test_hyb_file_name, '-o', test_hyb_file_name]
     )
+    assert not hybkit.util.validate_args(args)
     assert not hybkit.util.validate_args(args, script_parser)
     with pytest.raises(SystemExit):
         hybkit.util.validate_args_exit(args, script_parser)
+
 
     parser_components = [
         hybkit.util.in_hybs_parser,
@@ -183,6 +185,7 @@ def test_util_validate_args():
     args = script_parser.parse_args(
         ['-i', test_hyb_file_name, test_hyb_file_name, '-f', test_vienna_file_name]
     )
+    assert not hybkit.util.validate_args(args)
     assert not hybkit.util.validate_args(args, script_parser)
     with pytest.raises(SystemExit):
         hybkit.util.validate_args_exit(args, script_parser)

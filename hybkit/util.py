@@ -267,11 +267,11 @@ def validate_args(args, parser=None):
             verbose outputting of help message.
     """
     message = '\nArgument validation error: '
-    suffix = '\n\n' + parser.format_usage() + '\n'
-    # if parser is not None:
-    #     suffix = '\n\n' + parser.format_usage() + '\n'
-    # else:
-    #     suffix = 'Please use the -h or --help options for input requirements.'
+    suffix = '\n'
+    if parser is not None:
+        suffix = '\n\n' + parser.format_usage() + '\n'
+    else:
+        suffix = 'Please use the -h or --help options for input requirements.'
 
     if hasattr(args, 'in_hyb') and hasattr(args, 'out_hyb') and args.out_hyb is not None:
         len_in_hyb = len(args.in_hyb)
