@@ -267,10 +267,11 @@ def validate_args(args, parser=None):
             verbose outputting of help message.
     """
     message = '\nArgument validation error: '
-    if parser is not None:
-        suffix = '\n\n' + parser.format_usage() + '\n'
-    else:
-        suffix = 'Please use the -h or --help options for input requirements.'
+    suffix = '\n\n' + parser.format_usage() + '\n'
+    # if parser is not None:
+    #     suffix = '\n\n' + parser.format_usage() + '\n'
+    # else:
+    #     suffix = 'Please use the -h or --help options for input requirements.'
 
     if hasattr(args, 'in_hyb') and hasattr(args, 'out_hyb') and args.out_hyb is not None:
         len_in_hyb = len(args.in_hyb)
@@ -283,7 +284,7 @@ def validate_args(args, parser=None):
             message += '\n\nOutput Files:\n    '
             message += '\n    '.join([f for f in args.out_hyb])
             print(message + suffix)
-            sys.exit(1)
+            ret_val = False
 
     if hasattr(args, 'in_hyb') and hasattr(args, 'in_fold'):
         len_in_hyb = len(args.in_hyb)
@@ -296,8 +297,23 @@ def validate_args(args, parser=None):
             message += '\n\nOutput Files:\n    '
             message += '\n    '.join([f for f in args.in_fold])
             print(message + suffix)
-            sys.exit(1)
+            ret_val = False
 
+    return ret_val
+
+
+# Util : Path Helper Functions
+def validate_args_exit(args, parser=None):
+    """
+    Check supplied arguments using :func:`validate_args`, and exit if a conflict exists.
+
+    Args:
+        args (argparse.Namespace): The arguments produced by argparse.
+        parser (argparse.ArgumentParser, optional): Argparse parser object to use for
+            verbose outputting of help message.
+    """
+    if not validate_args(args, parser):
+        sys.exit(1)
 
 # ----- Begin Argparse Parsers -----
 # Argument Parser : Input/Output Options

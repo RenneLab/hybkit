@@ -118,38 +118,44 @@ def test_util_misc():
 
 # ----- Test hybkit.util.set_settings -----
 settings_info_dicts = [
-    hybkit.settings.HybRecord_settings_info,
-    hybkit.settings.HybFile_settings_info,
-    hybkit.settings.FoldRecord_settings_info,
-    hybkit.settings.FoldFile_settings_info,
-    hybkit.settings.HybFoldIter_settings_info,
-    hybkit.settings.Analysis_settings_info,
+    (hybkit.settings.HybRecord_settings, hybkit.settings.HybRecord_settings_info),
+    (hybkit.settings.HybFile_settings, hybkit.settings.HybFile_settings_info),
+    (hybkit.settings.FoldRecord_settings, hybkit.settings.FoldRecord_settings_info),
+    (hybkit.settings.FoldFile_settings, hybkit.settings.FoldFile_settings_info),
+    (hybkit.settings.HybFoldIter_settings, hybkit.settings.HybFoldIter_settings_info),
+    (hybkit.settings.Analysis_settings, hybkit.settings.Analysis_settings_info),
 ]
 test_parameters = []
-for settings_info_dict in settings_info_dicts:
+for source, settings_info_dict in settings_info_dicts:
     for setting in settings_info_dict.keys():
         default_value, description, type_str = settings_info_dict[setting][:3]
         short_flag, argparse_fields = settings_info_dict[setting][3:]
         if 'choices' in argparse_fields:
             good_choice = list(argparse_fields['choices'])[0]
-            bad_choice = 'invalid'
+            bad_choice_1, bad_choice_2 = 'invalid', ['invalid']
         else:
             good_choice = default_value
-            bad_choice = None
-        test_parameters.append((setting, 'Pass', good_choice, settings_info_dict[setting]))
-        if bad_choice is not None:
-            test_parameters.append((setting, 'Raise', bad_choice, settings_info_dict[setting]))
+            bad_choice_1, bad_choice_2 = None, None
+        test_parameters.append((source, setting, 'Pass', good_choice, settings_info_dict[setting]))
+        if bad_choice_1 is not None:
+            test_parameters.append((source, setting, 'Raise', bad_choice_1, settings_info_dict[setting]))
+            test_parameters.append((source, setting, 'Raise', bad_choice_2, settings_info_dict[setting]))
 
 
-@pytest.mark.parametrize("setting,expectation,set_val,setting_props", [*test_parameters])
-def test_util_set_settings(setting, expectation, set_val, setting_props):
+@pytest.mark.parametrize("source,setting,expectation,set_val,setting_props", [*test_parameters])
+def test_util_set_settings(source, setting, expectation, set_val, setting_props):
     expect_context = get_expected_result_context(expectation)
     use_namespace = argparse.Namespace()
     setattr(use_namespace, setting, set_val)
+    first_val = source[setting]
     with expect_context:
         hybkit.util.set_setting(setting, set_val, verbose=True)
+        assert source[setting] == set_val
+        hybkit.util.set_setting(setting, first_val, verbose=True)
     with expect_context:
         hybkit.util.set_settings_from_namespace(use_namespace, verbose=True)
+        assert source[setting] == set_val
+        hybkit.util.set_setting(setting, first_val, verbose=True)
 
 
 # ----- Test hybkit.util parser generation
@@ -165,8 +171,9 @@ def test_util_validate_args():
     args = script_parser.parse_args(
         ['-i', test_hyb_file_name, test_hyb_file_name, '-o', test_hyb_file_name]
     )
+    assert not hybkit.util.validate_args(args, script_parser)
     with pytest.raises(SystemExit):
-        hybkit.util.validate_args(args, script_parser)
+        hybkit.util.validate_args_exit(args, script_parser)
 
     parser_components = [
         hybkit.util.in_hybs_parser,
@@ -176,8 +183,9 @@ def test_util_validate_args():
     args = script_parser.parse_args(
         ['-i', test_hyb_file_name, test_hyb_file_name, '-f', test_vienna_file_name]
     )
+    assert not hybkit.util.validate_args(args, script_parser)
     with pytest.raises(SystemExit):
-        hybkit.util.validate_args(args, script_parser)
+        hybkit.util.validate_args_exit(args, script_parser)
 
     hybkit.settings._USE_ABSPATH = original_abspath
 
