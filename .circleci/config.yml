@@ -23,33 +23,8 @@ jobs:
       - run:
           name: Pytest-Test
           command: |
-            python -m pytest
             coverage run --source=. --omit="conf*",setup.py -m pytest
             coveralls
-
-  bash_test:
-    executor: bash-env
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - data2-cache
-      - attach_workspace:
-          at: ./
-      - run:
-          name: Re-initiate Environment
-          command: |
-            pwd
-            #cd ./programs
-            #ls
-            #echo "export PATH=\$PATH:$PWD" >> $BASH_ENV
-            #echo "export PATH=\$PATH:$PWD/miniconda/condabin/" >> $BASH_ENV
-      - run:
-          name: Setup Reference Data
-          command: |
-            #echo "" ; ls ; echo ""
-            #cd ./test_pipe
-            pwd
 
   bash_prep_data:
     executor: bash-env
@@ -59,7 +34,7 @@ jobs:
           keys:
             - programs-cache
       - run:
-          name: Download and Install Programs
+          name: Download Sample Data
           command: |
             pwd
             ls
@@ -91,6 +66,32 @@ jobs:
             - sample_03_grouped_target_analysis
             - sample_04_pattern_analysis
             - sample_05_fold_analysis
+
+  bash_test:
+    executor: bash-env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - sample_01
+            - sample_02
+            - sample_03
+            - sample_04
+            - sample_05
+
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment
+          command: |
+            pwd
+            ls
+
+      - run:
+          name: Run Test
+          command: |
+            pwd
+            ls
 
 workflows:
   test-python:
