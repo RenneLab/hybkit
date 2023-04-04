@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   python: circleci/python@2.1.1
+  coveralls: coveralls/coveralls@1.0.6
 
 executors:
   bash-env:
@@ -25,6 +26,8 @@ jobs:
           name: Pytest-Test
           command: |
             python -m pytest
+            coverage run --source=. --omit="conf*",setup.py -m pytest
+      - coveralls/upload
 
   bash_test:
     executor: bash-env
@@ -53,6 +56,7 @@ jobs:
   bash_prep_data:
     executor: bash-env
     steps:
+      - checkout
       - restore_cache:
           keys:
             - programs-cache
