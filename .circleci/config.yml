@@ -14,9 +14,17 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          args: pytest
+          pkg-manager: pip
+          pypi-cache: false
       - run:
-          name: Run pytest tests
-          command: python -m pytest
+          name: Pytest-Test
+          command: |
+            python -m pytest
 
   bash_test:
     executor: bash-env
@@ -52,6 +60,7 @@ jobs:
           name: Download and Install Programs
           command: |
             pwd
+            ls
       - save_cache:
           key: sample_01
           paths:
