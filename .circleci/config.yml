@@ -98,25 +98,8 @@ jobs:
           name: Re-initiate Environment and Install Hybkit
           command: |
             python3 --version
+            python3 -m pip install dependencies.txt
             python3 setup.py install
-            export PATH=$PATH:$PWD/scripts
-      - run:
-          name: Run Test
-          command: |
-            pwd
-            ls
-
-
-  scripts_autotest:
-    executor: << parameters.py-version >>
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run:
-          name: Re-initiate Environment and Install Hybkit
-          command: |
-            python setup.py install
             export PATH=$PATH:$PWD/scripts
       - run:
           name: Run Test
