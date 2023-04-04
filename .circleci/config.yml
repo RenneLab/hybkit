@@ -3,9 +3,9 @@ orbs:
   python: circleci/python@2.1.1
 
 executors:
-  #bash-env:
-    # machine:
-    #  image: ubuntu-2004:202111-02
+  bash-env:
+    machine:
+      image: ubuntu-2004:202111-02
   py-3-8:
     docker:
       - image: cimg/python:3.8
