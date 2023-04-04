@@ -80,7 +80,7 @@ jobs:
             - sample_05_fold_analysis
 
   bash_sample_1_test:
-    executor: bash-env
+    executor: << parameters.py-version >>
     steps:
       - checkout
       - restore_cache:
