@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   python: circleci/python@2.1.1
-  coveralls: coveralls/coveralls@1.0.6
 
 executors:
   bash-env:
@@ -19,14 +18,14 @@ jobs:
           pip-dependency-file: requirements.txt
           pkg-manager: pip
       - python/install-packages:
-          args: pytest coverage
+          args: pytest coverage coveralls
           pkg-manager: pip
       - run:
           name: Pytest-Test
           command: |
             python -m pytest
             coverage run --source=. --omit="conf*",setup.py -m pytest
-      - coveralls/upload
+            coveralls
 
   bash_test:
     executor: bash-env
