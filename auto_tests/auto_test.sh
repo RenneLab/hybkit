@@ -10,7 +10,7 @@ Automated testing for hybkit scripts.
 """
 echo -e """${NOTES}"""
 
-# Stop if error 
+# Stop if error
 set -e -u -o pipefail
 
 OUT_DIR="output_autotest"
@@ -19,16 +19,17 @@ if ! [ -d ${OUT_DIR} ]; then
   mkdir ${OUT_DIR}
 fi
 
-IN_HYB="test_hybrid.hyb"
-IN_VIENNA="test_hybrid.vienna"
+IN_HYB="test_data_files/test_hybrid.hyb"
+IN_VIENNA="test_data_files/test_hybrid.vienna"
 
 # Run tests
 hyb_check -i ${IN_HYB} --verbose
+
 hyb_eval -i ${IN_HYB} --verbose \
          --out_dir ${OUT_DIR} \
          --eval_types type mirna \
          --hybformat_id True \
-         --set_dataset  
+         --set_dataset
 
 hyb_filter -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb} --verbose \
            --out_dir ${OUT_DIR} \
@@ -49,7 +50,7 @@ for mode in $(echo "type mirna summary target"); do
 done
 set +v
 
-for mode in $(echo "strict dynamic"); do
+for mode in $(echo "static dynamic"); do
   hyb_fold_analyze -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb} --verbose \
                    -f ${OUT_DIR}/${IN_VIENNA/.vienna/_filtered.vienna} \
                    --out_dir ${OUT_DIR} \

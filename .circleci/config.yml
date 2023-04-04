@@ -67,31 +67,44 @@ jobs:
             - sample_04_pattern_analysis
             - sample_05_fold_analysis
 
-  bash_test:
+  bash_sample_1_test:
     executor: bash-env
     steps:
       - checkout
       - restore_cache:
           keys:
             - sample_01
-            - sample_02
-            - sample_03
-            - sample_04
-            - sample_05
 
       - attach_workspace:
           at: ./
       - run:
-          name: Re-initiate Environment
+          name: Re-initiate Environment and Install Hybkit
           command: |
-            pwd
-            ls
-
+            python setup.py install
+            export PATH=$PATH:$PWD/scripts
       - run:
           name: Run Test
           command: |
             pwd
             ls
+
+
+  scripts_autotest:
+    executor: bash-env
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python setup.py install
+            export PATH=$PATH:$PWD/scripts
+      - run:
+          name: Run Test
+          command: |
+            cd auto_tests
+            ./auto_test.sh
 
 workflows:
   test-python:
