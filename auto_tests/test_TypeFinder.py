@@ -54,8 +54,6 @@ test_parameters = [
      BAD_ID_MAP_PARAMS_1['params_str'], BAD_ID_MAP_PARAMS_1['params_dict']),
     ('make_id_map_params', 'Raise',
      BAD_ID_MAP_PARAMS_2['params_str'], BAD_ID_MAP_PARAMS_2['params_dict']),
-    ('make_id_map_params', 'Raise',
-     '', 23),
 ]
 arg_string = "method,expect_str,params_str,params_dict"
 
@@ -64,6 +62,10 @@ arg_string = "method,expect_str,params_str,params_dict"
 def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp_path):
     make_params_autotest_file_name = os.path.join(tmp_path, 'make_params_autotest_file.txt')
     expect_context = get_expected_result_context(expect_str)
+    with pytest.raises(TypeError):
+        gen_params = getattr(hybkit.type_finder.TypeFinder, method)(23)
+    with pytest.raises(FileNotFoundError):
+        gen_params = getattr(hybkit.type_finder.TypeFinder, method)(make_params_autotest_file_name)
     with open(make_params_autotest_file_name, 'w') as make_params_autotest_file:
         make_params_autotest_file.write(params_str)
     with expect_context:

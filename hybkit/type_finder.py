@@ -283,11 +283,15 @@ class TypeFinder(object):
         """
         ALLOWED_SEARCH_TYPES = {'startswith', 'contains', 'endswith', 'matches'}
         return_dict = {}
+        if not isinstance(legend_file, (str)):
+            message = 'legend_file must be a string, not %s' % type(legend_file)
+            print(message)
+            raise TypeError(message)
         if not os.path.isfile(legend_file):
             message = 'File: %s for make_string_match_params() method ' % legend_file
             message += 'not found.'
             print(message)
-            raise RuntimeError(message)
+            raise FileNotFoundError(message)
 
         with open(legend_file, 'r') as legend_file_obj:
             for line in legend_file_obj:
@@ -378,11 +382,16 @@ class TypeFinder(object):
             message = 'arguments passed to mapped_id_files and type_file_pairs must be '
             message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files)
             print(message)
-            raise RuntimeError(message)
+            raise TypeError(message)
         if isinstance(mapped_id_files, str):
             mapped_id_files = [mapped_id_files]
 
         for mapped_id_file in mapped_id_files:
+            # Check if file not exists and raise error
+            if not os.path.isfile(mapped_id_file):
+                message = 'File: %s for make_id_map_params() method not found.' % mapped_id_file
+                print(message)
+                raise FileNotFoundError(message)
             with open(mapped_id_file, 'r') as mapped_id_file_obj:
                 for line in mapped_id_file_obj:
                     # Skip Blank Lines
