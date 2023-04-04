@@ -20,7 +20,8 @@ with resources.path('hybkit', '__init__.py') as path_obj:
 # Hybkit information
 project_name = 'hybkit'
 version = "0.3.0a"
-description = 'Toolkit for analysis of hybrid genomic sequence data.'
+python_requires = '>=3.8'
+description = 'Toolkit for analysis of chimeric (hybrid) RNA sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
 keywords += 'RNA DNA vienna viennad unafold'
@@ -71,13 +72,14 @@ classifiers = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
 ]
 
 info_urls = {
     'Download as TAR': ('https://github.com/RenneLab/hybkit/tarball/' + version),
     'Renne Lab Github': 'https://github.com/RenneLab',
     'Renne Lab Mainpage': 'https://www.rennelab.com/',
-    'Hyb Format Specification':
+    'Travis Hyb Format Specification':
     'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
 }
 

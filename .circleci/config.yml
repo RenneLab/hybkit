@@ -80,6 +80,7 @@ jobs:
       - run:
           name: Re-initiate Environment and Install Hybkit
           command: |
+            python --version
             python setup.py install
             export PATH=$PATH:$PWD/scripts
       - run:
