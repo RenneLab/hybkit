@@ -80,6 +80,11 @@ jobs:
             - sample_05_fold_analysis
 
   bash_sample_1_test:
+    parameters:
+      #os:
+      #  type: executor
+      py-version:
+        type: executor
     executor: << parameters.py-version >>
     steps:
       - checkout
