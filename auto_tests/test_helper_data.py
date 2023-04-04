@@ -551,15 +551,23 @@ STRING_MATCH_PARAMS_1 = {
         endswith,_microRNA,microRNA
         contains,_microRNA,microRNA
         startswith,MIMAT,microRNA
+        startswith,Matchtype2,MatchType
         matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        matches,Matchtype1,MatchType
         endswith,_mRNA,mRNA
         """
     ),
     'params_dict': {
         'endswith': [('_microRNA', 'microRNA'), ('_mRNA', 'mRNA')],
         'contains': [('_microRNA', 'microRNA')],
-        'startswith': [('MIMAT', 'microRNA')],
-        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+        'startswith': [
+            ('MIMAT', 'microRNA'),
+            ('Matchtype2', 'MatchType')
+        ],
+        'matches': [
+            ('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA'),
+            ('Matchtype1', 'MatchType')
+        ],
     }
 }
 
@@ -571,7 +579,9 @@ BAD_STRING_MATCH_PARAMS_1 = {
         endswith,_microRNA,microRNA
         contains,_microRNA,microRNA
         startswith,MIMAT,microRNA
+        startswith,Matchtype2,MatchType
         matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        matches,Matchtype1,MatchType
         endswith,_mRNA,mRNA
         """
     ),
@@ -579,8 +589,14 @@ BAD_STRING_MATCH_PARAMS_1 = {
         'equalto': [('_microRNA', 'microRNA')],
         'endswith': [('_microRNA', 'microRNA'), ('_mRNA', 'mRNA')],
         'contains': [('_microRNA', 'microRNA')],
-        'startswith': [('MIMAT', 'microRNA')],
-        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+        'startswith': [
+            ('MIMAT', 'microRNA'),
+            ('Matchtype2', 'MatchType')
+        ],
+        'matches': [
+            ('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA'),
+            ('Matchtype1', 'MatchType')
+        ],
     }
 }
 
@@ -591,15 +607,23 @@ BAD_STRING_MATCH_PARAMS_2 = {
         endswith,_microRNA
         contains,_microRNA,microRNA
         startswith,MIMAT,microRNA
+        startswith,Matchtype2,MatchType
         matches,MIMAT0000078_MirBase_miR-23a_microRNA,microRNA
+        matches,Matchtype1,MatchType
         endswith,_mRNA,mRNA
         """
     ),
     'params_dict': {
         'endswith': [('_microRNA', None), ('_mRNA', 'mRNA')],
         'contains': [('_microRNA', 'microRNA')],
-        'startswith': [('MIMAT', 'microRNA')],
-        'matches': [('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA')],
+        'startswith': [
+            ('MIMAT', 'microRNA'),
+            ('Matchtype2', 'MatchType')
+        ],
+        'matches': [
+            ('MIMAT0000078_MirBase_miR-23a_microRNA', 'microRNA'),
+            ('Matchtype1', 'MatchType')
+        ],
     }
 }
 
@@ -613,6 +637,8 @@ ID_MAP_PARAMS_1 = {
         ARTSEG2_SOURCE_NAME_microRNA,microRNA
         ARTSEG2_SOURCE_NAME_mRNA,mRNA
         ARTSEG1_SOURCE_NAME_mRNA,mRNA
+        Matchtype1,MatchType
+        Matchtype22,MatchType
         """
     ),
     'params_dict': {
@@ -622,29 +648,36 @@ ID_MAP_PARAMS_1 = {
         'ARTSEG2_SOURCE_NAME_microRNA': 'microRNA',
         'ARTSEG2_SOURCE_NAME_mRNA': 'mRNA',
         'ARTSEG1_SOURCE_NAME_mRNA': 'mRNA',
+        'Matchtype1': 'MatchType',
+        'Matchtype22': 'MatchType',
     }
 }
 
-BAD_ID_MAP_PARAMS_1 = {
-    'params_str': (
-        """
-        #seg_id,seg_type
-        MIMAT0000078_MirBase_miR-23a_microRNA
-        ENSG00000188229_ENST00000340384_TUBB2C_mRNA,mRNA
-        ARTSEG1_SOURCE_NAME_microRNA,microRNA
-        ARTSEG2_SOURCE_NAME_microRNA,microRNA
-        ARTSEG2_SOURCE_NAME_mRNA,mRNA
-        ARTSEG1_SOURCE_NAME_mRNA,mRNA
-        """
+BAD_ID_MAP_PARAMS_1 = copy.deepcopy(ID_MAP_PARAMS_1)
+BAD_ID_MAP_PARAMS_1['params_str'] = (
+    BAD_ID_MAP_PARAMS_1['params_str'].replace(
+        'MIMAT0000078_MirBase_miR-23a_microRNA,microRNA',
+        'MIMAT0000078_MirBase_miR-23a_microRNA'
+    )
+)
+
+BAD_ID_MAP_PARAMS_2 = copy.deepcopy(ID_MAP_PARAMS_1)
+BAD_ID_MAP_PARAMS_2['params_dict'] = {}
+BAD_ID_MAP_PARAMS_2['params_str'] = (
+    BAD_ID_MAP_PARAMS_2['params_str'].replace(
+        'Matchtype1,MatchType',
+        'Matchtype1,MatchType\nMatchtype1,MatchTypeBAD',
+    )
+)
+
+ART_HYB_MATCHTYPE_PROPS = {
+    'hyb_str': (
+        '1_1000	AAAAAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGGGGG	.	'
+        'Matchtype1	.	.	.	.	.	'
+        'Matchtype22	.	.	.	.	.'
     ),
-    'params_dict': {
-        'MIMAT0000078_MirBase_miR-23a_microRNA': None,
-        'ENSG00000188229_ENST00000340384_TUBB2C_mRNA': 'mRNA',
-        'ARTSEG1_SOURCE_NAME_microRNA': 'microRNA',
-        'ARTSEG2_SOURCE_NAME_microRNA': 'microRNA',
-        'ARTSEG2_SOURCE_NAME_mRNA': 'mRNA',
-        'ARTSEG1_SOURCE_NAME_mRNA': 'mRNA',
-    }
+    'seg1_type': 'MatchType',
+    'seg2_type': 'MatchType'
 }
 
 ART_HYB_NOTYPE_PROPS = {

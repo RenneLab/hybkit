@@ -4,13 +4,14 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
+hybkit TypeFinder Class.
+
 This module contains the TypeFinder class to work with :class:`HybRecord` to
 parse sequence identifiers to idenfity sequence type.
 """
 
 import os
 import types
-
 
 
 class TypeFinder(object):
@@ -36,7 +37,7 @@ class TypeFinder(object):
     params = None
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
-    #:   Default method assigned using :meth:`check_set_method` 
+    #:   Default method assigned using :meth:`check_set_method`
     default_method = 'hybformat'
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
@@ -66,6 +67,7 @@ class TypeFinder(object):
         'string_match': 'make_string_match_params',
         'id_map': 'make_id_map_params'
     }
+
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
     def __init__(self):
@@ -109,10 +111,7 @@ class TypeFinder(object):
     # TypeFinder : Public Classmethods : method
     @classmethod
     def check_set_method(cls):
-        """
-        Check wether a TypeFinder method has been set, and if not then set the default method
-        of :attr:`default_method`.
-        """
+        """If no TypeFinder method set, set as :attr:`default_method`."""
         if not cls.method_is_set():
             cls.set_method(cls.default_method)
 
@@ -120,8 +119,10 @@ class TypeFinder(object):
     @classmethod
     def find(cls, seg_props):
         """
+        Find type of segment using :meth:`TypeFinder.find_custom_method`.
+
         If a TypeFinder method has been set with :meth:`set_method`.
-        use the current paramaters set in 
+        use the current paramaters set in
         :attr:`params` to find the type of the provided segment by calling::
 
             seg_type = :meth:`TypeFinder.find_custom_method`(seg_props, :attr`TypeFinder.params`)
@@ -135,7 +136,6 @@ class TypeFinder(object):
         if cls.find_with_params is None:
             raise RuntimeError('TypeFinder method has not been set.')
         return cls.find_with_params(seg_props, cls.params)
-        
 
     # TypeFinder : Public Classmethods : method
     @classmethod
@@ -174,7 +174,7 @@ class TypeFinder(object):
             <gene_id>_<transcript_id>_<gene_name>_<seg_type>
 
         This method returns the last component of the identifier,
-        split by "_", as the identfied sequence type. 
+        split by "_", as the identfied sequence type.
         (returns :obj:`None` if the segment identifier does not contain "_").
 
         Example:
@@ -235,7 +235,7 @@ class TypeFinder(object):
         seg_name = seg_props['ref_name']
         found_type = None
         check_done = False
-        if 'startswith' in params and found_type:
+        if 'startswith' in params and not found_type:
             for search_string, search_type in params['startswith']:
                 if seg_name.startswith(search_string):
                     found_type = search_type
@@ -368,14 +368,15 @@ class TypeFinder(object):
             segB_unique_id,segB_type
 
         Args:
-            mapped_id_files (:obj:`str`, :obj:`list`, or :obj:`tuple`): Iterable object containing strings of paths
+            mapped_id_files (:obj:`str`, :obj:`list`, or :obj:`tuple`): Iterable
+                object containing strings of paths
                 to files containing id/type mapping information.
 
         """
         return_dict = {}
         if not isinstance(mapped_id_files, (str, list, tuple)):
             message = 'arguments passed to mapped_id_files and type_file_pairs must be '
-            message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files) 
+            message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files)
             print(message)
             raise RuntimeError(message)
         if isinstance(mapped_id_files, str):

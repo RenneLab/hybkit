@@ -32,8 +32,13 @@ from auto_tests.test_helper_functions import *
 # ----- TypeFinder Misc - Minimal -----
 def test_typefinder_misc():
     """Test construction of HybRecord class with minimal information."""
+    Type_Finder = hybkit.type_finder.TypeFinder
     with pytest.raises((RuntimeError, TypeError)):
-        hybkit.type_finder.TypeFinder()
+        Type_Finder()
+    Type_Finder.set_custom_method(print)
+    Type_Finder._reset()
+    with pytest.raises((RuntimeError, TypeError)):
+        Type_Finder.find({})
 
 
 test_parameters = [
@@ -47,6 +52,10 @@ test_parameters = [
      ID_MAP_PARAMS_1['params_str'], ID_MAP_PARAMS_1['params_dict']),
     ('make_id_map_params', 'Raise',
      BAD_ID_MAP_PARAMS_1['params_str'], BAD_ID_MAP_PARAMS_1['params_dict']),
+    ('make_id_map_params', 'Raise',
+     BAD_ID_MAP_PARAMS_2['params_str'], BAD_ID_MAP_PARAMS_2['params_dict']),
+    ('make_id_map_params', 'Raise',
+     '', 23),
 ]
 arg_string = "method,expect_str,params_str,params_dict"
 
@@ -55,8 +64,6 @@ arg_string = "method,expect_str,params_str,params_dict"
 def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp_path):
     make_params_autotest_file_name = os.path.join(tmp_path, 'make_params_autotest_file.txt')
     expect_context = get_expected_result_context(expect_str)
-    if not os.path.isdir(test_out_dir):
-        os.mkdir(test_out_dir)
     with open(make_params_autotest_file_name, 'w') as make_params_autotest_file:
         make_params_autotest_file.write(params_str)
     with expect_context:
@@ -64,26 +71,27 @@ def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp
         assert gen_params == params_dict
 
 
-test_record_strings = [
-    (HYB_STR_1, 'microRNA', 'mRNA'),
-]
-for hyb_props in ART_HYB_PROPS_ALL + [ART_HYB_NOTYPE_PROPS]:
-    test_record_strings.append(
-        (hyb_props['hyb_str'], hyb_props['seg1_type'], hyb_props['seg2_type'])
-    )
-test_records = [
-    (hybkit.HybRecord.from_line(hyb_strs[0]), *hyb_strs) for hyb_strs in test_record_strings
-]
-
 test_parameter_sets = [
     ('badmethod', 'Raise', None, {}),
     ('hybformat', 'Pass', None, {}),
     ('hybformat', 'Raise', {'badparam': True}, {}),
     ('string_match', 'Pass', STRING_MATCH_PARAMS_1['params_dict'], {}),
+    ('string_match', 'Raise', {}, {}),
     # ('string_match', 'Raise', BAD_STRING_MATCH_PARAMS_1['params_dict'], {}),
     # ('string_match', 'Raise', BAD_STRING_MATCH_PARAMS_2['params_dict'], {}),
     ('id_map', 'Pass', ID_MAP_PARAMS_1['params_dict'], {}),
     # ('id_map', 'Raise', BAD_ID_MAP_PARAMS_1['params_dict'], {}),
+]
+test_record_strings = [
+    (HYB_STR_1, 'microRNA', 'mRNA'),
+]
+for hyb_props in ART_HYB_PROPS_ALL + [ART_HYB_NOTYPE_PROPS, ART_HYB_MATCHTYPE_PROPS]:
+    test_record_strings.append(
+        (hyb_props['hyb_str'], hyb_props['seg1_type'], hyb_props['seg2_type'])
+    )
+
+test_records = [
+    (hybkit.HybRecord.from_line(hyb_strs[0]), *hyb_strs) for hyb_strs in test_record_strings
 ]
 test_parameters = []
 for test_parameter_set in test_parameter_sets:
@@ -103,21 +111,23 @@ def test_typefinder_methods(method, expect_str, method_params, test_params, hyb_
         use_test_hyb_record = copy.deepcopy(test_hyb_record)
 
         gen_seg_1_type = hybkit.type_finder.TypeFinder.find(use_test_hyb_record.seg1_props)
-        assert gen_seg_1_type == test_seg1_type
         gen_seg_2_type = hybkit.type_finder.TypeFinder.find(use_test_hyb_record.seg2_props)
-        assert gen_seg_2_type == test_seg2_type
 
-        use_test_hyb_record.eval_types(allow_unknown=(test_seg1_type is None))
-        if test_seg1_type is None:
-            assert use_test_hyb_record.get_seg1_type() == 'unknown'
-        else:
-            assert use_test_hyb_record.get_seg1_type() == test_seg1_type
-        if test_seg2_type is None:
-            assert use_test_hyb_record.get_seg2_type() == 'unknown'
-        else:
-            assert use_test_hyb_record.get_seg2_type() == test_seg2_type
+        if not (method == 'hybformat' and test_seg1_type == 'MatchType'):
+            assert gen_seg_1_type == test_seg1_type
+            assert gen_seg_2_type == test_seg2_type
 
-        if test_seg1_type is None:
-            use_test_hyb_record_2 = copy.deepcopy(test_hyb_record)
-            with pytest.raises(RuntimeError):
-                use_test_hyb_record_2.eval_types()
+            use_test_hyb_record.eval_types(allow_unknown=(test_seg1_type is None))
+            if test_seg1_type is None:
+                assert use_test_hyb_record.get_seg1_type() == 'unknown'
+            else:
+                assert use_test_hyb_record.get_seg1_type() == test_seg1_type
+            if test_seg2_type is None:
+                assert use_test_hyb_record.get_seg2_type() == 'unknown'
+            else:
+                assert use_test_hyb_record.get_seg2_type() == test_seg2_type
+
+            if test_seg1_type is None:
+                use_test_hyb_record_2 = copy.deepcopy(test_hyb_record)
+                with pytest.raises(RuntimeError):
+                    use_test_hyb_record_2.eval_types()
