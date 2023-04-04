@@ -98,7 +98,7 @@ jobs:
           name: Re-initiate Environment and Install Hybkit
           command: |
             python3 --version
-            python3 -m pip install dependencies.txt
+            python3 -m pip install -r dependencies.txt
             python3 setup.py install
             export PATH=$PATH:$PWD/scripts
       - run:
