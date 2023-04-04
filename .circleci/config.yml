@@ -128,8 +128,8 @@ workflows:
         - bash_prep_data
         - bash_sample_1_test:
             matrix:
-              requires:
-              - bash_prep_data
               parameters:
                 # os: [linux, macos]
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+            #requires:
+            #  - bash_prep_data
