@@ -3,9 +3,21 @@ orbs:
   python: circleci/python@2.1.1
 
 executors:
-  bash-env:
-    machine:
-      image: ubuntu-2004:202111-02
+  #bash-env:
+    # machine:
+    #  image: ubuntu-2004:202111-02
+  py-3.8:
+    docker:
+      - image: cimg/python:3.8
+  py-3.9:
+    docker:
+      - image: cimg/python:3.9
+  py-3.10:
+    docker:
+      - image: cimg/python:3.10
+  py-3.11:
+    docker:
+      - image: cimg/python:3.11
 
 jobs:
   python_test:
@@ -80,8 +92,8 @@ jobs:
       - run:
           name: Re-initiate Environment and Install Hybkit
           command: |
-            python --version
-            python setup.py install
+            python3 --version
+            python3 setup.py install
             export PATH=$PATH:$PWD/scripts
       - run:
           name: Run Test
@@ -91,7 +103,7 @@ jobs:
 
 
   scripts_autotest:
-    executor: bash-env
+    executor: << parameters.py-version >>
     steps:
       - checkout
       - attach_workspace:
@@ -117,3 +129,7 @@ workflows:
         - bash_sample_1_test:
             requires:
               - bash_prep_data
+            matrix:
+              parameters:
+                # os: [linux, macos]
+                py-version: ["py-3.8", "py-3.9", "py-3.10", "py-3.11"]
