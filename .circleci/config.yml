@@ -100,10 +100,10 @@ jobs:
             python3 --version
             python3 -m pip install -r requirements.txt
             python3 setup.py install
-            export PATH=$PATH:$PWD/scripts
       - run:
           name: Run Test
           command: |
+            export PATH=$PATH:$PWD/scripts
             cd auto_tests
             ./auto_test.sh
 
