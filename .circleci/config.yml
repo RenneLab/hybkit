@@ -66,11 +66,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - example_01{{ checksum "example_01_summary_analysis/download_data.sh" }}
-            - example_02{{ checksum "example_01_target_analysis/download_data.sh" }}
-            - example_03{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
-            - example_04{{ checksum "example_01_pattern_analysis/download_data.sh" }}
-            - example_05{{ checksum "example_01_fold_analysis/download_data.sh" }}
+            - example_01-{{ checksum "example_01_summary_analysis/download_data.sh" }}
+            - example_02-{{ checksum "example_01_target_analysis/download_data.sh" }}
+            - example_03-{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
+            - example_04-{{ checksum "example_01_pattern_analysis/download_data.sh" }}
+            - example_05-{{ checksum "example_01_fold_analysis/download_data.sh" }}
       - run:
           name: Download Sample Data
           command: |
@@ -83,23 +83,23 @@ jobs:
             done
             ls example*
       - save_cache:
-          key: example_01
+          key: example_01-{{ checksum "example_01_summary_analysis/download_data.sh" }}
           paths:
             - example_01_summary_analysis
       - save_cache:
-          key: example_02
+          key: example_02-{{ checksum "example_01_target_analysis/download_data.sh" }}
           paths:
             - example_02_target_analysis
       - save_cache:
-          key: example_03
+          key: example_03-{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
           paths:
             - example_03_grouped_target_analysis
       - save_cache:
-          key: example_04
+          key: example_04-{{ checksum "example_01_pattern_analysis/download_data.sh" }}
           paths:
             - example_04_pattern_analysis
       - save_cache:
-          key: example_05
+          key: example_05-{{ checksum "example_01_fold_analysis/download_data.sh" }}
           paths:
             - example_05_fold_analysis
       - persist_to_workspace:
