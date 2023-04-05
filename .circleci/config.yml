@@ -48,41 +48,45 @@ jobs:
       - run:
           name: Download Sample Data
           command: |
-            pwd
-            ls
+            for data_dir in $(ls -d example_??_*); do
+              cd $data_dir
+              ./download_data.sh
+              cd ..
+            done
+            ls example*
       - save_cache:
-          key: sample_01
+          key: example_01
           paths:
-            - sample_01_summary_analysis
+            - example_01_summary_analysis
       - save_cache:
-          key: sample_02
+          key: example_02
           paths:
-            - sample_02_target_analysis
+            - example_02_target_analysis
       - save_cache:
-          key: sample_03
+          key: example_03
           paths:
-            - sample_03_grouped_target_analysis
+            - example_03_grouped_target_analysis
       - save_cache:
-          key: sample_04
+          key: example_04
           paths:
-            - sample_04_pattern_analysis
+            - example_04_pattern_analysis
       - save_cache:
-          key: sample_05
+          key: example_05
           paths:
-            - sample_05_fold_analysis
+            - example_05_fold_analysis
       - persist_to_workspace:
           root: ./
           paths:
-            - sample_01_summary_analysis
-            - sample_02_target_analysis
-            - sample_03_grouped_target_analysis
-            - sample_04_pattern_analysis
-            - sample_05_fold_analysis
+            - example_01_summary_analysis
+            - example_02_target_analysis
+            - example_03_grouped_target_analysis
+            - example_04_pattern_analysis
+            - example_05_fold_analysis
 
-  bash_sample_1_test:
+  bash_example_test_checkout:
     parameters:
-      #os:
-      #  type: executor
+      example:
+        type: string
       py-version:
         type: executor
     executor: << parameters.py-version >>
@@ -90,7 +94,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - sample_01
+            - << parameters.example >>
 
       - attach_workspace:
           at: ./
@@ -104,8 +108,11 @@ jobs:
           name: Run Test
           command: |
             export PATH=$PATH:$PWD/scripts
-            cd auto_tests
-            ./auto_test.sh
+            #cd auto_tests
+            #./auto_test.sh
+            cd << parameters.example >>*
+            python3 ./analysis_python.py
+            ./analysis_shell.sh
 
 workflows:
   test-python:
@@ -114,10 +121,11 @@ workflows:
   test-bash:
       jobs:
         - bash_prep_data
-        - bash_sample_1_test:
+        - bash_example_test_checkout:
             matrix:
               parameters:
                 # os: [linux, macos]
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+                example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
             #requires:
             #  - bash_prep_data
