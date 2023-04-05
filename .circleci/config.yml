@@ -39,7 +39,10 @@ jobs:
             coveralls
 
   test-autotests:
-    executor: bash-env
+    parameters:
+      py-version:
+        type: executor
+    executor: << parameters.py-version >>
     steps:
       - checkout
       - attach_workspace:
@@ -166,7 +169,11 @@ workflows:
       - python_test
   test-autotests:
       jobs:
-        - test-autotests
+        - test-autotests:
+            matrix:
+              parameters:
+                # os: [linux, macos]
+                py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
   test-examples:
       jobs:
         - prep_data
