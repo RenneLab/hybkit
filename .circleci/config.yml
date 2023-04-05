@@ -50,6 +50,8 @@ jobs:
           command: |
             for data_dir in $(ls -d example_??_*); do
               cd $data_dir
+              pwd
+              ls
               ./download_data.sh
               cd ..
             done
@@ -122,10 +124,11 @@ workflows:
       jobs:
         - bash_prep_data
         - bash_example_test_checkout:
+            requires:
+              - bash_prep_data
             matrix:
               parameters:
                 # os: [linux, macos]
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
                 example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
-            #requires:
-            #  - bash_prep_data
+
