@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Analysis for sample_hyb_analysis performed as a python workflow.
+Analysis for example_hyb_analysis performed as a python workflow.
 
 Provided as an example of direct
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.

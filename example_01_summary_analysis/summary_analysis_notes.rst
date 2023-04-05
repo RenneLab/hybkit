@@ -6,7 +6,7 @@
 Example Summary Analysis
 ========================
 
-This directory contains a sample analysis of Hyb-format data, published in the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
+This directory contains a example analysis of Hyb-format data, published in the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
 Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids (qCLASH) identifies Kaposi's Sarcoma-associated herpesvirus microRNA targets in endothelial cells." Journal of virology 92.8 (2018): e02138-17.
 
 This analysis first performs quality control on the data. It then summarizes and analyzes the hybrid, segment, and miRNA characteristics of each input file.
@@ -26,8 +26,8 @@ The completed output of the analysis requires ~1.5 GB of space.
 Summary Analysis Example Output
 -------------------------------
 
-.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
+.. image:: ../example_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
-.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_type_segall.png
+.. image:: ../example_01_summary_analysis/example_output/combined_analysis_type_segall.png
 
-.. image:: ../sample_01_summary_analysis/example_output/combined_analysis_mirna_counts.png
+.. image:: ../example_01_summary_analysis/example_output/combined_analysis_mirna_counts.png

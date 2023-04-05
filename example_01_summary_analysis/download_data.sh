@@ -9,7 +9,7 @@
 if [ -f GSM2720017_UI_BR1.hyb ]; then
     printf "Data already downloaded.\n"
 else
-       printf "\nDownloading Data for sample data analysis."
+       printf "\nDownloading Data for example data analysis."
 
        # Download tar-compressed hyb-format genomic sequence datafile GSE101978_RAW.tar from NCBI Gene Expression Ombnibus (GEO) GSE101978, at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
        printf "Downloading tar-compressed data-file..."

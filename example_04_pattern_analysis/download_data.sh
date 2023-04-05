@@ -8,7 +8,7 @@
 if [ -f WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna ]; then
     printf "Data already downloaded.\n"
 else
-    printf "\nPreparing data for sample fold analysis."
+    printf "\nPreparing data for example fold analysis."
 
       printf "\nCopying data to analysis directory."
       cp -v ../ref_data/WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb.gz \

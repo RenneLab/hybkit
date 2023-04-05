@@ -6,7 +6,7 @@
 Example Pattern Analysis
 =====================
 
-This directory contains a sample analysis of Hyb-format and Vienna-format data, published in 
+This directory contains a example analysis of Hyb-format and Vienna-format data, published in 
 the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
 Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids 
 (qCLASH) identifies Kaposi's Sarcoma-associated 
@@ -37,5 +37,5 @@ The completed output of the analysis requires ~30 MB of space.
 Fold Analysis Example Output
 --------------------------------------
 
-.. image:: ../sample_04_pattern_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target_pattern_bases.png
+.. image:: ../example_04_pattern_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target_pattern_bases.png
 

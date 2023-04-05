@@ -6,7 +6,7 @@
 Example Target Analysis
 =======================
 
-This directory contains a sample analysis of Hyb-format data, published in 
+This directory contains a example analysis of Hyb-format data, published in 
 the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
 Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids 
 (qCLASH) identifies Kaposi's Sarcoma-associated 
@@ -32,6 +32,6 @@ The completed output of the analysis requires ~20 MB of space.
 Target Analysis Example Output
 ------------------------------
 
-.. image:: ../sample_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_targets_kshv-miR-K12-5.png
+.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_targets_kshv-miR-K12-5.png
 
-.. image:: ../sample_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_targets_kshv-miR-K12-5_types.png
+.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_targets_kshv-miR-K12-5_types.png

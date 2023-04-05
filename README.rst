@@ -123,9 +123,9 @@ Pipelines:
     As an illustration, the example summary analysis includes the return of
     the contained hybrid sequence types as both a csv table and as a pie chart:
 
-        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.csv>`_
+        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/example_01_summary_analysis/example_output/combined_analysis_type_hybrids.csv>`_
 
-        |sample_01_image|
+        |example_01_image|
 
     Further detail on each provided pipeline can be found in
     the |Example Pipelines| section of |docs_link|_.
@@ -176,6 +176,6 @@ Installation:
 .. _Travis2014: https://doi.org/10.1016/j.ymeth.2013.10.015
 .. |Gay2018| replace:: *Gay et al. (J. Virol. 2018)*
 .. _Gay2018: https://doi.org/10.1128/JVI.02138-17
-.. |sample_01_image| image:: sample_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
+.. |example_01_image| image:: example_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
 
 .. include:: docs_readme_format.rst

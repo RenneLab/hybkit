@@ -29,8 +29,8 @@ with open(os.path.join(proj_dir, 'hybkit', '__about__.py')) as f:
 # Dynamically generate reference data file tuples:
 data_files = []
 data_file_dirs = ['', 'scripts', 'ref_data', 'hybkit']
-sample_directory_dirs = glob.glob('sample_0*')
-data_file_dirs += sample_directory_dirs
+example_directory_dirs = glob.glob('example_0*')
+data_file_dirs += example_directory_dirs
 for item in glob.glob('docs/**', recursive=True):
     if os.path.isdir(item) and not item.startswith(os.path.join('docs', '_')):
         data_file_dirs.append(item)
