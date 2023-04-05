@@ -67,9 +67,17 @@ jobs:
       - restore_cache:
           keys:
             - example_01-{{ checksum "example_01_summary_analysis/download_data.sh" }}
+      - restore_cache:
+          keys:
             - example_02-{{ checksum "example_02_target_analysis/download_data.sh" }}
+      - restore_cache:
+          keys:
             - example_03-{{ checksum "example_03_grouped_target_analysis/download_data.sh" }}
+      - restore_cache:
+          keys:
             - example_04-{{ checksum "example_04_pattern_analysis/download_data.sh" }}
+      - restore_cache:
+          keys:
             - example_05-{{ checksum "example_05_fold_analysis/download_data.sh" }}
       - run:
           name: Download Sample Data
