@@ -38,7 +38,7 @@ jobs:
             coverage run --source=. --omit="conf*",setup.py -m pytest
             coveralls
 
-  test-autotest:
+  test-autotests:
     executor: bash-env
     steps:
       - checkout
