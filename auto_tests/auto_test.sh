@@ -47,7 +47,7 @@ ls ${OUT_DIR}
 hyb_exclude_fold -f ${FULL_IN_VIENNA} --verbose \
                  -e ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_exclude.csv} \
                  --out_dir ${OUT_DIR} \
-                 --foldfile_error_mode warn_return \
+                 --error_mode warn_return \
 
 ls ${OUT_DIR}
 
@@ -62,15 +62,13 @@ set +v
 ls ${OUT_DIR}
 
 
-for mode in $(echo "static dynamic"); do
-  hyb_fold_analyze -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb} --verbose \
-                   -f ${OUT_DIR}/${IN_VIENNA/.vienna/_filtered.vienna} \
-                   --out_dir ${OUT_DIR} \
-                   --analysis_type fold \
-                   --analysis_name "TEST_FOLD" \
-                   --foldrecord_type dynamic \
-                   --allowed_mismatches 0
-done
+hyb_fold_analyze -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb} --verbose \
+                 -f ${OUT_DIR}/${IN_VIENNA/.vienna/_filtered.vienna} \
+                 --out_dir ${OUT_DIR} \
+                 --analysis_type fold \
+                 --analysis_name "TEST_FOLD" \
+                 --foldrecord_type dynamic \
+                 --allowed_mismatches 0
 
 ls ${OUT_DIR}
 
