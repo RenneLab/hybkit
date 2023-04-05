@@ -207,7 +207,7 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
-    hybkit.util.set_settingsfrom_namespace(args, verbose=args.verbose)
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
     hyb_analyze(
         args.in_hyb,
         args.analysis_type,
