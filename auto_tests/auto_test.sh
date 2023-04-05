@@ -33,16 +33,23 @@ hyb_eval -i ${FULL_IN_HYB} --verbose \
          --hybformat_id True \
          --set_dataset
 
+ls ${OUT_DIR}
+
 hyb_filter -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb} --verbose \
            --out_dir ${OUT_DIR} \
            --exclusion_table \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
 
+ls ${OUT_DIR}
+
+
 hyb_exclude_fold -f ${FULL_IN_VIENNA} --verbose \
                  -e ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_exclude.csv} \
                  --out_dir ${OUT_DIR} \
                  --foldfile_error_mode warn_return \
+
+ls ${OUT_DIR}
 
 for mode in $(echo "type mirna summary target"); do
   hyb_analyze -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb} --verbose \
@@ -51,6 +58,9 @@ for mode in $(echo "type mirna summary target"); do
               --analysis_name "TEST"
 done
 set +v
+
+ls ${OUT_DIR}
+
 
 for mode in $(echo "static dynamic"); do
   hyb_fold_analyze -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb} --verbose \
@@ -61,6 +71,8 @@ for mode in $(echo "static dynamic"); do
                    --foldrecord_type dynamic \
                    --allowed_mismatches 0
 done
+
+ls ${OUT_DIR}
 
 echo -e "\nDone with Autotests\n"
 
