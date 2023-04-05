@@ -164,6 +164,12 @@ class HybRecord(object):
             :attr:`settings['custom_flags'] <HybRecord.settings>`.
             This setting can also be disabled by setting 'allow_undefined_flags'
             to :obj:`True` in :attr:`HybRecord.settings`.
+        allow_undefined_flags (:obj:`bool`, optional): If :obj:`True`, allows flags
+            not defined in :attr:`ALL_FLAGS` or
+            :attr:`settings['custom_flags'] <HybRecord.settings>`
+            to be added to the record. If not provided, defaults to the value in
+            :attr:`settings['allow_undefined_flags'] <HybRecord.settings>`.
+
 
     .. _HybRecord-Attributes:
 
@@ -184,6 +190,7 @@ class HybRecord(object):
             the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
         fold_record (FoldRecord): Information on the predicted secondary structure of the sequence
             set by :func:`set_fold_record`.
+        allow_undefined_flags (bool): Whether to allow undefined flags to be set.
     """
 
     # Start HybRecord Attributes
@@ -371,6 +378,7 @@ class HybRecord(object):
                  seg2_props=None,
                  flags=None,
                  read_count=None,
+                 allow_undefined_flags=None,
                  ):
         """Describe __init__ method description in class docstring."""
         if id is None or seq is None:
@@ -396,10 +404,15 @@ class HybRecord(object):
             self._ensure_attr_types(seg2_props, 'seg_props')
         self.seg2_props = self._make_seg_props_dict(seg2_props)
 
+        if allow_undefined_flags is None:
+            self.allow_undefined_flags = self.settings['allow_undefined_flags']
+        else:
+            self.allow_undefined_flags = allow_undefined_flags
+
         if flags is None:
             flags = {}
         else:
-            flags = copy.deepcopy(flags)
+            flags = self._make_flags_dict(copy.deepcopy(flags))
             self._ensure_attr_types(flags, 'flags')
         self.flags = flags
         self.fold_record = None     # Placeholder variable for fold_record
@@ -429,10 +442,11 @@ class HybRecord(object):
                 defined in :attr:`ALL_FLAGS` or in
                 :attr:`settings['custom_flags'] <HybRecord.settings>`.
                 If None (default), uses setting in
-                :attr:`settings['allow_undefined_flags'] <HybRecord.settings>`.
+                :attr:`'allow_undefined_flags'` (Default:
+                :attr:`settings['allow_undefined_flags'] <HybRecord.settings>` ).
         """
         if allow_undefined_flags is None:
-            allow_undefined_flags = self.settings['allow_undefined_flags']
+            allow_undefined_flags = self.allow_undefined_flags
 
         if self._flagset is None:
             self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))
@@ -1563,12 +1577,11 @@ class HybRecord(object):
         return return_list
 
     # HybRecord : Private Methods : flags
-    def _make_flags_dict(self, flag_obj, allow_undefined_flags=None):
+    def _make_flags_dict(self, flag_obj):
         #  allow_undefined_flags allows the inclusion of flags not defined in hybkit.
         #  If argument is provided to the method, it overrides default behavior.
         #  Otherwise, the method falls back to the object-defaults.
-        if allow_undefined_flags is None:
-            allow_undefined_flags = self.settings['allow_undefined_flags']
+        allow_undefined_flags = self.allow_undefined_flags
 
         if self._flagset is None:
             self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))

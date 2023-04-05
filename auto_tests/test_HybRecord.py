@@ -29,7 +29,7 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 
-# Start HybRecord Tests
+# ----- Begin HybRecord Tests -----
 # ----- HybRecord Constructor Tests - Minimal -----
 def test_hybrecord_constructor_minimal():
     """Test construction of HybRecord class with minimal information."""
@@ -73,24 +73,53 @@ def test_hybrecord_constructor_minimal():
     with pytest.raises(RuntimeError):
         test_record.get_record_count(require=True)
 
+
+# ----- HybRecord Constructor Tests - Details -----
+def test_hybrecord_constructor_details():
+    """Test construction of HybRecord class with minimal information."""
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
+
     # Test "to_line" method with minimial information
     assert test_record.to_line(newline=False) == TEST_HYB_MINIMAL_STRING
     # Test "to_csv" method with minimial information
     assert (test_record.to_csv(newline=False)
             == TEST_HYB_MINIMAL_STRING.replace('\t', ','))
 
-    # Test HybRecord Minimal Constructor with missing id
+    # Test HybRecord Constructor with missing id
     with pytest.raises(RuntimeError):
         hybkit.HybRecord(id=None, seq=TEST_SEQ_STR)
-    # Test HybRecord Minimal Constructor with missing seq
+    # Test HybRecord Constructor with missing seq
     with pytest.raises(RuntimeError):
         hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=None)
+    # Test HybRecord Constructor with allowed bad_flag
+    hybkit.HybRecord(
+        id=TEST_HYB_ID_STR,
+        seq=TEST_SEQ_STR,
+        allow_undefined_flags=True,
+        flags={'bad_flag': 'bad_val'},
+    )
+    # Test HybRecord Constructor with bad_flag
+    with pytest.raises(RuntimeError):
+        hybkit.HybRecord(
+            id=TEST_HYB_ID_STR,
+            seq=TEST_SEQ_STR,
+            allow_undefined_flags=False,
+            flags={'bad_flag': 'bad_val'},
+        )
     # Test HybRecord Constructor with read count
     test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR, read_count=5)
     assert test_record.get_read_count() == 5
     # Set Read Count, and retest
     test_record.set_flag('read_count', 10)
     assert test_record.get_read_count() == 10
+    # Test HybRecord Constructor with mismatched read count
+    with pytest.raises(RuntimeError):
+        hybkit.HybRecord(
+            id=TEST_HYB_ID_STR,
+            seq=TEST_SEQ_STR,
+            read_count=5,
+            flags={'read_count': 10},
+        )
 
 
 # ----- HybRecord Method Tests -----
@@ -526,3 +555,5 @@ def test_hybrecord_misc_private():
             == ['read_count', 'seg1_type', 'seg2_type', 'dataset', 'badflag'])
     assert (test_record._get_flag_keys(reorder_flags=False)
             == ['dataset', 'read_count', 'seg1_type', 'seg2_type', 'badflag'])
+    test_record._flagset = None
+    test_record._make_flags_dict({})
