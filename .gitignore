@@ -1,8 +1,8 @@
 # hybkit-specific
-sample*/*.hyb
-sample*/*.vienna
-sample*/*.viennad
-sample*/*.ct
+example*/*.hyb
+example*/*.vienna
+example*/*.viennad
+example*/*.ct
 */output_*
 */output
 *.swp
