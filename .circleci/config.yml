@@ -38,7 +38,26 @@ jobs:
             coverage run --source=. --omit="conf*",setup.py -m pytest
             coveralls
 
-  bash_prep_data:
+  test-autotest:
+    executor: bash-env
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python3 --version
+            python3 -m pip install -r requirements.txt
+            python3 setup.py install
+      - run:
+          name: Run Test
+          command: |
+            export PATH=$PATH:$PWD/scripts
+            cd auto_tests
+            ./auto_test.sh
+
+  prep_data:
     executor: bash-env
     steps:
       - checkout
@@ -85,7 +104,7 @@ jobs:
             - example_04_pattern_analysis
             - example_05_fold_analysis
 
-  bash_example_test_checkout:
+  example_test_checkout:
     parameters:
       example:
         type: string
@@ -110,8 +129,33 @@ jobs:
           name: Run Test
           command: |
             export PATH=$PATH:$PWD/scripts
-            #cd auto_tests
-            #./auto_test.sh
+            cd << parameters.example >>*
+            python3 ./analysis_python.py
+            ./analysis_shell.sh
+
+  example_test_pip:
+    parameters:
+      example:
+        type: string
+      py-version:
+        type: executor
+    executor: << parameters.py-version >>
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.example >>
+
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python3 --version
+            python3 -m pip install hybkit
+      - run:
+          name: Run Test
+          command: |
+            export PATH=$PATH:$PWD/scripts
             cd << parameters.example >>*
             python3 ./analysis_python.py
             ./analysis_shell.sh
@@ -120,10 +164,22 @@ workflows:
   test-python:
     jobs:
       - python_test
-  test-bash:
+  test-autotests:
       jobs:
-        - bash_prep_data
-        - bash_example_test_checkout:
+        - test-autotests
+  test-examples:
+      jobs:
+        - prep_data
+        - example_test_checkout:
+            requires:
+              - bash_prep_data
+            matrix:
+              parameters:
+                # os: [linux, macos]
+                py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+                example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
+
+        - example_test_pip:
             requires:
               - bash_prep_data
             matrix:
