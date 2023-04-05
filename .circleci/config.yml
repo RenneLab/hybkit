@@ -67,10 +67,10 @@ jobs:
       - restore_cache:
           keys:
             - example_01-{{ checksum "example_01_summary_analysis/download_data.sh" }}
-            - example_02-{{ checksum "example_01_target_analysis/download_data.sh" }}
-            - example_03-{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
-            - example_04-{{ checksum "example_01_pattern_analysis/download_data.sh" }}
-            - example_05-{{ checksum "example_01_fold_analysis/download_data.sh" }}
+            - example_02-{{ checksum "example_02_target_analysis/download_data.sh" }}
+            - example_03-{{ checksum "example_03_grouped_target_analysis/download_data.sh" }}
+            - example_04-{{ checksum "example_04_pattern_analysis/download_data.sh" }}
+            - example_05-{{ checksum "example_05_fold_analysis/download_data.sh" }}
       - run:
           name: Download Sample Data
           command: |
@@ -87,19 +87,19 @@ jobs:
           paths:
             - example_01_summary_analysis
       - save_cache:
-          key: example_02-{{ checksum "example_01_target_analysis/download_data.sh" }}
+          key: example_02-{{ checksum "example_02_target_analysis/download_data.sh" }}
           paths:
             - example_02_target_analysis
       - save_cache:
-          key: example_03-{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
+          key: example_03-{{ checksum "example_03_grouped_target_analysis/download_data.sh" }}
           paths:
             - example_03_grouped_target_analysis
       - save_cache:
-          key: example_04-{{ checksum "example_01_pattern_analysis/download_data.sh" }}
+          key: example_04-{{ checksum "example_04_pattern_analysis/download_data.sh" }}
           paths:
             - example_04_pattern_analysis
       - save_cache:
-          key: example_05-{{ checksum "example_01_fold_analysis/download_data.sh" }}
+          key: example_05-{{ checksum "example_05_fold_analysis/download_data.sh" }}
           paths:
             - example_05_fold_analysis
       - persist_to_workspace:
@@ -150,7 +150,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - << parameters.example >>
+            - << parameters.example >>-
 
       - attach_workspace:
           at: ./
