@@ -19,7 +19,7 @@ if ! [ -d ${OUT_DIR} ]; then
   mkdir ${OUT_DIR}
 fi
 
-IN_HYB="test_data_files/test_hybrid.hyb"
+IN_HYB="test_hybrid.hyb"
 FULL_IN_HYB="test_data_files/${IN_HYB}"
 IN_VIENNA="test_hybrid.vienna"
 FULL_IN_VIENNA="test_data_files/${IN_VIENNA}"
