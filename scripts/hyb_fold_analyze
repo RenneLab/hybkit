@@ -36,7 +36,7 @@ __doc__ += textwrap.dedent("""
     and analyzes hybrid secondary structure properties.
 
     ``pattern`` Analysis:
-        Utilizes :class:`hybkit.analysis.PatternAnalysis` to analyze 
+        Utilizes :class:`hybkit.analysis.PatternAnalysis` to analyze
         hybrid miRNA fold pattern information
         and calculated per-base complimentarity counts for the miRNA portions of identified
         miRNA / target hybrids. By default miRNA-miRNA dimer hybrids are excluded, unless the
@@ -69,19 +69,20 @@ __doc__ += hybkit.util.output_description
 # Create Command-line Argument Parser
 def make_parser():
     script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [hybkit.util.in_hybs_parser,
-                         hybkit.util.in_folds_parser,
-                         hybkit.util.out_analysis_parser,
-                         hybkit.util.hyb_fold_analyze_parser,
-                         hybkit.util.all_analyze_parser,
-                         hybkit.util.gen_opts_parser,
-                         hybkit.util.hybrecord_parser,
-                         hybkit.util.hybfile_parser,
-                         hybkit.util.foldrecord_parser,
-                         hybkit.util.foldfile_parser,
-                         hybkit.util.analysis_parser,
-                         hybkit.util.hybfolditer_parser,
-                         ]
+    parser_components = [
+        hybkit.util.in_hybs_parser,
+        hybkit.util.in_folds_parser,
+        hybkit.util.out_analysis_parser,
+        hybkit.util.hyb_fold_analyze_parser,
+        hybkit.util.all_analyze_parser,
+        hybkit.util.gen_opts_parser,
+        hybkit.util.hybrecord_parser,
+        hybkit.util.hybfile_parser,
+        hybkit.util.foldrecord_parser,
+        hybkit.util.foldfile_parser,
+        hybkit.util.analysis_parser,
+        hybkit.util.hybfolditer_parser,
+    ]
     replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
     use_argparse_doc = argparse_doc
     for q, r in replace_pairs:
@@ -102,13 +103,16 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
+def hyb_fold_analyze(in_hyb_files,
+                     in_fold_files,
+                     analysis_type,
                      out_dir='.',
                      out_suffix=None,
                      out_basenames=None,
                      analysis_name=None,
                      make_plots=False,
-                     verbose=False, silent=False):
+                     verbose=False, silent=False
+                     ):
     """Perform main script function."""
 
     if not silent:
@@ -136,13 +140,14 @@ def hyb_fold_analyze(in_hyb_files, in_fold_files, analysis_type,
         if out_basenames is not None:
             out_basename = out_basenames[i]
         else:
-            out_basename = hybkit.util.make_out_file_name(in_hyb_file,
-                                                          name_suffix=out_suffix,
-                                                          in_suffix='.hyb',
-                                                          out_suffix='',
-                                                          out_dir=out_dir,
-                                                          seg_sep='_',
-                                                          )
+            out_basename = hybkit.util.make_out_file_name(
+                in_hyb_file,
+                name_suffix=out_suffix,
+                in_suffix='.hyb',
+                out_suffix='',
+                out_dir=out_dir,
+                seg_sep='_',
+            )
 
         if verbose:
             print('Analyzing Files:')
@@ -182,15 +187,16 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
-    hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_fold_analyze(args.in_hyb,
-                     args.in_fold,
-                     args.analysis_type,
-                     args.out_dir,
-                     out_suffix=args.out_suffix,
-                     out_basenames=args.out_basename,
-                     analysis_name=args.analysis_name,
-                     make_plots=args.make_plots,
-                     verbose=args.verbose,
-                     silent=args.silent,
-                     )
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
+    hyb_fold_analyze(
+        args.in_hyb,
+        args.in_fold,
+        args.analysis_type,
+        args.out_dir,
+        out_suffix=args.out_suffix,
+        out_basenames=args.out_basename,
+        analysis_name=args.analysis_name,
+        make_plots=args.make_plots,
+        verbose=args.verbose,
+        silent=args.silent,
+    )

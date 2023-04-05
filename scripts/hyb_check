@@ -35,11 +35,12 @@ __doc__ += textwrap.dedent("""
 
 # Create Command-line Argument Parser
 def make_parser():
-    parser_components = [hybkit.util.in_hybs_parser,
-                         hybkit.util.gen_opts_parser,
-                         hybkit.util.hybrecord_parser,
-                         hybkit.util.hybfile_parser,
-                         ]
+    parser_components = [
+        hybkit.util.in_hybs_parser,
+        hybkit.util.gen_opts_parser,
+        hybkit.util.hybrecord_parser,
+        hybkit.util.hybfile_parser,
+    ]
     # replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
     use_argparse_doc = argparse_doc
     # for q, r in replace_pairs:
@@ -79,5 +80,5 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
     hybkit.util.validate_args(args)
-    hybkit.util.set_settings(args, verbose=args.verbose)
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
     hyb_check(args.in_hyb, verbose=args.verbose, silent=args.silent)
