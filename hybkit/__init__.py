@@ -164,8 +164,6 @@ class HybRecord(object):
             :attr:`settings['custom_flags'] <HybRecord.settings>`.
             This setting can also be disabled by setting 'allow_undefined_flags'
             to :obj:`True` in :attr:`HybRecord.settings`.
-        fold_record (:obj:`FoldRecord`, optional): Set the record's :attr:`fold_record` attribute
-            as the provided FoldRecord object using :meth:`set_fold_record` on initializtaion.
 
     .. _HybRecord-Attributes:
 
@@ -373,7 +371,6 @@ class HybRecord(object):
                  seg2_props=None,
                  flags=None,
                  read_count=None,
-                 fold_record=None,
                  ):
         """Describe __init__ method description in class docstring."""
         if id is None or seq is None:
@@ -414,8 +411,8 @@ class HybRecord(object):
                 _print_and_error(message)
             self.set_flag('read_count', str(read_count))
 
-        if fold_record is not None:
-            self.set_fold_record(fold_record)
+        # if fold_record is not None:
+        #     self.set_fold_record(fold_record)
 
         self._post_init_tasks()    # Method stub for subclassing
 
@@ -445,7 +442,7 @@ class HybRecord(object):
             message = 'Flag "%s" is not defined. Please check flag key, ' % flag_key
             message += 'run with: "allow_undefined_flags=True", '
             message += 'add flag to "custom_flags" setting, '
-            message += 'or set "hybkit.settings.allow_undefined_flags = True".'
+            message += 'or set "HybRecord.settings.allow_undefined_flags = True".'
             _print_and_error(message)
 
         self.flags[flag_key] = flag_val
@@ -514,7 +511,7 @@ class HybRecord(object):
         return int(ret_val)
 
     # HybRecord : Public Methods : get_mirna_props
-    def get_mirna_props(self, require=True):
+    def get_mirna_props(self, allow_mirna_dimers=False, require=True):
         """
         Return the seg_props dict corresponding to the miRNA segment, if set.
 
@@ -523,20 +520,30 @@ class HybRecord(object):
         or :obj:`None` if the record does not contain a miRNA.
 
         Args:
+            allow_mirna_dimers (:obj:`bool`, optional): If ``True``, consider miRNA dimers
+                as a miRNA/target pair and return the 5p miRNA segment properties.
             require (:obj:`bool`, optional): If ``True``, raise an error if the read does not
                 contain a miRNA-annotated segment (Default: ``True``).
         """
         self._ensure_set('eval_mirna')
-        if self.has_prop('5p_mirna'):
-            return self.seg1_props
-        elif self.has_prop('3p_mirna'):
-            return self.seg2_props
+        if self.has_prop('has_mirna'):
+            if self.has_prop('mirna_dimer'):
+                if allow_mirna_dimers:
+                    return self.seg1_props
+                elif require:
+                    _print_and_error('Record contains a dimer of mirna-annotated segments.')
+                else:
+                    return None
+            elif self.has_prop('5p_mirna'):
+                return self.seg1_props
+            elif self.has_prop('3p_mirna'):
+                return self.seg2_props
         elif require:
             _print_and_error('Record does not contain a miRNA-annotated segment.')
         else:
             return None
 
-    def get_target_props(self, require=True):
+    def get_target_props(self, allow_mirna_dimers=False, require=True):
         """
         Return the seg_props dict corresponding to the target segment, if set.
 
@@ -546,17 +553,27 @@ class HybRecord(object):
         or contains two miRNAs.
 
         Args:
+            allow_mirna_dimers (:obj:`bool`, optional): If ``True``, consider miRNA dimers
+                as a miRNA/target pair and return the 3p miRNA segment properties as the
+                arbitrarily-selected "target" of the dimer pair.
             require (:obj:`bool`, optional): If ``True``, raise an error if the read does not
                 contain a single target-annotated segment (Default: ``True``).
         """
         self._ensure_set('eval_mirna')
-        if self.has_prop('mirna_not_dimer'):
-            if self.has_prop('5p_mirna'):
+        if self.has_prop('has_mirna'):
+            if self.has_prop('mirna_dimer'):
+                if allow_mirna_dimers:
+                    return self.seg2_props
+                elif require:
+                    _print_and_error('Record contains a dimer of mirna-annotated segments.')
+                else:
+                    return None
+            elif self.has_prop('5p_mirna'):
                 return self.seg2_props
             elif self.has_prop('3p_mirna'):
                 return self.seg1_props
         elif require:
-            _print_and_error('Record does not contain a single target-annotated segment.')
+            _print_and_error('Record does not contain a miRNA target annotated segment.')
         else:
             return None
 
@@ -784,11 +801,16 @@ class HybRecord(object):
         if prop in {'energy', 'fold_record'}:
             ret_bool = (getattr(self, prop) is not None)
         elif prop == 'full_seg_props':
-            ret_bool = (all(k in self.seg1_props and k is not None
-                            for k in self.SEGMENT_COLUMNS)
-                        and all(k in self.seg1_props and k is not None
-                                for k in self.SEGMENT_COLUMNS)
-                        )
+            ret_bool = (
+                all(
+                    k in self.seg1_props and self.seg1_props[k] is not None
+                    for k in self.SEGMENT_COLUMNS
+                )
+                and all(
+                    k in self.seg2_props and self.seg1_props[k] is not None
+                    for k in self.SEGMENT_COLUMNS
+                )
+            )
         elif prop == 'eval_types':
             ret_bool = all(st is not None for st in self.get_seg_types())
         elif prop == 'eval_mirna':
@@ -912,9 +934,7 @@ class HybRecord(object):
                     message += 'value for requested property: %s' % check_attr
                     _print_and_error(message)
 
-            if any((val is None) for val in check_info):
-                ret_val = None
-            elif check_type == 'prefix':
+            if check_type == 'prefix':
                 ret_val = any((val.startswith(prop_compare)) for val in check_info)
             elif check_type == 'contains':
                 ret_val = any((prop_compare in val) for val in check_info)
@@ -945,19 +965,20 @@ class HybRecord(object):
             #    raise RuntimeError(prop)
 
         elif prop in self._TARGET_PROPS_SET:
-            self._ensure_set('eval_target')
-            if prop == 'target_none':
-                ret_val = (self._get_flag('target_reg') == 'N')
-            elif prop == 'target_unknown':
-                ret_val = (self._get_flag('target_reg') == 'U')
-            elif prop == 'target_ncrna':
-                ret_val = (self._get_flag('target_reg') == 'NON')
-            elif prop == 'target_5p_utr':
-                ret_val = (self._get_flag('target_reg') == '5pUTR')
-            elif prop == 'target_coding':
-                ret_val = (self._get_flag('target_reg') == 'C')
-            elif prop == 'target_3p_utr':
-                ret_val = (self._get_flag('target_reg') == '3pUTR')
+            raise NotImplementedError('Target properties not yet implemented.')
+            # self._ensure_set('eval_target')
+            # if prop == 'target_none':
+            #     ret_val = (self._get_flag('target_reg') == 'N')
+            # elif prop == 'target_unknown':
+            #     ret_val = (self._get_flag('target_reg') == 'U')
+            # elif prop == 'target_ncrna':
+            #     ret_val = (self._get_flag('target_reg') == 'NON')
+            # elif prop == 'target_5p_utr':
+            #     ret_val = (self._get_flag('target_reg') == '5pUTR')
+            # elif prop == 'target_coding':
+            #     ret_val = (self._get_flag('target_reg') == 'C')
+            # elif prop == 'target_3p_utr':
+            #     ret_val = (self._get_flag('target_reg') == '3pUTR')
         return ret_val
 
     # HybRecord : Public Methods : Record Properties
@@ -1036,8 +1057,7 @@ class HybRecord(object):
                                                    | will be selected as the "miRNA").
         """
         if Bio is None:
-            message = 'Please install BioPython package and ensure it can be imported.'
-            print(message)
+            print('Please install BioPython package and ensure it can be imported.')
             raise bio_module_error
         allowed_modes = ['hybrid', 'seg1', 'seg2', 'mirna', 'target']
         allowed_modes_set = set(allowed_modes)

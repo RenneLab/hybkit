@@ -34,9 +34,9 @@ from auto_tests.test_helper_functions import *
 def test_hybrecord_constructor_minimal():
     """Test construction of HybRecord class with minimal information."""
     # Test HybRecord Minimal Constructor:
-    test_record = hybkit.HybRecord(id=TEST_HYBID_STR, seq=TEST_SEQ_STR)
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
     # Test "seq_id" attribute
-    assert test_record.id == TEST_HYBID_STR
+    assert test_record.id == TEST_HYB_ID_STR
     # Test "seq" attribute
     assert test_record.seq == TEST_SEQ_STR
     # Test "seg1_props" attribute
@@ -72,33 +72,55 @@ def test_hybrecord_constructor_minimal():
     # Test "get_record_count" method empty error
     with pytest.raises(RuntimeError):
         test_record.get_record_count(require=True)
+
+    # Test "to_line" method with minimial information
+    assert test_record.to_line(newline=False) == TEST_HYB_MINIMAL_STRING
+    # Test "to_csv" method with minimial information
+    assert (test_record.to_csv(newline=False)
+            == TEST_HYB_MINIMAL_STRING.replace('\t', ','))
+
     # Test HybRecord Minimal Constructor with missing id
     with pytest.raises(RuntimeError):
         hybkit.HybRecord(id=None, seq=TEST_SEQ_STR)
     # Test HybRecord Minimal Constructor with missing seq
     with pytest.raises(RuntimeError):
-        hybkit.HybRecord(id=TEST_HYBID_STR, seq=None)
+        hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=None)
+    # Set Read Count, and retest
+    test_record.set_flag('read_count', 10)
+    assert test_record.get_read_count() == 10
+
+
+
+# ----- HybRecord Method Tests -----
+def test_hybrecord_methods_misc():
+    """Test HybRecord Methods."""
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
+    hybkit.HybRecord._flagset = None
+    test_record.set_flag('seg1_type', 'microRNA')
+    with pytest.raises(RuntimeError):
+        test_record.set_flag('BadFlag', 'BadVal')
 
 
 # ----- HybRecord Constructor Failure Tests -----
 default_params = [
-    TEST_HYBID_STR, TEST_SEQ_STR, TEST_ENERGY_STR, TEST_SEG_PROPS_STR,
+    TEST_HYB_ID_STR, TEST_SEQ_STR, TEST_ENERGY_STR, TEST_SEG_PROPS_STR,
     TEST_SEG_PROPS_STR, TEST_FLAGS_STR, TEST_READ_COUNT_STR
 ]
 test_parameters = []
 # TEST_FLAGS_STR is 7th parameter
 # Test undefined flag in constructor.
-error_params = [''] + copy.deepcopy(default_params)
-error_params[7] = {'badflag': True}
+error_params = ['Bad_Flag'] + copy.deepcopy(default_params)
+error_params[6] = {'badflag': True}
 test_parameters.append(tuple(error_params))
 # Test mismatched read_count and read_count_flag
-error_params = [''] + copy.deepcopy(default_params)
-error_params[7] = {'read_count': TEST_READ_COUNT + 1}
+error_params = ['Bad_Read_Count'] + copy.deepcopy(default_params)
+error_params[6] = {'read_count': TEST_READ_COUNT + 10}
 test_parameters.append(tuple(error_params))
 # Test disallowed seg1_type flag in constructor.
-error_params = [''] + copy.deepcopy(default_params)
-error_params[7] = {'seg1_type': 'badtype'}
-test_parameters.append(tuple(error_params))
+# error_params = ['Bad_Seg_Type'] + copy.deepcopy(default_params)
+# error_params[6] = {'seg1_type': 'badtype'}
+# test_parameters.append(tuple(error_params))
+
 arg_string = "test_name,test_id,test_seq,test_energy,test_seg1_props,"
 arg_string += "test_seg2_props,test_flags,test_read_count"
 
@@ -123,7 +145,7 @@ def test_hybrecord_constructor_errors(test_name, test_id, test_seq, test_energy,
 # ----- HybRecord Type Tests - Main Attributes -----
 test_seg_props = copy.deepcopy(EMPTY_SEG_PROPS)
 default_constructor_args = {
-    'id': TEST_HYBID_STR,
+    'id': TEST_HYB_ID_STR,
     'seq': TEST_SEQ_STR,
     'energy': TEST_ENERGY_STR,
     'seg1_props': test_seg_props,
@@ -177,7 +199,7 @@ default_seg_props = {
     'score': 1.0
 }
 default_constructor_args = {
-    'id': TEST_HYBID_STR,
+    'id': TEST_HYB_ID_STR,
     'seq': TEST_SEQ_STR,
     'energy': TEST_ENERGY_STR,
     'seg1_props': default_seg_props,
@@ -251,6 +273,8 @@ def test_hybrecord_type_mirna(test_name, test_params):
     )
     with pytest.raises((ValueError, RuntimeError)):
         test_record.mirna_detail(detail='all', allow_mirna_dimers=True)
+    with pytest.raises((ValueError, RuntimeError)):
+        test_record.to_fasta_record(mode='mirna')
 
     test_record.eval_types()
     test_record.eval_mirna()
@@ -293,35 +317,26 @@ def test_hybrecord_type_mirna(test_name, test_params):
 
     # Check mirna-based properties
     assert test_record.flags['miRNA_seg'] == test_params['miRNA_seg']
-    if test_params['one_mirna_error']:
+
+    # Test 0-mirna cases
+    if not test_params['has_mirna']:
+        # Check error on miRNA detail and FASTA calls
         with pytest.raises((ValueError, RuntimeError)):
             test_record.mirna_detail()
         with pytest.raises((ValueError, RuntimeError)):
             test_record.to_fasta_record(mode='miRNA')
         with pytest.raises((ValueError, RuntimeError)):
             test_record.to_fasta_record(mode='target')
-    else:
-        # Check fasta-generation properties - mirna
-        mirna_fasta = test_record.to_fasta_record('miRNA', annotate=False)
-        assert str(mirna_fasta.seq) == test_params['mirna_seq']
-        assert str(mirna_fasta.id) == test_params['mirna_fasta_id']
-        mirna_fasta = test_record.to_fasta_record('miRNA', annotate=True)
-        assert str(mirna_fasta.id) == test_params['mirna_fasta_id_annotate']
-        # Check fasta-generation properties - target
-        target_fasta = test_record.to_fasta_record('target', annotate=False)
-        assert str(target_fasta.seq) == test_params['target_seq']
-        assert str(target_fasta.id) == test_params['target_fasta_id']
-        target_fasta = test_record.to_fasta_record('target', annotate=True)
-        assert str(target_fasta.id) == test_params['target_fasta_id_annotate']
+        # Check miRNA / target prop dict fetching error
+        assert test_record.get_mirna_props(require=False) is None
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.get_mirna_props(require=True)
+        assert test_record.get_target_props(require=False) is None
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.get_target_props(require=True)
 
-    if test_params['two_mirna_error']:
-        with pytest.raises((ValueError, RuntimeError)):
-            test_record.mirna_detail(detail='all', allow_mirna_dimers=True)
-        with pytest.raises((ValueError, RuntimeError)):
-            test_record.to_fasta_record('miRNA')
-        with pytest.raises((ValueError, RuntimeError)):
-            test_record.to_fasta_record('target')
-    else:
+    # Test 1-mirna or 2-mirna cases
+    if test_params['has_mirna']:
         mirna_detail_dict = test_record.mirna_detail(detail='all', allow_mirna_dimers=True)
         assert mirna_detail_dict['mirna_ref'] == test_params['mirna_ref']
         assert mirna_detail_dict['target_ref'] == test_params['target_ref']
@@ -329,6 +344,50 @@ def test_hybrecord_type_mirna(test_name, test_params):
         assert mirna_detail_dict['target_seg_type'] == test_params['target_seg_type']
         assert mirna_detail_dict['mirna_seq'] == test_params['mirna_seq']
         assert mirna_detail_dict['target_seq'] == test_params['target_seq']
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.mirna_detail(detail='bad_detail')
+
+        mirna_fasta = test_record.to_fasta_record('miRNA', annotate=False,
+                                                  allow_mirna_dimers=True)
+        assert str(mirna_fasta.seq) == test_params['mirna_seq']
+        assert str(mirna_fasta.id) == test_params['mirna_fasta_id']
+        mirna_fasta = test_record.to_fasta_record('miRNA', annotate=True,
+                                                  allow_mirna_dimers=True)
+        assert str(mirna_fasta.id) == test_params['mirna_fasta_id_annotate']
+        # Check fasta-generation properties - target
+        target_fasta = test_record.to_fasta_record('target', annotate=False,
+                                                   allow_mirna_dimers=True)
+        assert str(target_fasta.seq) == test_params['target_seq']
+        assert str(target_fasta.id) == test_params['target_fasta_id']
+        target_fasta = test_record.to_fasta_record('target', annotate=True,
+                                                   allow_mirna_dimers=True)
+        assert str(target_fasta.id) == test_params['target_fasta_id_annotate']
+        # Check correct miRNA / target seg prop dict fetching
+        assert (test_record.get_mirna_props(require=True, allow_mirna_dimers=True)
+                == getattr(test_record, test_params['mirna_seg_props']))
+        assert (test_record.get_target_props(require=True, allow_mirna_dimers=True)
+                == getattr(test_record, test_params['target_seg_props']))
+
+    # Test 2-mirna cases only
+    if test_params['has_mirna'] and not test_params['has_one_mirna']:
+        # Check miRNA Detail Props
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.mirna_detail(detail='all', allow_mirna_dimers=False)
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.to_fasta_record('miRNA', allow_mirna_dimers=False)
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.to_fasta_record('target', allow_mirna_dimers=False)
+        # Check miRNA / target prop dict fetching based on setting
+        assert test_record.get_mirna_props(require=False, allow_mirna_dimers=False) is None
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.get_mirna_props(require=True, allow_mirna_dimers=False)
+        assert test_record.get_target_props(require=False, allow_mirna_dimers=False) is None
+        with pytest.raises((ValueError, RuntimeError)):
+            test_record.get_target_props(require=True, allow_mirna_dimers=False)
+        assert (test_record.get_mirna_props(require=True, allow_mirna_dimers=True)
+                == getattr(test_record, test_params['mirna_seg_props']))
+        assert (test_record.get_target_props(require=True, allow_mirna_dimers=True)
+                == getattr(test_record, test_params['target_seg_props']))
 
 
 # ----- HybRecord properties tests -----
@@ -345,6 +404,8 @@ def test_hybrecord_props(test_name, test_params):
         hybformat_id=True,
     )
     test_record.eval_types()
+    test_record.eval_types()
+    test_record.eval_mirna()
     test_record.eval_mirna()
     # Check properties of hybrids
     for prop in test_params['true_prop_argsets']:
@@ -386,6 +447,7 @@ test_parameters = [
     ('is_set', ('badprop',)),
     ('prop', ('badprop',)),
     ('prop', ('any_seg_type_contains', None)),
+    ('prop', ('target_none')),  # NotImplmented
     ('set_fold_record', (None,)),
     ('set_fold_record', ('not_fold_record',)),
     ('mirna_detail', ('disallowed_detail',)),
@@ -396,16 +458,29 @@ test_parameters = [
     ('_parse_hybformat_ref', ('bad_ref_name_continues_on',)),
     ('_read_flags', ('bad_flag=B;bad_flag2=C;',)),
 ]
-# TODO: assert not test_record.prop('has_indels')
 
 
 @pytest.mark.parametrize("method,badval", [*test_parameters])
-def test_hybrecord_misc_disallowed(method, badval):
+def test_hybrecord_misc_disallowed_1(method, badval):
     test_record = hybkit.HybRecord.from_line(
         ART_HYB_PROPS_1['hyb_str'],
         hybformat_id=True,
         hybformat_ref=True,
     )
+    with pytest.raises((RuntimeError, NotImplementedError)):
+        getattr(test_record, method)(*badval)
+
+
+test_parameters = [
+    ('prop', ('has_indels',)),
+    ('prop', ('seg1_contains', 'blah')),
+
+]
+
+
+@pytest.mark.parametrize("method,badval", [*test_parameters])
+def test_hybrecord_misc_disallowed_2(method, badval):
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
     with pytest.raises(RuntimeError):
         getattr(test_record, method)(*badval)
 

@@ -76,8 +76,10 @@ ART_HYB_PROPS_1 = {
         ('eval_target',),
         ('fold_record',),
     ],
-    'one_mirna_error': True,
-    'two_mirna_error': False,
+    'has_mirna': True,
+    'has_one_mirna': False,
+    'mirna_seg_props': 'seg1_props',
+    'target_seg_props': 'seg2_props',
     'mirna_seg_type': 'microRNA',
     'target_seg_type': 'microRNA',
     'mirna_ref': 'ARTSEG1_SOURCE_NAME_microRNA',
@@ -129,8 +131,10 @@ ART_HYB_PROPS_2 = {
         ('eval_target',),
         ('fold_record',),
     ],
-    'one_mirna_error': False,
-    'two_mirna_error': False,
+    'has_mirna': True,
+    'has_one_mirna': True,
+    'mirna_seg_props': 'seg1_props',
+    'target_seg_props': 'seg2_props',
     'mirna_seg_type': 'microRNA',
     'target_seg_type': 'mRNA',
     'mirna_ref': 'ARTSEG1_SOURCE_NAME_microRNA',
@@ -181,8 +185,10 @@ ART_HYB_PROPS_3 = {
         ('eval_target',),
         ('fold_record',),
     ],
-    'one_mirna_error': False,
-    'two_mirna_error': False,
+    'has_mirna': True,
+    'has_one_mirna': True,
+    'mirna_seg_props': 'seg2_props',
+    'target_seg_props': 'seg1_props',
     'mirna_seg_type': 'microRNA',
     'target_seg_type': 'mRNA',
     'mirna_ref': 'ARTSEG2_SOURCE_NAME_microRNA',
@@ -233,8 +239,10 @@ ART_HYB_PROPS_4 = {
         ('eval_target',),
         ('fold_record',),
     ],
-    'one_mirna_error': True,
-    'two_mirna_error': True,
+    'has_mirna': False,
+    'has_one_mirna': False,
+    'mirna_seg_props': None,
+    'target_seg_props': None,
     'mirna_seg_type': None,
     'target_seg_type': None,
     'mirna_ref': None,
@@ -448,8 +456,9 @@ EMPTY_SEG_PROPS = {
 }
 
 # List of data objects for testing
-TEST_HYBID_STR = '123_456'
+TEST_HYB_ID_STR = '123_456'
 TEST_SEQ_STR = 'ATGCATGCATGC'
+TEST_HYB_MINIMAL_STRING = '\t'.join([TEST_HYB_ID_STR, TEST_SEQ_STR] + (['.'] * 13))
 TEST_FOLD_STR = '..((..))...'
 TEST_ENERGY_STR = '-7.5'
 TEST_SEG_PROPS = {
@@ -495,7 +504,7 @@ TEST_FLAGS_STR_REVERSED = {flag: TEST_FLAGS_STR[flag] for flag
                            in reversed([*TEST_FLAGS_STR.keys()])}
 TEST_OBJECTS = {
     'None': None,
-    'id_str': TEST_HYBID_STR,
+    'id_str': TEST_HYB_ID_STR,
     'test_seq_str': TEST_SEQ_STR,
     'dot_str': '.',
     'fold_str': TEST_FOLD_STR,
@@ -506,11 +515,11 @@ TEST_OBJECTS = {
     'tab_str': '\t',
     'int': 473,
     'float': 473.0,
-    'list': [TEST_HYBID_STR],
-    'tuple': (TEST_HYBID_STR,),
-    'set': {TEST_HYBID_STR},
+    'list': [TEST_HYB_ID_STR],
+    'tuple': (TEST_HYB_ID_STR,),
+    'set': {TEST_HYB_ID_STR},
     'empty_dict': {},
-    'dict_rand_key': {TEST_HYBID_STR: True},
+    'dict_rand_key': {TEST_HYB_ID_STR: True},
     'seg_props_dict': copy.deepcopy(EMPTY_SEG_PROPS),
 }
 NONSPACE_STRS = ['id_str', 'int_str', 'float_str', 'test_seq_str', 'fold_str']

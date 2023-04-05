@@ -37,9 +37,9 @@ from auto_tests.test_helper_functions import *
 def test_foldrecord_constructor_minimal():
     """Test construction of FoldRecord class with minimal information."""
     # Test HybRecord Minimal Constructor:
-    test_record = hybkit.FoldRecord(id=TEST_HYBID_STR, seq=TEST_SEQ_STR, fold=TEST_FOLD_STR)
+    test_record = hybkit.FoldRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR, fold=TEST_FOLD_STR)
     # Test "seq_id" attribute
-    assert test_record.id == TEST_HYBID_STR
+    assert test_record.id == TEST_HYB_ID_STR
     # Test "seq" attribute
     assert test_record.seq == TEST_SEQ_STR
     # Test "fold" attribute
@@ -50,7 +50,7 @@ def test_foldrecord_constructor_minimal():
     assert test_record.energy is None
 
     # Test with Energy
-    test_record_2 = hybkit.FoldRecord(id=TEST_HYBID_STR, seq=TEST_SEQ_STR,
+    test_record_2 = hybkit.FoldRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
                                       fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR)
     assert test_record_2.energy == TEST_ENERGY_STR
 
@@ -65,7 +65,7 @@ def test_foldrecord_constructor_minimal():
 # ----- FoldRecord Type Tests -----
 test_seg_props = copy.deepcopy(EMPTY_SEG_PROPS)
 default_constructor_args = {
-    'id': TEST_HYBID_STR,
+    'id': TEST_HYB_ID_STR,
     'seq': TEST_SEQ_STR,
     'fold': TEST_FOLD_STR,
     'energy': TEST_ENERGY_STR,

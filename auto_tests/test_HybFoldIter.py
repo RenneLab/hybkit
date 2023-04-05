@@ -31,6 +31,24 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+
+# ----- Start Direct Match Tests -----
+def test_hybfolditer_direct_match_misc():
+    """Test misc HybRecord / FoldRecord Match Properties"""
+    use_props = ART_BAD_HYB_VIENNA_PROPS_4
+    hyb_record = hybkit.HybRecord.from_line(use_props['hyb_str'])
+    fold_record = hybkit.FoldRecord.from_vienna_string(use_props['vienna_str'])
+    copy.deepcopy(hyb_record).set_fold_record(
+        copy.deepcopy(fold_record),
+        allow_energy_mismatch=True
+    )
+    with pytest.raises(RuntimeError):
+        copy.deepcopy(hyb_record).set_fold_record(
+            copy.deepcopy(fold_record),
+            allow_energy_mismatch=False
+        )
+
+
 # ----- Start Test HybFoldIter -----
 test_param_sets = []
 for prop_set in [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]:
@@ -134,6 +152,24 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
             assert fold_record.count_hyb_record_mismatches(hyb_record) >= test_props['mismatches']
             with pytest.raises(RuntimeError):
                 fold_record.ensure_matches_hyb_record(hyb_record)
+    else:
+        hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'r')
+        fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'r', seq_type=seq_type)
+        use_iter = hybkit.HybFoldIter(
+            hyb_file,
+            fold_file,
+            combine=True,
+            iter_error_mode='raise',
+        )
+        for hyb_record in use_iter:
+            fold_record = hyb_record.fold_record
+            hyb_record.eval_types()
+            hyb_record.eval_mirna()
+            mirna_detail_dict = hyb_record.mirna_detail(detail='all')
+            assert mirna_detail_dict['mirna_seq'] == test_props['seg1_seq']
+            assert mirna_detail_dict['target_seq'] == test_props['seg2_seq']
+            assert mirna_detail_dict['mirna_fold'] == test_props['seg1_fold']
+            assert mirna_detail_dict['target_fold'] == test_props['seg2_fold']
 
 
 # Test iter_error_mode values:
