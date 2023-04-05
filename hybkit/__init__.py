@@ -1106,13 +1106,9 @@ class HybRecord(object):
 
         if mode in {'seg1', 'seg2'}:
             seg_props = getattr(self, mode + '_props')
-            if any(seg_props[v] is None for v in ['read_start', 'read_end']):
-                message = 'Record %s, Segment: %s is missing one of ' % (str(self), mode)
-                message += 'read_start/read_end and cannot be converted to FASTA.'
-                _print_and_error(message)
+            fasta_seq = self._get_seg_seq(seg_props)  # Checks read_start and read_end
             read_start, read_end = seg_props['read_start'], seg_props['read_end']
             fasta_id = self.id + ':%i-%i' % (read_start, read_end)
-            fasta_seq = self._get_seg_seq(seg_props)
             if annotate:
                 fasta_id += ':' + seg_props['ref_name']
                 fasta_description += self._format_seg_props_line(seg_props)
@@ -1508,8 +1504,12 @@ class HybRecord(object):
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_seq(self, seg_props):
         if any(seg_props[v] is None for v in ['read_start', 'read_end']):
+            if 'ref_name' in seg_props:
+                use_ref_name = seg_props['ref_name']
+            else:
+                use_ref_name = 'UNKNOWN'
             message = 'Segement subsequence cannot be obtained for '
-            message += 'Record %s, Segment %s.\n' % (str(self), seg_props['ref_name'])
+            message += 'Record %s, Segment %s.\n' % (str(self), use_ref_name)
             message += 'Record segment is missing one of read_start/read_end.'
             _print_and_error(message)
         read_start, read_end = seg_props['read_start'], seg_props['read_end']
@@ -1551,7 +1551,7 @@ class HybRecord(object):
         if reorder_flags:
             return_list = self._get_ordered_flag_keys()
         else:
-            return_list = self.flags.keys()
+            return_list = [*self.flags.keys()]
         return return_list
 
     # HybRecord : Private Methods : flags

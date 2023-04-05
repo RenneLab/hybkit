@@ -90,7 +90,6 @@ def test_hybrecord_constructor_minimal():
     assert test_record.get_read_count() == 10
 
 
-
 # ----- HybRecord Method Tests -----
 def test_hybrecord_methods_misc():
     """Test HybRecord Methods."""
@@ -447,7 +446,7 @@ test_parameters = [
     ('is_set', ('badprop',)),
     ('prop', ('badprop',)),
     ('prop', ('any_seg_type_contains', None)),
-    ('prop', ('target_none')),  # NotImplmented
+    ('prop', ('target_none',)),  # NotImplmented
     ('set_fold_record', (None,)),
     ('set_fold_record', ('not_fold_record',)),
     ('mirna_detail', ('disallowed_detail',)),
@@ -488,6 +487,7 @@ def test_hybrecord_misc_disallowed_2(method, badval):
 test_parameters = [
     ('_ensure_props_read_start_end', tuple()),
     ('to_fasta_record', ('seg1',)),
+    ('_get_seg_seq', (EMPTY_SEG_PROPS,)),
 ]
 
 
@@ -512,3 +512,9 @@ def test_hybrecord_misc_private():
     )
     read_flags = test_record._read_flags('bad_flag=B;', allow_undefined_flags=True)
     assert read_flags['bad_flag'] == 'B'
+    test_record._flagset = None
+    assert (test_record._get_flag_keys(reorder_flags=True)
+            == ['read_count', 'seg1_type', 'seg2_type', 'dataset'])
+    assert (test_record._get_flag_keys(reorder_flags=False)
+            == ['dataset', 'read_count', 'seg1_type', 'seg2_type'])
+    assert test_record._make_seg_props_dict() == EMPTY_SEG_PROPS
