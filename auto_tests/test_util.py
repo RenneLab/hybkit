@@ -138,8 +138,10 @@ for source, settings_info_dict in settings_info_dicts:
             bad_choice_1, bad_choice_2 = None, None
         test_parameters.append((source, setting, 'Pass', good_choice, settings_info_dict[setting]))
         if bad_choice_1 is not None:
-            test_parameters.append((source, setting, 'Raise', bad_choice_1, settings_info_dict[setting]))
-            test_parameters.append((source, setting, 'Raise', bad_choice_2, settings_info_dict[setting]))
+            test_parameters.append((source, setting, 'Raise',
+                                    bad_choice_1, settings_info_dict[setting]))
+            test_parameters.append((source, setting, 'Raise',
+                                    bad_choice_2, settings_info_dict[setting]))
 
 
 @pytest.mark.parametrize("source,setting,expectation,set_val,setting_props", [*test_parameters])
@@ -175,7 +177,6 @@ def test_util_validate_args():
     assert not hybkit.util.validate_args(args, script_parser)
     with pytest.raises(SystemExit):
         hybkit.util.validate_args_exit(args, script_parser)
-
 
     parser_components = [
         hybkit.util.in_hybs_parser,
