@@ -273,6 +273,7 @@ def validate_args(args, parser=None):
     else:
         suffix = 'Please use the -h or --help options for input requirements.'
 
+    ret_val = True
     if hasattr(args, 'in_hyb') and hasattr(args, 'out_hyb') and args.out_hyb is not None:
         len_in_hyb = len(args.in_hyb)
         len_out_hyb = len(args.out_hyb)
