@@ -2516,11 +2516,11 @@ class FoldFile(object):
         # Set error_mode
         if error_mode is None:
             self.error_mode = None  # Use default value in FoldRecord class
-        elif error_mode in self._foldrecord_choices:
+        elif error_mode in self._error_mode_choices:
             self.error_mode = error_mode
         else:
             message = 'Invalid error_mode: %s. Allowed values: %s' % (
-                error_mode, self._foldrecord_choices)
+                error_mode, self._error_mode_choices)
             _print_and_error(message)
         self._post_init_tasks()  # Throws error on base class
 

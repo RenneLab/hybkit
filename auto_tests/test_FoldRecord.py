@@ -73,6 +73,7 @@ def test_foldrecord_constructor_main():
     assert test_record == test_record
     test_record_2.id = 'test2'
     assert test_record != test_record_2
+    assert len(test_record) == len(TEST_SEQ_STR)
     assert bool(test_record)
     print(str(test_record))
     hash(test_record)
@@ -191,6 +192,11 @@ test_parameters = [
     ('empty2', {'record_lines': ['', '']}),
     ('empty1', {'record_lines': ['abc', '123', 'singleval']}),
     ('empty0', {'record_lines': ['abc', '123', '(99']}),
+    ('bad_error', {
+        'record_lines': ART_HYB_VIENNA_PROPS_1['vienna_str'].split('\n')[:3],
+        'error_mode': 'bad_error_mode',
+    }),
+
 ]
 
 
@@ -202,7 +208,9 @@ def test_foldrecord_vienna_io_errors(test_name, test_kws):
 
 # ----- FoldRecord test reading vienna-format records with allowed errors. -----
 test_parameters = [
-    ('warn-99', {'record_lines': ['abc', '123', '(99'], 'error_mode': 'warn_return'}),
+    ('warn_99', {'record_lines': ['abc', '123', '(99'], 'error_mode': 'warn_return'}),
+    ('warn_lines', {'record_lines': ['abc', '123'], 'error_mode': 'warn_return'}),
+    ('warn_noenergy', {'record_lines': ['abc', '123', '.(.'], 'error_mode': 'warn_return'}),
 ]
 
 

@@ -32,7 +32,24 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
 
-# ----- Start Direct Match Tests -----
+# ----- Begin HybFoldIter Tests -----
+# ----- Constructor Tests -----
+def test_hybfolditer_constructor_misc(tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
+    hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'w')
+    fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'w')
+    with pytest.raises(RuntimeError):
+        use_iter = hybkit.HybFoldIter(hyb_file, None)
+    with pytest.raises(RuntimeError):
+        use_iter = hybkit.HybFoldIter(None, fold_file)
+    with pytest.raises(RuntimeError):
+        use_iter = hybkit.HybFoldIter(hyb_file, fold_file, iter_error_mode='BadMode')
+
+
+
+
+# ----- Direct Match Tests -----
 def test_hybfolditer_direct_match_misc():
     """Test misc HybRecord / FoldRecord Match Properties"""
     use_props = ART_BAD_HYB_VIENNA_PROPS_4
@@ -82,8 +99,6 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
                         skip_match_check, tmp_path):
     hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
-    if not os.path.isdir(test_out_dir):
-        os.mkdir(test_out_dir)
     expect_context = get_expected_result_context(expectation)
     combine = (combine_str == 'Combine')
     hyb_str = test_props['hyb_str']

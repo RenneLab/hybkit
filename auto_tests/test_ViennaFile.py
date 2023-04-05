@@ -31,7 +31,25 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
-# ----- Start ViennaFile Test IO of Vienna Strings / FoldRecords -----
+
+# ----- Begin ViennaFile Tests -----
+test_parameters = [
+    ('bad_type', 'Raise', {'seq_type': 'badtype'}),
+    ('bad_error_mode', 'Raise', {'error_mode': 'badmode'}),
+]
+@pytest.mark.parametrize("test_name,expectation,test_kwargs", [*test_parameters])
+# ----- Test Misc Properties of ViennaFiles -----
+def test_viennafile_constructor_misc(test_name, expectation, test_kwargs, tmp_path):
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
+    expect_context = get_expected_result_context(expectation)
+    with expect_context:
+        vienna_file = hybkit.ViennaFile.open(
+            vienna_autotest_file_name, 'w',
+            **test_kwargs
+        )
+
+
+# ----- Test IO of Vienna Strings / FoldRecords -----
 test_parameters = []
 for prop_set in [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]:
     if prop_set['overlapping']:
@@ -71,3 +89,11 @@ def test_viennafile_io(test_name, expectation, test_props, tmp_path):
             vienna_autotest_file.write_records([vienna_record, vienna_record])
             vienna_autotest_file.write_record(vienna_record)
             vienna_autotest_file.write_fh(vienna_str)
+
+
+# ----- Test ViennaFile Misc -----
+def test_viennafile_misc(tmp_path):
+    vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
+    vienna_file = hybkit.ViennaFile.open(vienna_autotest_file_name, 'w')
+    with pytest.raises(RuntimeError):
+        vienna_file._ensure_FoldRecord(None)
