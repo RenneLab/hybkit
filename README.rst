@@ -7,7 +7,7 @@ hybkit
 .. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
-.. image:: image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit/v3?label=CircleCI&logo=circleci
+.. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit/v3?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
