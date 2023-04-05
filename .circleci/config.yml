@@ -66,7 +66,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - programs-cache
+            - example_01{{ checksum "example_01_summary_analysis/download_data.sh" }}
+            - example_02{{ checksum "example_01_target_analysis/download_data.sh" }}
+            - example_03{{ checksum "example_01_grouped_target_analysis/download_data.sh" }}
+            - example_04{{ checksum "example_01_pattern_analysis/download_data.sh" }}
+            - example_05{{ checksum "example_01_fold_analysis/download_data.sh" }}
       - run:
           name: Download Sample Data
           command: |
