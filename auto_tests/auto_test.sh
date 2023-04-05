@@ -20,12 +20,14 @@ if ! [ -d ${OUT_DIR} ]; then
 fi
 
 IN_HYB="test_data_files/test_hybrid.hyb"
-IN_VIENNA="test_data_files/test_hybrid.vienna"
+FULL_IN_HYB="test_data_files/${IN_HYB}"
+IN_VIENNA="test_hybrid.vienna"
+FULL_IN_VIENNA="test_data_files/${IN_VIENNA}"
 
 # Run tests
-hyb_check -i ${IN_HYB} --verbose
+hyb_check -i ${FULL_IN_HYB} --verbose
 
-hyb_eval -i ${IN_HYB} --verbose \
+hyb_eval -i ${FULL_IN_HYB} --verbose \
          --out_dir ${OUT_DIR} \
          --eval_types type mirna \
          --hybformat_id True \
@@ -37,7 +39,7 @@ hyb_filter -i ${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb} --verbose \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
 
-hyb_exclude_fold -f ${IN_VIENNA} --verbose \
+hyb_exclude_fold -f ${FULL_IN_VIENNA} --verbose \
                  -e ${OUT_DIR}/${IN_HYB/.hyb/_evaluated_exclude.csv} \
                  --out_dir ${OUT_DIR} \
                  --foldfile_error_mode warn_return \
