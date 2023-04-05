@@ -200,12 +200,12 @@ workflows:
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
                 example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
 
-        - example_test_pip:
-            requires:
-              - prep_data
-            matrix:
-              parameters:
-                # os: [linux, macos]
-                py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
-                example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
+        # - example_test_pip:
+        #     requires:
+        #       - prep_data
+        #     matrix:
+        #       parameters:
+        #         # os: [linux, macos]
+        #         py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+        #         example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
 
