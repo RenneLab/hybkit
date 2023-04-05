@@ -435,7 +435,7 @@ class HybRecord(object):
             allow_undefined_flags = self.settings['allow_undefined_flags']
 
         if self._flagset is None:
-            self._flagset = set(self.ALL_FLAGS + list(self.settings.custom_flags))
+            self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))
 
         if (not allow_undefined_flags
                 and flag_key not in self._flagset):
