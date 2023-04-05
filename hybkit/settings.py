@@ -197,7 +197,7 @@ FoldRecord_settings_info = {
         than the original sequence.
         """,
         'str',
-        '-s',
+        '-y',
         {'choices': ['static', 'dynamic']}
     ],
     'error_mode': [
