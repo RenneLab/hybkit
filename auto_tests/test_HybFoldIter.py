@@ -142,16 +142,19 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
 
     if expectation == 'Raise':
         hyb_record = hybkit.HybFile(hyb_autotest_file_name, 'r').read_record()
-        fold_record = hybkit.ViennaFile(
+        fold_file = hybkit.ViennaFile(
             vienna_autotest_file_name,
             'r',
             seq_type=seq_type,
-        ).read_record(override_error_mode='return')
-        if not isinstance(fold_record, tuple) and not skip_match_check:
+        )
+        fold_record = fold_file.read_record(override_error_mode='warn_return')
+        if not skip_match_check:
+            assert not "made it here"
             assert not fold_record.matches_hyb_record(hyb_record)
             assert fold_record.count_hyb_record_mismatches(hyb_record) >= test_props['mismatches']
             with pytest.raises(RuntimeError):
                 fold_record.ensure_matches_hyb_record(hyb_record)
+
     else:
         hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'r')
         fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'r', seq_type=seq_type)

@@ -29,6 +29,17 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+
+# ----- HybFile test misc disallowed commands -----
+def test_hybfile_misc_disallowed(tmp_path):
+    hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
+    with hybkit.HybFile(hyb_autotest_file_name, 'w') as hyb_autotest_file:
+        with pytest.raises(RuntimeError):
+            hyb_autotest_file.write('test_str')
+        with pytest.raises(RuntimeError):
+            hyb_autotest_file._ensure_HybRecord(None)
+
+
 # ----- HybFile test reading/writing of hyb records. -----
 test_parameters = [
     ('One-Record', 'Pass', [ART_HYB_PROPS_1['hyb_str']], ),
@@ -44,8 +55,6 @@ for i, bad_hyb_str in enumerate(ART_BAD_HYB_STRS, start=1):
 @pytest.mark.parametrize("test_name,expectation,hyb_strs", [*test_parameters])
 def test_hybfile_io(test_name, expectation, hyb_strs, tmp_path):
     hyb_autotest_file_name = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
-    if not os.path.isdir(test_out_dir):
-        os.mkdir(test_out_dir)
     expect_context = get_expected_result_context(expectation)
     all_hyb_strs = ''.join(hyb_strs)
     with open(hyb_autotest_file_name, 'w') as hyb_autotest_file:

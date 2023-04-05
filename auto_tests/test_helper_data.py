@@ -327,7 +327,7 @@ for i in range(2):
 # Add bad hyb strings with missing columns
 source_str = ART_HYB_PROPS_1['hyb_str']
 items = source_str.split('\t')
-del items[4]
+del items[4:7]
 bad_hyb_str = '\t'.join(items)
 ART_BAD_HYB_STRS.append(bad_hyb_str)
 

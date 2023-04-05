@@ -85,6 +85,9 @@ def test_hybrecord_constructor_minimal():
     # Test HybRecord Minimal Constructor with missing seq
     with pytest.raises(RuntimeError):
         hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=None)
+    # Test HybRecord Constructor with read count
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR, read_count=5)
+    assert test_record.get_read_count() == 5
     # Set Read Count, and retest
     test_record.set_flag('read_count', 10)
     assert test_record.get_read_count() == 10
@@ -518,3 +521,8 @@ def test_hybrecord_misc_private():
     assert (test_record._get_flag_keys(reorder_flags=False)
             == ['dataset', 'read_count', 'seg1_type', 'seg2_type'])
     assert test_record._make_seg_props_dict() == EMPTY_SEG_PROPS
+    test_record.set_flag('badflag', 'badval', allow_undefined_flags=True)
+    assert (test_record._get_flag_keys(reorder_flags=True)
+            == ['read_count', 'seg1_type', 'seg2_type', 'dataset', 'badflag'])
+    assert (test_record._get_flag_keys(reorder_flags=False)
+            == ['dataset', 'read_count', 'seg1_type', 'seg2_type', 'badflag'])
