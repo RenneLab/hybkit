@@ -172,7 +172,7 @@ workflows:
         - prep_data
         - example_test_checkout:
             requires:
-              - bash_prep_data
+              - prep_data
             matrix:
               parameters:
                 # os: [linux, macos]
@@ -181,7 +181,7 @@ workflows:
 
         - example_test_pip:
             requires:
-              - bash_prep_data
+              - prep_data
             matrix:
               parameters:
                 # os: [linux, macos]
