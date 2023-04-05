@@ -381,27 +381,27 @@ class HybRecord(object):
         self.id = self._ensure_attr_types(id, 'id')
         self.seq = self._ensure_attr_types(seq, 'seq')
         self.energy = self._ensure_attr_types(energy, 'energy')
+
         if seg1_props is None:
             seg1_props = {}
         else:
             seg1_props = copy.deepcopy(seg1_props)
-        self.seg1_props = self._ensure_attr_types(
-            self._make_seg_props_dict(seg1_props),
-            'seg_props'
-        )
+            self._ensure_attr_types(seg1_props, 'seg_props')
+        self.seg1_props = self._make_seg_props_dict(seg1_props)
+
         if seg2_props is None:
             seg2_props = {}
         else:
             seg2_props = copy.deepcopy(seg2_props)
-        self.seg2_props = self._ensure_attr_types(
-            self._make_seg_props_dict(seg2_props),
-            'seg_props'
-        )
+            self._ensure_attr_types(seg2_props, 'seg_props')
+        self.seg2_props = self._make_seg_props_dict(seg2_props)
+
         if flags is None:
             flags = {}
         else:
             flags = copy.deepcopy(flags)
-        self.flags = self._ensure_attr_types(self._make_flags_dict(flags), 'flags')
+            self._ensure_attr_types(flags, 'flags')
+        self.flags = flags
         self.fold_record = None     # Placeholder variable for fold_record
 
         if read_count is not None:
@@ -1312,7 +1312,6 @@ class HybRecord(object):
 
     # Start HybRecord Private Constants
     # HybRecord : Private Constants
-    _SEG_PROPS_SET = set(SEGMENT_COLUMNS)
     _SET_PROPS_SET = set(SET_PROPS)
     _GEN_PROPS_SET = set(GEN_PROPS)
     _STR_PROPS_SET = set(STR_PROPS)
@@ -1374,7 +1373,7 @@ class HybRecord(object):
                         err_message = ('energy must be a float, int, numeric str, or None. '
                                        'Provided energy is non-numeric string: "%s"' % value)
         elif attribute == 'seg_props':
-            if not isinstance(value, (dict, type(None))):
+            if not isinstance(value, (dict)):  # Nonetype disallowed, need empty dict.
                 err_message = ('segN_props must be a dict. Provided segN_props is type '
                                '%s: %s' % (type(value), value))
             else:
@@ -1437,12 +1436,12 @@ class HybRecord(object):
                     else:
                         err_message = (
                             'segN_props must be have only keys: ref_name, read_start, read_end, '
-                            'ref_start, ref_end, score. Provided segN_props has key %s' % key
+                            'ref_start, ref_end, score. Provided segN_props has key %s' % prop_key
                         )
                         break
 
         elif attribute == 'flags':
-            if not isinstance(value, dict):
+            if not isinstance(value, dict):  # Nonetype disallowed, need empty dict.
                 err_message = (
                     'flags must be a dict. Provided flags is type '
                     '%s: %s' % (type(value), value)
@@ -1504,12 +1503,8 @@ class HybRecord(object):
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_seq(self, seg_props):
         if any(seg_props[v] is None for v in ['read_start', 'read_end']):
-            if 'ref_name' in seg_props:
-                use_ref_name = seg_props['ref_name']
-            else:
-                use_ref_name = 'UNKNOWN'
             message = 'Segement subsequence cannot be obtained for '
-            message += 'Record %s, Segment %s.\n' % (str(self), use_ref_name)
+            message += 'Record %s, Segment %s.\n' % (str(self), seg_props['ref_name'])
             message += 'Record segment is missing one of read_start/read_end.'
             _print_and_error(message)
         read_start, read_end = seg_props['read_start'], seg_props['read_end']
@@ -1578,11 +1573,6 @@ class HybRecord(object):
         if self._flagset is None:
             self._flagset = set(self.ALL_FLAGS + list(self.settings['custom_flags']))
 
-        if not isinstance(flag_obj, dict):
-            message = '"flag_obj" argument must be a dict obj. Defined keys are:'
-            message += ', '.join(self.ALL_FLAGS + self.settings['custom_flags'])
-            _print_and_error(message)
-
         if not allow_undefined_flags:
             for flag in flag_obj:
                 if flag not in self._flagset:
@@ -1600,15 +1590,6 @@ class HybRecord(object):
         return_dict = {}
         if seg_props_obj is None:
             seg_props_obj = {}
-        elif not isinstance(seg_props_obj, dict):
-            message = 'seg_props_ must be a dict object. Provided: "%s"' % seg_props_obj
-            _print_and_error(message)
-        # Check for extra keys in provided seg props dict
-        elif (set((*seg_props_obj.keys(),)) - set(self._SEG_PROPS_SET)):
-            message = 'seg_props_ must be a dict object with keys in: '
-            message += ', '.join(self.SEGMENT_COLUMNS)
-            message += '. Provided: "%s"' % str(*seg_props_obj.keys())
-            _print_and_error(message)
         for prop_key in self.SEGMENT_COLUMNS:
             if prop_key in seg_props_obj:
                 return_dict[prop_key] = seg_props_obj[prop_key]
@@ -1899,14 +1880,10 @@ class FoldRecord(object):
     | When the 'static' FoldRecord type is used, the following methods are used to for
         :obj:`HybRecord.fold_record` error-checking:
     | :meth:`static_count_hyb_record_mismatches`
-    | :meth:`static_matches_hyb_record`
-    | :meth:`static_ensure_matches_hyb_record`
 
     | When the 'dynamic' FoldRecord type is used, the following methods are used to for
         :obj:`HybRecord.fold_record` error-checking:
     | :meth:`dynamic_count_hyb_record_mismatches`
-    | :meth:`dynamic_matches_hyb_record`
-    | :meth:`dynamic_ensure_matches_hyb_record`
 
     Args:
         id (str): Identifier for record
@@ -2065,7 +2042,7 @@ class FoldRecord(object):
             return mismatches
 
     # FoldRecord : Public Methods : HybFile Comparison
-    def matches_hyb_record(self, hyb_record):
+    def matches_hyb_record(self, hyb_record, allowed_mismatches=None):
         """
         Return ``True`` if self.seq == hyb_record.seq.
 
@@ -2074,110 +2051,52 @@ class FoldRecord(object):
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
+            allowed_mismatches (:obj:`int`, optional): Number of mismatches allowed
+                for a match. If not provided, defaults to the option in
+                :attr:`settings['allowed_mismatches'] <FoldRecord.settings>`.
         """
-        if self.seq_type == 'static':
-            return self.static_matches_hyb_record(hyb_record)
-        elif self.seq_type == 'dynamic':
-            return self.dynamic_matches_hyb_record(hyb_record)
-
-    # FoldRecord : Public Methods : HybFile Comparison
-    def static_matches_hyb_record(self, hyb_record):
-        """
-        Return ``True`` if self.seq == hyb_record.seq.
-
-        Args:
-            hyb_record (HybRecord): hyb_record to compare.
-        """
-        return (self.seq == hyb_record.seq)
-
-    # FoldRecord : Public Methods : HybFile Comparison
-    def dynamic_matches_hyb_record(self, hyb_record):
-        """
-        Calculate dynamic sequence from hyb record and compare to dynamic FoldRecord seq.
-
-        Args:
-            hyb_record (HybRecord): hyb_record for comparison
-        """
-        dynamic_seq = hyb_record._get_dynamic_seq()
-        if (self.seq == dynamic_seq):
-            return True
-        else:
-            match_str = ''
-            for i in range(max([len(dynamic_seq), len(self.seq)])):
-                if dynamic_seq[i:(i + 1)] == self.seq[i:(i + 1)]:
-                    match_str += '|'
-                else:
-                    match_str += '.'
-                mismatch_count = match_str.count('.')
-            return mismatch_count <= self.settings['allowed_mismatches']
+        if allowed_mismatches is None:
+            allowed_mismatches = self.settings['allowed_mismatches']
+        mismatches = self.count_hyb_record_mismatches(hyb_record)
+        return (mismatches <= allowed_mismatches)
 
     # FoldRecord : Public Methods : HybFile Comparison
     def ensure_matches_hyb_record(self, hyb_record):
         """
-        Ensure self.seq matches hyb_record.seq.
-
-        Uses :meth:`static_ensure_matches_hyb_record` if :attr:`seq_type` is ``static``, and
-        :meth:`dynamic_ensure_matches_hyb_record` if :attr:`seq_type` is ``dynamic``.
-
-        Args:
-            hyb_record (HybRecord): hyb_record to compare.
-        """
-        if self.seq_type == 'static':
-            return self.static_ensure_matches_hyb_record(hyb_record)
-        elif self.seq_type == 'dynamic':
-            return self.dynamic_ensure_matches_hyb_record(hyb_record)
-
-    # FoldRecord : Public Methods : HybFile Comparison
-    def static_ensure_matches_hyb_record(self, hyb_record):
-        """
-        Ensure self.seq == hyb_record.seq.
+        Ensure self.seq matches hyb_record.seq, else raise an error.
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
         """
         if not self.matches_hyb_record(hyb_record):
-            message = 'Disallowed mismatch between HybRecord sequence and FoldRecord sequence.\n'
-            message += 'Hyb : %s\n' % str(hyb_record.seq)
-            message += 'Fold: %s\n' % str(self.seq)
+            if self.seq_type == 'static':
+                message = 'Disallowed mismatch between HybRecord sequence and FoldRecord sequence.\n'
+                message += 'Hyb : %s\n' % str(hyb_record.seq)
+                message += 'Fold: %s\n' % str(self.seq)
+            elif self.seq_type == 'dynamic':
+                dynamic_seq = hyb_record._get_dynamic_seq()
+                match_str = ''
+                for i in range(max([len(dynamic_seq), len(self.seq)])):
+                    if dynamic_seq[i:(i + 1)] == self.seq[i:(i + 1)]:
+                        match_str += '|'
+                    else:
+                        match_str += '.'
+                    mismatch_count = match_str.count('.')
+                message = 'Disallowed mismatch between HybRecord sequence '
+                message += 'and dynamic FoldRecord sequence.\n'
+                message += 'ID: %s\n' % hyb_record.id
+                dataset = hyb_record._get_flag('dataset')
+                if dataset is not None:
+                    message += 'Dataset: %s\n' % dataset
+                message += 'FoldRecord Seq:        %s\t(%i)\n' % (self.seq, len(self.seq))
+                message += 'HybRecord Seq:         %s\t(%i)\n' % (hyb_record.seq, len(hyb_record.seq))
+                message += 'HybRecord Dynamic Seq: %s\t(%i)\n' % (dynamic_seq, len(dynamic_seq))
+                message += '                       %s\t' % (match_str)
+                message += '(%i of %i)\n' % (mismatch_count,
+                                            self.settings['allowed_mismatches'])
+                message += 'dynamic FoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq))
             _print_and_error(message)
 
-    # FoldRecord : Public Methods : HybFile Comparison
-    def dynamic_ensure_matches_hyb_record(self, hyb_record):
-        """
-        Ensure the dynamic fold record sequence matches hyb_record.seq.
-
-        Args:
-            hyb_record (HybRecord): hyb_record for comparison
-        """
-        # if True:
-        #    dynamic_seq = hyb_record._get_dynamic_seq()
-        #    message  = 'HybRecord Seq:         %s\n' % str(hyb_record.seq)
-        #    message += 'HybRecord Dynamic Seq: %s\n' % str(dynamic_seq)
-        #    message += 'FoldRecord Seq: %s\n' % str(self.seq)
-        #    print(message)
-        if not self.matches_hyb_record(hyb_record):
-            dynamic_seq = hyb_record._get_dynamic_seq()
-            match_str = ''
-            for i in range(max([len(dynamic_seq), len(self.seq)])):
-                if dynamic_seq[i:(i + 1)] == self.seq[i:(i + 1)]:
-                    match_str += '|'
-                else:
-                    match_str += '.'
-                mismatch_count = match_str.count('.')
-            message = 'Disallowed mismatch between HybRecord sequence '
-            message += 'and dynamic FoldRecord sequence.\n'
-            message += 'ID: %s\n' % hyb_record.id
-            dataset = hyb_record._get_flag('dataset')
-            if dataset is not None:
-                message += 'Dataset: %s\n' % dataset
-            message += 'FoldRecord Seq:        %s\t(%i)\n' % (self.seq, len(self.seq))
-            message += 'HybRecord Seq:         %s\t(%i)\n' % (hyb_record.seq, len(hyb_record.seq))
-            message += 'HybRecord Dynamic Seq: %s\t(%i)\n' % (dynamic_seq, len(dynamic_seq))
-            message += '                       %s\t' % (match_str)
-            message += '(%i of %i)\n' % (mismatch_count,
-                                         self.settings['allowed_mismatches'])
-            message += 'dynamic FoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq))
-            _print_and_error(message)
 
     # Start FoldRecord Magic Methods
     # FoldRecord : Public MagicMethods : Comparison

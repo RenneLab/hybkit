@@ -34,7 +34,7 @@ from auto_tests.test_helper_functions import *
 
 # ----- Begin FoldRecord tests -----
 # ----- FoldRecord Constructor Tests - Minimal -----
-def test_foldrecord_constructor_minimal():
+def test_foldrecord_constructor_main():
     """Test construction of FoldRecord class with minimal information."""
     # Test HybRecord Minimal Constructor:
     test_record = hybkit.FoldRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR, fold=TEST_FOLD_STR)
@@ -54,12 +54,55 @@ def test_foldrecord_constructor_minimal():
                                       fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR)
     assert test_record_2.energy == TEST_ENERGY_STR
 
+    # Test seq_type
+    for seq_type in ['static', 'dynamic']:
+        test_record_2 = hybkit.FoldRecord(
+            id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
+            fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR,
+            seq_type=seq_type
+        )
+        assert test_record_2.seq_type == seq_type
+    with pytest.raises(RuntimeError):
+        test_record_2 = hybkit.FoldRecord(
+            id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
+            fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR,
+            seq_type='invalid'
+        )
+
+    # Test Magicmethods
     assert test_record == test_record
     test_record_2.id = 'test2'
     assert test_record != test_record_2
     assert bool(test_record)
     print(str(test_record))
     hash(test_record)
+
+
+# ----- FoldRecord Constructor Tests - Minimal -----
+def test_foldrecord_constructor_vienna_to_line():
+    """Test construction of FoldRecord class with minimal information."""
+    test_record = hybkit.FoldRecord(
+        id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
+        fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR,
+        seq_type='static',
+    )
+    format_energy_str = '(%s)' % TEST_ENERGY_STR
+    assert (
+        test_record.to_vienna_string()
+        == """>%s\n%s\n%s\t%s\n""" % (TEST_HYB_ID_STR, TEST_SEQ_STR,
+                                      TEST_FOLD_STR, format_energy_str)
+    )
+
+    test_record_2 = hybkit.FoldRecord(
+        id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
+        fold=TEST_FOLD_STR, energy=None,
+        seq_type='static',
+    )
+    assert (
+        test_record_2.to_vienna_string()
+        == """>%s\n%s\n%s\t%s\n""" % (TEST_HYB_ID_STR, TEST_SEQ_STR,
+                                      TEST_FOLD_STR, '(.)')
+    )
 
 
 # ----- FoldRecord Type Tests -----
