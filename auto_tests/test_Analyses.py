@@ -128,6 +128,8 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
     out_analysis_file_name = os.path.join(tmp_path, 'analysis_delim_str.csv')
     mirna_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='mirna')
     analysis_delim_str = hyb_analysis.get_analysis_delim_str()
+
+    # Execution-only writing tests
     hyb_analysis.write_analysis_delim_str(analysis='mirna', out_file_name=out_analysis_file_name)
     hyb_analysis.write_analysis_delim_str(analysis=['mirna'], out_file_name=out_analysis_file_name)
     hyb_analysis.write_analysis_delim_str(out_file_name=out_analysis_file_name)
@@ -288,6 +290,7 @@ def test_analysis_fold(tmp_path):
     assert fold_results['mirna_nt_fold_props'][4] == 1.0
     assert fold_results['mirna_nt_fold_props'][24] == 0.5
 
+    # Execution-only writing tests
     # Get Analysis Delim String:
     out_analysis_file_name = os.path.join(tmp_path, 'analysis_delim_str.csv')
     fold_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='fold')

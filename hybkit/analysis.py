@@ -16,7 +16,7 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 
 
-ANALYSIS_TYPES = ['energy', 'type', 'mirna', 'fold']
+ANALYSIS_OPTIONS = ['energy', 'type', 'mirna', 'fold']
 
 
 # --- Hybkit Analysis --- #
@@ -144,6 +144,9 @@ class Analysis(object):
     #: Class-level settings. See :attr:`hybkit.settings.Analysis_settings` for descriptions.
     settings = hybkit.settings.Analysis_settings
 
+    #: Possible options for analyses
+    analysis_options = ['energy', 'type', 'mirna', 'fold']
+
     # Class private variables:
     _result_keys = {
         'energy': [
@@ -179,7 +182,7 @@ class Analysis(object):
         """Describe in class docstring."""
         if analysis_types is None or not analysis_types:
             message = 'No analysis types provided. Analysis types must be provided'
-            message += ' as a list of strings.\nOptions: %s' % ', '.join(ANALYSIS_TYPES)
+            message += ' as a list of strings.\nOptions: %s' % ', '.join(self.analysis_options)
             print(message)
             raise RuntimeError(message)
         if isinstance(analysis_types, str):
@@ -187,10 +190,10 @@ class Analysis(object):
         self.analysis_types = []
         for analysis_type in analysis_types:
             if (not isinstance(analysis_type, str)
-                or analysis_type.lower() not in ANALYSIS_TYPES):
+                    or analysis_type.lower() not in self.analysis_options):
                 message = (
                     'Analysis type "%s" not recognized.'
-                    '\nChoices: %s' % (str(analysis_type), ', '.join(ANALYSIS_TYPES))
+                    '\nChoices: %s' % (str(analysis_type), ', '.join(self.analysis_options))
                 )
                 print(message)
                 raise RuntimeError(message)
@@ -283,7 +286,7 @@ class Analysis(object):
             )
             print(message)
             raise RuntimeError(message)
-        for analysis_type in ANALYSIS_TYPES:
+        for analysis_type in self.analysis_options:
             if result_key in self._result_keys[analysis_type]:
                 if analysis_type not in self.analysis_types:
                     message = (
@@ -293,7 +296,6 @@ class Analysis(object):
                     print(message)
                     raise RuntimeError(message)
                 return getattr(self, '_get_' + analysis_type + '_results')()[result_key]
-
 
     # Analysis : Public Methods : Results : get_analysis_delim_str
     def get_analysis_delim_str(self, analysis=None, out_delim=None):
@@ -394,19 +396,18 @@ class Analysis(object):
             if self.name is not None:
                 out_file_basename = self.name
             else:
-                out_file_basename = analysis
+                out_file_basename = 'analysis'
 
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
         all_out_files = []
         for analysis in use_analyses:
-            if hasattr(self, '_write_' + analysis + '_special'):
-                out_files = getattr(self, '_write_' + analysis + '_results_special')(
-                    basename=out_file_basename,
-                    out_delim=out_delim
-                )
-                all_out_files += out_files
+            out_files = getattr(self, '_write_' + analysis + '_results_special')(
+                basename=out_file_basename,
+                out_delim=out_delim
+            )
+            all_out_files += out_files
         return all_out_files
 
     # Analysis : Public Methods : Plot Results : plot_analysis_results
