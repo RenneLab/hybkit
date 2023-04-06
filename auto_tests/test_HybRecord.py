@@ -303,7 +303,7 @@ def test_hybrecord_type_mirna(test_name, test_params):
         hybformat_id=True,
     )
     with pytest.raises((ValueError, RuntimeError)):
-        test_record.mirna_detail(detail='all', allow_mirna_dimers=True)
+        test_record.mirna_details(detail='all', allow_mirna_dimers=True)
     with pytest.raises((ValueError, RuntimeError)):
         test_record.to_fasta_record(mode='mirna')
 
@@ -353,7 +353,7 @@ def test_hybrecord_type_mirna(test_name, test_params):
     if not test_params['has_mirna']:
         # Check error on miRNA detail and FASTA calls
         with pytest.raises((ValueError, RuntimeError)):
-            test_record.mirna_detail()
+            test_record.mirna_details()
         with pytest.raises((ValueError, RuntimeError)):
             test_record.to_fasta_record(mode='miRNA')
         with pytest.raises((ValueError, RuntimeError)):
@@ -368,7 +368,7 @@ def test_hybrecord_type_mirna(test_name, test_params):
 
     # Test 1-mirna or 2-mirna cases
     if test_params['has_mirna']:
-        mirna_detail_dict = test_record.mirna_detail(detail='all', allow_mirna_dimers=True)
+        mirna_detail_dict = test_record.mirna_details(detail='all', allow_mirna_dimers=True)
         assert mirna_detail_dict['mirna_ref'] == test_params['mirna_ref']
         assert mirna_detail_dict['target_ref'] == test_params['target_ref']
         assert mirna_detail_dict['mirna_seg_type'] == test_params['mirna_seg_type']
@@ -376,7 +376,7 @@ def test_hybrecord_type_mirna(test_name, test_params):
         assert mirna_detail_dict['mirna_seq'] == test_params['mirna_seq']
         assert mirna_detail_dict['target_seq'] == test_params['target_seq']
         with pytest.raises((ValueError, RuntimeError)):
-            test_record.mirna_detail(detail='bad_detail')
+            test_record.mirna_details(detail='bad_detail')
 
         mirna_fasta = test_record.to_fasta_record('miRNA', annotate=False,
                                                   allow_mirna_dimers=True)
@@ -403,7 +403,7 @@ def test_hybrecord_type_mirna(test_name, test_params):
     if test_params['has_mirna'] and not test_params['has_one_mirna']:
         # Check miRNA Detail Props
         with pytest.raises((ValueError, RuntimeError)):
-            test_record.mirna_detail(detail='all', allow_mirna_dimers=False)
+            test_record.mirna_details(detail='all', allow_mirna_dimers=False)
         with pytest.raises((ValueError, RuntimeError)):
             test_record.to_fasta_record('miRNA', allow_mirna_dimers=False)
         with pytest.raises((ValueError, RuntimeError)):

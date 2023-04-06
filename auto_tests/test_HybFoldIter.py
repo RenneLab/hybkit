@@ -183,7 +183,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
             fold_record = hyb_record.fold_record
             hyb_record.eval_types()
             hyb_record.eval_mirna()
-            mirna_detail_dict = hyb_record.mirna_detail(detail='all')
+            mirna_detail_dict = hyb_record.mirna_details(detail='all')
             assert mirna_detail_dict['mirna_seq'] == test_props['seg1_seq']
             assert mirna_detail_dict['target_seq'] == test_props['seg2_seq']
             assert mirna_detail_dict['mirna_fold'] == test_props['seg1_fold']

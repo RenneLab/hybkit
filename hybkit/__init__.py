@@ -715,7 +715,7 @@ class HybRecord(object):
                 mirna_flag = 'N'
             self.set_flag('miRNA_seg', mirna_flag)
 
-    def mirna_detail(self, detail='all', allow_mirna_dimers=False):
+    def mirna_details(self, detail='all', allow_mirna_dimers=False):
         """
         Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
@@ -796,6 +796,15 @@ class HybRecord(object):
             return mirna_details
         else:
             return mirna_details[detail]
+
+    # HybRecord : Public Methods : Record Properties
+    def mirna_detail(self, *args, **kwargs):
+        """
+        Deprecated, alias for :meth:`mirna_details`.
+
+        .. deprecated:: 0.1.0
+        """
+        return self.mirna_details(*args, **kwargs)
 
     # HybRecord : Public Methods : Record Properties
     def is_set(self, prop):
@@ -928,13 +937,13 @@ class HybRecord(object):
                 check_info = (self.get_seg1_type(), self.get_seg2_type())
                 multi_check = check_attr.split('_')[0]
             elif check_attr == 'mirna':
-                check_info = self.mirna_detail('mirna_ref', allow_mirna_dimers=True)
+                check_info = self.mirna_details('mirna_ref', allow_mirna_dimers=True)
             elif check_attr == 'target':
-                check_info = self.mirna_detail('target_ref', allow_mirna_dimers=True)
+                check_info = self.mirna_details('target_ref', allow_mirna_dimers=True)
             elif check_attr == 'mirna_seg_type':
-                check_info = self.mirna_detail('mirna_seg_type', allow_mirna_dimers=True)
+                check_info = self.mirna_details('mirna_seg_type', allow_mirna_dimers=True)
             elif check_attr == 'target_seg_type':
-                check_info = self.mirna_detail('target_seg_type', allow_mirna_dimers=True)
+                check_info = self.mirna_details('target_seg_type', allow_mirna_dimers=True)
             # else:
             #    raise RuntimeError('Unknown Field: ' + check_attr)
 
@@ -1687,7 +1696,6 @@ class HybFile(object):
             identifier in "<gene_id>_<transcript_id>_<gene_name>_<seg_type>" format.
             Defaults to value in :attr:`settings['hybformat_ref'] <HybFile.settings>`.
 
-
     Attributes:
         hybformat_id (bool): Whether to read count information from identifier during line parsing
         hybformat_ref (bool): Whether to read type information from reference name
@@ -1700,7 +1708,13 @@ class HybFile(object):
 
     # Start HybFile Public Methods
     # HybFile : Public Methods : Initialization / Closing
-    def __init__(self, *args, hybformat_id=None, hybformat_ref=None, **kwargs):
+    def __init__(self,
+                 *args,
+                 hybformat_id=None,
+                 hybformat_ref=None,
+                 seq_type=None,
+                 **kwargs
+                 ):
         """Describe __init__ method description in class docstring."""
         self.fh = open(*args, **kwargs)
         if hybformat_id is None:
@@ -1731,8 +1745,6 @@ class HybFile(object):
     def __next__(self):
         """Return next line as HybRecord object."""
         next_line = self.fh.__next__()
-        # while not next_line.strip():
-        #     next_line = self.fh.__next__()
         return HybRecord.from_line(
             next_line,
             hybformat_id=self.hybformat_id,
@@ -2083,7 +2095,8 @@ class FoldRecord(object):
         """
         if not self.matches_hyb_record(hyb_record):
             if self.seq_type == 'static':
-                message = 'Disallowed mismatch between HybRecord sequence and FoldRecord sequence.\n'
+                message = 'Disallowed mismatch between HybRecord sequence '
+                message += 'and FoldRecord sequence.\n'
                 message += 'Hyb : %s\n' % str(hyb_record.seq)
                 message += 'Fold: %s\n' % str(self.seq)
             elif self.seq_type == 'dynamic':
@@ -2102,14 +2115,14 @@ class FoldRecord(object):
                 if dataset is not None:
                     message += 'Dataset: %s\n' % dataset
                 message += 'FoldRecord Seq:        %s\t(%i)\n' % (self.seq, len(self.seq))
-                message += 'HybRecord Seq:         %s\t(%i)\n' % (hyb_record.seq, len(hyb_record.seq))
+                message += 'HybRecord Seq:         %s\t(%i)\n' % (hyb_record.seq,
+                                                                  len(hyb_record.seq))
                 message += 'HybRecord Dynamic Seq: %s\t(%i)\n' % (dynamic_seq, len(dynamic_seq))
                 message += '                       %s\t' % (match_str)
                 message += '(%i of %i)\n' % (mismatch_count,
-                                            self.settings['allowed_mismatches'])
+                                             self.settings['allowed_mismatches'])
                 message += 'dynamic FoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq))
             _print_and_error(message)
-
 
     # Start FoldRecord Magic Methods
     # FoldRecord : Public MagicMethods : Comparison

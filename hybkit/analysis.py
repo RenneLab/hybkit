@@ -15,1263 +15,859 @@ import numpy as np
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-# --- Base Analysis --- #
-class BaseAnalysis(object):
-    """Base class for specific analysis class types."""
+
+ANALYSIS_TYPES = ['energy', 'type', 'mirna', 'fold']
+
+
+# --- Hybkit Analysis --- #
+class Analysis(object):
+    """
+    Class for analysis of hybkit HybRecord and FoldRecord objects.
+
+    .. _Analyses:
+
+    This class contains multiple conceptual analyses for HybRecord/FoldRecord Data::
+
+        | Energy: Analysis of values of predicted intra-hybrid folding energy
+        | Type: Analysis of segment types
+        | miRNA: Analysis of miRNA segments distributions
+        | Fold: Analysis of folding data included in the analyzed hyb_records.
+
+    This class is utilized by selecting the analysis types to be performed on object
+    initialization. Analyses are performed either by using the :meth:`add_record` method
+    or by using the :meth:`add_all_records` method. The results of the analysis are
+    then available through the :meth:`get_all_results`, :meth:`get_analysis_results`, and
+    :meth:`get_specific_result` methods.
+    method, which can return the results
+    of all analyses or of one single analysis.
+
+    Details for each respective analysis are provided here:
+
+    .. _EnergyAnalysis:
+
+    Energy Analysis:
+
+        This analysis evaluates the energy of each :class:`~hybkit.HybRecord` object
+        and provides a binned-histogram of all energy values represented.
+
+        Output Results:
+            | energy_analysis_count (int): Count of energy values evaluated
+            | has_energy_val (int): Count of hyb_records with an energy value
+            | no_energy_val (int): Count of hyb_records without an energy value
+            | energy_min (float): Minimum energy value
+            | energy_max (float): Maximum energy value
+            | energy_mean (float): Mean energy value
+            | energy_std (float): Standard deviation of energy values
+            | binned_energy_vals (obj:`~collections.Counter`): Counter with integer keys of
+              energy values from ``energy_min`` to ``energy_max`` storing the count of any
+              hyb_records with energy values that fall within that range
+              (rounded to the next highest integer (e.g. -12.5 -> -12).
+
+
+    .. _TypeAnalysis:
+
+    Type Analysis:
+
+        Requirements:
+
+            | :ref:`seg1_type <seg1_type>` and
+              :ref:`seg2_type <seg2_type>` flags must be set for each HybRecord,
+              (can be done by :func:`hybkit.HybRecord.eval_types`).
+
+        Output Results:
+            | types_analysis_count (int): Count of hybrid types analyzed
+            | hybrid_types (:obj:`~collections.Counter`): Counter containing annotated
+              types of seg1 and seg (in original order)
+            | reordered_hybrid_types (~collections.Counter): Counter containing annotated
+              types of seg1 and seg2. This is provided in "sorted" order, where
+              types are sorted alphabetically.
+            | mirna_hybrid_types (~collections.Counter): Counter containing annotated
+              types of seg1 and seg2. This is provided in "miRNA-prime" order, where a
+              miRNA type is always listed before an other types, and then remaining
+              types are sorted alphabetically.
+            | seg1_types (:obj:`~collections.Counter`): Counter containing annotated type of
+              segment in position seg1
+            | seg2_types (:obj:`~collections.Counter`): Counter containing annotated type of
+              segment in position seg2
+            | all_seg_types (obj:`~collections.Counter`): Counter containing position-independent
+              annotated types
+
+    .. _MirnaAnalysis:
+
+    miRNA Analysis:
+
+        Requirements:
+            | :ref:`mirna_seg <mirna_seg>` flag
+              must be set for each HybRecord
+              (can be done by :func:`hybkit.HybRecord.eval_mirna`).
+
+        Output Results:
+            | mirna_analysis_count (int): Count of miRNA hybrids analyzed
+            | mirnas_5p (int): Count of |5p| miRNAs detected
+            | mirnas_3p (int): Count of |3p| miRNAs detected
+            | mirna_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
+            | non_mirna (int): Count of non-miRNA hybrids detected
+            | has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
+
+
+    .. _FoldAnalysis:
+
+    Fold Analysis:
+
+        This analysis evaluates the predicted binding of miRNA within hyb records
+        that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object
+        as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and
+        plotting of the predicted binding by position among the provided miRNA.
+
+        Requirements:
+            | :ref:`mirna_seg <mirna_seg>` flag
+              must be set for each HybRecord
+              (can be done by :func:`hybkit.HybRecord.eval_mirna`).
+            | :attr:`~hybkit.HybRecord.fold_record` attribute must be set for each HybRecord
+                with the corresponding :class:`~hybkit.FoldRecord` object. This can be done
+                using the :meth:`HybRecord.set_fold_record()` method.
+
+        Output Results:
+            | fold_analysis_count (int): Count of miRNA fold predictions analyzed
+            | folds_recorded (int): Count of fold predictions with a mirna fold
+            | mirna_nt_fold_counts (obj:`~collections.Counter`) : Counter with keys of
+              miRNA position index and values of number of miRNAs with a predicted
+              bound state at that index.
+            | mirna_nt_fold_props (obj:`~collections.Counter`) : Counter with keys of
+              miRNA position index and values of proportion (0.0 - 1.0) of miRNAs
+              with a predicted bound state at that index.
+            | fold_match_counts (obj:`~collections.Counter`) : Counter with keys of
+              count of predicted matches between miRNA and target with
+              values of count of miRNAs with that number of predicted matches.
+    """
 
     #: Class-level settings. See :attr:`hybkit.settings.Analysis_settings` for descriptions.
     settings = hybkit.settings.Analysis_settings
 
-    # BaseAnalysis : Public Methods
-    def __init__(self, *args, **kwargs):
-        """Stub method to be replaced by subclasses."""
-        message = 'BaseAnalysis is a base class and is not meant to be used directly.'
-        print(message)
-        raise NotImplementedError(message)
+    # Class private variables:
+    _result_keys = {
+        'energy': [
+            'energy_analysis_count', 'has_energy_val', 'no_energy_val',
+            'energy_min', 'energy_max', 'energy_mean', 'energy_std',
+            'binned_energy_vals',
+        ],
+        'type': [
+            'types_analysis_count', 'hybrid_types', 'reordered_hybrid_types',
+            'mirna_hybrid_types', 'seg1_types', 'seg2_types', 'all_seg_types',
+        ],
+        'mirna': [
+            'mirna_analysis_count', 'mirnas_5p', 'mirnas_3p', 'mirna_dimers',
+            'non_mirna', 'has_mirna',
+        ],
+        'fold': [
+            'fold_analysis_count', 'mirna_nt_fold_counts', 'mirna_nt_fold_props',
+            'fold_match_counts',
+        ],
+    }
+    _all_result_keys_list = []
+    for key in _result_keys:
+        _all_result_keys_list += _result_keys[key]
+    _all_result_keys_set = set(_all_result_keys_list)
 
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _ensure_same_class(self, cmp_obj):
-        if not type(self) == type(cmp_obj):
-            message = 'Objects are of different classes and cannot be compared.\n'
-            message += '    %s (%s)\n' % (str(self), type(self))
-            message += '    %s (%s)\n' % (str(cmp_obj), type(cmp_obj))
+    # ----- Begin Analysis Class -----
+    # Start Analysis Public Methods
+    # Analysis : Public Methods
+    def __init__(self,
+                 analysis_types=None,
+                 name=None,
+                 ):
+        """Describe in class docstring."""
+        if analysis_types is None:
+            message += 'No analysis types provided. Analysis types must be provided'
+            message += ' as a list of strings.\nOptions: %s' % ', '.join(ANALYSIS_TYPES)
             print(message)
             raise RuntimeError(message)
-
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _format_all_seg_types(self, out_delim):
-        """Return the results of all_seg_types in a list of delimited lines."""
-        sorted_pairs = self.all_seg_types.most_common()
-        ret_lines = [''.join(['seg_type', out_delim, 'count'])]
-        ret_lines += ['%s%s%i' % (key, out_delim, count) for (key, count) in sorted_pairs]
-        return ret_lines
-
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _format_hybrid_type_counts(self, out_delim):
-        """Return the results of hybrid_type_counts in a list of delimited lines."""
-        ret_lines = ['hybrid_type' + out_delim + 'count']
-        sorted_pairs = self.hybrid_types.most_common()
-        ret_lines += ['%s%s%i' % (key, out_delim, count) for (key, count) in sorted_pairs]
-        return ret_lines
-
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _init_type_analysis(self):
-        self.hybrid_types = Counter()
-        self.seg1_types = Counter()
-        self.seg2_types = Counter()
-        self.all_seg_types = Counter()
-
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _add_type_analysis(self, hyb_record):
-        hyb_record._ensure_set('eval_types')
-        count = hyb_record.get_count(self.settings['count_mode'])
-        seg1_type, seg2_type = hyb_record.get_seg_types()
-
-        if self.settings['mirna_sort'] and hyb_record.is_set('eval_mirna'):
-            if hyb_record.has_prop('5p_mirna'):
-                join_types = seg1_type, seg2_type
-            elif hyb_record.has_prop('3p_mirna'):
-                join_types = seg2_type, seg1_type
-            else:
-                join_types = sorted((seg1_type, seg2_type))
-        else:
-            join_types = sorted((seg1_type, seg2_type))
-        hybrid_type = self.settings['type_sep'].join(join_types)
-
-        self.hybrid_types[hybrid_type] += count
-        self.seg1_types[seg1_type] += count
-        self.seg2_types[seg2_type] += count
-
-        for seg_type in seg1_type, seg2_type:
-            self.all_seg_types[seg_type] += count
-
-    # BaseAnalysis : Private Methods : TypeAnalysis
-    def _update_type_analysis(self, add_analysis):
-        self.hybrid_types.update(add_analysis.hybrid_types)
-        self.seg1_types.update(add_analysis.seg2_types)
-        self.seg2_types.update(add_analysis.seg1_types)
-        self.all_seg_types.update(add_analysis.all_seg_types)
-
-    # BaseAnalysis : Private Methods : MirnaAnalysis
-    def _init_mirna_analysis(self):
-        self.mirnas_5p = 0
-        self.mirnas_3p = 0
-        self.mirna_dimers = 0
-        self.non_mirnas = 0
-        self.has_mirna = 0
-        self._mirna_counts = ['mirnas_5p', 'mirnas_3p', 'mirna_dimers', 'non_mirnas', 'has_mirna']
-
-    # BaseAnalysis : Private Methods : MirnaAnalysis
-    def _add_mirna_analysis(self, hyb_record):
-        hyb_record._ensure_set('eval_mirna')
-        count = hyb_record.get_count(self.settings['count_mode'])
-
-        if hyb_record.has_prop('mirna_dimer'):
-            self.mirna_dimers += count
-            self.has_mirna += count
-        elif hyb_record.has_prop('5p_mirna'):
-            self.mirnas_5p += count
-            self.has_mirna += count
-        elif hyb_record.has_prop('3p_mirna'):
-            self.mirnas_3p += count
-            self.has_mirna += count
-        elif hyb_record.has_prop('no_mirna'):
-            self.non_mirnas += count
-        else:
-            raise RuntimeError()
-
-    # BaseAnalysis : Private Methods : MirnaAnalysis
-    def _update_mirna_analysis(self, add_analysis):
-        self.mirnas_5p += add_analysis.mirnas_5p
-        self.mirnas_3p += add_analysis.mirnas_3p
-        self.mirna_dimers += add_analysis.mirna_dimers
-        self.non_mirnas += add_analysis.non_mirnas
-        self.has_mirna += add_analysis.has_mirna
-
-    # BaseAnalysis : Private Methods : MirnaAnalysis
-    def _format_mirna_counts(self, out_delim):
-        ret_lines = ['miRNA_type' + out_delim + 'count']
-        for key in self._mirna_counts:
-            ret_lines.append('%s%s%i' % (key, out_delim, getattr(self, key)))
-        return ret_lines
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _init_target_analysis(self):
-        self.mirna_target_info = {}
-        self.mirna_target_count = 0
-        self.mirna_target_total_counts = None
-        self.mirna_target_type_counts = None
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _add_target_analysis(self, hyb_record, count_mode, allow_mirna_dimers):
-        hyb_record._ensure_set('eval_mirna')
-        count = hyb_record.get_count(count_mode)
-
-        mirna_name = None
-
-        if hyb_record.has_prop('has_mirna'):
-            if hyb_record.has_prop('mirna_dimer'):
-                if allow_mirna_dimers:
-                    mirna_name = hyb_record.seg1_props['ref_name']
-                    mirna_type = hyb_record.get_seg1_type()
-                    target_name = hyb_record.seg2_props['ref_name']
-                    target_type = hyb_record.get_seg2_type()
-            else:
-                mirna_details = hyb_record.mirna_detail()
-                mirna_name = mirna_details['mirna_ref']
-                mirna_type = mirna_details['mirna_seg_type']
-                target_name = mirna_details['target_ref']
-                target_type = mirna_details['target_seg_type']
-
-        if mirna_name is not None:
-            mirna_id = (mirna_name, mirna_type)
-            target_id = (target_name, target_type)
-            if mirna_id not in self.mirna_target_info:
-                self.mirna_target_info[mirna_id] = Counter()
-            self.mirna_target_info[mirna_id][target_id] += count
-            self.mirna_target_count += count
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _update_target_analysis(self, add_analysis):
-        for mirna_id in add_analysis.mirna_target_info:
-            if mirna_id not in self.mirna_target_info:
-                self.mirna_target_info[mirna_id] = add_analysis.mirna_target_info[mirna_id]
-            else:
-                self.mirna_target_info[mirna_id].update(add_analysis.mirna_target_info[mirna_id])
-        self.mirna_target_count += add_analysis.mirna_target_count
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _process_target_analysis_info(self):
-        self.mirna_target_total_counts = Counter()
-        self.mirna_target_type_counts = {}
-        # Iterate over each miRNA
-        for mirna_id in sorted(self.mirna_target_info.keys()):
-            mirna_name, mirna_type = mirna_id
-            # Sum target counts for each mirna
-            total_count = sum(self.mirna_target_info[mirna_id].values())
-            self.mirna_target_total_counts[mirna_name] = total_count
-            # Count target types for each mirna
-            mirna_i_target_type_counts = Counter()
-            for target_id in self.mirna_target_info[mirna_id].keys():
-                target_name, target_type = target_id
-                target_count = self.mirna_target_info[mirna_id][target_id]
-                mirna_i_target_type_counts[target_type] += target_count
-            self.mirna_target_type_counts[mirna_name] = mirna_i_target_type_counts
-            # Sort mirna targets by most common
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _format_target_analysis(self, out_delim, only_mirna_id=None):
-        ret_lines = [out_delim.join(['mirna', 'mirna_type', 'target', 'target_type', 'count'])]
-        if only_mirna_id is not None:
-            use_mirna_ids = [only_mirna_id]
-        else:
-            use_mirna_ids = self.mirna_target_info.keys()
-
-        for mirna_id in use_mirna_ids:
-            mirna_name, mirna_seg_type = mirna_id
-            for target_id, count in self.mirna_target_info[mirna_id].most_common():
-                target_name, target_seg_type = target_id
-                count_str = str(count)
-                line_items = [mirna_name, mirna_seg_type, target_name, target_seg_type, count_str]
-                ret_lines.append(out_delim.join(line_items))
-            ret_lines.append('')
-        return ret_lines
-
-    # BaseAnalysis : Private Methods : TargetAnalysis
-    def _format_target_analysis_totals(self, out_delim):
-        ret_lines = [out_delim.join(['mirna', 'target_count'])]
-        for mirna_id in self.mirna_target_info:
-            mirna_name, mirna_seg_type = mirna_id
-            mirna_total_count = str(self.mirna_target_total_counts[mirna_name])
-            ret_lines.append(out_delim.join([mirna_name, mirna_total_count]))
-        return ret_lines
-
-    # BaseAnalysis : Private Methods : PatternAnalysis
-    def _init_pattern_analysis(self):
-        self.mirna_folds = 0
-        self.mirna_fold_count = {i: 0 for i in range(1, 25)}
-        self.mirna_fold_frac = {i: 0.0 for i in range(1, 25)}
-
-    # BaseAnalysis : Private Methods : PatternAnalysis
-    def _add_pattern_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
-        hyb_record._ensure_set('eval_mirna')
-        hyb_record._ensure_set('fold_record')
-        count = hyb_record.get_count(count_mode)
-
-        mirna_fold = None
-
-        if hyb_record.has_prop('has_mirna'):
-            if hyb_record.has_prop('mirna_dimer'):
-                if allow_mirna_dimers:
-                    mirna_fold = hyb_record.fold_record._get_seg_fold(hyb_record.seg1_props,
-                                                                      hyb_record)
-            else:
-                mirna_fold = hyb_record.mirna_detail('mirna_fold')
-
-            if (('(' in mirna_fold and ')' in mirna_fold)
-                    or ('(' not in mirna_fold and ')' not in mirna_fold)
-                    or len(mirna_fold) < 5):
-                message = 'WARNING: addto_mirna_fold: Record: %s, ' % str(hyb_record)
-                message += 'Bad Fold: %s' % mirna_fold
+        self.analysis_types = []
+        for analysis_type in analysis_types:
+            if not isinstance(analysis_type, str):
+                message = (
+                    'Analysis type "%s" must be of type string.\n Provided Type:'
+                    '' % (analysis_type, type(analysis_type))
+                )
                 print(message)
-                return
+                raise RuntimeError(message)
+            if analysis_type.lower() not in ANALYSIS_TYPES:
+                message = (
+                    'Analysis type "%s" not recognized.'
+                    '\nChoices: %s' % (analysis_type, ', '.join(ANALYSIS_TYPES))
+                )
+                print(message)
+                raise RuntimeError(message)
+            else:
+                self.analysis_types.append(analysis_type.lower())
+        self.name = self._sanitize_name(name)
 
-        if mirna_fold is not None:
-            self.mirna_folds += count
-            for i in range(len(mirna_fold)):
-                if mirna_fold[i] in {'(', ')'}:
-                    self.mirna_fold_count[(i + 1)] += count
-            for i in self.mirna_fold_count:
-                self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
+        for analysis_type in analysis_types:
+            getattr(self, '_init_' + analysis_type)()
 
-    # BaseAnalysis : Private Methods : PatternAnalysis
-    def _update_pattern_analysis(self, add_analysis):
-        self.mirna_folds += add_analysis.mirna_folds
-        for i in add_analysis.mirna_fold_count.keys():
-            if i not in self.mirna_fold_count:
-                self.mirna_fold_count[i] = 0
-            self.mirna_fold_count[i] += add_analysis.mirna_fold_count[i]
-        for i in self.mirna_fold_count.keys():
-            self.mirna_fold_frac[i] = (self.mirna_fold_count[i] / self.mirna_folds)
+    # Analysis : Public Methods : Add HybRecord
+    def add_hyb_record(self, hyb_record):
+        """
+        Add a HybRecord object to the analysis.
 
-    # BaseAnalysis : Private Methods : PatternAnalysis
-    def _format_pattern_analysis(self, out_delim):
-        ret_lines = [out_delim.join(['data', 'count'])]
-        ret_lines.append(out_delim.join(['mirna_folds', str(self.mirna_folds)]))
-        ret_lines.append('')
+        Args:
+            hyb_record (:class:`~hybkit.HybRecord`): HybRecord object to be added to the
+                analysis.
+        """
+        for analysis_type in self.analysis_types:
+            getattr(self, '_add_' + analysis_type)(hyb_record)
 
-        line_values = ['index']
-        max_i = 24
-        while self.mirna_fold_count[max_i] == 0:
-            max_i -= 1
-        line_values += [str(i) for i in range(1, (max_i + 1))]
-        ret_lines.append(out_delim.join(line_values))
+    # Analysis : Public Methods : Add HybRecords
+    def add_hyb_records(self, hyb_record_iter, eval_types=False, eval_mirna=False):
+        """
+        Add a list of HybRecord objects to the analysis.
 
-        line_values = ['i_count']
-        line_values += [str(self.mirna_fold_count[i]) for i in range(1, (max_i + 1))]
-        ret_lines.append(out_delim.join(line_values))
+        Args:
+            hyb_records (:class:HybFile: or :obj:`list` of :class:`~hybkit.HybRecord`): HybFile
+                to iterate over, or iterable
+                of HybRecord objects to be added to the analysis.
+            eval_types (bool): If True, evaluate the hybrid type of the HybRecord before adding
+                it to the analysis using :meth:`hybkit.HybRecord.eval_types`.
+            eval_mirna (bool): If True, evaluate the miRNA segment of the HybRecord before
+                adding it to the analysis using :meth:`hybkit.HybRecord.eval_mirna`.
 
-        line_values = ['i_fraction']
-        line_values += ["%f.3" % self.mirna_fold_frac[i] for i in range(1, (max_i + 1))]
-        ret_lines.append(out_delim.join(line_values))
+        """
+        for hyb_record in hyb_record_iter:
+            if eval_types:
+                hyb_record.eval_types()
+            if eval_mirna:
+                hyb_record.eval_mirna()
+            self.add_hyb_record(hyb_record)
 
-        return ret_lines
+    # Start Results Methods
+    # Analysis : Public Methods : Results : get_all_results
+    def get_all_results(self):
+        """
+        Return a dictionary with all results for all active analyses.
 
-    # -- Fold Analysis Methods --
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _init_fold_analysis(self):
-        self.energies = Counter()
-        self.match_counts = Counter()
-        self.energy_bins = None
-        self.energy_bin_densities = None
-        for i in range(26):
-            self.match_counts[i] = 0
-        self._energy_bin_strf = '%.1f'
-        energy_bin_size = int(round(((float(self.settings['energy_bin_size']) + 0.0001) * 10), 0))
-        energy_strs_num = int((-10 * float(self.settings['energy_min_bin'])) + 0.0001)
-       
-        # Initialize bins sorted by least -> most magnitude
-        self._energy_bins = [(-1 * i/10) for i 
-                             in range(0, ((energy_strs_num) + 1), energy_bin_size)] 
-        self._energy_bin_strs = [(self._energy_bin_strf % f) for f in self._energy_bins]
-        # Reverse bins into lowest -> highest order
-        self._energy_bins.reverse()
+        Returns:
+            dict: Dictionary with keys of analysis type and values of
+                dictionaries with results for that analysis type.
+        """
+        results = {}
+        for analysis_type in self.analysis_types:
+            results[analysis_type] = getattr(self, '_get_' + analysis_type + '_results')()
+        return results
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _add_fold_analysis(self, hyb_record, count_mode, allow_mirna_dimers=False):
+    # Analysis : Public Methods : Results : get_analysis_result
+    def get_analysis_results(self, analysis):
+        """
+        Return a dictionary with all results for a specific analysis.
+
+        Args:
+            analysis (str): Analysis type to return results for.
+
+        Returns:
+            dict: Dictionary with results for the specified analysis type.
+                see :ref:_Analyses for details.
+        """
+        self._ensure_analyses_active(analysis)
+        return getattr(self, '_get_' + analysis + '_results')()
+
+    # Analysis : Public Methods : Results : get_specific_result
+    def get_specific_result(self, result_key):
+        """
+        Get a specific result from the analysis.
+
+        Args:
+            result_key (str): Result key to return from one of the enabled analyses.
+
+        Returns:
+            Result value for the specified result key.
+        """
+        if result_key not in self._all_result_keys_set:
+            message = (
+                'Result key "%s" not recognized.'
+                '\nChoices: %s' % (result_key, ', '.join(self._all_result_keys_list))
+            )
+            print(message)
+            raise RuntimeError(message)
+        for analysis_type in self.analysis_types:
+            if result_key in self._result_keys[analysis_type]:
+                if analysis_type not in self.analysis_types:
+                    message = (
+                        'Result "%s" cannot be gotten because analysis type "%s" is not'
+                        'active.' % (result_key, analysis_type)
+                    )
+                    print(message)
+                    raise RuntimeError(message)
+                return getattr(self, '_get_' + analysis_type + '_results')()[result_key]
+
+    # Analysis : Public Methods : Results : get_analysis_delim_str
+    def get_analysis_delim_str(self, analysis=None, out_delim=None):
+        """
+        Return a delimited string containing the results of the analysis.
+
+        Args:
+            analysis (:obj:`str` or :obj:`list` of str): Analysis type to return results for.
+                If not provided, return the results for all active analyses.
+            out_delim (str): Delimiter to use for output. If not provided, defaults to
+                the value in :attr:`settings['out_delim'] <settings>`.
+        """
+        if analysis is None:
+            use_analyses = self.analysis_types
+        elif isinstance(analysis, str):
+            use_analyses = [analysis]
+        elif isinstance(analysis, (list, tuple)):
+            use_analyses = analysis
+        self._ensure_analyses_active(use_analyses)
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        ret_str = ''
+        if self.name is not None:
+            ret_str += out_delim.join(['analysis_name', self.name]) + '\n'
+        for analysis_type in use_analyses:
+            ret_str += self._get_analysis_results_delim_str(
+                analysis_type, out_delim=out_delim
+            )
+        return ret_str
+
+    # Start Write Methods
+    # Analysis : Public Methods : Write Results : All Analyses
+    def write_analysis_delim_str(self, out_file_name=None, analysis=None, out_delim=None):
+        """
+        Write the results of the analysis to a delimited text file.
+
+        Args:
+            out_file_name (str): Path to output file. If not provided, defaults to:
+                ./<analysis_name>_<analysis>.csv if analysis/analyses provided, or
+                ./<analysis_name>_multi_analysis.csv if no analysis/analyses provided.
+            analysis (:obj:`str` or :obj:`list` of str): Analysis type to return results for.
+                If not provided, return the results for all active analyses.
+            out_delim (str): Delimiter to use for output. If not provided, defaults to
+                the value in :attr:`settings['out_delim'] <settings>`.
+        """
+        if analysis is None:
+            use_analyses = self.analysis_types
+            out_suffix = 'multi_analysis'
+        elif isinstance(analysis, str):
+            use_analyses = [analysis]
+            out_suffix = 'analysis'
+        elif isinstance(analysis, (list, tuple)):
+            use_analyses = analysis
+            out_suffix = '-'.join(use_analyses)
+        self._ensure_analyses_active(use_analyses)
+
+        if out_file_name is None:
+            if self.name is not None:
+                out_file_name = self.name + '_' + out_suffix + '.csv'
+            else:
+                out_file_name = 'analysis_' + out_suffix + '.csv'
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        out_delim_str = self.get_analysis_delim_str(analysis, out_delim=out_delim)
+
+        with open(out_file_name, 'w') as out_file:
+            out_file.write(out_delim_str)
+
+    # Analysis : Public Methods : Write Results : write_analysis_results_special
+    def write_analysis_results_special(self, out_file_basename=None,
+                                       analysis=None, out_delim=None):
+        """
+        Write the results of the analyses to specilized text files.
+
+        Args:
+            out_file_basename (str): Path for basename of output file. Files will be renamed
+                using the provided path as the base name. If not provided, defaults to:
+                ./<analysis_name>_<analysis> if :attr:`name` is set, or
+                ./Analysis_multi_<analysis>  if name not set.
+            analysis (:obj:`str` or :obj:`list` of str): Analysis type to write results files
+                for.
+                If not provided, write results files for all active analyses.
+            out_delim (str): Delimiter to use for output where applicable.
+                If not provided, defaults to
+                the value in :attr:`settings['out_delim'] <settings>`.
+        """
+        if analysis is None:
+            use_analyses = self.analysis_types
+        elif isinstance(analysis, str):
+            use_analyses = [analysis]
+        elif isinstance(analysis, (list, tuple)):
+            use_analyses = analysis
+        self._ensure_analyses_active(use_analyses)
+
+        if out_file_basename is None:
+            if self.name is not None:
+                out_file_basename = self.name
+            else:
+                out_file_basename = analysis
+
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        all_out_files = []
+        for analysis in use_analyses:
+            if hasattr(self, '_write_' + analysis + '_special'):
+                out_files = getattr(self, '_write_' + analysis + '_special')(
+                    basename=out_file_basename,
+                    out_delim=out_delim
+                )
+                all_out_files += out_files
+        return all_out_files
+
+    # Analysis : Public Methods : Plot Results : plot_analysis_results
+    def plot_analysis_results(self, analysis=None, out_basename=None):
+        """
+        Plot the results of the analyses.
+
+        Args:
+            analysis (:obj:`str` or :obj:`list` of str): Analysis type to plot results for.
+                If not provided, plot results for all active analyses.
+            out_basename (str): Path to output file. If not provided, defaults to:
+                ./<analysis_name> if :attr:`name` provided or
+                ./analysis if no name provided.
+        """
+        if analysis is None:
+            use_analyses = self.analysis_types
+        elif isinstance(analysis, str):
+            use_analyses = [analysis]
+        elif isinstance(analysis, (list, tuple)):
+            use_analyses = analysis
+        self._ensure_analyses_active(use_analyses)
+
+        if out_basename is None:
+            if self.name is not None:
+                out_basename = self.name
+            else:
+                out_basename = 'analysis'
+
+        all_out_files = []
+        for analysis in use_analyses:
+            if hasattr(self, '_plot_' + analysis):
+                out_files = getattr(self, '_plot_' + analysis)(
+                    basename=out_basename
+                )
+                all_out_files += out_files
+        return all_out_files
+
+    # Start Init Methods
+    # Analysis : Private Methods : Init Methods : Energy Analysis
+    def _init_energy(self):
+        self._energy_analysis_count = 0
+        self._has_energy_val = 0
+        self._no_energy_val = 0
+        self._energy_vals = np.array([], dtype=float)
+        self._binned_energy_vals = Counter()
+        for i in range(0, -31, -1):
+            self._binned_energy_vals[i] = 0
+
+    # Analysis : Private Methods : Init Methods : Type Analysis
+    def _init_type(self):
+        self._types_analysis_count = 0
+        self._hybrid_types = Counter()
+        self._reordered_hybrid_types = Counter()
+        self._mirna_hybrid_types = Counter()
+        self._seg1_types = Counter()
+        self._seg2_types = Counter()
+        self._all_seg_types = Counter()
+
+    # Analysis : Private Methods : Init Methods : miRNA Analysis
+    def _init_mirna(self):
+        self._mirna_analysis_count = 0
+        self._mirnas_5p = 0
+        self._mirnas_3p = 0
+        self._mirna_dimers = 0
+        self._non_mirna = 0
+        self._has_mirna = 0
+
+    # Analysis : Private Methods : Init Methods : Fold Analysis
+    def _init_fold(self):
+        self._fold_analysis_count = 0
+        self._folds_recorded = 0
+        self._mirna_nt_fold_counts = Counter()
+        self._fold_match_counts = Counter()
+
+    # Start Add Methods
+    # Analysis : Private Methods : Add Methods : Energy Analysis
+    def _add_energy(self, hyb_record):
+        self._energy_analysis_count += 1
+        if hyb_record.energy is not None:
+            self._has_energy_val += 1
+            self._energy_vals = np.append(self._energy_vals, float(hyb_record.energy))
+            if hyb_record.energy is not None:
+                energy_bin = int(np.ceil(float(hyb_record.energy)))
+            self._binned_energy_vals[energy_bin] += 1
+        else:
+            self._no_energy_val += 1
+
+    # Analysis : Private Methods : Add Methods : Type Analysis
+    def _add_type(self, hyb_record):
+        hyb_record._ensure_set('eval_types')
+        self._types_analysis_count += 1
+        seg1_type = hyb_record.get_seg1_type()
+        seg2_type = hyb_record.get_seg2_type()
+        hybrid_type = (seg1_type, seg2_type)
+        reordered_hybrid_type = tuple(sorted([seg1_type, seg2_type]))
+        if hyb_record.is_set('eval_mirna') and hyb_record.prop('has_mirna'):
+            if hyb_record.prop('5p_mirna'):
+                mirna_hybrid_type = (seg1_type, seg2_type)
+            else:
+                mirna_hybrid_type = (seg2_type, seg1_type)
+        else:
+            mirna_hybrid_type = reordered_hybrid_type
+        self._hybrid_types[hybrid_type] += 1
+        self._reordered_hybrid_types[reordered_hybrid_type] += 1
+        self._mirna_hybrid_types[mirna_hybrid_type] += 1
+        self._seg1_types[seg1_type] += 1
+        self._seg2_types[seg2_type] += 1
+        self._all_seg_types[seg1_type] += 1
+        self._all_seg_types[seg2_type] += 1
+
+    # Analysis : Private Methods : Add Methods : miRNA Analysis
+    def _add_mirna(self, hyb_record):
+        self._mirna_analysis_count += 1
+        hyb_record._ensure_set('eval_mirna')
+        if hyb_record.prop('has_mirna'):
+            self._has_mirna += 1
+            if hyb_record.prop('mirna_dimer'):
+                self._mirna_dimers += 1
+            elif hyb_record.prop('5p_mirna'):
+                self._mirnas_5p += 1
+            elif hyb_record.prop('3p_mirna'):
+                self._mirnas_3p += 1
+
+        else:
+            self._non_mirna += 1
+
+    # Analysis : Private Methods : Add Methods : Fold Analysis
+    def _add_fold(self, hyb_record):
+        self._fold_analysis_count += 1
         hyb_record._ensure_set('fold_record')
-        count = hyb_record.get_count(count_mode)
+        hyb_record._ensure_set('eval_mirna')
+        if hyb_record.prop('has_mirna'):
+            self._folds_recorded += 1
+            mirna_fold = hyb_record.mirna_details('mirna_fold')
+            match_count = 0
+            for pos_i, nt_i in enumerate(range(len(mirna_fold)), start=1):
+                if mirna_fold[nt_i] in {'(', ')'}:
+                    self._mirna_nt_fold_counts[pos_i] += 1
+                    match_count += 1
+        self._fold_match_counts[match_count] += 1
 
-        record_energy = hyb_record.fold_record.energy
-        if record_energy is None:
-            message = 'ERROR: add_fold_analysis: Record: %s, ' % str(hyb_record)
-            message += 'Bad Energy: %s' % record_energy
-            print(message)
-            raise RuntimeError(message)
+    # Start Get Results Methods
+    # Analysis : Private Methods : Get Methods : Energy Analysis
+    def _get_energy_results(self):
+        energy_results = {}
+        energy_results['energy_analysis_count'] = copy.deepcopy(self._energy_analysis_count)
+        energy_results['has_energy_val'] = copy.deepcopy(self._has_energy_val)
+        energy_results['no_energy_val'] = copy.deepcopy(self._no_energy_val)
+        energy_results['energy_min'] = self._energy_vals.min()
+        energy_results['energy_max'] = self._energy_vals.max()
+        energy_results['energy_mean'] = self._energy_vals.mean()
+        energy_results['energy_std'] = self._energy_vals.std()
+        energy_results['binned_energy_vals'] = copy.deepcopy(self._binned_energy_vals)
+        return energy_results
 
-        self.energies[record_energy] += count
+    # Analysis : Private Methods : Get Methods : Type Analysis
+    def _get_type_results(self):
+        type_results = {}
+        type_results['types_analysis_count'] = copy.deepcopy(self._types_analysis_count)
+        type_results['hybrid_types'] = copy.deepcopy(self._hybrid_types)
+        type_results['reordered_hybrid_types'] = copy.deepcopy(self._reordered_hybrid_types)
+        type_results['mirna_hybrid_types'] = copy.deepcopy(self._mirna_hybrid_types)
+        type_results['seg1_types'] = copy.deepcopy(self._seg1_types)
+        type_results['seg2_types'] = copy.deepcopy(self._seg2_types)
+        type_results['all_seg_types'] = copy.deepcopy(self._all_seg_types)
+        return type_results
 
-        record_fold = hyb_record.fold_record.fold
-        l_matches = record_fold.count('(')
-        r_matches = record_fold.count(')')
-        if l_matches != r_matches:
-            message = 'ERROR: add_fold_analysis: Record: %s, ' % str(hyb_record)
-            message += 'Malformed Fold, L/R Matches do not match: %s' % record_fold
-            print(message)
-            raise RuntimeError(message)
-        self.match_counts[l_matches] += count       
-        
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _update_fold_analysis(self, add_analysis):
-        self.energies += add_analysis.energies
-        self.match_counts += add_analysis.match_counts
-        self.energy_bins = None
-        self.energy_bin_densities = None
+    # Analysis : Private Methods : Get Methods : miRNA Analysis
+    def _get_mirna_results(self):
+        mirna_results = {}
+        mirna_results['mirna_analysis_count'] = copy.deepcopy(self._mirna_analysis_count)
+        mirna_results['has_mirna'] = copy.deepcopy(self._has_mirna)
+        mirna_results['non_mirna'] = copy.deepcopy(self._non_mirna)
+        mirna_results['mirnas_5p'] = copy.deepcopy(self._mirnas_5p)
+        mirna_results['mirnas_3p'] = copy.deepcopy(self._mirnas_3p)
+        mirna_results['mirna_dimers'] = copy.deepcopy(self._mirna_dimers)
+        return mirna_results
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _process_fold_analysis(self):
-        # Create binned energy analysis with counts
-        energies = [float(i) for i in self.energies.keys()]
-        weights = [i for i in self.energies.values()]
-        bin_vals, keys = np.histogram(energies, bins=self._energy_bins, weights=weights)
-        # Reverse Histogram to put in low -> high magnitude order
-        bin_vals = bin_vals[::-1]
-        keys = keys[::-1]
-        energy_bins = {}
-        for i in range(len(bin_vals)):
-            energy_bins[self._energy_bin_strf % keys[i]] = bin_vals[i]
-        energy_bins[keys[-1]] = 0
+    # Analysis : Private Methods : Get Methods : Fold Analysis
+    def _get_fold_results(self):
+        fold_results = {}
+        fold_results['fold_analysis_count'] = copy.deepcopy(self._fold_analysis_count)
+        fold_results['folds_recorded'] = copy.deepcopy(self._folds_recorded)
+        fold_results['fold_match_counts'] = copy.deepcopy(self._fold_match_counts)
+        fold_results['mirna_nt_fold_counts'] = copy.deepcopy(self._mirna_nt_fold_counts)
+        fold_results['mirna_nt_fold_props'] = {
+            k: (v / self._folds_recorded) for k, v in self._mirna_nt_fold_counts.items()
+        }
+        return fold_results
 
-        self.energy_bins = energy_bins
+    # Start Get Results String Methods
+    # Analysis : Private Methods : Result String Methods : All Analyses
+    def _get_analysis_results_delim_str(self, analysis, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
 
-        # Create binned energy analysis with density
-        bin_vals, keys = np.histogram(energies, bins=self._energy_bins, weights=weights, 
-                         density=True)
-        # Reverse Histogram to put in low -> high magnitude order
-        bin_vals = bin_vals[::-1]
-        keys = keys[::-1]
-        energy_bin_densities = {}
-        for i in range(len(bin_vals)):
-            energy_bin_densities[self._energy_bin_strf % keys[i]] = bin_vals[i]
-        energy_bin_densities[keys[-1]] = 0
+        analysis_results = getattr(self, f'_get_{analysis}_results')()
 
-        self.energy_bin_densities = energy_bin_densities
-        
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _format_fold_analysis_matches(self, out_delim):
-        ret_lines = [out_delim.join(['data'] + [str(i) for i in self.match_counts.keys()])]
-        out_line = ['hybrid_match_counts']
-        out_line += [str(v) for v in self.match_counts.values()]
-        ret_lines.append(out_delim.join(out_line))
-        return ret_lines
+        analysis_results_str = ''
+        for key, val in analysis_results.items():
+            if isinstance(val, dict):
+                for subkey, subval in val.items():
+                    if isinstance(subkey, tuple):
+                        use_subkey = '--'.join(subkey)
+                    else:
+                        use_subkey = str(subkey)
+                    if isinstance(subval, float):
+                        use_subval = f'{subval:.3f}'
+                    else:
+                        use_subval = str(subval)
+                    analysis_results_str += out_delim.join([key, use_subkey, use_subval]) + '\n'
+            else:
+                if isinstance(val, float):
+                    use_val = f'{val:.3f}'
+                else:
+                    use_val = str(val)
+                analysis_results_str += out_delim.join([key, use_val]) + '\n'
+        return analysis_results_str
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _format_fold_analysis_energies(self, out_delim):
-        ret_lines = [out_delim.join(['data'] + self._energy_bin_strs)]
-        out_line = ['hybrid_energies']
-        out_line += [str(v) for v in self.energy_bins.values()]
-        ret_lines.append(out_delim.join(out_line))
-        return ret_lines
+    # Start Write Methods
+    # Analysis : Private Methods : Result Special Writing Methods : Energy Analysis
+    def _write_energy_results_special(self, basename, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
 
-    # BaseAnalysis : Private Methods : FoldAnalysis
-    def _format_fold_analysis_energy_densities(self, out_delim):
-        ret_lines = [out_delim.join(['data'] + self._energy_bin_strs)]
-        out_line = ['hybrid_energy_densities']
-        out_line += ['%.4f' % v for v in self.energy_bin_densities.values()]
-        ret_lines.append(out_delim.join(out_line))
-        return ret_lines
-    
-    
-    # BaseAnalysis : Private Classmethods
+        energy_results = self._get_energy_results()
+
+        out_file_names = []
+        main_result_keys = [
+            'energy_analysis_count', 'has_energy_val', 'no_energy_val',
+            'energy_min', 'energy_max', 'energy_mean', 'energy_std',
+        ]
+        main_result_file_name = basename + '_energy_main_results.csv'
+        with open(main_result_file_name, 'w') as main_result_file:
+            for key in main_result_keys:
+                val = energy_results[key]
+                main_result_file.write(out_delim.join([key, str(val)]) + '\n')
+        out_file_names.append(main_result_file_name)
+
+        binned_energy_vals_file_name = basename + '_energy_binned_vals.csv'
+        with open(binned_energy_vals_file_name, 'w') as binned_energy_vals_file:
+            for val, count in energy_results['binned_energy_vals'].items():
+                binned_energy_vals_file.write(out_delim.join([str(val), str(count)]) + '\n')
+        out_file_names.append(binned_energy_vals_file_name)
+        return out_file_names
+
+    # Analysis : Private Methods : Result Special Writing Methods : Type Analysis
+    def _write_type_results_special(self, basename, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        type_results = self._get_type_results()
+
+        out_file_names = []
+        name_keys = {
+            'hybrid_types': 'type_hybrid_types',
+            'reordered_hybrid_types': 'type_reordered_hybrid_types',
+            'mirna_hybrid_types': 'type_mirna_hybrid_types',
+            'seg1_types': 'type_seg1_types',
+            'seg2_types': 'type_seg2_types',
+            'all_seg_types': 'type_all_seg_types',
+        }
+        for name_key, name_val in name_keys.items():
+            out_file_name = basename + '_' + name_val + '.csv'
+            val_dict = type_results[name_key]
+            if hasattr(val_dict, 'most_common'):
+                iter_method = 'most_common'
+            else:
+                iter_method = 'items'
+
+            with open(out_file_name, 'w') as out_file:
+                for info_key, info_val in getattr(val_dict, iter_method)():
+                    if isinstance(info_key, tuple):
+                        use_info_key = '--'.join(info_key)
+                    else:
+                        use_info_key = str(info_key)
+                    out_file.write(out_delim.join([use_info_key, str(info_val)]) + '\n')
+            out_file_names.append(out_file_name)
+
+        return out_file_names
+
+    # Analysis : Private Methods : Result Special Writing Methods : miRNA Analysis
+    def _write_mirna_results_special(self, basename, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        mirna_results = self._get_mirna_results()
+
+        out_file_names = []
+        main_keys = [
+            'mirna_analysis_count', 'has_mirna', 'non_mirna',
+            'mirnas_5p', 'mirnas_3p', 'mirna_dimers',
+        ]
+        main_outfile_name = basename + '_mirna_results.csv'
+        with open(main_outfile_name, 'w') as out_file:
+            for key in main_keys:
+                val = mirna_results[key]
+                out_file.write(out_delim.join([key, str(val)]) + '\n')
+        out_file_names.append(main_outfile_name)
+
+        return out_file_names
+
+    # Analysis : Private Methods : Result Special Writing Methods : Fold Analysis
+    def _write_fold_results_special(self, basename, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        fold_results = self._get_fold_results()
+
+        out_file_names = []
+        name_keys = {
+            'folds_recorded': 'fold_main_results',
+            'fold_match_counts': 'fold_fold_match_counts',
+            'mirna_nt_fold_counts': 'fold_mirna_nt_fold_counts',
+            'mirna_nt_fold_props': 'fold_mirna_nt_fold_props',
+        }
+        for name_key, name_val in name_keys.items():
+            out_file_name = basename + '_' + name_val + '.csv'
+            if name_key == 'folds_recorded':
+                val_dict = {name_key: fold_results[name_key]}
+                iter_method = 'items'
+            else:
+                val_dict = fold_results[name_key]
+                if hasattr(val_dict, 'most_common'):
+                    iter_method = 'most_common'
+                else:
+                    iter_method = 'items'
+
+            with open(out_file_name, 'w') as out_file:
+                for info_key, info_val in getattr(val_dict, iter_method)():
+                    out_file.write(out_delim.join([str(info_key), str(info_val)]) + '\n')
+            out_file_names.append(out_file_name)
+
+        return out_file_names
+
+    # Start Plot Methods
+    # Analysis : Private Methods : Result Plotting Methods : Energy Analysis
+    def _plot_energy_results(self, basename):
+        energy_results = self._get_energy_results()
+        out_files = []
+        # Plot Histogram
+        energy_histogram_file_name = basename + '_energy_histogram.png'
+        hybkit.plot.energy_histogram(
+            results=energy_results,
+            plot_file_name=energy_histogram_file_name,
+            name=self.name,
+        )
+        out_files.append(energy_histogram_file_name)
+
+    # Analysis : Private Methods : Result Plotting Methods : Type Analysis
+    def _plot_type_results(self, basename):
+        type_results = self._get_type_results()
+        out_files = []
+        ype_results = {}
+        type_results['types_analysis_count'] = copy.deepcopy(self._types_analysis_count)
+        type_results['hybrid_types'] = copy.deepcopy(self._hybrid_types)
+        type_results['reordered_hybrid_types'] = copy.deepcopy(self._reordered_hybrid_types)
+        type_results['mirna_hybrid_types'] = copy.deepcopy(self._mirna_hybrid_types)
+        type_results['seg1_types'] = copy.deepcopy(self._seg1_types)
+        type_results['seg2_types'] = copy.deepcopy(self._seg2_types)
+        type_results['all_seg_types'] = copy.deepcopy(self._all_seg_types)
+
+        # Plot mirna_hybrid_types
+        mirna_hybrid_types_file_name = basename + '_types_mirna_hybrids.png'
+        # TODO: Implement hybkit.plot.type_count
+        hybkit.plot.type_count(
+            type_results['mirna_hybrid_types'],
+            mirna_hybrid_types_file_name,
+            title='miRNA Hybrid Types',
+            name=self.name,
+        )
+        out_files.append(mirna_hybrid_types_file_name)
+
+        # Plot All Seg Types
+        all_seg_types_file_name = basename + '_types_all_seg.png'
+        hybkit.plot.type_count(
+            type_results['all_seg_types'],
+            all_seg_types_file_name,
+            title='All Segment Types',
+            name=self.name,
+        )
+        out_files.append(all_seg_types_file_name)
+
+        # Plot Seg1 Types
+        seg1_types_file_name = basename + '_types_seg1.png'
+        hybkit.plot.type_count(
+            type_results['seg1_types'],
+            seg1_types_file_name,
+            title='5p Segment Types',
+            name=self.name,
+        )
+        out_files.append(seg1_types_file_name)
+
+        # Plot Seg2 Types
+        seg2_types_file_name = basename + '_types_seg2.png'
+        hybkit.plot.type_count(
+            type_results['seg2_types'],
+            seg2_types_file_name,
+            title='3p Segment Types',
+            name=self.name,
+        )
+        out_files.append(seg2_types_file_name)
+        return out_files
+
+    # Analysis : Private Methods : Result Plotting Methods : Fold Analysis
+    def _plot_fold_results(self, basename):
+        fold_results = self._get_fold_results()
+        out_files = []
+
+        # Plot Match Counts Histogram
+        match_counts_histogram_file_name = basename + '_fold_match_counts_histogram.png'
+        # TODO: Implement hybkit.plot.fold_match_counts_histogram
+        hybkit.plot.fold_match_counts_histogram(
+            results=fold_results['fold_match_counts'],
+            plot_file_name=match_counts_histogram_file_name,
+            name=self.name,
+        )
+        out_files.append(match_counts_histogram_file_name)
+
+        # Plot miRNA nt Fold Counts Histogram
+        mirna_nt_fold_counts_histogram_file_name = basename + '_fold_mirna_nt_counts_histogram.png'
+        # TODO: Implement hybkit.plot.fold_mirna_nt_counts_histogram
+        hybkit.plot.fold_mirna_nt_counts_histogram(
+            results=fold_results['mirna_nt_fold_counts'],
+            plot_file_name=mirna_nt_fold_counts_histogram_file_name,
+            name=self.name,
+        )
+        out_files.append(mirna_nt_fold_counts_histogram_file_name)
+
+        # Plot miRNA nt Fold Counts Histogram
+        mirna_nt_fold_props_histogram_file_name = basename + '_fold_mirna_nt_props_histogram.png'
+        hybkit.plot.fold_mirna_nt_counts_histogram(
+            results=fold_results['mirna_nt_fold_props'],
+            plot_file_name=mirna_nt_fold_props_histogram_file_name,
+        )
+        out_files.append(mirna_nt_fold_props_histogram_file_name)
+        return out_files
+
+    # Analysis : Private Methods : Utility Methods
+    def _ensure_analyses_active(self, analyses):
+        if isinstance(analyses, str):
+            all_test_analyses = [analyses]
+        elif isinstance(analyses, list):
+            all_test_analyses = analyses
+        else:
+            raise TypeError('Analyses must be a string or list of strings.')
+        for test_analysis in all_test_analyses:
+            if test_analysis not in self.analysis_types:
+                message = (
+                    'Analysis type "%s" not an active analysis.'
+                    '\nActive choices: %s' % (test_analysis, ', '.join(self.analysis_types))
+                )
+                print(message)
+                raise RuntimeError(message)
+
+    # Analysis : Private Classmethods
     @classmethod
     def _sanitize_name(self, file_name):
         for char, replace in [('*', 'star'), (',', 'com')]:
             file_name = file_name.replace(char, replace)
         return file_name
-
-
-# --- Type Analysis --- #
-class TypeAnalysis(BaseAnalysis):
-    """
-    Analysis of segment types included in the analyzed hyb_records.
-
-    Before using the analysis, the :ref:`seg1_type <seg1_type>` and
-    :ref:`seg2_type <seg2_type>` flags must be set for the hyb_record,
-    as is done by :func:`hybkit.HybRecord.eval_types`.
-    A count is added to
-    the analysis class object for each hybrid type (Ex: "miRNA-mRNA") with
-    segments placed in sorted order for non-redundant type-combinations.
-    The analysis additionally reports the number of individual segment
-    types.
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        hybrid_types (~collections.Counter): Counter containing annotated ordered types of
-            seg1 and seg2
-        seg1_types (~collections.Counter): Counter containing annotated type of
-            segment in position seg1
-        seg2_types (~collections.Counter): Counter containing annotated type of
-            segment in position seg2
-        all_seg_types (~collections.Counter): Counter containing position-independent
-            annotated types
-
-    """
-
-    # TypeAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_type_analysis()
-
-    # TypeAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add information from a :class:`~hybkit.HybRecord` record to analysis.
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        self._add_type_analysis(hyb_record)
-
-    # TypeAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another TypeAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (TypeAnalysis): :class:`TypeAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_type_analysis(add_analysis)
-
-    # TypeAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a type analysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        ret_lines = []
-        ret_lines += self._format_hybrid_type_counts(out_delim)
-        ret_lines.append('')
-        ret_lines += self._format_all_seg_types(out_delim)
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # TypeAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of a type analysis to a file.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        analyses = [('type_hybrids', self._format_hybrid_type_counts),
-                    ('type_segs', self._format_all_seg_types),
-                    ]
-
-        for analysis_name, analysis_method in analyses:
-            analysis_file_name = file_name_base + '_' + analysis_name + '.csv'
-            with open(analysis_file_name, 'w') as out_file:
-                out_lines = analysis_method(out_delim=out_delim)
-                out_str = '\n'.join(out_lines) + '\n'
-                out_file.write(out_str)
-
-    # TypeAnalysis : Public Methods
-    def plot(self, file_name_base):
-        """
-        Create plots of the results using :func:`hybkit.plot.type_count`.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        hybkit.plot.type_count(self.hybrid_types, file_name_base + '_type_hybrids',
-                               title='Hybrid Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_segall',
-                               title='Total Segment Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_seg1',
-                               title='5p Segment Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_seg2',
-                               title='3p Segment Types Types', name=self.name)
-
-
-# --- miRNA Count Analysis --- #
-class MirnaAnalysis(BaseAnalysis):
-    """
-    Analyze counts/types of miRNA in hyb records.
-
-    The mirna_count analysis determines what type each record is
-    with regard to mirna and counts them accordingly.
-    This includes:
-
-        | :obj:`mirnas_5p`: Hybrids with a |5p| miRNA.
-        | :obj:`mirnas_3p`: Hybrids with a |3p| miRNA.
-        | :obj:`mirna_dimers`: Hybrids with both a |5p| and |3p| miRNA.
-        | :obj:`non_mirnas`: Hybrids with no miRNA.
-        | :obj:`has_mirna`: Hybrids with a miRNA (one of first three categories).
-
-    Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
-    must be set for each record as can be done by sequential use of the
-    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-    methods.
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        mirnas_5p (int): Count of |5p| miRNAs detected
-        mirnas_3p (int): Count of |3p| miRNAs detected
-        mirna_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
-        non_mirnas (int): Count of non-miRNA hybrids detected
-        has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
-    """
-
-    # MirnaAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_mirna_analysis()
-
-    # MirnaAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add information from a :class:`~hybkit.HybRecord` record to analysis.
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        self._add_mirna_analysis(hyb_record)
-
-    # MirnaAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another MirnaAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (MirnaAnalysis): :class:`MirnaAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_mirna_analysis(add_analysis)
-
-    # MirnaAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a miRNA analysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        ret_lines = self._format_mirna_counts(out_delim)
-
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # MirnaAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of a type analysis to a file.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        analysis_file_name = file_name_base + '_mirna_counts.csv'
-        with open(analysis_file_name, 'w') as out_file:
-            out_lines = self.results(out_delim=out_delim)
-            out_str = '\n'.join(out_lines) + '\n'
-            out_file.write(out_str)
-
-    # MirnaAnalysis : Public Methods
-    def plot(self, file_name_base):
-        """
-        Create plots of the results using :func:`hybkit.plot.mirna`.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        hybkit.plot.mirna(self, file_name_base + '_mirna_counts')
-
-
-# --- Full Summary Analysis --- #
-
-class SummaryAnalysis(BaseAnalysis):
-    """
-    Analysis of segment types and miRNA counts in hyb records.
-
-    This analysis includes the components of both the :class:`TypeAnalysis` and
-    :class:`MirnaAnalysis` analyses, performed simultaneously.
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        hybrid_types (~collections.Counter): Counter containing annotated ordered types of
-            seg1 and seg2
-        seg1_types (~collections.Counter): Counter containing annotated type of
-            segment in position seg1
-        seg2_types (~collections.Counter): Counter containing annotated type of
-            segment in position seg2
-        all_seg_types (~collections.Counter): Counter containing position-independent
-            annotated types
-        mirnas_5p (int): Count of |5p| miRNAs detected
-        mirnas_3p (int): Count of |3p| miRNAs detected
-        mirna_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
-        non_mirnas (int): Count of non-miRNA hybrids detected
-        has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
-    """
-
-    # SummaryAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_type_analysis()
-        self._init_mirna_analysis()
-
-    # SummaryAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add information from a :class:`hybkit.HybRecord` record to analysis.
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        self._add_type_analysis(hyb_record)
-        self._add_mirna_analysis(hyb_record)
-
-    # SummaryAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another SummaryAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (SummaryAnalysis): :class:`SummaryAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_type_analysis(add_analysis)
-        self._update_mirna_analysis(add_analysis)
-
-    # SummaryAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a miRNA analysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        ret_lines = []
-        ret_lines += self._format_hybrid_type_counts(out_delim)
-        ret_lines.append('')
-        ret_lines += self._format_all_seg_types(out_delim)
-        ret_lines.append('')
-        ret_lines += self._format_mirna_counts(out_delim)
-
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # SummaryAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of a type analysis to a file.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        analyses = [('type_hybrids', self._format_hybrid_type_counts),
-                    ('type_segs', self._format_all_seg_types),
-                    ('mirna_counts', self._format_mirna_counts),
-                    ]
-
-        for analysis_name, analysis_method in analyses:
-            analysis_file_name = file_name_base + '_' + analysis_name + '.csv'
-            with open(analysis_file_name, 'w') as out_file:
-                out_lines = analysis_method(out_delim=out_delim)
-                out_str = '\n'.join(out_lines) + '\n'
-                out_file.write(out_str)
-
-    # SummaryAnalysis : Public Methods
-    def plot(self, file_name_base):
-        """
-        Create plots of results via :func:`hybkit.plot.type_count` and :func:`hybkit.plot.mirna`.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        hybkit.plot.type_count(self.hybrid_types, file_name_base + '_type_hybrids',
-                               title='Hybrid Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_segall',
-                               title='Total Segment Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_seg1',
-                               title='5p Segment Types', name=self.name)
-        hybkit.plot.type_count(self.all_seg_types, file_name_base + '_type_seg2',
-                               title='3p Segment Types Types', name=self.name)
-        hybkit.plot.mirna(self, file_name_base + '_mirna_counts')
-
-
-# --- Target Analysis --- #
-
-class TargetAnalysis(BaseAnalysis):
-    """
-    Class for analysis of targets in miRNA-containing hybrids.
-
-    The mirna_target analysis provides an analysis of what sequences are targeted
-    by each respective miRNA within the hyb records. The attribute has keys
-    of each miRNA, with each value being a dict of targeted sequences and their
-    associated count of times targeted.
-
-    Before using the analysis, the :ref:`seg1_type <seg1_type>`,
-    :ref:`seg2_type <seg2_type>`, and :ref:`mirna_seg <mirna_seg>` flags
-    must be set for each record as can be done by sequential use of the
-    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-    methods.
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        targets_5p (int): Count of |5p| miRNAs detected
-        targets_3p (int): Count of |3p| miRNAs detected
-        target_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
-        non_targets (int): Count of non-miRNA hybrids detected
-        has_target (int): Hybrids with |5p|, |3p|, or both, as miRNA
-    """
-
-    # TargetAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_target_analysis()
-
-    # TargetAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add the information from a :class:`~hybkit.HybRecord` to a mirna_target analysis.
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        count_mode = self.settings['count_mode']
-        allow_mirna_dimers = self.settings['allow_mirna_dimers']
-        self._add_target_analysis(hyb_record, count_mode, allow_mirna_dimers)
-
-    # TargetAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another TargetAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (TargetAnalysis): :class:`TargetAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_target_analysis(add_analysis)
-
-    # TargetAnalysis : Public Methods
-    def process_target_analysis(self):
-        """
-        Summarize results of the target analysis.
-
-        This fills the analysis variables:
-
-            | :obj:`mirna_target_total_counts` : :class:`Counter` with keys of miRNA names and
-              values of miRNA total counts.
-            | :obj:`mirna_target_type_counts` : Dict with keys of miRNA names and values of
-              :class:`Counter` objects, with each counter object containin the count of
-              segment types targeted by that miRNA.
-        """
-        self._process_target_analysis_info()
-
-    # TargetAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a miRNA analysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        if self.mirna_target_total_counts is None:
-            self.process_target_analysis()
-
-        ret_lines = self._format_target_analysis(out_delim)
-        ret_lines.append('')
-        ret_lines += self._format_target_analysis_totals(out_delim)
-
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # TargetAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of the target analysis to a file.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        if self.mirna_target_total_counts is None:
-            self.process_target_analysis()
-
-        analyses = [('targets_all', self._format_target_analysis),
-                    ('targets_total', self._format_target_analysis_totals),
-                    ]
-
-        for analysis_name, analysis_method in analyses:
-            analysis_file_name = file_name_base + '_' + analysis_name + '.csv'
-            with open(analysis_file_name, 'w') as out_file:
-                out_lines = analysis_method(out_delim=out_delim)
-                out_str = '\n'.join(out_lines) + '\n'
-                out_file.write(out_str)
-
-    # TargetAnalysis : Public Methods
-    def write_individual(self, file_name_base, out_delim=None):
-        """
-        Write the results of the target analysis to individual files per miRNA.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        for mirna_id in self.mirna_target_info:
-            mirna, mirna_seg_type = mirna_id
-            analysis_file_name = file_name_base + '_targets_' + mirna + '.csv'
-            analysis_file_name = self._sanitize_name(analysis_file_name)
-            out_lines = self._format_target_analysis(out_delim, only_mirna_id=mirna_id)
-            with open(analysis_file_name, 'w') as out_file:
-                out_file.write('\n'.join(out_lines) + '\n')
-
-    # TargetAnalysis : Public Methnds
-    def plot(self, file_name_base):
-        """
-        Plot targets of all miRNAs in analysis.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        if self.mirna_target_total_counts is None:
-            self.process_target_analysis()
-
-        combined_targets = Counter()
-        combined_target_types = Counter()
-        for mirna_id in self.mirna_target_info:
-            mirna_name, _ = mirna_id
-            combined_targets.update(self.mirna_target_info[mirna_id])
-            combined_target_types.update(self.mirna_target_type_counts[mirna_name])
-        hybkit.plot.target(combined_targets,
-                           file_name_base + '_targets_all',
-                           title='Combined miRNA Targets',
-                           )
-        hybkit.plot.target_type(combined_target_types,
-                                file_name_base + '_targets_types_all',
-                                title='Combined miRNA Target Types',
-                                )
-
-    # TargetAnalysis : Public Methnds
-    def plot_individual(self, file_name_base):
-        """
-        Plot targets of each individual miRNA in analysis.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        if self.mirna_target_total_counts is None:
-            self.process_target_analysis()
-
-        for mirna_id in self.mirna_target_info:
-            mirna_name, mirna_seg_type = mirna_id
-            analysis_file_name = file_name_base + '_targets_' + mirna_name
-            analysis_file_name = self._sanitize_name(analysis_file_name)
-            analysis_target_file_name = file_name_base + '_targets_' + mirna_name + '_types'
-            analysis_target_file_name = self._sanitize_name(analysis_target_file_name)
-
-            hybkit.plot.target(self.mirna_target_info[mirna_id],
-                               analysis_file_name,
-                               name=mirna_name,
-                               )
-            hybkit.plot.target_type(self.mirna_target_type_counts[mirna_name],
-                                    analysis_target_file_name,
-                                    name=mirna_name,
-                                    )
-
-
-# --- miRNA Pattern Analysis --- #
-
-class PatternAnalysis(BaseAnalysis):
-    """
-    Evaluate and quantify predicted miRNA binding patterns.
-
-    This analysis evaluates the predicted binding of miRNA within hyb records
-    that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object
-    as the attribute :attr:`~hybkit.HybRecord.fold_record`. This includes an analysis and
-    plotting of the predicted binding by position among the provided miRNA.
-
-    Before using the analysis, the :ref:`mirna_seg <mirna_seg>` flag
-    must be set for each record as can be done by sequential use of the
-    :func:`hybkit.HybRecord.eval_types` and :func:`hybkit.HybRecord.eval_mirna`
-    methods.
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        mirna_folds (int): Number of miRNA folds represented
-        mirna_fold_counts (dict): Dict with keys of miRNA index and values of number of miRNAs
-            folded at that index
-        mirna_fold_frac (dict): Dict with keys of miRNA index and values of percent of miRNAs
-            folded at that index
-    """
-    # PatternAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_pattern_analysis()
-
-    # PatternAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add the information from a :class:`~hybkit.HybRecord` to a pattern analysis.
-
-        If the record contains a single miRNA, the miRNA fold is identified.
-        miRNA Dimers are skipped unless the :attr:`settings['all_mirna_dimers'] <settings>`
-        setting is True.
-        The count for this miRNA and its target is then added to :obj:`mirna_fold_counts` and
-        :obj:`mirna_fold_frac` is recalculated.
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        count_mode = self.settings['count_mode']
-        allow_mirna_dimers = self.settings['allow_mirna_dimers']
-        self._add_pattern_analysis(hyb_record, count_mode, allow_mirna_dimers)
-
-    # PatternAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another PatternAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (PatternAnalysis): :class:`PatternAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_pattern_analysis(add_analysis)
-
-    # PatternAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a miRNA analysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        ret_lines = self._format_pattern_analysis(out_delim)
-
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # PatternAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of the pattern analysis to files.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        pattern_counts_name = file_name_base + '_pattern_counts.csv'
-        with open(pattern_counts_name, 'w') as pattern_counts_file:
-            pattern_counts_file.write(out_delim.join(['data', 'count']) + '\n')
-            pattern_counts_file.write(out_delim.join(['mirna_folds', str(self.mirna_folds)]) + '\n')
-
-        line_values = ['index']
-        max_i = 24
-        while self.mirna_fold_count[max_i] == 0:
-            max_i -= 1
-        line_values += [str(i) for i in range(1, (max_i + 1))]
-        write_lines = [out_delim.join(line_values)]
-
-        line_values = ['i_count']
-        line_values += [str(self.mirna_fold_count[i]) for i in range(1, (max_i + 1))]
-        write_lines.append(out_delim.join(line_values))
-
-        line_values = ['i_fraction']
-        line_values += ["%f.3" % self.mirna_fold_frac[i] for i in range(1, (max_i + 1))]
-        write_lines.append(out_delim.join(line_values))
-
-        pattern_bases_name = file_name_base + '_pattern_bases.csv'
-        with open(pattern_bases_name, 'w') as pattern_bases_file:
-            pattern_bases_file.write('\n'.join(write_lines) + '\n')
-
-    # PatternAnalysis : Public Methods
-    def plot(self, file_name_base):
-        """
-        Create plots of the results.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        hybkit.plot.pattern(self, file_name_base + '_pattern_bases')
-
-
-# --- Hybrid Fold Analysis --- #
-
-class FoldAnalysis(BaseAnalysis):
-    """
-    Evaluate hybrid fold energy and match count characteristics.
-
-    This analysis evaluates the predicted Gibbs Free Energy of folding 
-    and count of predicted Watson-Crick Base Pairing Interactions within
-    hyb records that have an associated :class:`~hybkit.FoldRecord` object
-    as the attribute :attr:`~hybkit.HybRecord.energy_record`. 
-
-    Args:
-        name (str, optional): Analysis name
-
-    Attributes:
-        name (str): Analysis name
-        energies (collections.Counter): Python counter object containing strings representing
-            hybrid energy counts.
-        matches (collections.Counter): Python counter object containing counts of hybrids
-            with a predicted number of match interactions.
-
-    """
-    # FoldAnalysis : Public Methods
-    def __init__(self,
-                 name=None,
-                 ):
-        self.name = name
-        self._init_fold_analysis()
-    
-    
-    # FoldAnalysis : Public Methods
-    def add(self, hyb_record):
-        """
-        Add the information from a :class:`~hybkit.HybRecord` to the fold analysis.
-       
-        Fold values > 0.0 are assumed to be artifacts and are capped at 0.0. 
-
-        Args:
-            hyb_record (HybRecord): Record with information to add.
-        """
-        count_mode = self.settings['count_mode']
-        self._add_fold_analysis(hyb_record, count_mode)
-
-    # FoldAnalysis : Public Methods
-    def update(self, add_analysis):
-        """
-        Add another FoldAnalysis object to this one by combining counts.
-
-        Args:
-            add_analysis (FoldAnalysis): :class:`FoldAnalysis` object to add.
-        """
-        self._ensure_same_class(add_analysis)
-        self._update_fold_analysis(add_analysis)
-
-    # FoldAnalysis : Public Methods
-    def process_fold_analysis(self):
-        """
-        Calculate binned results of fold analysis.
-
-        This fills the analysis variables:
-
-            | :obj:`energy_bins` : `dict` with keys of a Gibbs Free Energy quantity 
-              and values of counts of hybrids with that predicted energy
-            | :obj:`energy_bin_densities` : `dict` with keys of a Gibbs Free Energy quantity 
-              and values of counts of hybrids with that predicted energy normalized by total
-              counts
-        """
-        self._process_fold_analysis()
-
-    # FoldAnalysis : Public Methods
-    def results(self, out_delim=None, newline=False):
-        r"""
-        Return the results of a FoldAnalysis in a list of delimited lines.
-
-        Args:
-            out_delim (str, optional): Delimiter for entries within lines, such as ',' or '\\t'.
-                If not provided, defaults to :attr:`settings['out_delim'] <settings>`
-            newline (bool, optional): Terminate lines with a newline_character. Default False
-
-        Returns:
-            list of string objects representing the results of the analysis.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        if self.energy_bins is None:
-            self.process_fold_analysis()
-
-        ret_lines = self._format_fold_analysis_matches(out_delim)
-        ret_lines += [''] + self._format_fold_analysis_energies(out_delim)
-        ret_lines += [''] + self._format_fold_analysis_energy_densities(out_delim)
-
-        if newline:
-            for i in range(len(ret_lines)):
-                ret_lines[i] += '\n'
-        return ret_lines
-
-    # FoldAnalysis : Public Methods
-    def write(self, file_name_base, out_delim=None):
-        """
-        Write the results of the FoldAnalysis to files.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-            out_delim (str, optional): Delimiter to write between fields.
-                Defaults to :attr:`settings['out_delim'] <settings>` if not provided.
-        """
-        if out_delim is None:
-            out_delim = self.settings['out_delim']
-
-        if self.energy_bins is None:
-            self.process_fold_analysis()
-
-        matches_name = file_name_base + '_fold_match.csv'
-        energies_name = file_name_base + '_fold_energy.csv'
-        energy_densities_name = file_name_base + '_fold_energy_densities.csv'
-
-        with open(matches_name, 'w') as matches_file:
-            write_lines = self._format_fold_analysis_matches(out_delim)
-            matches_file.write('\n'.join(write_lines) + '\n')
-
-        with open(energies_name, 'w') as energies_file:
-            write_lines = self._format_fold_analysis_energies(out_delim)
-            energies_file.write('\n'.join(write_lines) + '\n')
-
-        with open(energy_densities_name, 'w') as energy_densities_file:
-            write_lines = self._format_fold_analysis_energy_densities(out_delim)
-            energy_densities_file.write('\n'.join(write_lines) + '\n')
-
-
-    # FoldAnalysis : Public Methods
-    def plot(self, file_name_base):
-        """
-        Create plots of the results.
-
-        Args:
-            file_name_base (str): "Base" name for output files. Final file names will be generated
-                based on analysis type and provided parameters.
-        """
-        hybkit.plot.fold_energy_counts(self, file_name_base + '_fold_energy_counts')
-        hybkit.plot.fold_energy_densities(self, file_name_base + '_fold_energy_densities')
-        hybkit.plot.fold_matches(self, file_name_base + '_fold_match_counts')
-
-

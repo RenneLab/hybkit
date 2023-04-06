@@ -9,8 +9,6 @@ Helper data objects for automatic testing of hybkit code.
 
 import copy
 import os
-import hybkit
-import pytest
 from contextlib import nullcontext as does_not_raise
 
 # ----- Start Real Hyb/Vienna Data Examples -----
