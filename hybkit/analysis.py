@@ -177,24 +177,20 @@ class Analysis(object):
                  name=None,
                  ):
         """Describe in class docstring."""
-        if analysis_types is None:
-            message += 'No analysis types provided. Analysis types must be provided'
+        if analysis_types is None or not analysis_types:
+            message = 'No analysis types provided. Analysis types must be provided'
             message += ' as a list of strings.\nOptions: %s' % ', '.join(ANALYSIS_TYPES)
             print(message)
             raise RuntimeError(message)
+        if isinstance(analysis_types, str):
+            analysis_types = [analysis_types]
         self.analysis_types = []
         for analysis_type in analysis_types:
-            if not isinstance(analysis_type, str):
-                message = (
-                    'Analysis type "%s" must be of type string.\n Provided Type:'
-                    '' % (analysis_type, type(analysis_type))
-                )
-                print(message)
-                raise RuntimeError(message)
-            if analysis_type.lower() not in ANALYSIS_TYPES:
+            if (not isinstance(analysis_type, str)
+                or analysis_type.lower() not in ANALYSIS_TYPES):
                 message = (
                     'Analysis type "%s" not recognized.'
-                    '\nChoices: %s' % (analysis_type, ', '.join(ANALYSIS_TYPES))
+                    '\nChoices: %s' % (str(analysis_type), ', '.join(ANALYSIS_TYPES))
                 )
                 print(message)
                 raise RuntimeError(message)
@@ -202,7 +198,7 @@ class Analysis(object):
                 self.analysis_types.append(analysis_type.lower())
         self.name = self._sanitize_name(name)
 
-        for analysis_type in analysis_types:
+        for analysis_type in self.analysis_types:
             getattr(self, '_init_' + analysis_type)()
 
     # Analysis : Public Methods : Add HybRecord
@@ -287,7 +283,7 @@ class Analysis(object):
             )
             print(message)
             raise RuntimeError(message)
-        for analysis_type in self.analysis_types:
+        for analysis_type in ANALYSIS_TYPES:
             if result_key in self._result_keys[analysis_type]:
                 if analysis_type not in self.analysis_types:
                     message = (
@@ -297,6 +293,7 @@ class Analysis(object):
                     print(message)
                     raise RuntimeError(message)
                 return getattr(self, '_get_' + analysis_type + '_results')()[result_key]
+
 
     # Analysis : Public Methods : Results : get_analysis_delim_str
     def get_analysis_delim_str(self, analysis=None, out_delim=None):
@@ -405,7 +402,7 @@ class Analysis(object):
         all_out_files = []
         for analysis in use_analyses:
             if hasattr(self, '_write_' + analysis + '_special'):
-                out_files = getattr(self, '_write_' + analysis + '_special')(
+                out_files = getattr(self, '_write_' + analysis + '_results_special')(
                     basename=out_file_basename,
                     out_delim=out_delim
                 )

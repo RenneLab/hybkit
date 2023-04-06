@@ -800,7 +800,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Properties
     def mirna_detail(self, *args, **kwargs):
         """
-        Deprecated, alias for :meth:`mirna_details`.
+        Deprecate, alias for :meth:`mirna_details`.
 
         .. deprecated:: 0.1.0
         """
