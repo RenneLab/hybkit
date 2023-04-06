@@ -50,7 +50,7 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
         hyb_autotest_file.write(combined_hyb_strs)
 
     hyb_analysis = hybkit.analysis.Analysis(
-        analysis_types=['energy', 'type', 'mirna'],
+        analysis_types=['energy', 'type', 'mirna', 'target'],
         name='test_analysis',
     )
 
@@ -64,7 +64,7 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
             hyb_analysis.add_hyb_records(hyb_file, eval_types=True, eval_mirna=True)
 
     all_results = hyb_analysis.get_all_results()
-    for key in ['energy', 'type', 'mirna']:
+    for key in ['energy', 'type', 'mirna', 'target']:
         assert key in all_results
 
     # Check energy results
@@ -116,6 +116,19 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
     assert all_results['mirna']['mirnas_3p'] == record_count / 4
     assert all_results['mirna']['mirna_dimers'] == record_count / 4
 
+    # Check target results
+    assert all_results['target']['target_analysis_count'] == record_count
+    assert all_results['target']['target_evals'] == record_count * 3 / 4
+    assert all_results['target']['target_names'] == {
+        'ARTSEG2_SOURCE_NAME_microRNA': record_count / 4,  # Dimer
+        'ARTSEG2_SOURCE_NAME_mRNA': record_count / 4,
+        'ARTSEG1_SOURCE_NAME_mRNA': record_count / 4,
+    }
+    assert all_results['target']['target_types'] == {
+        'microRNA': record_count / 4,  # Dimers
+        'mRNA': record_count * 2 / 4,
+    }
+
     # Check analysis results fetching:
     mirna_results = hyb_analysis.get_analysis_results('mirna')
     assert mirna_results == all_results['mirna']
@@ -136,11 +149,11 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
 
     out_special_file_base = os.path.join(tmp_path, 'special_analysis')
     hyb_analysis.write_analysis_delim_str(analysis=['mirna'], out_file_name=out_analysis_file_name)
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base,
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base,
                                                 analysis=['mirna'])
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base,
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base,
                                                 analysis='mirna')
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base)
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base)
 
     # Check erroring on bad results requests:
     with pytest.raises(RuntimeError):
@@ -201,6 +214,17 @@ def test_analysis_problems(tmp_path):
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error if no mirna values
+    with pytest.raises(RuntimeError):
+        with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
+            for hyb_record in hyb_file:
+                hyb_record.eval_types()
+                hyb_analysis.add_hyb_record(hyb_record)
+
+    # Test raise error for no mirna values for target analysis
+    hyb_analysis = hybkit.analysis.Analysis(
+        analysis_types=['target'],
+        name='test_analysis',
+    )
     with pytest.raises(RuntimeError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
@@ -301,8 +325,8 @@ def test_analysis_fold(tmp_path):
 
     out_special_file_base = os.path.join(tmp_path, 'special_analysis')
     hyb_analysis.write_analysis_delim_str(analysis=['fold'], out_file_name=out_analysis_file_name)
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base,
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base,
                                                 analysis=['fold'])
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base,
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base,
                                                 analysis='fold')
-    hyb_analysis.write_analysis_results_special(out_file_basename=out_special_file_base)
+    hyb_analysis.write_analysis_results_special(out_basename=out_special_file_base)

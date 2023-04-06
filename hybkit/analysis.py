@@ -16,9 +16,6 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 
 
-ANALYSIS_OPTIONS = ['energy', 'type', 'mirna', 'fold']
-
-
 # --- Hybkit Analysis --- #
 class Analysis(object):
     """
@@ -31,6 +28,7 @@ class Analysis(object):
         | Energy: Analysis of values of predicted intra-hybrid folding energy
         | Type: Analysis of segment types
         | miRNA: Analysis of miRNA segments distributions
+        | Target: Analysis of mirna target segment names and types
         | Fold: Analysis of folding data included in the analyzed hyb_records.
 
     This class is utilized by selecting the analysis types to be performed on object
@@ -68,6 +66,11 @@ class Analysis(object):
 
     Type Analysis:
 
+        This analysis evaluates the counts of each type of segment included in the
+        :class:`~hybkit.HybRecord` objects. The types of segments are determined by
+        the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags, which
+        are set by the :func:`hybkit.HybRecord.eval_types` method.
+
         Requirements:
 
             | :ref:`seg1_type <seg1_type>` and
@@ -96,6 +99,12 @@ class Analysis(object):
 
     miRNA Analysis:
 
+        Analysis of miRNA segments in hybrids.
+        The mirna_analysis provides an analysis of what miRNA types are present in
+        the hyb records. If a miRNA dimer is present in a hybrid, this is counted
+        in ``mirna_dimers``. If a single miRNA is present in a hybrid, this is
+        counted in ``mirnas_5p`` or ``mirnas_3p`` depending on the miRNA location.
+
         Requirements:
             | :ref:`mirna_seg <mirna_seg>` flag
               must be set for each HybRecord
@@ -109,6 +118,29 @@ class Analysis(object):
             | non_mirna (int): Count of non-miRNA hybrids detected
             | has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
 
+    .. _TargetAnalysis:
+
+    Target Analysis:
+
+        Analysis of targets in miRNA-containing hybrids.
+        The mirna_target analysis provides an analysis of what annotated sequences
+        and sequence types are targeted by any miRNA within the hyb records. If a
+        miRNA is not present in a hybrid, the hybrid is not included in the analysis.
+        If a miRNA dimer is present in a hybrid, the 5p miRNA is used for the analysis,
+        and the 3p miRNA is considered the "target."
+
+        Requirements:
+            | :ref:`mirna_seg <mirna_seg>` flag
+              must be set for each HybRecord
+              (can be done by :func:`hybkit.HybRecord.eval_mirna`).
+
+        Output Results:
+            | target_analysis_count (int): Count of hybrids analyzed
+            | target_evals (int): Count of target evaluations performed
+            | target_names (:obj:`~collections.Counter`): Counter containing names of
+              miRNA targets detected.
+            | target_types (:obj:`~collections.Counter`): Counter containing types of
+              miRNA targets detected.
 
     .. _FoldAnalysis:
 
@@ -145,7 +177,8 @@ class Analysis(object):
     settings = hybkit.settings.Analysis_settings
 
     #: Possible options for analyses
-    analysis_options = ['energy', 'type', 'mirna', 'fold']
+    # analysis_options = ['energy', 'type', 'mirna', 'target', 'fold']
+    analysis_options = hybkit.settings.ANALYSIS_TYPE_OPTIONS
 
     # Class private variables:
     _result_keys = {
@@ -161,6 +194,9 @@ class Analysis(object):
         'mirna': [
             'mirna_analysis_count', 'mirnas_5p', 'mirnas_3p', 'mirna_dimers',
             'non_mirna', 'has_mirna',
+        ],
+        'target': [
+            'target_analysis_count', 'target_evals', 'target_names', 'target_types',
         ],
         'fold': [
             'fold_analysis_count', 'mirna_nt_fold_counts', 'mirna_nt_fold_props',
@@ -367,7 +403,7 @@ class Analysis(object):
             out_file.write(out_delim_str)
 
     # Analysis : Public Methods : Write Results : write_analysis_results_special
-    def write_analysis_results_special(self, out_file_basename=None,
+    def write_analysis_results_special(self, out_basename=None,
                                        analysis=None, out_delim=None):
         """
         Write the results of the analyses to specilized text files.
@@ -392,11 +428,11 @@ class Analysis(object):
             use_analyses = analysis
         self._ensure_analyses_active(use_analyses)
 
-        if out_file_basename is None:
+        if out_basename is None:
             if self.name is not None:
-                out_file_basename = self.name
+                out_basename = self.name
             else:
-                out_file_basename = 'analysis'
+                out_basename = 'analysis'
 
         if out_delim is None:
             out_delim = self.settings['out_delim']
@@ -404,7 +440,7 @@ class Analysis(object):
         all_out_files = []
         for analysis in use_analyses:
             out_files = getattr(self, '_write_' + analysis + '_results_special')(
-                basename=out_file_basename,
+                basename=out_basename,
                 out_delim=out_delim
             )
             all_out_files += out_files
@@ -422,6 +458,8 @@ class Analysis(object):
                 ./<analysis_name> if :attr:`name` provided or
                 ./analysis if no name provided.
         """
+        return ['not implemented']
+        # TODO : Implement this
         if analysis is None:
             use_analyses = self.analysis_types
         elif isinstance(analysis, str):
@@ -474,6 +512,13 @@ class Analysis(object):
         self._mirna_dimers = 0
         self._non_mirna = 0
         self._has_mirna = 0
+
+    # Analysis : Private Methods : Init Methods : Target Analysis
+    def _init_target(self):
+        self._target_analysis_count = 0
+        self._target_evals = 0
+        self._target_names = Counter()
+        self._target_types = Counter()
 
     # Analysis : Private Methods : Init Methods : Fold Analysis
     def _init_fold(self):
@@ -534,6 +579,16 @@ class Analysis(object):
         else:
             self._non_mirna += 1
 
+    # Analysis : Private Methods : Add Methods : Target Analysis
+    def _add_target(self, hyb_record):
+        self._target_analysis_count += 1
+        hyb_record._ensure_set('eval_mirna')
+        if hyb_record.prop('has_mirna'):
+            self._target_evals += 1
+            mirna_details = hyb_record.mirna_details(allow_mirna_dimers=True)
+            self._target_names[mirna_details['target_ref']] += 1
+            self._target_types[mirna_details['target_seg_type']] += 1
+
     # Analysis : Private Methods : Add Methods : Fold Analysis
     def _add_fold(self, hyb_record):
         self._fold_analysis_count += 1
@@ -585,6 +640,15 @@ class Analysis(object):
         mirna_results['mirnas_3p'] = copy.deepcopy(self._mirnas_3p)
         mirna_results['mirna_dimers'] = copy.deepcopy(self._mirna_dimers)
         return mirna_results
+
+    # Analysis : Private Methods : Get Methods : Target Analysis
+    def _get_target_results(self):
+        target_results = {}
+        target_results['target_analysis_count'] = copy.deepcopy(self._target_analysis_count)
+        target_results['target_evals'] = copy.deepcopy(self._target_evals)
+        target_results['target_names'] = copy.deepcopy(self._target_names)
+        target_results['target_types'] = copy.deepcopy(self._target_types)
+        return target_results
 
     # Analysis : Private Methods : Get Methods : Fold Analysis
     def _get_fold_results(self):
@@ -710,6 +774,38 @@ class Analysis(object):
 
         return out_file_names
 
+    # Analysis : Private Methods : Result Special Writing Methods : Target Analysis
+    def _write_target_results_special(self, basename, out_delim=None):
+        if out_delim is None:
+            out_delim = self.settings['out_delim']
+
+        target_results = self._get_target_results()
+
+        out_file_names = []
+        main_keys = [
+            'target_analysis_count', 'target_evals'
+        ]
+        main_outfile_name = basename + '_target_results.csv'
+        with open(main_outfile_name, 'w') as out_file:
+            for key in main_keys:
+                val = target_results[key]
+                out_file.write(out_delim.join([key, str(val)]) + '\n')
+        out_file_names.append(main_outfile_name)
+
+        names_outfile_name = basename + '_target_names.csv'
+        with open(names_outfile_name, 'w') as out_file:
+            for name, count in target_results['target_names'].most_common():
+                out_file.write(out_delim.join([name, str(count)]) + '\n')
+        out_file_names.append(names_outfile_name)
+
+        types_outfile_name = basename + '_target_types.csv'
+        with open(types_outfile_name, 'w') as out_file:
+            for name, count in target_results['target_types'].most_common():
+                out_file.write(out_delim.join([name, str(count)]) + '\n')
+        out_file_names.append(types_outfile_name)
+
+        return out_file_names
+
     # Analysis : Private Methods : Result Special Writing Methods : Fold Analysis
     def _write_fold_results_special(self, basename, out_delim=None):
         if out_delim is None:
@@ -810,6 +906,33 @@ class Analysis(object):
             name=self.name,
         )
         out_files.append(seg2_types_file_name)
+        return out_files
+
+    # Analysis : Private Methods : Result Plotting Methods : Target Analysis
+    def _plot_target_results(self, basename):
+        target_results = self._get_target_results()
+        out_files = []
+
+        # Plot target_names
+        target_names_file_name = basename + '_target_names.png'
+        hybkit.plot.type_count(
+            target_results['target_names'],
+            target_names_file_name,
+            title='miRNA Target Names',
+            name=self.name,
+        )
+        out_files.append(target_names_file_name)
+
+        #Plot target_types
+        target_types_file_name = basename + '_target_types.png'
+        hybkit.plot.type_count(
+            target_results['target_types'],
+            target_types_file_name,
+            title='miRNA Target Types',
+            name=self.name,
+        )
+        out_files.append(target_types_file_name)
+
         return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Fold Analysis

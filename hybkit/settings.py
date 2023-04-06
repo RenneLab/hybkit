@@ -8,6 +8,7 @@
 import copy
 
 
+# ----- Begin Settings Helper Functions -----
 # Util : Settings Helper Functions
 def _all_str_cases(in_str):
     return [in_str.lower(), in_str.title(), in_str.upper()]
@@ -21,6 +22,7 @@ def _settings_info_to_settings(settings_info_dict):
     return ret_dict
 
 
+# ----- Begin Settings Constants -----
 # Util : Global Variables
 #: Allowed suffixes for "Hyb" files.
 HYB_SUFFIXES = _all_str_cases('.hyb')
@@ -42,15 +44,18 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 #: Default miRNA types for use in :func:`mirna_analysis`.
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
+#: Analysis types for use by :class:`hybkit.Analysis`.
+ANALYSIS_TYPE_OPTIONS = ['energy', 'type', 'mirna', 'target', 'fold']
 
-#: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
-#: (range: ENERGY_MIN_BIN <= 0).
-ENERGY_MIN_BIN = '-45.0'
+# #: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
+# #: (range: ENERGY_MIN_BIN <= 0).
+# ENERGY_MIN_BIN = '-45.0'
 
-#: Default Gibbs Free Energy bin size for use by :class:`EnergyAnalysis` ('0.1' == no binning).
-ENERGY_BIN_SIZE = '0.4'
+# #: Default Gibbs Free Energy bin size for use by :class:`EnergyAnalysis` ('0.1' == no binning).
+# ENERGY_BIN_SIZE = '0.4'
 
-# settings_info : HybRecord
+# ----- Begin settings_info variables -----
+# Start settings_info : HybRecord
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -115,20 +120,20 @@ HybRecord_settings_info = {
         None,
         {'nargs': '?', 'const': True}
     ],
-    'check_complete_seg_types': [
-        False,
-        """
-        Check every segment possibility when assigning segment types, rather than
-        breaking after the first match is found. If True, finding segment types
-        is slower but better at catching errors.
-        """,
-        'custom_bool_from_str',
-        None,
-        {'nargs': '?', 'const': True}
-    ],
+    # 'check_complete_seg_types': [
+    #     False,
+    #     """
+    #     Check every segment possibility when assigning segment types, rather than
+    #     breaking after the first match is found. If True, finding segment types
+    #     is slower but better at catching errors.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {'nargs': '?', 'const': True}
+    # ],
 }
 
-# settings_info : HybFile
+# Start settings_info : HybFile
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -161,7 +166,7 @@ HybFile_settings_info = {
     ],
 }
 
-# settings_info : FoldRecord
+# Start settings_info : FoldRecord
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -216,7 +221,7 @@ FoldRecord_settings_info = {
     ],
 }
 
-# settings_info : FoldFile
+# Start settings_info : FoldFile
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -226,7 +231,7 @@ FoldRecord_settings_info = {
 FoldFile_settings_info = {
 }
 
-# settings_info : HybFoldIter
+# Start settings_info : HybFoldIter
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -277,7 +282,7 @@ HybFoldIter_settings_info = {
     ],
 }
 
-# settings_info : Analysis
+# Start settings_info : Analysis
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -285,45 +290,18 @@ HybFoldIter_settings_info = {
 #: Information for settings of :class:`~hybkit.Analysis` class.
 #: Copied into :data:`Analysis_settings` for use at runtime.
 Analysis_settings_info = {
-    'count_mode': [
+    'quant_mode': [
         'record',
         """
-        Method for counting records. "read": use the number of reads per hyb record as the count
-        (may contain PCR duplicates); "record" count the number of records represented by each
+        Method for counting records. Options:
+        "single": count each record as a single entry;
+        "read": use the number of reads per hyb record as the count (may contain PCR duplicates);
+        "record" count the number of records represented by each
         (hyb record entry 1 for "unmerged" records, >= 1 for "merged" records)
         """,
         'str',
         None,
-        {'choices': ['read', 'record']}
-    ],
-    'mirna_sort': [
-        True,
-        """
-        During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs.
-        If False, sort alphabetically.
-        """,
-        'custom_bool_from_str',
-        None,
-        {}
-    ],
-    'allow_mirna_dimers': [
-        False,
-        """
-        Include miRNA / miRNA dimers in TargetAnalysis.
-        If False, exclude these from analysis results.
-        """,
-        'custom_bool_from_str',
-        None,
-        {'nargs': '?', 'const': True}
-    ],
-    'type_sep': [
-        '-',
-        """
-        Separator-string to place between types in analysis output.
-        """,
-        'str',
-        None,
-        {}
+        {'choices': ['single', 'read', 'record']}
     ],
     'out_delim': [
         ',',
@@ -334,25 +312,54 @@ Analysis_settings_info = {
         None,
         {}
     ],
-    'energy_min_bin': [
-        ENERGY_MIN_BIN,
-        """
-        Minimum Gibbs Free Energy value for binned analysis.
-        """,
-        'str',
-        None,
-        {}
-    ],
-    'energy_bin_size': [
-        ENERGY_BIN_SIZE,
-        """
-        Size of increment to bin energy values for binned energy analysis
-        (allowed >= 0.1). A value of '0.1' represents no value binning.
-        """,
-        'str',
-        None,
-        {}
-    ],
+    # 'mirna_sort': [
+    #     True,
+    #     """
+    #     During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs.
+    #     If False, sort alphabetically.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {}
+    # ],
+    # 'allow_mirna_dimers': [
+    #     False,
+    #     """
+    #     Include miRNA / miRNA dimers in TargetAnalysis.
+    #     If False, exclude these from analysis results.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {'nargs': '?', 'const': True}
+    # ],
+    # 'type_sep': [
+    #     '-',
+    #     """
+    #     Separator-string to place between types in analysis output.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
+    # 'energy_min_bin': [
+    #     ENERGY_MIN_BIN,
+    #     """
+    #     Minimum Gibbs Free Energy value for binned analysis.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
+    # 'energy_bin_size': [
+    #     ENERGY_BIN_SIZE,
+    #     """
+    #     Size of increment to bin energy values for binned energy analysis
+    #     (allowed >= 0.1). A value of '0.1' represents no value binning.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
 
 }
 
