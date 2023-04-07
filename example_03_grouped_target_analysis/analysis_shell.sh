@@ -84,7 +84,7 @@ rm -v ${QC_FILES}
 hyb_analyze -i ${COMBINED_FILE} --verbose \
             --out_dir ${OUT_DIR} \
             -u '' \
-            --analysis_type target \
+            --analysis_types target \
             --analysis_name "KSHV Combined" \
 
 set +v

@@ -82,8 +82,8 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
 
                 # If assigned 'miRNA' does not contain string 'kshv', skip.
                 if (not hyb_record.has_prop('has_mirna')
-                        or not hyb_record.has_prop('mirna_contains', 'kshv')
-                        ):
+                        or not hyb_record.has_prop('mirna_contains', 'kshv')):
+
                     continue
 
                 # Set dataset flag of record

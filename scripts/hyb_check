@@ -88,7 +88,6 @@ def hyb_check(in_hyb_files,
             InFoldClass = contextlib.nullcontext
             in_fold_args = tuple()
 
-
         if verbose:
             print('Checking Files:')
             print('    Input Hyb:   ' + in_hyb_file)

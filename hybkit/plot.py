@@ -27,7 +27,7 @@ GENERAL_DEFAULTS = {
 
 
 PIE_DEFAULTS = {
-    'SETTINGS':  {
+    'SETTINGS': {
         'autopct': '%1.1f%%',
         'shadow': False,
         'startangle': 90,
@@ -171,7 +171,6 @@ def type_count(results, plot_file_name, title, name=None):
         title (str): Title of plot.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
     """
-
     # Sort hybrid_type_counts counter object in descending order
     labels, counts = [], []
     for key, count in results.most_common():

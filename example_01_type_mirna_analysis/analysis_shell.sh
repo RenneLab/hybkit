@@ -17,7 +17,7 @@ See: 'type_mirna_analysis_notes.rst' for more information.
 
 printf """${NOTES}"""
 
-# Stop if error 
+# Stop if error
 set -e -u -o pipefail
 
 OUT_DIR="output_shell"
@@ -44,7 +44,7 @@ for fn in ${IN_FILES[*]}; do
   echo "    ${fn}"
 done
 
-set -v 
+set -v
 
 # Check input files for errors.
 hyb_check -i ${IN_FILES[*]} --verbose
@@ -57,7 +57,7 @@ hyb_eval -i ${IN_FILES[*]} --verbose \
          --type_params_file string_match_legend.csv \
          --mirna_types miRNA KSHV-miRNA \
          --hybformat_id True \
-         --set_dataset  
+         --set_dataset
 
 # Generate file names to match python analysis
 EVAL_FILES=( $(ls ${OUT_DIR}/*evaluated*.hyb) )
@@ -73,7 +73,7 @@ hyb_filter -i ${EVAL_FILES[*]} --verbose \
            --exclude_2 any_seg_type_is mitoch-rRNA \
 
 # Cleanup intermediate files
-rm -v ${OUT_DIR}/*evaluated*.hyb 
+rm -v ${OUT_DIR}/*evaluated*.hyb
 
 # Run Summary analysis on individual files
 for fn in ${QC_FILES[*]}; do
@@ -97,7 +97,7 @@ cat ${QC_FILES} > ${COMBINED_FILE}
 hyb_analyze -i ${COMBINED_FILE} --verbose \
               -o ${COMBINED_FILE/.hyb/} \
               -u '' \
-              --analysis_type summary \
+              --analysis_types "type" "mirna" \
               --analysis_name "Combined Analysis"
 
 rm -v ${COMBINED_FILE}

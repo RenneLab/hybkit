@@ -273,7 +273,7 @@ HybFoldIter_settings_info = {
         {'choices': ['raise', 'warn_return', 'warn_skip', 'skip', 'return']}
     ],
     'max_sequential_skips': [
-        20,
+        100,
         """
         Maximum number of record(-pairs) to skip in a row. Limited as several sequential skips
         usually indicates an issue with record formatting or a desynchrnoization between files.
