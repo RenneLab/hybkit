@@ -79,6 +79,7 @@ jobs:
       - run:
           name: Download Sample Data
           command: |
+            ls example*
             for data_dir in $(ls -d example_??_*); do
               cd $data_dir
               pwd

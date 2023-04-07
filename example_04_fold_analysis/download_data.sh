@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 # usage: "sh ./download_data.sh"
-# DL Version 1.0
+# DL Version v02
 
 if [ -f WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna ]; then
     printf "Data already downloaded.\n"
