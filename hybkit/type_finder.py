@@ -63,9 +63,23 @@ class TypeFinder(object):
     #:     'id_map'       :meth:`make_id_map_params`
     #:     ============== ===================================================
     param_methods = {
-        'hybformat': 'N/A',
+        'hybformat': None,
         'string_match': 'make_string_match_params',
         'id_map': 'make_id_map_params'
+    }
+
+    # TypeFinder : Public Methods : Flag_Info : find_seg_type
+    #: Dict of whether parameter generation methods need an input file
+    #:
+    #:     ============== ===================================================
+    #:     'hybformat'    :obj:`False`
+    #:     'string_match' :obj:`True`
+    #:     'id_map'       :obj:`True`
+    #:     ============== ===================================================
+    param_methods_needs_file = {
+        'hybformat': False,
+        'string_match': True,
+        'id_map': True,
     }
 
     # TypeFinder : Public Methods : Initialization

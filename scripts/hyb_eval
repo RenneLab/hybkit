@@ -12,6 +12,50 @@ Evaluation Types:
     ``type``   Assigns types to each segment within hyb records
     ``mirna``  Assigns which segments are a miRNA based on segment types.
     ========== ==========================================================
+
+This utility reads in one or more files in hyb-format
+(see the :ref:`Hybkit Hyb File Specification`)
+and evaluates hybrid record properties.
+
+``type`` Evaluation:
+    | The 'type' evaluation utilizes the :func:`hybkit.HybRecord.eval_types` method
+        to assign the record flags: :ref:`seg1_type <seg1_type>`
+        and :ref:`seg2_type <seg2_type>`
+
+    Example system calls:
+        ::
+
+            $ hyb_eval -t type -i my_file_1.hyb
+
+            $ hyb_eval -t type -i my_file_1.hyb \\
+                        --type_method string_match \\
+                        --type_parameters my_parameters_file.csv \\
+                        --allow_unknown_seg_types
+
+``mirna`` Evaluation:
+    | The 'mirna' evaluation uses the :func:`hybkit.HybRecord.eval_mirna` method
+        to identify properties relating to mirna within the hybrids,
+        including mirna presence and positions.
+        This evaluation requires the seg_type flags to be filled, either by a type evaluation,
+        or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
+        reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
+        the presence and position of any miRNA within the hybrid.
+
+    Example system calls:
+        ::
+
+            $ hyb_eval -t mirna -i my_file_1.hyb
+
+            $ hyb_eval -t mirna -i my_file_1.hyb \\
+                        --mirna_types miRNA kshv-miRNA
+
+    This can also be combined with the type evaluation, as such:
+
+            $ hyb_eval -t type mirna -i my_file_1.hyb \\
+                        --type_method string_match \\
+                        --type_parameters my_parameters_file.csv \\
+                        --allow_unknown_seg_types \\
+                        --mirna_types miRNA kshv-miRNA
 """
 
 import sys
@@ -23,57 +67,6 @@ import hybkit
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
-
-# Divide docstring into argparse and full portions.
-argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
-__doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format
-    (see the :ref:`Hybkit Hyb File Specification`)
-    and evaluates hybrid record properties.
-
-    ``type`` Evaluation:
-        | The 'type' evaluation utilizes the :func:`hybkit.HybRecord.eval_types` method
-          to assign the record flags: :ref:`seg1_type <seg1_type>`
-          and :ref:`seg2_type <seg2_type>`
-
-        Example system calls:
-            ::
-
-                $ hyb_eval -t type -i my_file_1.hyb
-
-                $ hyb_eval -t type -i my_file_1.hyb \\
-                           --type_method string_match \\
-                           --type_parameters my_parameters_file.csv \\
-                           --allow_unknown_seg_types
-
-    ``mirna`` Evaluation:
-        | The 'mirna' evaluation uses the :func:`hybkit.HybRecord.eval_mirna` method
-          to identify properties relating to mirna within the hybrids,
-          including mirna presence and positions.
-          This evaluation requires the seg_type flags to be filled, either by a type evaluation,
-          or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
-          reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
-          the presence and position of any miRNA within the hybrid.
-
-        Example system calls:
-            ::
-
-                $ hyb_eval -t mirna -i my_file_1.hyb
-
-                $ hyb_eval -t mirna -i my_file_1.hyb \\
-                           --mirna_types miRNA kshv-miRNA
-
-        This can also be combined with the type evaluation, as such:
-
-                $ hyb_eval -t type mirna -i my_file_1.hyb \\
-                           --type_method string_match \\
-                           --type_parameters my_parameters_file.csv \\
-                           --allow_unknown_seg_types \\
-                           --mirna_types miRNA kshv-miRNA
-
-    """)
-
-__doc__ += hybkit.util.output_description
 
 
 # Create Command-line Argument Parser
@@ -89,17 +82,10 @@ def make_parser():
         hybkit.util.hybfile_parser,
     ]
 
-    replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."'), ('``', '"')]
-    use_argparse_doc = argparse_doc
-    for q, r in replace_pairs:
-        use_argparse_doc = use_argparse_doc.replace(q, r)
-    use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
-    use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb').replace(':.', ':')
-
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
-        description=use_argparse_doc,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=hybkit.util.get_argparse_doc(__doc__),
+        formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )
 
@@ -109,19 +95,17 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_eval(
-    in_hyb_files,
-    eval_types,
-    out_dir='.',
-    out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
-    out_hyb_files=None,
-    type_method=None,
-    type_params=None,
-    type_params_file=None,
-    set_dataset=None,
-    verbose=False, silent=False
-):
-
+def hyb_eval(in_hyb_files,
+             eval_types,
+             out_dir='.',
+             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
+             out_hyb_files=None,
+             type_method=None,
+             type_params=None,
+             type_params_file=None,
+             set_dataset=None,
+             verbose=False, silent=False
+             ):
     """Perform main script function."""
 
     if not silent:
@@ -140,14 +124,15 @@ def hyb_eval(
         if type_method is None:
             message = '"type_method" argument is required for hyb_eval method.'
             print(message)
-            raise Error(message)
+            raise RuntimeError(message)
 
         if type_method != make_parser().get_default('type_method'):
             if verbose:
                 print('Setting non-default type finding method: %s' % type_method)
             params = {}
-            params_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
-            if params_method is not None:
+            params_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+            if params_method_str is not None:
+                params_method = getattr(hybkit.HybRecord.TypeFinder, params_method_str)
                 if type_params is None:
                     if hybkit.HybRecord.TypeFinder.param_methods_needs_file[type_method]:
                         if type_params_file is None:
@@ -158,7 +143,8 @@ def hyb_eval(
                             raise Exception(message)
                         if verbose:
                             print('Using type parameter file: %s' % type_params_file)
-                        param_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+                        param_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+                        param_method = getattr(hybkit.HybRecord.TypeFinder, param_method_str)
                         type_params = param_method(type_params_file)
                 if verbose:
                     print()
@@ -194,13 +180,10 @@ def hyb_eval(
             for record in in_hyb:
                 if set_dataset:
                     record.set_flag('dataset', file_label)
-
                 if do_type:
                     record.eval_types()
-
                 if do_mirna:
                     record.eval_mirna()
-
                 out_hyb.write_record(record)
 
     if verbose:
