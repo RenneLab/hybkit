@@ -37,6 +37,10 @@ def test_util_misc():
     original_abspath = hybkit.settings._USE_ABSPATH
     hybkit.settings._USE_ABSPATH = True
 
+    # Test get_argparse_doc
+    source_str = ":ref:`|==``::\n::\n"
+    assert hybkit.util.get_argparse_doc(source_str) == '":\n'
+
     # Test _bool_from_string
     assert hybkit.util._bool_from_string(True)
     assert hybkit.util._bool_from_string('yes')

@@ -41,7 +41,7 @@ def get_argparse_doc(docstring):
         if line.strip() == '::':
             continue
         retain_lines.append(line.rstrip())
-    argparse_doc = '\n'.join(retain_lines)
+    argparse_doc = '\n'.join(retain_lines) + '\n'
     for query_str, replace_str in final_replace_pairs:
         argparse_doc = argparse_doc.replace(query_str, replace_str)
     return argparse_doc
@@ -780,12 +780,30 @@ _this_arg_help = (
     Analysis to perform on input hyb (and fold) files.
     """
 )
+_hyb_analysis_options = copy.deepcopy(settings.ANALYSIS_TYPE_OPTIONS)[:-1]
 hyb_analyze_parser.add_argument(
     '-a', '--analysis_types',
     # required=True,
     nargs='+',
     action='store',
-    choices=settings.ANALYSIS_TYPE_OPTIONS,
+    choices=_hyb_analysis_options,
+    help=_this_arg_help
+)
+
+# Argument Parser : hyb_fold_analyze
+hyb_fold_analyze_parser = argparse.ArgumentParser(add_help=False)
+_this_arg_help = (
+    """
+    Analysis to perform on input hyb and fold files.
+    """
+)
+hyb_fold_analyze_parser.add_argument(
+    '-a', '--analysis_types',
+    # required=True,
+    # nargs='1',
+    default='fold',
+    action='store',
+    choices=copy.deepcopy(settings.ANALYSIS_TYPE_OPTIONS),
     help=_this_arg_help
 )
 
@@ -894,12 +912,14 @@ def set_setting(setting, set_value, verbose=False):
         verbose (:obj:`bool`, optional): If True, print when changing setting.
     """
     out_report = '\n'
+    setting_found = False
     for class_name in ['HybRecord', 'HybFile', 'FoldRecord',
                        'FoldFile', 'HybFoldIter', 'Analysis']:
         cls_settings_info = getattr(settings, class_name + '_settings_info')
         cls_settings = getattr(settings, class_name + '_settings')
         do_check_list = isinstance(set_value, list)
         if setting in cls_settings:
+            setting_found = True
             old_setting = cls_settings[setting]
             if 'choices' in cls_settings_info[setting][4]:
                 choices = cls_settings_info[setting][4]['choices']
@@ -920,7 +940,9 @@ def set_setting(setting, set_value, verbose=False):
                 out_report += 'Setting %s Setting: ' % class_name
                 out_report += '"%s" to "%s"\n' % (setting, str(set_value))
                 cls_settings[setting] = set_value
-
+    if not setting_found:
+        message = 'Setting "%s" not found' % setting
+        raise RuntimeError(message)
     if verbose and out_report.strip():
         print(out_report)
     return out_report
