@@ -137,7 +137,7 @@ jobs:
           name: Run Test
           command: |
             export PATH=$PATH:$PWD/scripts
-            echo "Stub for now"
+            ls
             cd << parameters.example >>*
             python3 ./analysis_python.py
             ./analysis_shell.sh
