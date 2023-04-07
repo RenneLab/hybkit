@@ -21,7 +21,6 @@ hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output_python')
 input_files = sorted(f for f in os.listdir(analysis_dir) if f.endswith('.hyb'))
-input_files = input_files[:1]
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
