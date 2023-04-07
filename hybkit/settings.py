@@ -211,8 +211,8 @@ FoldRecord_settings_info = {
         'raise',
         """
         Mode for handling errors during reading of HybFiles
-        (overridden by HybFoldIter.settings['error_mode'] when using HybFoldIter).
-        Options: "raise": Raise an error when encountered and exit program;
+        (overridden by HybFoldIter.settings['iter_error_mode'] when using HybFoldIter).
+        Options: "raise": Raise an error when encountered and exit program ;
         "warn_return": Print a warning and return the error_value ;
         "return": Return the error value with no program output.
         record is encountered.

@@ -31,6 +31,9 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+hybkit.util.set_setting('error_mode', 'raise')
+hybkit.util.set_setting('iter_error_mode', 'raise')
+
 
 # ----- Begin FoldRecord tests -----
 # ----- FoldRecord Constructor Tests - Minimal -----

@@ -15,7 +15,6 @@ import argparse
 import pytest
 import hybkit
 
-
 # ----- Import Testing Helper Data -----
 from auto_tests.test_helper_data import *
 # Includes the following variables:
@@ -31,12 +30,17 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+hybkit.util.set_setting('error_mode', 'raise')
+hybkit.util.set_setting('iter_error_mode', 'raise')
+
 
 # ----- Begin ViennaFile Tests -----
 test_parameters = [
     ('bad_type', 'Raise', {'seq_type': 'badtype'}),
     ('bad_error_mode', 'Raise', {'error_mode': 'badmode'}),
 ]
+
+
 @pytest.mark.parametrize("test_name,expectation,test_kwargs", [*test_parameters])
 # ----- Test Misc Properties of ViennaFiles -----
 def test_viennafile_constructor_misc(test_name, expectation, test_kwargs, tmp_path):

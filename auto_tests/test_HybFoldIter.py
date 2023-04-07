@@ -15,7 +15,6 @@ import argparse
 import pytest
 import hybkit
 
-
 # ----- Import Testing Helper Data -----
 from auto_tests.test_helper_data import *
 # Includes the following variables:
@@ -31,6 +30,9 @@ from auto_tests.test_helper_functions import *
 # get_expected_result_string(is_allowed=False)
 # get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
 
+hybkit.util.set_setting('error_mode', 'raise')
+hybkit.util.set_setting('iter_error_mode', 'raise')
+
 
 # ----- Begin HybFoldIter Tests -----
 # ----- Constructor Tests -----
@@ -45,8 +47,6 @@ def test_hybfolditer_constructor_misc(tmp_path):
         use_iter = hybkit.HybFoldIter(None, fold_file)
     with pytest.raises(RuntimeError):
         use_iter = hybkit.HybFoldIter(hyb_file, fold_file, iter_error_mode='BadMode')
-
-
 
 
 # ----- Direct Match Tests -----
