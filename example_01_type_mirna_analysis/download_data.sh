@@ -4,7 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 # usage: "sh ./download_data.sh"
-# DL Version 1.0
+# DL Version v02
 
 # Check if GSM2720017_UI_BR1.hyb exists, and if not download data.
 if [ -f GSM2720017_UI_BR1.hyb ]; then
