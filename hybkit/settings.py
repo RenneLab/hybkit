@@ -45,7 +45,9 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
 #: Analysis types for use by :class:`hybkit.Analysis`.
-ANALYSIS_TYPE_OPTIONS = ['energy', 'type', 'mirna', 'target', 'fold']
+ANALYSIS_TYPE_OPTIONS_HYB = ['energy', 'type', 'mirna', 'target']
+ANALYSIS_TYPE_OPTIONS_FOLD = ['fold']
+ANALYSIS_TYPE_OPTIONS = [*ANALYSIS_TYPE_OPTIONS_HYB, *ANALYSIS_TYPE_OPTIONS_FOLD]
 
 # #: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
 # #: (range: ENERGY_MIN_BIN <= 0).

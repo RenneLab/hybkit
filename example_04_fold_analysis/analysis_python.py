@@ -4,11 +4,10 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-Analysis for example_pattern_analysis performed as a python workflow.
+Example fold analysis performed as a python workflow.
 
-Provided as an example of direct
-usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
-For further detail, see "pattern_analysis_notes.rst".
+Provided as an example of direct usage of hybkit functions.
+For further detail, see the relevant "[analysis]_analysis_notes.rst".
 """
 
 import os
@@ -16,21 +15,12 @@ import sys
 import hybkit
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
-
+hybkit.util.set_setting('mirna_types', ['miRNA', 'KSHV-miRNA'])
 # Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.settings.HybFile_settings['hybformat_id'] = True
-
-# Allow few mismatches between hyb-record sequence and fold-record sequence.
-hybkit.settings.FoldRecord_settings['allowed_mismatches'] = 3
-
-# Set FoldRecord as "dynamic" to work with Hyb-format *_hybrid_ua.vienna files
-# which have a modified sequence.
-hybkit.settings.FoldFile_settings['foldrecord_type'] = 'dynamic'
-
-# Allow mirna/mirna dimers in analysis.
-hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
-
+hybkit.util.set_setting('hybformat_id', True)
+# Set FoldRecord seq_type as "dynamic" to work with Hyb-format *_hybrid_ua.vienna files
+#   which have a modified sequence.
+hybkit.util.set_setting('seq_type', 'dynamic')
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
@@ -38,9 +28,9 @@ input_hyb_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.hy
 input_vienna_name = os.path.join(analysis_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 out_dir = os.path.join(analysis_dir, 'output_python')
-out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_fold.hyb')
+out_hyb_name = os.path.join(out_dir, 'WT_BR1_comp_hOH7_KSHV_hybrids_ua_qc.hyb')
 data_label = 'WT_BR1'
-out_analysis_basename = out_hyb_name.replace('.hyb', '')
+analysis_basename = out_hyb_name.replace('.hyb', '')
 
 # Begin Analysis
 print('\nPerforming Pattern Analysis...')
@@ -58,8 +48,8 @@ remove_types = ['rRNA', 'mitoch-rRNA']
 match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
 hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 
-# Initialize PatternAnalysis:
-pattern_analysis = hybkit.analysis.PatternAnalysis(name='WT_BR1')
+# Initialize Fold Analysis:
+hyb_analysis = hybkit.analysis.Analysis(analysis_types=['fold', 'energy'], name='WT_BR1')
 
 # Use the combined iterator to iterate over the hyb and vienna files simultaneously,
 #   returning hyb records containing their associated fold record.
@@ -70,8 +60,12 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
 
     hyb_fold_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=True)
     for i, hyb_record in enumerate(hyb_fold_iter):
-        # Find Segment types
+        # Find Segment types and miRNA information
         hyb_record.eval_types()
+        hyb_record.eval_mirna()
+
+        # Set dataset flag of record
+        hyb_record.set_flag('dataset', in_file_label)
 
         # Determine if record has type that is excluded
         use_record = True
@@ -84,27 +78,22 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
         if not use_record:
             continue
 
-        # Perform record analysis
-        hyb_record.eval_mirna()
-
         # If the record contains a non-duplex miRNA, then analyze folding.
         # Equivalent to ('has_mirna' and not 'has_mirna_dimer')
         if hyb_record.has_prop('mirna_not_dimer'):
-            # Set dataset flag of record
-            hyb_record.set_flag('dataset', in_file_label)
-            # Perform miRNA Fold Pattern Analysis
-            pattern_analysis.add(hyb_record)
+            # Perform miRNA Fold Analysis
+            hyb_analysis.add_hyb_record(hyb_record)
             # Write the record to the output hyb file.
             # out_hyb.write_record(hyb_record)
 
-# Print report after Iteration
+# Print iterator report after Iteration
 print()
 hyb_fold_iter.print_report()
 print()
 
 # Write pattern analysis for input file to outputs.
-print('Outputting Analyses to:\n    %s\n' % out_analysis_basename)
-pattern_analysis.write(out_analysis_basename)
-pattern_analysis.plot(out_analysis_basename)
+print('Outputting Analyses to:\n    %s\n' % analysis_basename)
+hyb_analysis.write_analysis_results_special(out_basename=analysis_basename)
+hyb_analysis.plot_analysis_results(out_basename=analysis_basename)
 
-print('Done!')
+print('\nDone!\n')

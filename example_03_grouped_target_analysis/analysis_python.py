@@ -4,10 +4,9 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 """
-Grouped target analysis performed as a python workflow.
+Example grouped target analysis performed as a python workflow.
 
 Provided as an example of direct usage of hybkit functions.
-File names are hardcoded, and functions are accessed directly.
 For more details, see: "grouped_target_analysis_notes.rst".
 """
 
@@ -16,27 +15,16 @@ import sys
 import hybkit
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
-
+hybkit.util.set_setting('mirna_types', ['miRNA', 'KSHV-miRNA'])
 # Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.settings.HybFile_settings['hybformat_id'] = True
-
-# Allow mirna/mirna dimers in analysis.
-hybkit.settings.Analysis_settings['allow_mirna_dimers'] = True
+hybkit.util.set_setting('hybformat_id', True)
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 analysis_label = 'kshv_combined'
 analysis_name = 'KSHV Combined'
 out_dir = os.path.join(analysis_dir, 'output_python')
-input_files = [
-    os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720021_WT_BR2.hyb'),
-    os.path.join(analysis_dir, 'GSM2720022_WT_BR3.hyb'),
-    os.path.join(analysis_dir, 'GSM2720023_D11_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720024_D11_BR2.hyb'),
-    os.path.join(analysis_dir, 'GSM2720025_D11_BR3.hyb')
-]
+input_files = [f for f in os.listdir(analysis_dir) if f.endswith('.hyb')]
 out_file_path = os.path.join(analysis_dir, 'output_python', analysis_label + '.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
@@ -94,8 +82,8 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
 
                 # If assigned 'miRNA' does not contain string 'kshv', skip.
                 if (not hyb_record.has_prop('has_mirna')
-                    or not hyb_record.has_prop('mirna_contains', 'kshv')
-                    ):
+                        or not hyb_record.has_prop('mirna_contains', 'kshv')
+                        ):
                     continue
 
                 # Set dataset flag of record
@@ -108,20 +96,16 @@ print('\nPerforming Combined Target Analysis...\n')
 # Repeat iteration over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Initialize target analysis:
-    target_analysis = hybkit.analysis.TargetAnalysis(name=analysis_label)
+    hyb_analysis = hybkit.analysis.Analysis(analysis_types='target', name=analysis_label)
 
     # Perform target-analysis of mirna within kshv-associated data.
-    for hyb_record in out_kshv_file:
-        target_analysis.add(hyb_record)
+    hyb_analysis.add_hyb_records(out_kshv_file)
 
     # Write target information to output file
     # Set analysis basename without ".hyb" extension
     analysis_basename = out_file_path.replace('.hyb', '')
-    print('Writing Individual Analysis Files to Name Base:\n    %s' % analysis_basename)
-    target_analysis.write_individual(analysis_basename)
-    target_analysis.plot_individual(analysis_basename)
-    print('Writing Combined Analysis Files to Name Base:\n    %s' % analysis_basename)
-    target_analysis.write(analysis_basename)
-    target_analysis.plot(analysis_basename)
+    print('Writing Analysis Files to Name Base:\n    %s' % analysis_basename)
+    hyb_analysis.write_analysis_results_special(out_basename=analysis_basename)
+    hyb_analysis.plot_analysis_results(out_basename=analysis_basename)
 
 print('Done\n')

@@ -91,9 +91,9 @@ jobs:
             done
             ls example*
       - save_cache:
-          key: example_01-{{ checksum "example_01_summary_analysis/download_data.sh" }}
+          key: example_01-{{ checksum "example_01_type_mirna_analysis/download_data.sh" }}
           paths:
-            - example_01_summary_analysis
+            - example_01_type_mirna_analysis
       - save_cache:
           key: example_02-{{ checksum "example_02_target_analysis/download_data.sh" }}
           paths:
@@ -103,21 +103,17 @@ jobs:
           paths:
             - example_03_grouped_target_analysis
       - save_cache:
-          key: example_04-{{ checksum "example_04_pattern_analysis/download_data.sh" }}
+          key: example_04-{{ checksum "example_04_fold_analysis/download_data.sh" }}
           paths:
-            - example_04_pattern_analysis
-      - save_cache:
-          key: example_05-{{ checksum "example_05_fold_analysis/download_data.sh" }}
-          paths:
-            - example_05_fold_analysis
+            - example_04_fold_analysis
+
       - persist_to_workspace:
           root: ./
           paths:
-            - example_01_summary_analysis
+            - example_01_type_mirna_analysis
             - example_02_target_analysis
             - example_03_grouped_target_analysis
-            - example_04_pattern_analysis
-            - example_05_fold_analysis
+            - example_04_fold_analysis
 
   example_test_checkout:
     parameters:
@@ -145,9 +141,9 @@ jobs:
           command: |
             export PATH=$PATH:$PWD/scripts
             echo "Stub for now"
-            #cd << parameters.example >>*
-            #python3 ./analysis_python.py
-            #./analysis_shell.sh
+            cd << parameters.example >>*
+            python3 ./analysis_python.py
+            ./analysis_shell.sh
 
   example_test_pip:
     parameters:
@@ -173,9 +169,10 @@ jobs:
           command: |
             export PATH=$PATH:$PWD/scripts
             echo "Stub for now"
-            #cd << parameters.example >>*
-            #python3 ./analysis_python.py
-            #./analysis_shell.sh
+            cd << parameters.example >>*
+            python3 ./analysis_python.py
+            ./analysis_shell.sh
+            diff -r ./output_python ./output_shell
 
 workflows:
   test-python:
@@ -198,7 +195,7 @@ workflows:
               parameters:
                 # os: [linux, macos]
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
-                example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
+                example: ["example_01", "example_02", "example_03", "example_04"]
 
         # - example_test_pip:
         #     requires:

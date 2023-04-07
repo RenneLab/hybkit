@@ -6,17 +6,16 @@
 # usage: "bash ./analysis_shell.sh"
 
 NOTES="""
-Analysis for summary_analysis pipeline performed using shell scripts.
+Analysis for type/mirna analysis pipeline performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
-File names are hardcoded, and functions are accessed directly.
 This will produce identical output to analysis_python.py version,
 though that implementation is more efficeint.
 
-See: 'summary_analysis_notes.rst' for more information.
+See: 'type_mirna_analysis_notes.rst' for more information.
 """
 
-echo -e """${NOTES}"""
+printf """${NOTES}"""
 
 # Stop if error 
 set -e -u -o pipefail
@@ -81,7 +80,7 @@ for fn in ${QC_FILES[*]}; do
   hyb_analyze -i ${fn} --verbose \
               --out_dir ${OUT_DIR} \
               -u '' \
-              --analysis_type summary \
+              --analysis_types "type" "mirna" \
               --analysis_name "$(basename ${fn/_qc.hyb/})"
 done
 set +v

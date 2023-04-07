@@ -611,10 +611,16 @@ class Analysis(object):
         energy_results['energy_analysis_count'] = copy.deepcopy(self._energy_analysis_count)
         energy_results['has_energy_val'] = copy.deepcopy(self._has_energy_val)
         energy_results['no_energy_val'] = copy.deepcopy(self._no_energy_val)
-        energy_results['energy_min'] = self._energy_vals.min()
-        energy_results['energy_max'] = self._energy_vals.max()
-        energy_results['energy_mean'] = self._energy_vals.mean()
-        energy_results['energy_std'] = self._energy_vals.std()
+        if energy_results['has_energy_val'] > 0:
+            energy_results['energy_min'] = self._energy_vals.min()
+            energy_results['energy_max'] = self._energy_vals.max()
+            energy_results['energy_mean'] = self._energy_vals.mean()
+            energy_results['energy_std'] = self._energy_vals.std()
+        else:
+            energy_results['energy_min'] = None
+            energy_results['energy_max'] = None
+            energy_results['energy_mean'] = None
+            energy_results['energy_std'] = None
         energy_results['binned_energy_vals'] = copy.deepcopy(self._binned_energy_vals)
         return energy_results
 
@@ -923,7 +929,7 @@ class Analysis(object):
         )
         out_files.append(target_names_file_name)
 
-        #Plot target_types
+        # Plot target_types
         target_types_file_name = basename + '_target_types.png'
         hybkit.plot.type_count(
             target_results['target_types'],

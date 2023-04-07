@@ -10,69 +10,47 @@ Automated testing for hybkit scripts.
 """
 echo -e """${NOTES}"""
 
-exit 0
+# Stop if error
+set -e -u -o pipefail
 
-# # Stop if error
-# set -e -u -o pipefail
+OUT_DIR="output_autotest"
 
-# OUT_DIR="output_autotest"
+if ! [ -d "${OUT_DIR}" ]; then
+  mkdir "${OUT_DIR}"
+fi
 
-# if ! [ -d "${OUT_DIR}" ]; then
-#   mkdir "${OUT_DIR}"
-# fi
+IN_HYB="test_hybrid.hyb"
+FULL_IN_HYB="test_data_files/${IN_HYB}"
+IN_VIENNA="test_hybrid.vienna"
+FULL_IN_VIENNA="test_data_files/${IN_VIENNA}"
 
-# IN_HYB="test_hybrid.hyb"
-# FULL_IN_HYB="test_data_files/${IN_HYB}"
-# IN_VIENNA="test_hybrid.vienna"
-# FULL_IN_VIENNA="test_data_files/${IN_VIENNA}"
+# Run tests
+hyb_check -i "${FULL_IN_HYB}" --verbose
 
-# # Run tests
-# hyb_check -i "${FULL_IN_HYB}" --verbose
+hyb_eval -i "${FULL_IN_HYB}" --verbose \
+         --out_dir "${OUT_DIR} "\
+         --eval_types type mirna \
+         --hybformat_id True \
+         --set_dataset
 
-# hyb_eval -i "${FULL_IN_HYB}" --verbose \
-#          --out_dir "${OUT_DIR} "\
-#          --eval_types type mirna \
-#          --hybformat_id True \
-#          --set_dataset
-
-# ls "${OUT_DIR}"
-
-# hyb_filter -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb}" --verbose \
-#            --out_dir "${OUT_DIR}" \
-#            --exclusion_table \
-#            --exclude any_seg_type_is rRNA \
-#            --exclude_2 any_seg_type_is mitoch-rRNA \
-
-# ls "${OUT_DIR}"
+hyb_filter -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb}" --verbose \
+           --out_dir "${OUT_DIR}" \
+           --exclude any_seg_type_is rRNA \
+           --exclude_2 any_seg_type_is mitoch-rRNA \
 
 
-# hyb_exclude_fold -f "${FULL_IN_VIENNA}" --verbose \
-#                  -e "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_exclude.csv}" \
-#                  --out_dir "${OUT_DIR}" \
-#                  --error_mode warn_return \
+for mode in "energy" "type" "mirna" "target" "fold" "energy type mirna target fold"; do
 
-# ls "${OUT_DIR}"
+hyb_analyze -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb}" --verbose \
+            -f "${OUT_DIR}/${IN_VIENNA/.vienna/_filtered.vienna}" \
+            --out_dir "${OUT_DIR}" \
+            --analysis_types "${mode}" \
+            --analysis_name "TEST_FOLD" \
+            --seq_type dynamic \
+            --allowed_mismatches 0
 
-# for mode in "type" "mirna" "summary" "target"; do
-#   hyb_analyze -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb}" --verbose \
-#               --out_dir "${OUT_DIR}" \
-#               --analysis_type "${mode}" \
-#               --analysis_name "TEST"
-# done
-# set +v
+done
 
-# ls "${OUT_DIR}"
-
-
-# hyb_fold_analyze -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb}" --verbose \
-#                  -f "${OUT_DIR}/${IN_VIENNA/.vienna/_filtered.vienna}" \
-#                  --out_dir "${OUT_DIR}" \
-#                  --analysis_type fold \
-#                  --analysis_name "TEST_FOLD" \
-#                  --foldrecord_type dynamic \
-#                  --allowed_mismatches 0
-
-# ls "${OUT_DIR}"
-
-# echo -e "\nDone with Autotests\n"
+set +v
+echo -e "\nDone with Autotests\n"
 

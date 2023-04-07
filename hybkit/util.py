@@ -306,7 +306,7 @@ def validate_args(args, parser=None):
         len_in_hyb = len(args.in_hyb)
         len_out_hyb = len(args.out_hyb)
         if len_in_hyb != len_out_hyb:
-            message += 'The number of input files and number of output files provided '
+            message += 'The number of input hyb files and output hyb files provided '
             message += 'do not match. ( %i and %i )' % (len_in_hyb, len_out_hyb)
             message += '\n\nInput Files:\n    '
             message += '\n    '.join([f for f in args.in_hyb])
@@ -315,7 +315,21 @@ def validate_args(args, parser=None):
             print(message + suffix)
             ret_val = False
 
-    if hasattr(args, 'in_hyb') and hasattr(args, 'in_fold'):
+    if (hasattr(args, 'in_fold') and args.in_fold is not None
+            and hasattr(args, 'out_fold') and args.out_fold is not None):
+        len_in_fold = len(args.in_fold)
+        len_out_fold = len(args.out_fold)
+        if len_in_fold != len_out_fold:
+            message += 'The number of input fold files and output fold files provided '
+            message += 'do not match. ( %i and %i )' % (len_in_fold, len_out_fold)
+            message += '\n\nInput Files:\n    '
+            message += '\n    '.join([f for f in args.in_fold])
+            message += '\n\nOutput Files:\n    '
+            message += '\n    '.join([f for f in args.out_fold])
+            print(message + suffix)
+            ret_val = False
+
+    if hasattr(args, 'in_hyb') and hasattr(args, 'in_fold') and args.in_fold is not None:
         len_in_hyb = len(args.in_hyb)
         len_in_fold = len(args.in_fold)
         if len_in_hyb != len_in_fold:
@@ -353,7 +367,8 @@ class _HybkitFormatter(argparse.ArgumentDefaultsHelpFormatter,
 
 
 # ----- Begin Argparse Parsers -----
-# Argument Parser : Input/Output Options
+# Start I/O Files
+# Argument Parser : Input/Output: I/O Files
 in_hybs_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
     """
@@ -369,7 +384,7 @@ in_hybs_parser.add_argument(
     help=_this_arg_help
 )
 
-# Argument Parser : Input/Output Options
+# Argument Parser : Input/Output : I/O Files
 in_folds_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
     """
@@ -380,13 +395,14 @@ _this_arg_help = (
 in_folds_parser.add_argument(
     '-f', '--in_fold', type=fold_exists,
     metavar='PATH_TO/MY_FILE.VIENNA',
-    required=True,
-    nargs='+',
+    # required=True,
+    nargs='*',
     help=_this_arg_help
 )
 
-# Argument Parser : Input/Output Options
+# Argument Parser : Input/Output : I/O Files
 out_hybs_parser = argparse.ArgumentParser(add_help=False)
+# In out_opts_... combined parsers
 _this_arg_help = (
     """
     Optional path to one or more hyb-format file for
@@ -403,8 +419,9 @@ out_hybs_parser.add_argument(
     help=_this_arg_help
 )
 
-# Argument Parser : Input/Output Options
+# Argument Parser : Input/Output : I/O Files
 out_folds_parser = argparse.ArgumentParser(add_help=False)
+# In out_opts_... combined parsers
 _this_arg_help = (
     """
     Optional path to one or more ".vienna" or ".ct"-format files for
@@ -414,34 +431,20 @@ _this_arg_help = (
     """
 )
 out_folds_parser.add_argument(
-    '-o', '--out_fold', type=out_path_exists,
+    '-l', '--out_fold', type=out_path_exists,
     metavar='PATH_TO/OUT_FILE.VIENNA',
     # required=True,
     nargs='+',
     help=_this_arg_help
 )
 
-# Argument Parser : Input/Output Options
-req_out_hyb_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = (
-    """
-    Path to hyb-format file for output (should include a ".hyb" suffix).
-    """
-)
-req_out_hyb_parser.add_argument(
-    '-o', '--out_hyb', type=out_path_exists,
-    metavar='PATH_TO/OUT_FILE.HYB',
-    required=True,
-    # nargs='1',
-    help=_this_arg_help
-)
-
-# Argument Parser : Input/Output Options
+# Argument Parser : Input/Output : I/O Files
 out_basenames_parser = argparse.ArgumentParser(add_help=False)
+# In out_opts_... combined parsers
 _this_arg_help = (
     """
     Optional path to one or more basename prefixes to use for
-    analysis output. The appropriate suffix will be added
+    output. The appropriate suffix will be added
     based on the specific name.
     If not provided, the output for input file "PATH_TO/MY_FILE.HYB"
     will be used as a template for the basename "OUT_DIR/MY_FILE".
@@ -455,11 +458,13 @@ out_basenames_parser.add_argument(
     help=_this_arg_help
 )
 
-# Argument Parser : Input/Output Options
+# Start I/O File Options
+# Argument Parser : Input/Output : I/O File Options
+# In out_opts_... combined parsers
 out_dir_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
     """
-    Path to directory for output of evaluation files.
+    Path to directory for output of files.
     Defaults to the current working directory.
     """
 )
@@ -472,7 +477,8 @@ out_dir_parser.add_argument(
 )
 
 
-# Argument Parser : Input/Output Options
+# Argument Parser : Input/Output : I/O File Options
+# In out_opts_... combined parsers
 out_suffix_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
     """
@@ -488,32 +494,77 @@ out_suffix_parser.add_argument(
     help=_this_arg_help
 )
 
-out_opts_parser = argparse.ArgumentParser(
+# Start I/O Combined
+# Argument Parser : Input/Output : I/O Combined
+cmb_hyb_fold_imputs_parser = argparse.ArgumentParser(
     add_help=False,
     parents=[
+        in_hybs_parser,
+        in_folds_parser,
+    ],
+)
+
+# Argument Parser : Input/Output : I/O Combined
+cmb_hyb_fold_io_parser = argparse.ArgumentParser(
+    add_help=False,
+    parents=[
+        in_hybs_parser,
+        in_folds_parser,
         out_hybs_parser,
-        out_dir_parser,
-        out_suffix_parser,
-    ],
-)
-
-out_fold_opts_parser = argparse.ArgumentParser(
-    add_help=False,
-    parents=[
         out_folds_parser,
-        out_dir_parser,
-        out_suffix_parser,
     ],
 )
-out_analysis_parser = argparse.ArgumentParser(
+
+# Argument Parser : Input/Output : I/O Combined
+cmb_out_opts_parser = argparse.ArgumentParser(
     add_help=False,
     parents=[
-        out_basenames_parser,
         out_dir_parser,
         out_suffix_parser,
     ],
 )
 
+# Argument Parser : Input/Output : I/O Combined
+# out_opts_parser_hyb = argparse.ArgumentParser(
+#     add_help=False,
+#     parents=[
+#         out_hybs_parser,
+#         out_dir_parser,
+#         out_suffix_parser,
+#     ],
+# )
+
+# Argument Parser : Input/Output : I/O Combined
+# out_opts_parser_basename = argparse.ArgumentParser(
+#     add_help=False,
+#     parents=[
+#         out_basenames_parser,
+#         out_dir_parser,
+#         out_suffix_parser,
+#     ],
+# )
+
+# Argument Parser : Input/Output : I/O Combined
+# out_fold_opts_parser = argparse.ArgumentParser(
+#     add_help=False,
+#     parents=[
+#         out_folds_parser,
+#         out_dir_parser,
+#         out_suffix_parser,
+#     ],
+# )
+
+# Argument Parser : Input/Output : I/O Combined
+# cmb_out_analysis_parser = argparse.ArgumentParser(
+#     add_help=False,
+#     parents=[
+#         out_basenames_parser,
+#         out_dir_parser,
+#         out_suffix_parser,
+#     ],
+# )
+
+# Start General Options
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
 verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
@@ -542,6 +593,7 @@ verbosity_group.add_argument(
     help=_this_arg_help
 )
 
+# Start Record Manip Options
 # Argument Parser : Record Manipulation Options
 record_manip_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
@@ -557,7 +609,8 @@ record_manip_parser.add_argument(
     help=_this_arg_help
 )
 
-# Argument Parser : HybRecord, HybFile, FoldRecord
+# Start Class Settings Parsers
+# Argument Parser : Class Settings Parser
 _class_settings_groups = {}
 # Create parser for HybRecord options
 hybrecord_parser = argparse.ArgumentParser(add_help=False)
@@ -607,6 +660,18 @@ for _cls_name, _cls_group in _class_settings_groups.items():
         _use_kwargs['default'] = _default
         _cls_group.add_argument(*_use_args, **_use_kwargs)
 
+# Argument Parser : Record Manipulation Options
+cmb_hyb_fold_class_settings_parser = argparse.ArgumentParser(
+    add_help=False,
+    parents=[
+        hybrecord_parser,
+        hybfile_parser,
+        foldrecord_parser,
+        foldfile_parser,
+        hybfolditer_parser,
+    ],
+)
+
 
 #  ----- Begin Task-specific Parsers -----
 # Start eval
@@ -642,7 +707,7 @@ type_opts_group.add_argument(
     '--type_method',
     # required=True,
     # nargs='?',
-    default='hyb',
+    default=type_finder.TypeFinder.default_method,
     choices=type_finder.TypeFinder.methods.keys(),
     help=_this_arg_help
 )
@@ -685,23 +750,6 @@ hyb_filter_parser.add_argument(
     # nargs='+',
     default='all',
     choices={'all', 'any'},
-    help=_this_arg_help
-)
-
-# Argument Parser : hyb_filter : exclusion_table
-_this_arg_help = (
-    """
-    Output an "exclusion table" for use with hyb_filter_fold.
-    """
-)
-hyb_filter_parser.add_argument(
-    '--exclusion_table',
-    # required=True,
-    nargs='?',
-    default=False,
-    const=True,
-    type=_bool_from_string,
-    choices=[True, False],
     help=_this_arg_help
 )
 
@@ -757,50 +805,17 @@ for i in range(1, 4):
         help=_this_arg_help
     )
 
-# Start exclude_fold
-# Argument Parser : hyb_exclude_fold : exclusion_table
-hyb_exclude_fold_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = (
-    """
-    Exclusion table(s) corresponding to input files, generated by hyb_filter
-    """
-)
-hyb_exclude_fold_parser.add_argument(
-    '-e', '--exclusion_table',
-    required=True,
-    nargs='+',
-    help=_this_arg_help
-)
-
-# Start analyze
-# Argument Parser : hyb_analyze : analysis_types
-hyb_analyze_parser = argparse.ArgumentParser(add_help=False)
-_this_arg_help = (
-    """
-    Analysis to perform on input hyb (and fold) files.
-    """
-)
-_hyb_analysis_options = copy.deepcopy(settings.ANALYSIS_TYPE_OPTIONS)[:-1]
-hyb_analyze_parser.add_argument(
-    '-a', '--analysis_types',
-    # required=True,
-    nargs='+',
-    action='store',
-    choices=_hyb_analysis_options,
-    help=_this_arg_help
-)
-
 # Argument Parser : hyb_fold_analyze
-hyb_fold_analyze_parser = argparse.ArgumentParser(add_help=False)
+hyb_analyze_parser = argparse.ArgumentParser(add_help=False)
 _this_arg_help = (
     """
     Analysis to perform on input hyb and fold files.
     """
 )
-hyb_fold_analyze_parser.add_argument(
+hyb_analyze_parser.add_argument(
     '-a', '--analysis_types',
     # required=True,
-    # nargs='1',
+    nargs='+',
     default='fold',
     action='store',
     choices=copy.deepcopy(settings.ANALYSIS_TYPE_OPTIONS),
@@ -839,55 +854,59 @@ all_analyze_parser.add_argument(
     help=_this_arg_help
 )
 
+
 # Start Documentation Settings
 # Argument Parser : Standardized Documentation Settings
-output_description = textwrap.dedent("""
-Output File Naming:
-    Output files can be named in two fashions: via automatic name generation,
-    or by providing specific out file names.
+# output_description = textwrap.dedent(
+output_description = (
+    """
+    Output File Naming:
+        Output files can be named in two fashions: via automatic name generation,
+        or by providing specific out file names.
 
-    Automatic Name Generation:
-        For output name generation, the default respective naming scheme is used::
+        Automatic Name Generation:
+            For output name generation, the default respective naming scheme is used::
 
-            hyb_script -i PATH_TO/MY_FILE_1.HYB [...]
-                -->  OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
+                hyb_script -i PATH_TO/MY_FILE_1.HYB [...]
+                    -->  OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
 
-        This output file path can be modified with the arguments {--out_dir, --out_suffix}
-        described below.
+            This output file path can be modified with the arguments {--out_dir, --out_suffix}
+            described below.
 
-        The output directory defaults to the current working directory ``($PWD)``, and
-        can be modified with the ``--out_dir <dir>`` argument.
-        Note: The provided directory must exist, or an error will be raised.
-        For Example::
+            The output directory defaults to the current working directory ``($PWD)``, and
+            can be modified with the ``--out_dir <dir>`` argument.
+            Note: The provided directory must exist, or an error will be raised.
+            For Example::
 
-            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_dir MY_OUT_DIR
-                -->  MY_OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
+                hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_dir MY_OUT_DIR
+                    -->  MY_OUT_DIR/MY_FILE_1_ADDSUFFIX.HYB
 
-        The suffix used for output files is based on the primary actions of the script.
-        It can be specified using ``--out_suffix <suffix>``. This can optionally include
-        the ".hyb" final suffix.
-        for Example::
+            The suffix used for output files is based on the primary actions of the script.
+            It can be specified using ``--out_suffix <suffix>``. This can optionally include
+            the ".hyb" final suffix.
+            for Example::
 
-            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX
-                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
-            #OR
-            hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX.HYB
-                -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
+                hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX
+                    -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
+                #OR
+                hyb_script -i PATH_TO/MY_FILE_1.HYB [...] --out_suffix MY_SUFFIX.HYB
+                    -->  OUT_DIR/MY_FILE_1_MY_SUFFIX.HYB
 
-    Specific Output Names:
-        Alternatively, specific file names can be provided via the -o/--out_hyb argument,
-        ensuring that the same number of input and output files are provided. This argument
-        takes precedence over all automatic output file naming options
-        (--out_dir, --out_suffix), which are ignored if -o/--out_hyb is provided.
-        For Example::
+        Specific Output Names:
+            Alternatively, specific file names can be provided via the -o/--out_hyb argument,
+            ensuring that the same number of input and output files are provided. This argument
+            takes precedence over all automatic output file naming options
+            (--out_dir, --out_suffix), which are ignored if -o/--out_hyb is provided.
+            For Example::
 
-            hyb_script [...] --out_hyb MY_OUT_DIR/OUT_FILE_1.HYB MY_OUT_DIR/OUT_FILE_2.HYB
-                -->  MY_OUT_DIR/OUT_FILE_1.hyb
-                -->  MY_OUT_DIR/OUT_FILE_2.hyb
+                hyb_script [...] --out_hyb MY_OUT_DIR/OUT_FILE_1.HYB MY_OUT_DIR/OUT_FILE_2.HYB
+                    -->  MY_OUT_DIR/OUT_FILE_1.hyb
+                    -->  MY_OUT_DIR/OUT_FILE_2.hyb
 
-        Note: The directory provided with output file paths (MY_OUT_DIR above) must exist,
-        otherwise an error will be raised.
-    """)
+            Note: The directory provided with output file paths (MY_OUT_DIR above) must exist,
+            otherwise an error will be raised.
+    """
+)
 
 
 # ------ Begin Settings Manipulation Functions ------
@@ -911,7 +930,7 @@ def set_setting(setting, set_value, verbose=False):
         set_value (str): New value for setting
         verbose (:obj:`bool`, optional): If True, print when changing setting.
     """
-    out_report = '\n'
+    out_report = ''
     setting_found = False
     for class_name in ['HybRecord', 'HybFile', 'FoldRecord',
                        'FoldFile', 'HybFoldIter', 'Analysis']:
@@ -945,6 +964,8 @@ def set_setting(setting, set_value, verbose=False):
         raise RuntimeError(message)
     if verbose and out_report.strip():
         print(out_report)
+    if out_report:
+        out_report = '\n' + out_report
     return out_report
 
 

@@ -4,87 +4,69 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and analyze the contained hybrid sequences.
+Read one or more '.hyb' format and corresponding ".vienna" or ".ct" format files
+ and analyze the fold information in the contained hybrid sequences.
 
 Analysis Types:
 
-    ============================== ==============================================================
-    ``energy`` : Energy Analysis   Analyze of predicted folding energies of hyb_records
-    ``type`` : Type Analysis       Analyze of segment types included in the analyzed hyb_records
-    ``mirna`` : miRNA Analysis     Analyze counts/types of miRNA in hyb records
-    ============================== ==============================================================
+    =============================== ==============================================================
+    ``fold`` : Pattern Analysis  Analyze folding pattern of miRNAs in miRNA/target hybrids.
+    =============================== ==============================================================
 
-    This utility reads in one or more files in hyb-format
+This utility reads in one or more files in hyb-format
     (see the :ref:`Hybkit Hyb File Specification`)
-    and analyzes hybrid record properties.
+    along with a corresponding predicted RNA secondary structure file in the
+    "Vienna" (:ref:`Vienna Format <vienna_file_format>`) or
+    "CT" (:ref:`CT_Format <ct_file_format>`) formats,
+    and analyzes hybrid secondary structure properties.
 
-    ``energy`` Analysis:
-       Analyze hybrid predicted energies of folding.
+    ``fold`` Analysis:
+        Analyze hybrid miRNA fold pattern information
+        and calculated per-base complimentarity counts for the miRNA portions of identified
+        miRNA / target hybrids. For miRNA-miRNA dimers, the 5p miRNA is considered the "miRNA"
+        and the 3p miRNA is considered the "target".
 
-       Example system calls:
-            ::
+        Iteration over both files simultaneously is performed using :class:`~hybkit.HybFoldIter`,
+        including error checking. Error checking settings can be modified in
+        :attr:`HybFoldIter.settings <hybkit.HybFoldIter.settings>`.
 
-                $ hyb_analyze -a energy -i my_file_1.hyb
+        This analysis requires the record flag: :ref:`miRNA_seg <mirna_seg>`
+        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with
+        :ref:`miRNA_seg <mirna_seg>` set to one of '5p', '3p', or 'B' will be evaluated.
 
-                $ hyb_analyze -a energy type mirna -i my_file_1.hyb \\
-                           --make_plots False
-
-    ``type`` Analysis:
-        Analyze hybrid types.
-
-        Requires the record flags: :ref:`seg1_type <seg1_type>`
-        and :ref:`seg2_type <seg2_type>` to be set by the :meth:`hybkit.HybRecord.eval_types`
-        method.
-
-        Example system calls:
-            ::
-
-                $ hyb_analyze -a type -i my_file_1.hyb
-
-                $ hyb_analyze -a energy type mirna -i my_file_1.hyb \\
-                           --make_plots False
-
-    ``mirna`` Analysis:
-        Analyze miRNA counts.
-
-        Requires the record flag: :ref:`miRNA_seg <mirna_seg>`
-        to be set by the :meth:`hybkit.HybRecord.eval_mirna`
-        method.
 
         Example system calls:
             ::
 
-                $ hyb_analyze -a mirna -i my_file_1.hyb
+                $ hyb_analyze -a fold -i my_file_1.hyb -f my_file_1.vienna
 
-                $ hyb_analyze -a energy type mirna -i my_file_1.hyb \\
-                            --make_plots False
+                $ hyb_analyze -a fold -i my_file_2.hyb -f my_file_2.ct \\
+                           --make_plots False
 """
 
-import sys
 import os
 import argparse
-import textwrap
+import contextlib
 import hybkit
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-# Divide docstring into argparse and full portions.
 __doc__ += hybkit.util.output_description
 
 
 # Create Command-line Argument Parser
 def make_parser():
-    script_args = argparse.ArgumentParser(add_help=False)
     parser_components = [
         hybkit.util.in_hybs_parser,
-        hybkit.util.out_analysis_parser,
+        hybkit.util.in_folds_parser,
+        hybkit.util.out_basenames_parser,
+        hybkit.util.cmb_out_opts_parser,
         hybkit.util.hyb_analyze_parser,
         hybkit.util.all_analyze_parser,
         hybkit.util.gen_opts_parser,
-        hybkit.util.hybrecord_parser,
-        hybkit.util.hybfile_parser,
+        hybkit.util.cmb_hyb_fold_class_settings_parser,
         hybkit.util.analysis_parser,
     ]
 
@@ -95,14 +77,13 @@ def make_parser():
         allow_abbrev=False,
     )
 
-    # script_parser.set_defaults(out_suffix=hybkit.settings._EVAL_OUT_SUFFIX)
-
     return script_parser
 
 
 # Define main script function.
 def hyb_analyze(in_hyb_files,
                 analysis_types,
+                in_fold_files=None,
                 out_dir='.',
                 out_suffix=None,
                 out_basenames=None,
@@ -113,7 +94,7 @@ def hyb_analyze(in_hyb_files,
     """Perform main script function."""
 
     if not silent:
-        print('\nPerforming Analysis of Hyb Files...')
+        print('\nPerforming Fold Pattern Analysis of Hyb Files...')
 
     if verbose:
         print('\nPerforming Analysis Types: ' + ', '.join(analysis_types))
@@ -129,10 +110,22 @@ def hyb_analyze(in_hyb_files,
     if verbose:
         print('Using Out Suffix: "%s"' % out_suffix)
 
-    combined_analysis = hybkit.analysis.Analysis(analysis_types, name=analysis_name)
+    combined_analysis = hybkit.analysis.Analysis(analysis_types=analysis_types, name=analysis_name)
 
-    for i, in_hyb_file in enumerate(in_hyb_files):
+    # Start Setup Input Files
+    if in_fold_files:
+        file_iter = zip(in_hyb_files, in_fold_files)
+    else:
+        file_iter = in_hyb_files
+
+    for i, use_files in enumerate(file_iter):
+        if in_fold_files:
+            in_hyb_file, in_fold_file = use_files
+        else:
+            in_hyb_file, in_fold_file = use_files, None
         file_basename = os.path.basename(in_hyb_file)
+        file_label = file_basename.replace('.hyb', '')
+
         if out_basenames is not None:
             out_basename = out_basenames[i]
         else:
@@ -145,19 +138,44 @@ def hyb_analyze(in_hyb_files,
                 seg_sep='_',
             )
 
-        if verbose:
-            print('Analyzing File:')
-            print('    Input   : ' + in_hyb_file)
-            print('    Out Base: ' + out_basename)
+        if in_fold_file is not None:
+            if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
+                InFoldClass = hybkit.ViennaFile
+            elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
+                InFoldClass = hybkit.CtFile
+            else:
+                raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
+            in_fold_args = (in_fold_file, 'r')
+        else:
+            InFoldClass = contextlib.nullcontext
+            in_fold_args = tuple()
 
-        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb:
-            combined_analysis.add_hyb_records(in_hyb)
+        if verbose:
+            print('Analyzing Files:')
+            print('    Input Hyb:   ' + in_hyb_file)
+            if in_fold_files:
+                print('    Input Fold:  ' + in_fold_file)
+            print('    Output Base: ' + out_basename)
+
+        # Start Record Iteration
+        with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
+             InFoldClass(*in_fold_args) as in_fold:
+            if in_fold_file is None:
+                record_iter = in_hyb
+            else:
+                record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
+
+            for i, hyb_record in enumerate(record_iter, start=1):
+                combined_analysis.add_hyb_record(hyb_record)
 
         combined_analysis.write_analysis_results_special(out_basename=out_basename)
         if make_plots:
             combined_analysis.plot_analysis_results(out_basename=out_basename)
 
     if verbose:
+        if hasattr(record_iter, 'print_report'):
+            print('\nHybFoldIter Report:\n')
+            record_iter.print_report()
         print('\nAnalysis Complete.\n')
 
 
@@ -168,9 +186,10 @@ if __name__ == '__main__':
     hybkit.util.validate_args(args, script_parser)
     hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
     hyb_analyze(
-        args.in_hyb,
-        args.analysis_types,
-        args.out_dir,
+        in_hyb_files=args.in_hyb,
+        in_fold_files=args.in_fold,
+        analysis_types=args.analysis_types,
+        out_dir=args.out_dir,
         out_suffix=args.out_suffix,
         out_basenames=args.out_basename,
         analysis_name=args.analysis_name,

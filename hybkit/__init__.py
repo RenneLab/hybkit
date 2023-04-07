@@ -2926,6 +2926,7 @@ class HybFoldIter(object):
                 message += 'Next HybRecord: %s\n' % str(next_hyb_record)
             if next_fold_record is not None:
                 message += 'Next FoldRecord: %s\n' % str(next_fold_record)
+            message += '\n' + '\n'.join(self.report()) + '\n'
             print(message)
             raise
 

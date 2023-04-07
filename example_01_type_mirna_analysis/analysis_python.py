@@ -4,11 +4,10 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Analysis for summary_analysis pipeline performed as a python workflow.
+Analysis for type/mirna analysis pipeline performed as a python workflow.
 
-Provided as an example of direct
-usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
-See: "summary_analysis_notes.rst" for more information.
+Provided as an example of direct use of the Hybkit API.
+See: "type_mirna_analysis_notes.rst" for more information.
 """
 
 import os
@@ -21,21 +20,11 @@ hybkit.settings.HybRecord_settings['mirna_types'] = ['miRNA', 'KSHV-miRNA']
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))
 out_dir = os.path.join(analysis_dir, 'output_python')
-input_files = [
-    os.path.join(analysis_dir, 'GSM2720017_UI_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720018_UI_BR2.hyb'),
-    os.path.join(analysis_dir, 'GSM2720019_UI_BR3.hyb'),
-    os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720021_WT_BR2.hyb'),
-    os.path.join(analysis_dir, 'GSM2720022_WT_BR3.hyb'),
-    os.path.join(analysis_dir, 'GSM2720023_D11_BR1.hyb'),
-    os.path.join(analysis_dir, 'GSM2720024_D11_BR2.hyb'),
-    os.path.join(analysis_dir, 'GSM2720025_D11_BR3.hyb')
-]
+input_files = sorted(f for f in os.listdir(analysis_dir) if f.endswith('.hyb'))
+input_files = input_files[:1]
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
-
 print('\nPerforming QC & Summary Analysis...')
 
 if not os.path.isdir(out_dir):
@@ -48,12 +37,6 @@ print('    ' + '\n    '.join(input_files) + '\n')
 # Set the method of finding segment type
 match_params = hybkit.HybRecord.TypeFinder.make_string_match_params(match_legend_file)
 hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
-
-# Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.HybFile.settings['hybformat_id'] = True
-
-# Initialize listto store independent analyses.
-summary_analyses = []
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
@@ -71,16 +54,20 @@ for in_file_path in input_files:
     sys.stdout.flush()
 
     # Initialize file-specific analysis
-    file_summary_analysis = hybkit.analysis.SummaryAnalysis(name=in_file_label)
+    file_analysis = hybkit.analysis.Analysis(
+        analysis_types=['type', 'mirna'], name=in_file_label
+    )
+    combined_analysis = hybkit.analysis.Analysis(
+        analysis_types=['type', 'mirna'], name='Combined Analysis'
+    )
 
     # Open one HybFile entry for reading, and one for writing
-    with hybkit.HybFile(in_file_path, 'r') as in_file, \
+    with hybkit.HybFile(in_file_path, 'r', hybformat_id=True) as in_file, \
          hybkit.HybFile(out_file_path, 'w') as out_file:
-
         # Iterate over each record of the input file
         for hyb_record in in_file:
-            # Find the segments type of each record
-            hyb_record.eval_types()
+            hyb_record.eval_types()  # Find segment types
+            hyb_record.eval_mirna()  # Find miRNA details
 
             # Determine if record has type that is excluded
             use_record = True
@@ -88,18 +75,16 @@ for in_file_path in input_files:
                 if hyb_record.has_prop('any_seg_type_is', remove_type):
                     use_record = False
                     break
-
             # If record has an excluded type, continue to next record without analyzing.
             if not use_record:
                 continue
 
+            # Set the dataset label for the record
             hyb_record.set_flag('dataset', in_file_label)
 
-            # Perform record analysis
-            hyb_record.eval_mirna()
-
-            # Add record details to SummaryAnalysis
-            file_summary_analysis.add(hyb_record)
+            # Add record details to analyses
+            file_analysis.add_hyb_record(hyb_record)
+            combined_analysis.add_hyb_record(hyb_record)
 
             # Write the modified record to the output file
             out_file.write_record(hyb_record)
@@ -108,20 +93,14 @@ for in_file_path in input_files:
     analysis_file_basename = out_file_path.replace('.hyb', '')
     print('Outputting Analyses to:\n    %s\n' % analysis_file_basename)
     sys.stdout.flush()
-    file_summary_analysis.write(analysis_file_basename)
-    file_summary_analysis.plot(analysis_file_basename)
-    summary_analyses.append(file_summary_analysis)
-
-# Create a combined summary analysis
-combined_summary_analysis = hybkit.analysis.SummaryAnalysis(name='Combined Analysis')
-for file_analysis in summary_analyses:
-    combined_summary_analysis.update(file_analysis)
+    file_analysis.write_analysis_results_special(analysis_file_basename)
+    file_analysis.plot_analysis_results(analysis_file_basename)
 
 # Write combined summary analysis to files.
 combined_analysis_file_basename = os.path.join(out_dir, 'combined_analysis')
 print('Outputting Combined Analysis to:\n    %s\n' % combined_analysis_file_basename)
 sys.stdout.flush()
-combined_summary_analysis.write(combined_analysis_file_basename)
-combined_summary_analysis.plot(combined_analysis_file_basename)
+combined_analysis.write_analysis_results_special(combined_analysis_file_basename)
+combined_analysis.plot_analysis_results(combined_analysis_file_basename)
 
 print('Done!')
