@@ -4,6 +4,7 @@
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
 # usage: "sh ./download_data.sh"
+# DL Version 1.0
 
 if [ -f GSM2720020_WT_BR1.hyb ]; then
     printf "Data already downloaded.\n"
