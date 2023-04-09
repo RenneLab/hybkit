@@ -447,7 +447,7 @@ class Analysis(object):
         return all_out_files
 
     # Analysis : Public Methods : Plot Results : plot_analysis_results
-    def plot_analysis_results(self, analysis=None, out_basename=None):
+    def plot_analysis_results(self, out_basename=None, analysis=None):
         """
         Plot the results of the analyses.
 
