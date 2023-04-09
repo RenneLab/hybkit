@@ -458,8 +458,6 @@ class Analysis(object):
                 ./<analysis_name> if :attr:`name` provided or
                 ./analysis if no name provided.
         """
-        return ['not implemented']
-        # TODO : Implement this
         if analysis is None:
             use_analyses = self.analysis_types
         elif isinstance(analysis, str):
@@ -476,8 +474,8 @@ class Analysis(object):
 
         all_out_files = []
         for analysis in use_analyses:
-            if hasattr(self, '_plot_' + analysis):
-                out_files = getattr(self, '_plot_' + analysis)(
+            if hasattr(self, '_plot_' + analysis + '_results'):
+                out_files = getattr(self, '_plot_' + analysis + '_results')(
                     basename=out_basename
                 )
                 all_out_files += out_files
@@ -831,6 +829,10 @@ class Analysis(object):
             if name_key == 'folds_recorded':
                 val_dict = {name_key: fold_results[name_key]}
                 iter_method = 'items'
+            elif name_key in {'fold_match_counts', 'mirna_nt_fold_counts', 'mirna_nt_fold_props'}:
+                val_dict = {k: fold_results[name_key][k]
+                            for k in sorted([*fold_results[name_key].keys()])}
+                iter_method = 'items'
             else:
                 val_dict = fold_results[name_key]
                 if hasattr(val_dict, 'most_common'):
@@ -853,11 +855,13 @@ class Analysis(object):
         # Plot Histogram
         energy_histogram_file_name = basename + '_energy_histogram.png'
         hybkit.plot.energy_histogram(
-            results=energy_results,
+            results=energy_results['binned_energy_vals'],
             plot_file_name=energy_histogram_file_name,
+            title='Hybrid Gibbs Free Energy (kcal/mol)',
             name=self.name,
         )
         out_files.append(energy_histogram_file_name)
+        return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Type Analysis
     def _plot_type_results(self, basename):
@@ -872,14 +876,36 @@ class Analysis(object):
         type_results['seg2_types'] = copy.deepcopy(self._seg2_types)
         type_results['all_seg_types'] = copy.deepcopy(self._all_seg_types)
 
+        # Plot hybrid_types
+        hybrid_types_file_name = basename + '_types_hybrid_types.png'
+        hybkit.plot.type_count(
+            type_results['hybrid_types'],
+            hybrid_types_file_name,
+            title='Hybrid Types',
+            name=self.name,
+            join_entries=True,
+        )
+        out_files.append(hybrid_types_file_name)
+
+        # Plot reordered_hybrid_types
+        reordered_hybrid_types_file_name = basename + '_types_reordered_hybrid_types.png'
+        hybkit.plot.type_count(
+            type_results['reordered_hybrid_types'],
+            reordered_hybrid_types_file_name,
+            title='Reordered Hybrid Types',
+            name=self.name,
+            join_entries=True,
+        )
+        out_files.append(reordered_hybrid_types_file_name)
+
         # Plot mirna_hybrid_types
         mirna_hybrid_types_file_name = basename + '_types_mirna_hybrids.png'
-        # TODO: Implement hybkit.plot.type_count
         hybkit.plot.type_count(
             type_results['mirna_hybrid_types'],
             mirna_hybrid_types_file_name,
             title='miRNA Hybrid Types',
             name=self.name,
+            join_entries=True,
         )
         out_files.append(mirna_hybrid_types_file_name)
 
@@ -921,7 +947,7 @@ class Analysis(object):
 
         # Plot target_names
         target_names_file_name = basename + '_target_names.png'
-        hybkit.plot.type_count(
+        hybkit.plot.target_count(
             target_results['target_names'],
             target_names_file_name,
             title='miRNA Target Names',
@@ -938,7 +964,6 @@ class Analysis(object):
             name=self.name,
         )
         out_files.append(target_types_file_name)
-
         return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Fold Analysis
@@ -948,20 +973,20 @@ class Analysis(object):
 
         # Plot Match Counts Histogram
         match_counts_histogram_file_name = basename + '_fold_match_counts_histogram.png'
-        # TODO: Implement hybkit.plot.fold_match_counts_histogram
         hybkit.plot.fold_match_counts_histogram(
             results=fold_results['fold_match_counts'],
             plot_file_name=match_counts_histogram_file_name,
+            title='Predicted Fold Match Count',
             name=self.name,
         )
         out_files.append(match_counts_histogram_file_name)
 
         # Plot miRNA nt Fold Counts Histogram
         mirna_nt_fold_counts_histogram_file_name = basename + '_fold_mirna_nt_counts_histogram.png'
-        # TODO: Implement hybkit.plot.fold_mirna_nt_counts_histogram
         hybkit.plot.fold_mirna_nt_counts_histogram(
             results=fold_results['mirna_nt_fold_counts'],
             plot_file_name=mirna_nt_fold_counts_histogram_file_name,
+            title='Predicted Matches per miRNA Nucleotide',
             name=self.name,
         )
         out_files.append(mirna_nt_fold_counts_histogram_file_name)
@@ -971,6 +996,8 @@ class Analysis(object):
         hybkit.plot.fold_mirna_nt_counts_histogram(
             results=fold_results['mirna_nt_fold_props'],
             plot_file_name=mirna_nt_fold_props_histogram_file_name,
+            title='Predicted Match Proportion per miRNA Nucleotide',
+            name=self.name,
         )
         out_files.append(mirna_nt_fold_props_histogram_file_name)
         return out_files
