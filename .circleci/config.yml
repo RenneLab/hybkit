@@ -99,6 +99,8 @@ jobs:
     parameters:
       example:
         type: string
+      example:
+        type: test-command
       py-version:
         type: executor
     executor: << parameters.py-version >>
@@ -120,10 +122,9 @@ jobs:
           name: Run Test
           command: |
             export PATH=$PATH:$PWD/scripts
-            ls
             cd << parameters.example >>*
-            python3 ./analysis_python.py
-            ./analysis_shell.sh
+            ./<< parameters.test-command >>
+            ls output_*
 
   example_test_pip:
     parameters:
@@ -176,6 +177,7 @@ workflows:
                 # os: [linux, macos]
                 py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
                 example: ["example_01", "example_02", "example_03", "example_04"]
+                test-command: ["analysis_python.py", "analysis_shell.sh"]
 
         # - example_test_pip:
         #     requires:
