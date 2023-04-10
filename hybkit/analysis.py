@@ -171,6 +171,15 @@ class Analysis(object):
             | fold_match_counts (obj:`~collections.Counter`) : Counter with keys of
               count of predicted matches between miRNA and target with
               values of count of miRNAs with that number of predicted matches.
+
+    Args:
+        analysis_types (:obj:`str` or :obj:`list` of :obj:`str`): Analysis types to perform.
+        name (:obj:`str`, optional): Name of the analysis.
+        quant_mode (:obj:`str`, optional): Quantification mode to use for record quantification.
+            Options are "single": One count per record; "reads": If "read_count" flag is set, count
+            all reads in record (else count 1); "records": if the "record_count" flag is set, count
+            all individual records within combined record (else count 1). If not provided, defaults to
+            the value in :attr:`settings['quant_mode']`.
     """
 
     #: Class-level settings. See :attr:`hybkit.settings.Analysis_settings` for descriptions.
@@ -208,12 +217,15 @@ class Analysis(object):
         _all_result_keys_list += _result_keys[key]
     _all_result_keys_set = set(_all_result_keys_list)
 
+    _quant_mode_options = set(hybkit.settings.Analysis_settings_info['quant_mode'][4]['choices'])
+
     # ----- Begin Analysis Class -----
     # Start Analysis Public Methods
     # Analysis : Public Methods
     def __init__(self,
                  analysis_types=None,
                  name=None,
+                 quant_mode=None,
                  ):
         """Describe in class docstring."""
         if analysis_types is None or not analysis_types:
@@ -236,6 +248,18 @@ class Analysis(object):
             else:
                 self.analysis_types.append(analysis_type.lower())
         self.name = self._sanitize_name(name)
+
+        if quant_mode is None:
+            self.quant_mode = self.settings['quant_mode']
+        elif quant_mode not in self._quant_mode_options:
+            message = (
+                'Quantification mode "%s" not recognized.'
+                '\nChoices: %s' % (str(quant_mode), ', '.join(self._quant_mode_options))
+            )
+            print(message)
+            raise RuntimeError(message)
+        else:
+            self.quant_mode = quant_mode
 
         for analysis_type in self.analysis_types:
             getattr(self, '_init_' + analysis_type)()
@@ -481,6 +505,16 @@ class Analysis(object):
                 all_out_files += out_files
         return all_out_files
 
+    # Start Helper Methods
+    # Analysis : Private Methods : Helper Methods
+    def _get_quant(self, hyb_record):
+        if self.quant_mode == 'single':
+            return 1
+        elif self.quant_mode == 'reads':
+            return hyb_record.get_read_count(require=True)
+        elif self.quant_mode == 'records':
+            return hyb_record.get_record_count(require=True)
+
     # Start Init Methods
     # Analysis : Private Methods : Init Methods : Energy Analysis
     def _init_energy(self):
@@ -528,19 +562,21 @@ class Analysis(object):
     # Start Add Methods
     # Analysis : Private Methods : Add Methods : Energy Analysis
     def _add_energy(self, hyb_record):
+        count = self._get_quant(hyb_record)
         self._energy_analysis_count += 1
         if hyb_record.energy is not None:
-            self._has_energy_val += 1
+            self._has_energy_val += count
             self._energy_vals = np.append(self._energy_vals, float(hyb_record.energy))
             if hyb_record.energy is not None:
                 energy_bin = int(np.ceil(float(hyb_record.energy)))
-            self._binned_energy_vals[energy_bin] += 1
+            self._binned_energy_vals[energy_bin] += count
         else:
-            self._no_energy_val += 1
+            self._no_energy_val += count
 
     # Analysis : Private Methods : Add Methods : Type Analysis
     def _add_type(self, hyb_record):
         hyb_record._ensure_set('eval_types')
+        count = self._get_quant(hyb_record)
         self._types_analysis_count += 1
         seg1_type = hyb_record.get_seg1_type()
         seg2_type = hyb_record.get_seg2_type()
@@ -553,54 +589,56 @@ class Analysis(object):
                 mirna_hybrid_type = (seg2_type, seg1_type)
         else:
             mirna_hybrid_type = reordered_hybrid_type
-        self._hybrid_types[hybrid_type] += 1
-        self._reordered_hybrid_types[reordered_hybrid_type] += 1
-        self._mirna_hybrid_types[mirna_hybrid_type] += 1
-        self._seg1_types[seg1_type] += 1
-        self._seg2_types[seg2_type] += 1
-        self._all_seg_types[seg1_type] += 1
-        self._all_seg_types[seg2_type] += 1
+        self._hybrid_types[hybrid_type] += count
+        self._reordered_hybrid_types[reordered_hybrid_type] += count
+        self._mirna_hybrid_types[mirna_hybrid_type] += count
+        self._seg1_types[seg1_type] += count
+        self._seg2_types[seg2_type] += count
+        self._all_seg_types[seg1_type] += count
+        self._all_seg_types[seg2_type] += count
 
     # Analysis : Private Methods : Add Methods : miRNA Analysis
     def _add_mirna(self, hyb_record):
-        self._mirna_analysis_count += 1
         hyb_record._ensure_set('eval_mirna')
+        count = self._get_quant(hyb_record)
+        self._mirna_analysis_count += 1
         if hyb_record.prop('has_mirna'):
-            self._has_mirna += 1
+            self._has_mirna += count
             if hyb_record.prop('mirna_dimer'):
-                self._mirna_dimers += 1
+                self._mirna_dimers += count
             elif hyb_record.prop('5p_mirna'):
-                self._mirnas_5p += 1
+                self._mirnas_5p += count
             elif hyb_record.prop('3p_mirna'):
-                self._mirnas_3p += 1
-
+                self._mirnas_3p += count
         else:
-            self._non_mirna += 1
+            self._non_mirna += count
 
     # Analysis : Private Methods : Add Methods : Target Analysis
     def _add_target(self, hyb_record):
-        self._target_analysis_count += 1
         hyb_record._ensure_set('eval_mirna')
+        self._target_analysis_count += 1
+        count = self._get_quant(hyb_record)
         if hyb_record.prop('has_mirna'):
             self._target_evals += 1
             mirna_details = hyb_record.mirna_details(allow_mirna_dimers=True)
-            self._target_names[mirna_details['target_ref']] += 1
-            self._target_types[mirna_details['target_seg_type']] += 1
+            self._target_names[mirna_details['target_ref']] += count
+            self._target_types[mirna_details['target_seg_type']] += count
 
     # Analysis : Private Methods : Add Methods : Fold Analysis
     def _add_fold(self, hyb_record):
-        self._fold_analysis_count += 1
         hyb_record._ensure_set('fold_record')
         hyb_record._ensure_set('eval_mirna')
+        self._fold_analysis_count += 1
+        count = self._get_quant(hyb_record)
         if hyb_record.prop('has_mirna'):
-            self._folds_recorded += 1
+            self._folds_recorded += count
             mirna_fold = hyb_record.mirna_details('mirna_fold')
             match_count = 0
             for pos_i, nt_i in enumerate(range(len(mirna_fold)), start=1):
                 if mirna_fold[nt_i] in {'(', ')'}:
-                    self._mirna_nt_fold_counts[pos_i] += 1
+                    self._mirna_nt_fold_counts[pos_i] += count
                     match_count += 1
-        self._fold_match_counts[match_count] += 1
+        self._fold_match_counts[match_count] += count
 
     # Start Get Results Methods
     # Analysis : Private Methods : Get Methods : Energy Analysis

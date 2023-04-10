@@ -293,17 +293,17 @@ HybFoldIter_settings_info = {
 #: Copied into :data:`Analysis_settings` for use at runtime.
 Analysis_settings_info = {
     'quant_mode': [
-        'record',
+        'single',
         """
         Method for counting records. Options:
-        "single": count each record as a single entry;
-        "read": use the number of reads per hyb record as the count (may contain PCR duplicates);
-        "record" count the number of records represented by each
-        (hyb record entry 1 for "unmerged" records, >= 1 for "merged" records)
+        "single": Count each record as a single entry;
+        "reads": Use the number of reads per hyb record as the count (may contain PCR duplicates);
+        "records": Count the number of records represented by each
+        hyb record entry (1 for "unmerged" records, >= 1 for "merged" records)
         """,
         'str',
         None,
-        {'choices': ['single', 'read', 'record']}
+        {'choices': ['single', 'reads', 'records']}
     ],
     'out_delim': [
         ',',
