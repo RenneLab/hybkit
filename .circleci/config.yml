@@ -99,8 +99,8 @@ jobs:
     parameters:
       example:
         type: string
-      example:
-        type: test-command
+      test-command:
+        type: string
       py-version:
         type: executor
     executor: << parameters.py-version >>
