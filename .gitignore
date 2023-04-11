@@ -1,4 +1,5 @@
 # hybkit-specific
+example*/example_output/*.hyb
 example*/*.hyb
 example*/*.vienna
 example*/*.viennad
