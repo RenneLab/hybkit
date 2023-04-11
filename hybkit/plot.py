@@ -144,7 +144,7 @@ def energy_histogram(results,
         max_count = max(max_count, count)
     if not max_count:
         message = 'Warning: Attempted to create empty plot to name: %s' % plot_file_name
-        print(message % plot_file_name)
+        print(message)
         raise RuntimeError(message)
 
     # Plot energy bins

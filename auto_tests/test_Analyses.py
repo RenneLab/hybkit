@@ -161,7 +161,6 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
                                        analysis=['mirna'])
     hyb_analysis.plot_analysis_results(out_basename=out_special_file_base)
 
-
     # Check erroring on bad results requests:
     with pytest.raises(RuntimeError):
         hyb_analysis.get_analysis_results('bad_analysis')

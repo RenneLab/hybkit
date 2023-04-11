@@ -22,12 +22,7 @@ hybkit Toolkit
         :ref:`hyb_filter`                   Filter a hyb file to a specific subset of sequences
         :ref:`hyb_analyze`                  Perform a type, miRNA, summary, or target analysis 
                                             on a hyb file
-        :ref:`hyb_exclude_fold`             Filter a fold file using an exclusion table created by
-                                            hyb_filter
-        :ref:`hyb_fold_analyze`             Perform a fold analysis on a hyb and a RNA secondary
-                                            structure (fold) file in ".vienna" or ".ct" format
-                                            on a hyb file
-        =================================== ==========================================================
+        =================================== ===========================================================
 
     Detailed descriptions and usage information are avilable at each respective script page.
 
@@ -39,7 +34,5 @@ hybkit Toolkit
    toolkit/hyb_filter
    toolkit/hyb_eval
    toolkit/hyb_analyze
-   toolkit/hyb_fold_analyze
-   toolkit/hyb_exclude_fold
 
 

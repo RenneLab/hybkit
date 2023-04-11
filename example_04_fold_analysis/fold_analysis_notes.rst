@@ -3,7 +3,7 @@
     Renne Lab, University of Florida
     Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-Example Pattern Analysis
+Example Fold Analysis
 =====================
 
 This directory contains a example analysis of Hyb-format and Vienna-format data, published in 

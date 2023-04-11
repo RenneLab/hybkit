@@ -88,6 +88,7 @@ keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel Stribling", "Rolf Renne"]
+__copyright__ = '2023, ' + __author__
 __date__ = "2021/09/30"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"

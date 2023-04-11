@@ -3,8 +3,8 @@
     Renne Lab, University of Florida
     Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-Example Summary Analysis
-========================
+Example Type-miRNA Analysis
+===========================
 
 This directory contains a example analysis of Hyb-format data, published in the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
 Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids (qCLASH) identifies Kaposi's Sarcoma-associated herpesvirus microRNA targets in endothelial cells." Journal of virology 92.8 (2018): e02138-17.

@@ -1,2 +1,2 @@
 
-.. include:: ../example_04_pattern_analysis/pattern_analysis_notes.rst
+.. include:: ../example_04_fold_analysis/fold_analysis_notes.rst

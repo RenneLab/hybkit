@@ -178,8 +178,8 @@ class Analysis(object):
         quant_mode (:obj:`str`, optional): Quantification mode to use for record quantification.
             Options are "single": One count per record; "reads": If "read_count" flag is set, count
             all reads in record (else count 1); "records": if the "record_count" flag is set, count
-            all individual records within combined record (else count 1). If not provided, defaults to
-            the value in :attr:`settings['quant_mode']`.
+            all individual records within combined record (else count 1). If not provided,
+            defaults to the value in :attr:`settings['quant_mode']`.
     """
 
     #: Class-level settings. See :attr:`hybkit.settings.Analysis_settings` for descriptions.

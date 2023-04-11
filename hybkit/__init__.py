@@ -45,9 +45,6 @@ information:
 |                         | one of a :class:`ViennaFile` or :class:`CtFile`                  |
 +-------------------------+------------------------------------------------------------------+
 
-Todo:
-    Check static/dynamic FoldRecord methods
-
 """
 
 import os
@@ -464,7 +461,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg1_type(self, require=False):
         """
-        Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
+        Return the "seg1_type" flag if defined, or return None.
 
         Args:
             require (:obj:`bool`, optional): If ``True``, raise an error
@@ -475,7 +472,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg2_type(self, require=False):
         """
-        Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
+        Return the "seg2_type" flag if defined, or return None.
 
         Args:
             require (:obj:`bool`, optional): If ``True``,
@@ -486,7 +483,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg_types(self, require=False):
         """
-        Return :ref:`seg1_type <seg1_type>`(or None), :ref:`seg2_type <seg2_type>` (or None) flags.
+        Return "seg1_type" (or None), "seg2_type" (or None) flags.
 
         Args:
             require (:obj:`bool`, optional): If ``True``,
@@ -600,7 +597,7 @@ class HybRecord(object):
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
         This uses the method: :func:`TypeFinder.method`
         set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
-        :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags if not already set.
+        "seg1_type", "seg2_type" flags if not already set.
 
         To use a type-finding method other than the default,
         prepare the :class:`TypeFinder` class by
@@ -681,8 +678,8 @@ class HybRecord(object):
 
         If not already done, determine whether a miRNA exists within this record and
         set the :ref:`miRNA_seg <mirna_seg>` flag.
-        This evaluation requries the :ref:`seg1_type <seg1_type>`
-        and :ref:`seg2_type <seg2_type>` flags to
+        This evaluation requries the "seg1_type"
+        and "seg2_type" flags to
         be populated, which can be performed by the :func:`eval_types` method.
 
         Args:
@@ -1266,19 +1263,22 @@ class HybRecord(object):
 
         Create artificial HybRecord from two SeqRecord Objects
         For the hybrid:
-            id: seg1_record.id + '--' + seg2_record.id
-                (overwritten by "id" paramater if provided)
-            seq: seg1_record.seq + seg2_record
+
+            | id: seg1_record.id + '--' + seg2_record.id
+              (overwritten by "id" paramater if provided)
+            | seq: seg1_record.seq + seg2_record
 
         For each segment:
-            FASTA_Sequence_ID -> segN_ref_name
-            FASTA_Description -> Flags: segN_det
-                (Overwritten if segN_det flag is provided directly)
+
+            | FASTA_Sequence_ID -> segN_ref_name
+            | FASTA_Description -> Flags: segN_det
+              (Overwritten if segN_det flag is provided directly)
 
         Optional fields to add via function arguments:
-            hyb_id
-            energy
-            flags
+
+            | hyb_id
+            | energy
+            | flags
 
         Args:
             seg1_record (SeqRecord): Biopython SeqRecord object containing information
@@ -1684,8 +1684,8 @@ class HybRecord(object):
 
 # ----- Begin HybFile Class -----
 class HybFile(object):
-    """
-    Wrapper for a *.hyb -format text file which returns entries (lines) as HybRecord objects.
+    r"""
+    Wrapper for a hyb-format text file which returns entries (lines) as HybRecord objects.
 
     Args:
         hybformat_id (:obj:`bool`, optional): If ``True``, during parsing of lines read count

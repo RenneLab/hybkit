@@ -176,6 +176,6 @@ Installation:
 .. _Travis2014: https://doi.org/10.1016/j.ymeth.2013.10.015
 .. |Gay2018| replace:: *Gay et al. (J. Virol. 2018)*
 .. _Gay2018: https://doi.org/10.1128/JVI.02138-17
-.. |example_01_image| image:: example_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
+.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
 
 .. include:: docs_readme_format.rst

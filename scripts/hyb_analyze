@@ -10,7 +10,7 @@ Read one or more '.hyb' format and corresponding ".vienna" or ".ct" format files
 Analysis Types:
 
     =============================== ==============================================================
-    ``fold`` : Pattern Analysis  Analyze folding pattern of miRNAs in miRNA/target hybrids.
+    ``fold`` : Fold Analysis        Analyze folding pattern of miRNAs in miRNA/target hybrids.
     =============================== ==============================================================
 
 This utility reads in one or more files in hyb-format
