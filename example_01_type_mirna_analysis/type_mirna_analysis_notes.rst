@@ -11,7 +11,7 @@ Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybr
 
 This analysis first performs quality control on the data. It then summarizes and analyzes the hybrid, segment, and miRNA characteristics of each input file.
 Analyses for each individual file, and a combined summary analysis are all produced.
- 
+
 The sequencing information is available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
 
   https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
@@ -26,8 +26,8 @@ The completed output of the analysis requires ~1.5 GB of space.
 Summary Analysis Example Output
 -------------------------------
 
-.. image:: ../example_01_summary_analysis/example_output/combined_analysis_type_hybrids.png
+.. image:: ../example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
 
-.. image:: ../example_01_summary_analysis/example_output/combined_analysis_type_segall.png
+.. image:: ../example_01_type_mirna_analysis/example_output/combined_analysis_types_all_seg.png
 
-.. image:: ../example_01_summary_analysis/example_output/combined_analysis_mirna_counts.png
+.. image:: ../example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
