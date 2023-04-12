@@ -164,11 +164,15 @@ Installation:
           under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
           file.
 
-.. |hybkit Toolkit| replace:: *hybkit Toolkit*
-.. |Example Pipelines| replace:: *Example Pipelines*
-.. |hybkit API| replace:: *hybkit API*
-.. |docs_link| replace:: hybkit's ReadTheDocs
-.. _docs_link: https://hybkit.readthedocs.io#
+.. ifconfig:: on_github
+
+    .. |hybkit Toolkit| replace:: *hybkit Toolkit*
+    .. |Example Pipelines| replace:: *Example Pipelines*
+    .. |hybkit API| replace:: *hybkit API*
+    .. |docs_link| replace:: hybkit's ReadTheDocs
+    .. _docs_link: https://hybkit.readthedocs.io#
+    .. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
+
 .. |Helwak2013| replace:: *Helwak et al. (Cell 2013)*
 .. _Helwak2013: https://doi.org/10.1016/j.cell.2013.03.043
 .. |Travis2014| replace:: *Travis et al. (Methods 2014)*
@@ -179,6 +183,4 @@ Installation:
 .. _Hunter2007: https://doi.org/10.1109/MCSE.2007.55
 .. |Cock2009| replace:: *Cock et al. (Bioinformatics 2009)*
 .. _Cock2009: https://doi.org/10.1093/bioinformatics/btp163
-.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
-
 .. include:: docs_readme_format.rst

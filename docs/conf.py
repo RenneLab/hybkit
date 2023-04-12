@@ -121,7 +121,7 @@ class PPrintDictDirective(Directive):
 def setup(app):
     """Set / setup the directive."""
     app.add_directive('ppdict', PPrintDictDirective)
-
+    app.add_config_value('on_github', False, 'env')
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -130,6 +130,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.ifconfig',
     'sphinxarg.ext',
     'sphinx_rtd_theme',
 ]
