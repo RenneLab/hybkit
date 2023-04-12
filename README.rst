@@ -23,11 +23,11 @@ hybkit
    :target: https://www.gnu.org/licenses/gpl-3.0.en.html
    :alt: GNU GPLv3+ License
 
-| Welcome to *hybkit*, a toolkit for analysis of ".hyb" (hyb-file) format chimeric
+| Welcome to *hybkit*, a toolkit for analysis of hyb-format chimeric
   (hybrid) RNA sequence data defined with the Hyb software package by |Travis2014|_.
   This genomic data-type is generated from RNA proximitiy-ligation and ribonomics
   techniques such as Crosslinking, Ligation, and
-  Sequencing of Hybrids (CLASH; |Helwak2013|_) and Quick CLASH (qCLASH; |Gay2018|_).
+  Sequencing of Hybrids (CLASH; |Helwak2013|_), Quick CLASH (qCLASH; |Gay2018|_).
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 | Full project documentation is available at |docs_link|_.
 
@@ -36,36 +36,35 @@ Project components:
        analyzing, and plotting hyb-format data.
     #. The hybkit python API, an extendable documented codebase
        for creation of custom analyses of hyb-format data.
-    #. Example analysis pipelines for analysis of publicly available qCLASH hybrid
-       sequence data implemented either with toolkit scripts or the hybkit Python API.
+    #. Example pipelines for analysis of publicly available qCLASH hybrid
+       sequence data implemented in each of command-line scripts and hybkit Python API.
 
 Hybkit Toolkit:
     The hybkit toolkit includes several command-line utilities
-    for manipulation of ".hyb" format data:
+    for manipulation of hyb-format data:
 
         =================================== ===========================================================
         Utility                             Description
         =================================== ===========================================================
-        hyb_check                           Parse a hyb file and check for errors
-        hyb_eval                            Evaluate hyb records to identify segment types and miRNAs
-        hyb_filter                          Filter a hyb file to a specific subset of sequences
-        hyb_analyze                         Perform a type, miRNA, summary, or target analysis
-                                            on a hyb file
-        hyb_exclude_fold                    Filter a fold file using an exclusion table created by
-                                            hyb_filter
-        hyb_fold_analyze                    Perform a fold analysis on a hyb and a RNA secondary
-                                            structure (fold) file in ".vienna" or ".ct" format
-                                            on a hyb file
+        hyb_check                           Parse hyb (+ fold) files and check for errors
+        hyb_eval                            Evaluate hyb (+ fold) records to identify segment
+                                            types and miRNAs
+        hyb_filter                          Filter hyb (+ fold) records to a specific
+                                            custom subset
+        hyb_analyze                         Perform an energy, type, miRNA, target, or fold analysis
+                                            on hyb (+ fold) files and plot results
         =================================== ===========================================================
 
-    These scripts are used on the command line with hyb files. For example, to filter a
-    hyb file to contain only hybrids with a sequence identifier containing the string "kshv"
+    These scripts are used on the command line with hyb (and associated "vienna" or "CT") files.
+    For example, to filter a
+    hyb and corresponding vienna file to contain only hybrids with
+    a sequence identifier containing the string "kshv":
 
     Example:
 
         ::
 
-            $ hyb_filter -i my_hyb_file.hyb --filter any_seg_contains kshv
+            $ hyb_filter -i my_hyb_file.hyb -f my_hyb_file.vienna --filter any_seg_contains kshv
 
     Further detail on the usage of each script is provided in
     the |hybkit Toolkit| section of |docs_link|_.
@@ -73,11 +72,11 @@ Hybkit Toolkit:
 
 Hybkit API:
     Hybkit provides a Python3 module with a documented API for interacting with
-    records in hyb files.
+    records in hyb files and associated vienna or CT files.
     This capability was inspired by the `BioPython Project <https://biopython.org/>`_.
-    The primary utility is provided by classes for hyb records (HybRecord), classes
-    for fold records (FoldRecord, DynamicFoldRecord), and file-iterator classes
-    (HybFile, ViennaFile, CTFile).
+    The primary utility is provided by a class for hyb records (HybRecord), a class
+    for fold records (FoldRecord), and file-iterator classes
+    (HybFile, ViennaFile, CTFile, HybFoldIter).
     Record attributes can be analyzed, set, and evaluated using included class methods.
 
     For example, a workflow to print the identifiers of only sequences within a ".hyb" file
@@ -104,18 +103,18 @@ Hybkit API:
     |hybkit API| section of |docs_link|_.
 
 Pipelines:
-    Hybkit provides several example pipelines for analysis of "hyb" data using the
+    Hybkit provides several example pipelines for analysis of hyb data using the
     utilities provided in the toolkit. These include:
 
         ============================= ===========================================================
         Pipeline                      Description
         ============================= ===========================================================
-        Summary Analysis              Quantify the sequence and miRNA types in a hyb file
+        Type/miRNA Analysis           Quantify the sequence and miRNA types in a hyb file
         Target Analysis               Analyze targets of a set of miRNAs from a single
                                       experiment
         Grouped Target Analysis       Analyze and plot targets of a set of miRNAs from
                                       pooled experimental replicates
-        Pattern Analysis              Analyze and plot predicted miRNA folding patterns in
+        Fold Analysis                 Analyze and plot predicted miRNA folding patterns in
                                       miRNA-containing hybrids
         ============================= ===========================================================
 
@@ -123,7 +122,7 @@ Pipelines:
     As an illustration, the example summary analysis includes the return of
     the contained hybrid sequence types as both a csv table and as a pie chart:
 
-        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/example_01_summary_analysis/example_output/combined_analysis_type_hybrids.csv>`_
+        `CSV Output <https://raw.githubusercontent.com/RenneLab/hybkit/master/example_01_type_mirna_analysis/example_output/combined_analysis_type_hybrid_types.csv>`_
 
         |example_01_image|
 
@@ -132,16 +131,16 @@ Pipelines:
 
 Installation:
     Dependencies:
-        * Python3.7+
-        * `matplotlib <https://matplotlib.org/>`_
-        * `BioPython <https://biopython.org/>`_
+        * Python3.8+
+        * `matplotlib <https://matplotlib.org/>`_ >= 3.7.1 (|Hunter2007|_)
+        * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
 
     The recommended installation method is via hybkit's
     `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using
     `python3 pip <https://pip.pypa.io/en/stable/>`_, which will
     automatically handle version control and dependency installation::
 
-        $ pip install hybkit
+        $ python3 -m pip install hybkit
 
     Acquisition of the package can also be performed by cloning the project's Github repository::
 
@@ -176,6 +175,10 @@ Installation:
 .. _Travis2014: https://doi.org/10.1016/j.ymeth.2013.10.015
 .. |Gay2018| replace:: *Gay et al. (J. Virol. 2018)*
 .. _Gay2018: https://doi.org/10.1128/JVI.02138-17
+.. |Hunter2007| replace:: *Hunter JD. (Computing in Science & Engineering 2007)*
+.. _Hunter2007: https://doi.org/10.1109/MCSE.2007.55
+.. |Cock2009| replace:: *Cock et al. (Bioinformatics 2009)*
+.. _Cock2009: https://doi.org/10.1093/bioinformatics/btp163
 .. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
 
 .. include:: docs_readme_format.rst

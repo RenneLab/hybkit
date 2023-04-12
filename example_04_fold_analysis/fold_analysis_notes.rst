@@ -6,23 +6,23 @@
 Example Fold Analysis
 =====================
 
-This directory contains a example analysis of Hyb-format and Vienna-format data, published in 
+This directory contains a example analysis of Hyb-format and Vienna-format data, published in
 the quick Crosslinking and Sequencing of Hybrids (qCLASH) experiment described in:
-Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids 
-(qCLASH) identifies Kaposi's Sarcoma-associated 
-herpesvirus microRNA targets in endothelial cells." 
+Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybrids
+(qCLASH) identifies Kaposi's Sarcoma-associated
+herpesvirus microRNA targets in endothelial cells."
 Journal of virology 92.8 (2018): e02138-17.
 
-This analysis investigates the folding pattern of miRNA 
-from an experimental replicate infected with 
-Kaposi's Sarcoma-Associated Herpesvirus (KSHV), which are given the type name "KSHV-miRNA". 
-Data from the predicted folding pattern for each hybrid record produced 
+This analysis investigates the folding fold of miRNA
+from an experimental replicate infected with
+Kaposi's Sarcoma-Associated Herpesvirus (KSHV), which are given the type name "KSHV-miRNA".
+Data from the predicted folding fold for each hybrid record produced
 by the "Hyb" program are analyzed, and the folds of each KSHV miRNA with a non-miRNA target
-are characterized to determine the per-base folding patterns.
- 
+are characterized to determine the per-base folding folds.
+
 Hybrid sequence information created by the Hyb program and the fold output are
-provided with the hybkit package in the databases directory, created 
-by downstream analysis of files 
+provided with the hybkit package in the databases directory, created
+by downstream analysis of files
 available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
 
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
@@ -37,5 +37,8 @@ The completed output of the analysis requires ~30 MB of space.
 Fold Analysis Example Output
 --------------------------------------
 
-.. image:: ../example_04_pattern_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_mirna_target_pattern_bases.png
+.. image:: ../example_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_qc_fold_mirna_nt_counts_histogram.png
+
+.. image:: ../example_04_fold_analysis/example_output/WT_BR1_comp_hOH7_KSHV_hybrids_ua_qc_fold_mirna_nt_props_histogram.png
+
 
