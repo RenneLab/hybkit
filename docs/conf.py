@@ -25,6 +25,9 @@ from docutils import nodes, statemachine
 sys.path.insert(0, os.path.abspath('..'))
 # sys.path.insert(0, os.path.abspath(os.path.join('..', 'scripts')))
 import hybkit
+conf_dir = os.path.abspath('.')
+main_dir = os.path.abspath('..')
+scripts_dir = os.path.join(main_dir, 'scripts')
 
 # remove TypeFinder links from HybRecord class for documentation
 hybkit.HybRecord.TypeFinder = None
@@ -32,19 +35,19 @@ hybkit.HybRecord.TypeFinder = None
 # import hybkit_scripts
 hyb_check = imp.load_source(
     'hyb_check',
-    os.path.abspath(os.path.join('..', 'scripts', 'hyb_check')),
+    os.path.join(scripts_dir, 'hyb_check'),
 )
 hyb_filter = imp.load_source(
     'hyb_filter',
-    os.path.abspath(os.path.join('..', 'scripts', 'hyb_filter')),
+    os.path.join(scripts_dir, 'hyb_filter'),
 )
 hyb_eval = imp.load_source(
     'hyb_eval',
-    os.path.abspath(os.path.join('..', 'scripts', 'hyb_eval')),
+    os.path.join(scripts_dir, 'hyb_eval'),
 )
 hyb_analyze = imp.load_source(
     'hyb_analyze',
-    os.path.abspath(os.path.join('..', 'scripts', 'hyb_analyze')),
+    os.path.join(scripts_dir, 'hyb_analyze'),
 )
 
 # -- Project information -----------------------------------------------------
@@ -55,6 +58,16 @@ author = hybkit.__about__.__author__
 # The full version, including alpha/beta/rc tags
 version = '.'.join(hybkit.__about__.__version__.split('.'))
 release = hybkit.__about__.__version__
+
+# -- Create Docs Index File --------------------------------------------------
+with open(os.path.join(main_dir, 'README.rst'), 'r') as readme_file, \
+     open(os.path.join(conf_dir, 'index.rst'), 'w') as index_file:
+
+    for line in readme_file:
+        if line.startswith('.. Github Only'):
+            break
+        index_file.write(line)
+    index_file.write('.. include:: ./index_suffix.rst\n')
 
 
 # -- PPrint Functions -----------------------------------------------------------
