@@ -461,7 +461,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg1_type(self, require=False):
         """
-        Return the "seg1_type" flag if defined, or return None.
+        Return the :ref:`seg1_type <seg1_type>` flag if defined, or return None.
 
         Args:
             require (:obj:`bool`, optional): If ``True``, raise an error
@@ -472,7 +472,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Flag_Info : seg_type
     def get_seg2_type(self, require=False):
         """
-        Return the "seg2_type" flag if defined, or return None.
+        Return the :ref:`seg2_type <seg2_type>` flag if defined, or return None.
 
         Args:
             require (:obj:`bool`, optional): If ``True``,
@@ -597,7 +597,7 @@ class HybRecord(object):
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
         This uses the method: :func:`TypeFinder.method`
         set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
-        "seg1_type", "seg2_type" flags if not already set.
+        :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags if not already set.
 
         To use a type-finding method other than the default,
         prepare the :class:`TypeFinder` class by
@@ -678,8 +678,8 @@ class HybRecord(object):
 
         If not already done, determine whether a miRNA exists within this record and
         set the :ref:`miRNA_seg <mirna_seg>` flag.
-        This evaluation requries the "seg1_type"
-        and "seg2_type" flags to
+        This evaluation requries the :ref:`seg1_type <seg1_type>`
+        and :ref:`seg2_type <seg2_type>` flags to
         be populated, which can be performed by the :func:`eval_types` method.
 
         Args:

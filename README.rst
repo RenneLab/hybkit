@@ -36,6 +36,8 @@ Project components:
        analyzing, and plotting hyb-format data.
     #. The hybkit python API, an extendable documented codebase
        for creation of custom analyses of hyb-format data.
+    #. Integrated analysis of predicted secondary structure (fold) information for
+       the API and command-line utilities.
     #. Example pipelines for analysis of publicly available qCLASH hybrid
        sequence data implemented in each of command-line scripts and hybkit Python API.
 
@@ -46,13 +48,13 @@ Hybkit Toolkit:
         =================================== ===========================================================
         Utility                             Description
         =================================== ===========================================================
-        hyb_check                           Parse hyb (+ fold) files and check for errors
-        hyb_eval                            Evaluate hyb (+ fold) records to identify segment
+        hyb_check                           Parse hyb (and fold) files and check for errors
+        hyb_eval                            Evaluate hyb (and fold) records to identify segment
                                             types and miRNAs
-        hyb_filter                          Filter hyb (+ fold) records to a specific
+        hyb_filter                          Filter hyb (and fold) records to a specific
                                             custom subset
         hyb_analyze                         Perform an energy, type, miRNA, target, or fold analysis
-                                            on hyb (+ fold) files and plot results
+                                            on hyb (and fold) files and plot results
         =================================== ===========================================================
 
     These scripts are used on the command line with hyb (and associated "vienna" or "CT") files.
@@ -109,9 +111,9 @@ Pipelines:
         ============================= ===========================================================
         Pipeline                      Description
         ============================= ===========================================================
-        Type/miRNA Analysis           Quantify the sequence and miRNA types in a hyb file
+        Type/miRNA Analysis           Quantify sequence types and miRNA types in a hyb file
         Target Analysis               Analyze targets of a set of miRNAs from a single
-                                      experiment
+                                      experimental replicate
         Grouped Target Analysis       Analyze and plot targets of a set of miRNAs from
                                       pooled experimental replicates
         Fold Analysis                 Analyze and plot predicted miRNA folding patterns in
@@ -146,12 +148,12 @@ Installation:
 
         $ git clone git://github.com/RenneLab/hybkit
 
-    Or by downloading the zipped package::
+    *OR* by downloading the zipped package::
 
         $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
         $ unzip master.zip
 
-    Followed by installation using python's setuptools::
+    With either meth then followed by installation using python's setuptools::
 
         $ python setup.py install
 
