@@ -12,8 +12,8 @@
 
    self
    source/specification
+   source/hybkit_api
    source/hybkit_toolkit
    source/example_pipelines
-   source/hybkit_api
    source/about
 

@@ -7,34 +7,35 @@ r"""
 Module storing primary hybkit classes and hybkit API.
 
 This module contains classes and methods for reading, writing, and manipulating data
-in the ".hyb" genomic sequence format ([Travis2014]_).
+in the ".hyb" genomic sequence format ([Travis2014]_). For more information, see the
+:ref:`Hyb Specification <hybkit Hyb File Specification>`.
 
 An example string of a ".hyb" format line from [Gay2018]_ is::
 
     2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
 
-This is primarily based on three classes for storage of
-chimeric sequence information and associated fold-information:
+Hybkit functionality is primarily based on classes for storage and evaluation of
+chimeric genomic sequences and associated fold-information:
 
 +----------------------------+---------------------------------------------------------------+
-| :class:`HybRecord`         | Class for storage of hybrid sequence records                  |
+| :class:`HybRecord`         | Class to store a single hyb (hybrid) sequence records         |
 +----------------------------+---------------------------------------------------------------+
-| :class:`FoldRecord`        | Class for storage of predicted RNA                            |
-|                            | secondary structure information for chimeric sequence reads   |
+| :class:`FoldRecord`        | Class to store predicted RNA                                  |
+|                            | secondary structure information for hybrid reads              |
 +----------------------------+---------------------------------------------------------------+
 
-It also includes classes for reading, writing, and iterating over files containing that
+Also included are classes for reading, writing, and iterating over files containing hybrid
 information:
 
 +-------------------------+------------------------------------------------------------------+
-| :class:`HybFile`        | Class for reading and writing ".hyb"-format files                |
+| :class:`HybFile`        | Class for reading and writing hyb-format files                   |
 |                         | [Travis2014]_ containing chimeric RNA sequence information       |
 |                         | as :class:`HybRecord` objects                                    |
 +-------------------------+------------------------------------------------------------------+
-| :class:`ViennaFile`     | Class for reading and writing Vienna (.vienna)-format files      |
+| :class:`ViennaFile`     | Class for reading and writing Vienna-format files                |
 |                         | [ViennaFormat]_ containing RNA secondary structure information   |
-|                         | dot-bracket format as :class:`FoldRecord` objects                |
+|                         | in dot-bracket format as :class:`FoldRecord` objects             |
 +-------------------------+------------------------------------------------------------------+
 | :class:`CtFile`         | -BETA- Class for reading Connectivity Table (.ct)-format files   |
 |                         | [CTFormat]_ containing predicted RNA secondary-structure         |
@@ -42,7 +43,7 @@ information:
 |                         | :class:`FoldRecord` objects                                      |
 +-------------------------+------------------------------------------------------------------+
 | :class:`HybFoldIter`    | Class for concurrent iteration over a :class:`HybFile` and       |
-|                         | one of a :class:`ViennaFile` or :class:`CtFile`                  |
+|                         | a :class:`ViennaFile` or :class:`CtFile`                         |
 +-------------------------+------------------------------------------------------------------+
 
 """
@@ -75,12 +76,12 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
 # ----- Begin HybRecord Class -----
 class HybRecord(object):
     r"""
-    Class for storing and analyzing chimeric (hybrid) RNA-seq reads in ".hyb" format.
+    Class for storing and analyzing chimeric (hybrid) RNA-seq reads in hyb format.
 
-    Hyb file (".hyb") format entries are a GFF-related file format described by [Travis2014]_.
+    Hyb file (hyb) format entries are a GFF-related file format described by [Travis2014]_
     that contain information about a genomic sequence read identified to be a chimera by
     anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\t") and provides
-    annotations on each components. An example .hyb format line
+    annotations on each components. An example hyb-format line
     from [Gay2018]_::
 
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
@@ -91,6 +92,9 @@ class HybRecord(object):
          seg1_ref_name, seg1_read_start, seg1_read_end, seg1_ref_start, seg1_ref_end, seg1_score,
          seg2_ref_name, seg2_read_start, seg2_read_end, seg2_ref_start, seg2_ref_end, seg2_score,
          flag1=val1;flag2=val2;flag3=val3..."
+
+    (For more information, see the
+    :ref:`Hyb Specification <hybkit Hyb File Specification>`)
 
     The preferred method for reading hyb records from lines is with
     the :func:`HybRecord.from_line` constructor::
@@ -145,14 +149,14 @@ class HybRecord(object):
     Args:
         id (str): Identifier for the hyb record
         seq (str): Nucleotide sequence of the hyb record
-        energy (:obj:`str`, optional): Predicted energy of sequence folding in kcal/mol
+        energy (:obj:`str` or :obj:`float`, optional): Predicted energy of sequence folding in kcal/mol
         seg1_props (:obj:`dict`, optional): Properties of segment 1 of the record,
             containing possible
-            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`:
+            :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
             ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         seg2_props (:obj:`dict`, optional): Properties of segment 2 of the record,
             containing possible:
-            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`:
+            :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
             ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
         flags (:obj:`dict`, optional): Dict with keys of flags for the record and their
             associated values.
@@ -173,13 +177,13 @@ class HybRecord(object):
     Attributes:
         id (str): Identifier for the hyb record (Hyb format: "<read-num>_<read-count>")
         seq (str): Nucleotide sequence of the hyb record
-        energy ( or None): Predicted energy of folding
+        energy (str): Predicted energy of folding
         seg1_props (dict): Information on chimeric segment 1, contains
-            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`:
+            :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
             'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int),
             'ref_end' (int), and 'score' (float).
         seg2_props (dict): Information on segment 2, contains
-            :attr:`segment column keys <HybRecord.SEGMENT_COLUMNS>`:
+            :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
             'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int),
             'ref_end' (int), and 'score' (float).
         flags (dict): Dict of flags with possible
@@ -1360,6 +1364,7 @@ class HybRecord(object):
         # Value is checked for placeholder value: '.' and converted to None if found.
         if value == '.':
             value = None
+        # Check "id" is valid str
         if attribute == 'id':
             if not isinstance(value, str):
                 err_message = (
@@ -1369,6 +1374,8 @@ class HybRecord(object):
             elif not value.strip():
                 err_message = ('id must be a non-empty string. '
                                'Provided id: "%s" is an empty string' % value)
+
+        # Check "seq" is valid str
         elif attribute == 'seq':
             if not isinstance(value, str):
                 err_message = ('seq must be a string. Provided seq is type %s: %s' %
@@ -1378,6 +1385,9 @@ class HybRecord(object):
                                'string' % value)
             elif not value.isalpha():
                 err_message = 'seq must be alphabetic. Provided seq is non-alphabetic: %s' % value
+
+        # Check "energy" is valid float, int, or str,
+        # if float or int, convert to str of float with one decmial.
         elif attribute == 'energy':
             if not isinstance(value, (float, int, type(None), str)):
                 err_message = ('energy must be a float, int, numeric str, or None. '
@@ -1395,6 +1405,10 @@ class HybRecord(object):
                     except ValueError:
                         err_message = ('energy must be a float, int, numeric str, or None. '
                                        'Provided energy is non-numeric string: "%s"' % value)
+            elif isinstance(value, (int, float)):
+                value = '%.1f' % float(value)
+
+        # Check "seg_props" is dict or None
         elif attribute == 'seg_props':
             if not isinstance(value, (dict)):  # Nonetype disallowed, need empty dict.
                 err_message = ('segN_props must be a dict. Provided segN_props is type '
@@ -1463,6 +1477,7 @@ class HybRecord(object):
                         )
                         break
 
+        # Check "flags" is dict or None
         elif attribute == 'flags':
             if not isinstance(value, dict):  # Nonetype disallowed, need empty dict.
                 err_message = (
