@@ -1708,21 +1708,21 @@ class HybFile(object):
 
     Args:
         hybformat_id (:obj:`bool`, optional): If ``True``, during parsing of lines read count
-            information from identifier in "<read_number>_<read_count>" format.
+            information from identifier in ``<read_number>_<read_count>`` format.
             Defaults to value in :attr:`settings['hybformat_id'] <HybFile.settings>`.
         hybformat_ref (:obj:`bool`, optional): If ``True``, during parsing of lines read
             additional record information from
-            identifier in "<gene_id>_<transcript_id>_<gene_name>_<seg_type>" format.
+            identifier in ``<gene_id>_<transcript_id>_<gene_name>_<seg_type>`` format.
             Defaults to value in :attr:`settings['hybformat_ref'] <HybFile.settings>`.
 
     Attributes:
-        hybformat_id (bool): Whether to read count information from identifier during line parsing
-        hybformat_ref (bool): Whether to read type information from reference name
+        hybformat_id (bool): Read count information from identifier during line parsing
+        hybformat_ref (bool): Read type information from reference name
             during line parsing
 
     """
 
-    #: Class-level settings. See :obj:`settings.HybFile_settings` for descriptions.
+    #: Class-level settings. See :obj:`hybkit.settings.HybFile_settings_info` for descriptions.
     settings = hybkit.settings.HybFile_settings
 
     # Start HybFile Public Methods
@@ -1731,7 +1731,6 @@ class HybFile(object):
                  *args,
                  hybformat_id=None,
                  hybformat_ref=None,
-                 seq_type=None,
                  **kwargs
                  ):
         """Describe __init__ method description in class docstring."""
@@ -1797,7 +1796,7 @@ class HybFile(object):
         end of each written record line.
 
         Args:
-            write_record (HybRecord): Record to write`.
+            write_record (HybRecord): Record to write.
         """
         self._ensure_HybRecord(write_record)
         record_string = write_record.to_line(newline=True)
@@ -1812,7 +1811,7 @@ class HybFile(object):
         end of each written record line.
 
         Args:
-            write_records (list): List of :class:`HybRecord` objects to write`.
+            write_records (list): List of :class:`HybRecord` objects to write.
         """
         for write_record in write_records:
             self.write_record(write_record)
@@ -1824,7 +1823,11 @@ class HybFile(object):
 
     # HybFile : Public Methods : Writing
     def write(self, *args, **kwargs):
-        """Implement error for "write" method to catch errors."""
+        """
+        Implement no-op / error for "write" method to catch errors.
+
+        Use :meth:`write_record` or :meth:`write_fh()` instead.
+        """
         message = 'HybFile.write() is not implemented.\n'
         message += 'Please Use HybFile.write_record() or HybFile.write_fh() instead.'
         raise NotImplementedError(message)
@@ -1894,51 +1897,55 @@ class FoldRecord(object):
 
     Overlapping Alignment Example::
 
-        hyb.seq and static fold.seq:
+        Static:
         seg1: 1111111111111111111111
         seg2:                   222222222222222222222
         seq:  TAGCTTATCAGACTGATGTTTTAGCTTATCAGACTGATG
 
-        Dynamic fold.seq:
+        Dynamic:
         seg1: 1111111111111111111111
         seg2:                       222222222222222222222
         seq:  TAGCTTATCAGACTGATGTTTTTTTTAGCTTATCAGACTGATG
 
     Gapped Alignment Example::
 
-        hyb.seq and static fold.seq:
+        Static:
         seg1:   1111111111111111
         seg2:                     222222222222222222
         seq:  TTAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
 
-        Dynamic fold.seq:
+        Dynamic:
         seg1: 1111111111111111
         seg2:                 222222222222222222
         seq:  AGCTTATCAGACTGATTAGCTTATCAGACTGATG
 
     Dynamic sequences are found in the Hyb program \*_hybrids_ua.hyb file type.
-    This is primarily relevant in error-checking when setting the :obj:`HybRecord.fold_record`
-    of a :obj:`HybRecord` object.
+    This is primarily relevant in error-checking when setting the :meth:`HybRecord.set_fold_record`
+    method.
 
-    | When the 'static' FoldRecord type is used, the following methods are used for
-        :obj:`HybRecord.fold_record` error-checking:
-    | :meth:`static_count_hyb_record_mismatches`
+    When the 'static' FoldRecord type is used, the following methods are used for
+    :obj:`HybRecord.fold_record` error-checking:
 
-    | When the 'dynamic' FoldRecord type is used, the following methods are used for
-        :obj:`HybRecord.fold_record` error-checking:
-    | :meth:`dynamic_count_hyb_record_mismatches`
+      * :meth:`static_count_hyb_record_mismatches`
+
+    When the 'dynamic' FoldRecord type is used, the following methods are used for
+    :obj:`HybRecord.fold_record` error-checking:
+
+      * :meth:`dynamic_count_hyb_record_mismatches`
 
     Args:
         id (str): Identifier for record
         seq (str): Nucleotide sequence of record.
         fold (str): Fold representation of record.
-        energy (str or :obj:`float`, optional): Energy of folding for record.
-        seq_type (str, optional): Expect sequence to be
-            'static' (match exactly to corresponding :attr:`HybRecord.seq`), or
-            'dynamic' (construct from pieces of :attr:`HybRecord.seq`).
+        energy (:obj:`str` or :obj:`float`, optional): Energy of folding for record.
+        seq_type (:obj:`str`, optional): Expect sequence to be
+            'static' (match exactly to corresponding
+            :ref:`HybRecord.seq <HybRecord-Attributes>`), or
+            'dynamic' (construct from pieces of
+            :ref:`HybRecord.seq <HybRecord-Attributes>`).
             if not provided, defaults to
-            :attr:`~settings['seq_type'] <HybRecord.settings>` setting.
-            See :obj:`settings.FoldRecord_settings` for descriptions.
+            :attr:`~settings['seq_type'] <FoldRecord.settings>` setting.
+            See :obj:`hybkit.settings.FoldRecord_settings_info` for descriptions.
 
     .. _FoldRecord-Attributes:
 
@@ -1946,12 +1953,13 @@ class FoldRecord(object):
         id (str): Sequence Identifier (often seg1name-seg2name)
         seq (str): Genomic Sequence
         fold (str): Dot-bracket Fold Representation, '(', '.', and ')' characters
-        energy (float or None): Predicted energy of folding
-        seq_type (str): Whether sequence is 'static' or 'dynamic' (see Args for details).
+        energy (str): Predicted energy of folding
+        seq_type (str): Whether sequence is 'static' or 'dynamic'
+            (Default: 'static'; see Args for details)
     """
 
     # FoldRecord : Class-Level Constants
-    #: Class-level settings. See :obj:`settings.FoldRecord_settings` for descriptions.
+    #: Class-level settings. See :obj:`hybkit.settings.FoldRecord_settings_info` for descriptions.
     settings = hybkit.settings.FoldRecord_settings
 
     _seq_type_choices = set(hybkit.settings.FoldRecord_settings_info['seq_type'][4]['choices'])
@@ -2087,10 +2095,7 @@ class FoldRecord(object):
     # FoldRecord : Public Methods : HybFile Comparison
     def matches_hyb_record(self, hyb_record, allowed_mismatches=None):
         """
-        Return ``True`` if self.seq == hyb_record.seq.
-
-        Uses :meth:`static_matches_hyb_record` if :attr:`seq_type` is ``static``, and
-        :meth:`dynamic_matches_hyb_record` if :attr:`seq_type` is ``dynamic``.
+        Return ``True`` if self.seq and hyb_record.seq mismatches are <= allowed_mismatches.
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
@@ -2104,14 +2109,17 @@ class FoldRecord(object):
         return (mismatches <= allowed_mismatches)
 
     # FoldRecord : Public Methods : HybFile Comparison
-    def ensure_matches_hyb_record(self, hyb_record):
+    def ensure_matches_hyb_record(self, hyb_record, allowed_mismatches=None):
         """
         Ensure self.seq matches hyb_record.seq, else raise an error.
 
         Args:
             hyb_record (HybRecord): hyb_record to compare.
+            allowed_mismatches (:obj:`int`, optional): Number of mismatches allowed
+                for a match. If not provided, defaults to the option in
+                :attr:`settings['allowed_mismatches'] <FoldRecord.settings>`.
         """
-        if not self.matches_hyb_record(hyb_record):
+        if not self.matches_hyb_record(hyb_record, allowed_mismatches):
             if self.seq_type == 'static':
                 message = 'Disallowed mismatch between HybRecord sequence '
                 message += 'and FoldRecord sequence.\n'
@@ -2119,13 +2127,7 @@ class FoldRecord(object):
                 message += 'Fold: %s\n' % str(self.seq)
             elif self.seq_type == 'dynamic':
                 dynamic_seq = hyb_record._get_dynamic_seq()
-                match_str = ''
-                for i in range(max([len(dynamic_seq), len(self.seq)])):
-                    if dynamic_seq[i:(i + 1)] == self.seq[i:(i + 1)]:
-                        match_str += '|'
-                    else:
-                        match_str += '.'
-                    mismatch_count = match_str.count('.')
+                match_str, mismatch_count = self._get_seq_mismatch_string(dynamic_seq, self.seq)
                 message = 'Disallowed mismatch between HybRecord sequence '
                 message += 'and dynamic FoldRecord sequence.\n'
                 message += 'ID: %s\n' % hyb_record.id
@@ -2197,8 +2199,10 @@ class FoldRecord(object):
         """
         Construct instance from a list of 3 strings of vienna-format ([ViennaFormat]_) lines.
 
+        See :ref:`Vienna File Format <vienna_file_format>` for more details.
+
         Args:
-            record_lines (:obj:`str` or :obj:`tuple`): Iterable of 3
+            record_lines (:obj:`list` or :obj:`tuple`): Iterable of 3
                 strings corresponding to lines of a vienna-format record.
         """
         # See ERROR_MODE_ARGS_SUFFIX for error_mode and seq_type args
@@ -2265,6 +2269,8 @@ class FoldRecord(object):
         """
         Construct instance from a string representing 3 vienna-format ([ViennaFormat]_) lines.
 
+        See :ref:`Vienna File Format <vienna_file_format>` for more details.
+
         Args:
             record_string (str or tuple): 3-line string containing
                 a vienna-format record
@@ -2282,6 +2288,8 @@ class FoldRecord(object):
     def from_ct_lines(cls, record_lines, error_mode=None, seq_type=None):
         """
         Create a FoldRecord from a list of record lines in ".ct" format ([CTFormat]_).
+
+        See :ref:`CT File Format <ct_file_format>` for more details.
 
         Warning:
             This method is in beta stage, and is not well-tested.
@@ -2376,6 +2384,8 @@ class FoldRecord(object):
         """
         Create a FoldRecord entry from a multi-line string from ".ct" format ([CTFormat]_).
 
+        See :ref:`CT File Format <ct_file_format>` for more details.
+
         Warning:
             This method is in beta stage, and is not well-tested.
 
@@ -2432,6 +2442,9 @@ class FoldRecord(object):
                     except ValueError:
                         err_message = ('energy must be a float, int, numeric str, or None. '
                                        'Provided energy is non-numeric string: "%s"' % value)
+            # Store energy value as a string
+            elif isinstance(value, (float, int)):
+                value = "%.1f" % value
         elif attribute == 'fold':
             if not isinstance(value, str):
                 err_message = ('fold must be a string. Provided fold is type %s: %s' %
@@ -2498,6 +2511,17 @@ class FoldRecord(object):
         else:
             raise RuntimeError()
 
+    # FoldRecord : Private Methods : Seq Comparison
+    def _get_seq_mismatch_string(seq1, seq2):
+        match_str = ''
+        for i in range(max([len(seq1), len(seq2)])):
+            if seq1[i:(i + 1)] == seq2[i:(i + 1)]:
+                match_str += '|'
+            else:
+                match_str += '.'
+            mismatch_count = match_str.count('.')
+        return match_str, mismatch_count
+
 
 # ----- Begin FoldFile Class -----
 FOLD_FILE_COMMON_ARGS_ATTRS = (
@@ -2505,15 +2529,16 @@ FOLD_FILE_COMMON_ARGS_ATTRS = (
 
     Args:
         seq_type (:obj:`str`, optional): Type of FoldRecord to return:
-            'static', or 'dynamic'
-            (if not provided, uses :attr:`settings.FoldRecord_settings['seq_type']`).
-        error_mode (:obj:`str`, optional): 'string representing the error mode.
+            ``static``, or ``dynamic``
+            (if not provided, uses
+            :attr:`FoldRecord.settings['seq_type'] <FoldRecord.settings>`).
+        error_mode (:obj:`str`, optional): String representing the error mode.
                 If None, defaults to the value set in
                 :attr:`settings['error_mode'] <FoldRecord.settings>`.
                 Options:
                 "raise": Raise an error when encountered and exit program;
                 "warn_return": Print a warning and return the error_value;
-                "return": Return the error value with no program output.
+                "return": Return the error value with no warnings.
         *args: Passed to :func:`open()`.
         **kwargs: Passed to :func:`open()`.
 
@@ -2521,6 +2546,11 @@ FOLD_FILE_COMMON_ARGS_ATTRS = (
         fh (:obj:`file`): File handle for the file being wrapped.
         foldrecord_seq_type (str): Type of FoldRecord to return (see Args)
         error_mode (str): Mode for error catching (see Args)
+
+    Warning:
+        Occasionally fold files can be poorly-formatted. In that case, this iterator
+        attempts error-catching but this is not always successful so verbose error modes
+        are encouraged.
     """
 )
 
@@ -2534,7 +2564,7 @@ class FoldFile(object):
 
     # Args/Attrs Description in FOLD_FILE_COMMON_ARGS_ATTRS
 
-    #: Class-level settings. See :attr:`settings.FoldFile_settings` for descriptions.
+    #: Class-level settings. See :attr:`hybkit.settings.FoldFile_settings_info` for descriptions.
     settings = hybkit.settings.FoldFile_settings
 
     _foldrecord_settings_info = hybkit.settings.FoldRecord_settings_info
@@ -2585,7 +2615,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Reading
     def __next__(self):
-        """Return :class:`FoldRecord` via :meth:`read_record` based on file type."""
+        """Return :class:`FoldRecord` via :meth:`read_record` for this file type."""
         return self.read_record()
 
     # FoldFile : Public Methods : Reading
@@ -2599,7 +2629,7 @@ class FoldFile(object):
 
     # FoldFile : Public Methods : Reading
     def read_records(self):
-        """Return list of all :class:`FoldRecord` objects based on the appropriate file type."""
+        """Return list of all :class:`FoldRecord` objects for this file type."""
         records = []
         for record in self:
             records.append(record)
@@ -2608,7 +2638,7 @@ class FoldFile(object):
     # FoldFile : Public Methods : Writing
     def write_record(self, write_record):
         """
-        Write a FoldRecord object as the appropriate record/file type.
+        Write a FoldRecord object for this file type.
 
         Unlike the file.write() method, this method will add a newline to the
         end of each written record line.
@@ -2623,7 +2653,7 @@ class FoldFile(object):
     # FoldFile : Public Methods : Writing
     def write_records(self, write_records):
         """
-        Write a sequence of FoldRecord objects as the appropraite record/file type.
+        Write a sequence of FoldRecord objects for this file type.
 
         Unlike the file.writelines() method, this method will add a newline to the
         end of each written record line.
@@ -2673,9 +2703,11 @@ FoldFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS
 # ----- Begin ViennaFile Class -----
 class ViennaFile(FoldFile):
     """
-    Vienna file wrapper that returns ".vienna" file lines as FoldRecord objects.
+    Vienna file wrapper that returns vienna-format file lines as FoldRecord objects.
 
     See :ref:`Vienna File Format <vienna_file_format>` for more information.
+
+    .. _ViennaFile-Attributes:
     """
 
     # Args/Attrs Description in FOLD_FILE_COMMON_ARGS_ATTRS
@@ -2688,7 +2720,8 @@ class ViennaFile(FoldFile):
 
         Args:
             override_error_mode (str): Override the error_mode set in the
-                :class:`ViennaFile` object. See :class:`ViennaFile` for more
+                :class:`ViennaFile` object. See the
+                :ref:`ViennaFile Constructor <ViennaFile-Attributes>` for more
                 information on allowed error modes.
         """
         line_1 = next(self.fh)
@@ -2726,7 +2759,7 @@ class CtFile(FoldFile):
     """
     Ct file wrapper that returns ".ct" file lines as FoldRecord objects.
 
-        See :ref:`Ct File Format <ct_file_format>` for more information.
+        See :ref:`CT File Format <ct_file_format>` for more information.
 
     Warning:
             This class is in beta stage, and is not well-tested.
@@ -2738,7 +2771,7 @@ class CtFile(FoldFile):
     # CtFile : Public Methods
     def read_record(self):
         """
-        Return the next ct record as a :class:`FoldRecord` object.
+        Return the next CT record as a :class:`FoldRecord` object.
 
         Call next(self.fh) to return the first line of the next entry.
         Determine the expected number of following lines in the entry, and read that number
@@ -2755,6 +2788,14 @@ class CtFile(FoldFile):
             error_mode=self.error_mode)
         return record
 
+    # CtFile : Disable Record Writing Methods
+    #: CtFile Record Writing Not Implemented
+    write_record = None
+
+    # CtFile : Disable Record Writing Methods
+    #: CtFile Record Writing Not Implemented
+    write_records = None
+
     # CtFile : Private Methods
     def _post_init_tasks(self):
         """Hold place for any post-initializaiton tasks."""
@@ -2762,7 +2803,7 @@ class CtFile(FoldFile):
 
     # CtFile : Private Methods
     def _to_record_string(self, write_record, newline):
-        """Return a :class:`Fold Record` as a Ct-format string."""
+        """ (NOOP / Not-Implemented) Return a :class:`Fold Record` as a CT-format string."""
         message = 'No write_record is implmeneted for ct files, as the FoldRecord '
         message += 'object does not contain the complete set of ct record information.'
         print(message)
@@ -2776,7 +2817,7 @@ CtFile.__doc__ += FOLD_FILE_COMMON_ARGS_ATTRS
 # ----- Begin HybFoldIter Class -----
 class HybFoldIter(object):
     """
-    Iterator for simultaneous iteration over a :class:`HybFile` and :class:`FoldFile` object.
+    Iterator for simultaneous iteration over a :class:`HybFile` and ``FoldFile`` object.
 
     This class provides an iterator to iterate through a :class:`HybFile` and one of a
     :class:`ViennaFile`, or :class:`CtFile` simultaneously to return
@@ -2787,7 +2828,8 @@ class HybFoldIter(object):
 
     Args:
         hybfile_handle (HybFile) : HybFile object for iteration
-        foldfile_handle (FoldFile) : FoldFile object for iteration
+        foldfile_handle (:class:`ViennaFile` or :class:`CtFile`) : :class:`ViennaFile` or
+            :class:`CtFile` object for iteration
         combine (:obj:`bool`, optional) : Use HybRecord.set_fold_record(FoldRecord)
             and return only the HybRecord.
         iter_error_mode (str, optional) : Error mode to use for reading :class:`FoldRecord`
@@ -2798,7 +2840,7 @@ class HybFoldIter(object):
         (:class:`HybRecord`, :class:`FoldRecord`)
     """
 
-    #: Class-level settings. See :attr:`settings.HybFoldIter_settings` for descriptions.
+    #: Class-level settings. See :attr:`settings.HybFoldIter_settings_info` for descriptions.
     settings = hybkit.settings.HybFoldIter_settings
 
     _iter_error_modes = set(hybkit.settings.HybFoldIter_settings_info
