@@ -7,10 +7,10 @@ r"""
 Module storing primary hybkit classes and hybkit API.
 
 This module contains classes and methods for reading, writing, and manipulating data
-in the ".hyb" genomic sequence format ([Travis2014]_). For more information, see the
-:ref:`Hyb Specification <hybkit Hyb File Specification>`.
+in the hyb genomic sequence format ([Travis2014]_). For more information, see the
+:ref:`hybkit Hyb File Specification`.
 
-An example string of a ".hyb" format line from [Gay2018]_ is::
+An example string of a hyb-format line from [Gay2018]_ is::
 
     2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
 
@@ -19,7 +19,7 @@ Hybkit functionality is primarily based on classes for storage and evaluation of
 chimeric genomic sequences and associated fold-information:
 
 +----------------------------+---------------------------------------------------------------+
-| :class:`HybRecord`         | Class to store a single hyb (hybrid) sequence records         |
+| :class:`HybRecord`         | Class to store a single hyb (hybrid) sequence record          |
 +----------------------------+---------------------------------------------------------------+
 | :class:`FoldRecord`        | Class to store predicted RNA                                  |
 |                            | secondary structure information for hybrid reads              |
@@ -79,8 +79,9 @@ class HybRecord(object):
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in hyb format.
 
     Hyb file (hyb) format entries are a GFF-related file format described by [Travis2014]_
-    that contain information about a genomic sequence read identified to be a chimera by
-    anlaysis software. Each line contains 15 or 16 columns separated by tabs ("\\t") and provides
+    that contain information about a genomic sequence read identified to be ahybrid by
+    a chimeric read caller. Each line contains 15 or 16
+    columns separated by tabs ("\\t") and provides
     annotations on each components. An example hyb-format line
     from [Gay2018]_::
 
@@ -88,13 +89,16 @@ class HybRecord(object):
 
     The columns are respectively described in hybkit as:
 
-         id, seq, energy,
-         seg1_ref_name, seg1_read_start, seg1_read_end, seg1_ref_start, seg1_ref_end, seg1_score,
-         seg2_ref_name, seg2_read_start, seg2_read_end, seg2_ref_start, seg2_ref_end, seg2_score,
-         flag1=val1;flag2=val2;flag3=val3..."
+        ``id``, ``seq``, ``energy``,
+        ``seg1_ref_name``, ``seg1_read_start``, ``seg1_read_end``,
+        ``seg1_ref_start``, ``seg1_ref_end``, ``seg1_score``,
+        ``seg2_ref_name``, ``seg2_read_start``, ``seg2_read_end``,
+        ``seg2_ref_start``, ``seg2_ref_end``, ``seg2_score``,
+        ``flags``
+
 
     (For more information, see the
-    :ref:`Hyb Specification <hybkit Hyb File Specification>`)
+    :ref:`hybkit Hyb File Specification`)
 
     The preferred method for reading hyb records from lines is with
     the :func:`HybRecord.from_line` constructor::
@@ -102,11 +106,11 @@ class HybRecord(object):
         # line = "2407_718\tATC..."
         hyb_record = hybkit.HybRecord.from_line(line)
 
-    This constructor parses hyb files using the
-    :class:`HybFile` class.
+    This is the constructor used by the  :class:`HybFile` class to parse hyb files.
     For example, to print all hybrid identifiers in a hyb file::
 
         with hybkit.HybFile('path/to/file.hyb', 'r') as hyb_file:
+            # performs "hyb_record = hybkit.HybRecord.from_line(line)" for each line in file
             for hyb_record in hyb_file:
                 print(hyb_record.id)
 
@@ -149,43 +153,44 @@ class HybRecord(object):
     Args:
         id (str): Identifier for the hyb record
         seq (str): Nucleotide sequence of the hyb record
-        energy (:obj:`str` or :obj:`float`, optional): Predicted energy of sequence folding in kcal/mol
+        energy (:obj:`str` or :obj:`float`, optional): Predicted energy of sequence
+            folding in kcal/mol
         seg1_props (:obj:`dict`, optional): Properties of segment 1 of the record,
             containing possible
             :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
-            ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+            (``ref_name``, ``read_start``, ``read_end``, ``ref_start``, ``ref_end``, ``score``)
         seg2_props (:obj:`dict`, optional): Properties of segment 2 of the record,
             containing possible:
             :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
-            ('ref_name', 'read_start', 'read_end', 'ref_start', 'ref_end', 'score')
+            (``ref_name``, ``read_start``, ``read_end``, ``ref_start``, ``ref_end``, ``score``)
         flags (:obj:`dict`, optional): Dict with keys of flags for the record and their
             associated values.
             By default flags must be defined in :attr:`ALL_FLAGS` but custom
             flags can be supplied by changing
-            :attr:`settings['custom_flags'] <HybRecord.settings>`.
+            :attr:`HybRecord.settings['custom_flags'] <HybRecord.settings>`.
             This setting can also be disabled by setting 'allow_undefined_flags'
             to :obj:`True` in :attr:`HybRecord.settings`.
         allow_undefined_flags (:obj:`bool`, optional): If :obj:`True`, allows flags
             not defined in :attr:`ALL_FLAGS` or
-            :attr:`settings['custom_flags'] <HybRecord.settings>`
+            :attr:`HybRecord.settings['custom_flags'] <HybRecord.settings>`
             to be added to the record. If not provided, defaults to the value in
-            :attr:`settings['allow_undefined_flags'] <HybRecord.settings>`.
+            :attr:`HybRecord.settings['allow_undefined_flags'] <HybRecord.settings>`.
 
 
     .. _HybRecord-Attributes:
 
     Attributes:
-        id (str): Identifier for the hyb record (Hyb format: "<read-num>_<read-count>")
+        id (str): Identifier for the hyb record (Hyb format: ``<read-num>_<read-count>``)
         seq (str): Nucleotide sequence of the hyb record
         energy (str): Predicted energy of folding
         seg1_props (dict): Information on chimeric segment 1, contains
             :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
-            'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int),
-            'ref_end' (int), and 'score' (float).
+            ``ref_name`` (:obj:`str`), ``read_start`` (:obj:`int`), ``read_end`` (:obj:`int`),
+            ``ref_start`` (:obj:`int`), ``ref_end`` (:obj:`int`), and ``score`` (:obj:`float`).
         seg2_props (dict): Information on segment 2, contains
             :attr:`segment column <HybRecord.SEGMENT_COLUMNS>` keys:
-            'ref_name' (str), 'read_start' (int), 'read_end' (int), 'ref_start' (int),
-            'ref_end' (int), and 'score' (float).
+            ``ref_name`` (:obj:`str`), ``read_start`` (:obj:`int`), ``read_end`` (:obj:`int`),
+            ``ref_start`` (:obj:`int`), ``ref_end`` (:obj:`int`), and ``score`` (:obj:`float`).
         flags (dict): Dict of flags with possible
             :attr:`flag keys <HybRecord.ALL_FLAGS>` and values as defined in
             the :ref:`Flags` section of the :ref:`Hybkit Hyb File Specification`.
@@ -245,7 +250,7 @@ class HybRecord(object):
     #: :any:`hybkit Hyb File Specification`.
     ALL_FLAGS = _HYB_FLAGS + _HYBKIT_FLAGS
 
-    #: Class-level settings. See :attr:`settings.HybRecord_settings` for descriptions.
+    #: Class-level settings. See :attr:`settings.HybRecord_settings_info` for descriptions.
     settings = hybkit.settings.HybRecord_settings
 
     #: Link to :class:`type_finder.TypeFinder` class for parsing sequence identifiers
@@ -257,37 +262,40 @@ class HybRecord(object):
     # HybRecord : Private Constants
     #: Properties for the :meth:`is_set` method.
     #:
-    #: * ``energy``         : record.energy is not None
-    #: * ``full_seg_props`` : Each seg key is in segN_props dict and is not None
-    #: * ``fold_record``    : record.fold_record has been set
-    #: * ``eval_types``     : seg1_type and seg2_type flags have been set
-    #: * ``eval_mirna``     : miRNA_seg flag has been set
+    #: * ``energy``         : :attr:`energy` is not None
+    #: * ``full_seg_props`` : Each seg key is in :ref:`segN_props <HybRecord-Attributes>`
+    #:   dict and is not None
+    #: * ``fold_record``    : :ref:`fold_record <HybRecord-Attributes>` has been set
+    #: * ``eval_types``     : :ref:`seg1_type <HybRecord-Attributes>` and
+    #:   :ref:`seg2_type <HybRecord-Attributes>` flags have been set
+    #: * ``eval_mirna``     : :ref:`miRNA_seg <HybRecord-Attributes>` flag has been set
     #:
     SET_PROPS = [
         'energy', 'full_seg_props', 'fold_record',
         'eval_types', 'eval_mirna', 'eval_target',
     ]
 
-    #: General record properties for the :meth:`has_prop` method.
+    #: General record properties for the :meth:`prop` method.
     #:
-    #: * ``has_indels`` : either seg1 or seg2 alignments has insertions/deltions,
-    #:   shown by differing read/refernce length for the same alignment
+    #: * ``has_indels`` : either seg1 or seg2 alignments has insertions/deletions,
+    #:   shown by differing read/reference length for the same alignment
     GEN_PROPS = [
         'has_indels'
     ]
 
-    #: String-comparison properties for the :meth:`has_prop` method.
+    #: String-comparison properties for the :meth:`prop` method.
     #:
     #: * **Field Types:**
     #:
-    #:   * ``id``           : record.id
-    #:   * ``seq``          : record.seq
-    #:   * ``seg1``         : record.seg1_props['ref_name']
-    #:   * ``seg2``         : record.seg2_props['ref_name']
-    #:   * ``any_seg``      : record.seg1_props['ref_name'] OR record.seg1_props['ref_name']
-    #:   * ``seg1_type``    : seg1_type flag
-    #:   * ``seg2_type``    : seg2_type flag
-    #:   * ``any_seg_type`` : seg1_type OR seg2_type flags
+    #:   * ``id``           : :ref:`record.id <HybRecord-Attributes>`
+    #:   * ``seq``          : :ref:`record.seq <HybRecord-Attributes>`
+    #:   * ``seg1``         : :ref:`seg1_props['ref_name'] <HybRecord-Attributes>`
+    #:   * ``seg2``         : :ref:`seg2_props['ref_name'] <HybRecord-Attributes>`
+    #:   * ``any_seg``      : :ref:`seg1_props['ref_name'] <HybRecord-Attributes>` OR
+    #:     :ref:`seg1_props['ref_name'] <HybRecord-Attributes>`
+    #:   * ``seg1_type``    : :ref:`seg1_type <seg1_type>` flag
+    #:   * ``seg2_type``    : :ref:`seg2_type <seg2_type>` flag
+    #:   * ``any_seg_type`` : :ref:`seg1_type <seg1_type>` OR :ref:`seg2_type <seg2_type>` flags
     #:
     #: * **Comparisons:**
     #:
@@ -306,13 +314,14 @@ class HybRecord(object):
         'seg2_type_is', 'seg2_type_prefix', 'seg2_type_suffix', 'seg2_type_contains',
         'any_seg_type_is', 'any_seg_type_prefix', 'any_seg_type_suffix', 'any_seg_type_contains',
     ]
-    #: miRNA-evaluation-related properties for the :meth:`has_prop` method.
-    #: Requires :ref:`miRNA_seg <mirna_seg>` field to be set by :meth:`eval_mirna` method.
+    #: miRNA-evaluation-related properties for the :meth:`prop` method.
+    #: Requires :ref:`miRNA_seg <mirna_seg>` flag to be set by :meth:`eval_mirna` method.
     #:
-    #: * ``has_mirna``       : Seg1 or seg2 has been identified as a miRNA
-    #: * ``no_mirna``        : Seg1 and seg2 have been identified as not a miRNA
-    #: * ``mirna_dimer``     : Both seg1 and seg2 have been identified as a miRNA
-    #: * ``mirna_not_dimer`` : Only one of seg1 or seg2 has been identifed as a miRNA
+    #: * ``has_mirna``       : **Either or Both** Seg1 or seg2 hve been **identified as** a miRNA
+    #: * ``no_mirna``        : **Both** Seg1 and seg2 have been identified as **Not** a miRNA
+    #: * ``mirna_dimer``     : **Both** seg1 and seg2 have been **identified as** a miRNA
+    #: * ``mirna_not_dimer`` : **One and Only One** of seg1 or seg2
+    #:   has been **identifed as** a miRNA
     #: * ``5p_mirna``        : Seg1 (5p) has been identifed as a miRNA
     #: * ``3p_mirna``        : Seg2 (3p) has been identifed as a miRNA
     #:
@@ -321,15 +330,19 @@ class HybRecord(object):
         '5p_mirna', '3p_mirna',
     ]
 
-    #: miRNA-evaluation & string-comparison properties for the :meth:`has_prop` method.
-    #: Requires :ref:`miRNA_seg <mirna_seg>` field to be set by :meth:`eval_mirna` method.
+    #: miRNA-evaluation & string-comparison properties for the :meth:`prop` method.
+    #: Requires :ref:`miRNA_seg <mirna_seg>` flag to be set by :meth:`eval_mirna` method.
     #:
     #: * Field Types:
     #:
-    #:   * ``mirna``       : segN_props['ref_name'] for identified miRNA segN_props
-    #:   * ``target``      : segN_props['ref_name'] for identified target segN_props
-    #:   * ``mirna_type``  : segN_type for identified miRNA segN for miRNA/target hybrid
-    #:   * ``target_type`` : segN_type for identified target segN for miRNA/target hybrid
+    #:   * ``mirna``       : `segN_props['ref_name'] <HybRecord-Attributes>``
+    #      for identified miRNA segN_props
+    #:   * ``target``      : `segN_props['ref_name'] <HybRecord-Attributes>``
+    #      for identified target segN_props
+    #:   * ``mirna_type``  : :ref:`segN_type <seg1_type>` flag
+    #      for identified miRNA segN for miRNA/target hybrid
+    #:   * ``target_type`` : :ref:`segN_type <seg1_type>` flag
+    #      for identified target segN for miRNA/target hybrid
     #:
     #: * Comparisons:
     #:
@@ -346,28 +359,11 @@ class HybRecord(object):
         'target_seg_type_is', 'target_seg_type_prefix',
         'target_seg_type_suffix', 'target_seg_type_contains',
     ]
-    #: Target-evaluation-related properties for the :meth:`has_prop` method.
-    #: Requires :ref:`target_reg <target_reg>` field to be set.
-    #:
-    #: * ``target_none``    : Identified to have no miRNA target
-    #: * ``target_unknown`` : Unknown whether there is a miRNA target
-    #: * ``target_ncrna``   : miRNA target is identified as in a noncoding transcript
-    #: * ``target_5p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
-    #:   of a coding transcript
-    #: * ``target_3p_utr``  : miRNA target is identified as in the 5p UnTranslated Region
-    #:   of a coding transcript
-    #: * ``target_coding``  : miRNA target is identified as in coding region
-    #:   of a coding transcript
-    #:
-    TARGET_PROPS = [
-        'target_none', 'target_unknown', 'target_ncrna',
-        'target_5p_utr', 'target_3p_utr', 'target_coding',
-    ]
 
-    #: All allowed properties for the :meth:`has_prop()` method.
-    #: See :attr:`GEN_PROPS`, :attr:`STR_PROPS`, :attr:`MIRNA_PROPS`,
-    #: :attr:`MIRNA_STR_PROPS`, and :attr:`TARGET_PROPS` for details.
-    HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + MIRNA_STR_PROPS + TARGET_PROPS
+    #: All allowed properties for the :meth:`prop()` method.
+    #: See :attr:`GEN_PROPS`, :attr:`STR_PROPS`, :attr:`MIRNA_PROPS`, and
+    #: :attr:`MIRNA_STR_PROPS`
+    HAS_PROPS = GEN_PROPS + STR_PROPS + MIRNA_PROPS + MIRNA_STR_PROPS
 
     # Start HybRecord Public Methods
     # HybRecord : Public Methods : Initialization
@@ -438,12 +434,12 @@ class HybRecord(object):
         Args:
             flag_key (str): Key for flag to set.
             flag_val : Value for flag to set.
-            allow_undefined_flags (:obj:`bool` or :obj:`None`, optional):
+            allow_undefined_flags (:obj:`bool`, optional):
                 Allow inclusion of flags not
                 defined in :attr:`ALL_FLAGS` or in
                 :attr:`settings['custom_flags'] <HybRecord.settings>`.
-                If None (default), uses setting in
-                :attr:`'allow_undefined_flags'` (Default:
+                If not provided, uses setting in
+                :attr:`'HybRecord.allow_undefined_flags'` (Defaults to value in:
                 :attr:`settings['allow_undefined_flags'] <HybRecord.settings>` ).
         """
         if allow_undefined_flags is None:
@@ -488,6 +484,9 @@ class HybRecord(object):
     def get_seg_types(self, require=False):
         """
         Return "seg1_type" (or None), "seg2_type" (or None) flags.
+
+        Return a tuple of the :ref:`seg1_type <seg1_type>` and :ref:`seg2_type <seg2_type>` flags
+        for each respective flag that is defined, or None for each flag that is not.
 
         Args:
             require (:obj:`bool`, optional): If ``True``,
@@ -541,17 +540,17 @@ class HybRecord(object):
                 contain a miRNA-annotated segment (Default: ``True``).
         """
         self._ensure_set('eval_mirna')
-        if self.has_prop('has_mirna'):
-            if self.has_prop('mirna_dimer'):
+        if self.prop('has_mirna'):
+            if self.prop('mirna_dimer'):
                 if allow_mirna_dimers:
                     return self.seg1_props
                 elif require:
                     _print_and_error('Record contains a dimer of mirna-annotated segments.')
                 else:
                     return None
-            elif self.has_prop('5p_mirna'):
+            elif self.prop('5p_mirna'):
                 return self.seg1_props
-            elif self.has_prop('3p_mirna'):
+            elif self.prop('3p_mirna'):
                 return self.seg2_props
         elif require:
             _print_and_error('Record does not contain a miRNA-annotated segment.')
@@ -575,17 +574,17 @@ class HybRecord(object):
                 contain a single target-annotated segment (Default: ``True``).
         """
         self._ensure_set('eval_mirna')
-        if self.has_prop('has_mirna'):
-            if self.has_prop('mirna_dimer'):
+        if self.prop('has_mirna'):
+            if self.prop('mirna_dimer'):
                 if allow_mirna_dimers:
                     return self.seg2_props
                 elif require:
                     _print_and_error('Record contains a dimer of mirna-annotated segments.')
                 else:
                     return None
-            elif self.has_prop('5p_mirna'):
+            elif self.prop('5p_mirna'):
                 return self.seg2_props
-            elif self.has_prop('3p_mirna'):
+            elif self.prop('3p_mirna'):
                 return self.seg1_props
         elif require:
             _print_and_error('Record does not contain a miRNA target annotated segment.')
@@ -597,20 +596,23 @@ class HybRecord(object):
         """
         Find the types of each segment using the the :class:`TypeFinder` class.
 
-        This method provides :attr:`seg1_props` and :attr:`seg2_props`
+        This method provides :attr:`HybRecord.seg1_props` and :attr:`HybRecord.seg2_props`
         to the :class:`TypeFinder` class, linked as attribute :attr:`HybRecord.TypeFinder`.
-        This uses the method: :func:`TypeFinder.method`
-        set by :func:`TypeFinder.set_method` or :func:`TypeFinder.set_custom_method` to set the
+        This uses the method: :func:`TypeFinder.find <hybkit.type_finder.TypeFinder.find>`
+        set by :func:`TypeFinder.set_method <hybkit.type_finder.TypeFinder.set_method>`
+        or :func:`TypeFinder.set_custom_method <hybkit.type_finder.TypeFinder.set_custom_method>`
+        to set the
         :ref:`seg1_type <seg1_type>`, :ref:`seg2_type <seg2_type>` flags if not already set.
 
         To use a type-finding method other than the default,
-        prepare the :class:`TypeFinder` class by
-        preparing and setting :attr:`TypeFinder.params` and using :func:`TypeFinder.set_method`.
+        prepare the :class:`TypeFinder <hybkit.type_finder.TypeFinder>` class by
+        preparing and setting :attr:`TypeFinder.params <hybkit.type_finder.TypeFinder.params>`
+        and using :meth:`TypeFinder.set_method <hybkit.type_finder.TypeFinder.set_method>`.
 
         Args:
             allow_unknown (:obj:`bool`, optional): If ``True``, allow segment types that cannot be
                 identified and set them as "unknown". Otherwise raise an error.
-                If None (default), uses setting in
+                If not provided uses setting in
                 :attr:`settings['allow_unknown_seg_types'] <HybRecord.settings>`.
         """
         # If types already set, skip.
@@ -642,13 +644,16 @@ class HybRecord(object):
     # HybRecord : Public Methods : fold_record
     def set_fold_record(self, fold_record, allow_energy_mismatch=False):
         """
-        Check and set provided fold_record (:class:`FoldRecord`) as :attr:`fold_record`.
+        Check and set provided fold_record (:class:`FoldRecord`) as attribute fold_record.
+
 
         Ensures that fold_record argument is an instance of FoldRecord and
-        has a matching sequence to this HybRecord, then set as self.fold_record.
+        has a matching sequence to this HybRecord, then set as
+        :ref:`HybRecord.fold_record <HybRecord-Attributes>`.
 
         Args:
-            fold_record (FoldRecord): :attr:`FoldRecord` instance to set as :obj:`fold_record`.
+            fold_record (FoldRecord): :attr:`FoldRecord` instance to set as
+                :ref:`HybRecord.fold_record <HybRecord-Attributes>`.
         """
         # TODO: update fold_record_reading tuple
         if fold_record is None or (isinstance(fold_record, tuple) and fold_record[0] is None):
@@ -727,7 +732,7 @@ class HybRecord(object):
 
         Args:
             detail (str): | Type of detail to return. Options include:
-                          | ``all``             : (dict of all properties, default)
+                          | ``all``             : Dict of all properties (default)
                           | ``mirna_ref``       : Identifier for Assigned miRNA
                           | ``target_ref``      : Identifier for Assigned Target
                           | ``mirna_seg_type``  : Assigned seg_type of miRNA
@@ -736,7 +741,7 @@ class HybRecord(object):
                           | ``target_seq``      : Annotated subsequence of target
                           | ``mirna_fold``      : Annotated fold substring of miRNA
                             (requires fold_record set)
-                          | ``target_fold``     : Annotated fold substring target
+                          | ``target_fold``     : Annotated fold substring of target
                             (requires fold_record set)
             allow_mirna_dimers (:obj:`bool`, optional): Allow miRNA/miRNA dimers.
                 The 5p-position will be assigned as the "miRNA",
@@ -746,8 +751,8 @@ class HybRecord(object):
         self._ensure_set('eval_mirna')
         mirna_flag = self._get_flag('miRNA_seg')
 
-        if ((not self.has_prop('has_mirna'))
-                or (not allow_mirna_dimers and not self.has_prop('mirna_not_dimer'))):
+        if ((not self.prop('has_mirna'))
+                or (not allow_mirna_dimers and not self.prop('mirna_not_dimer'))):
             message = 'mirna_detail method requires a hybrid containing a single mirna.\n'
             message += 'hybrecord: %s does not meet this criteria ' % str(self)
             message += 'with miRNA_seg flag: %s' % mirna_flag
@@ -803,7 +808,7 @@ class HybRecord(object):
         """
         Deprecate, alias for :meth:`mirna_details`.
 
-        .. deprecated:: 0.1.0
+        .. deprecated:: v0.3.0
         """
         return self.mirna_details(*args, **kwargs)
 
@@ -848,7 +853,7 @@ class HybRecord(object):
         """
         Return ``False`` if HybRecord property "prop" is set (if relevant) and is not ``None``.
 
-        (returns ``"not :meth:`is_set`"`` )
+        ( returns ``not is_set(prop)`` )
 
         Args:
             prop (str): Property / Analysis to check
@@ -872,11 +877,10 @@ class HybRecord(object):
             :attr:`STR_PROPS`       Field String Comparison Properties
             :attr:`MIRNA_PROPS`     miRNA-Associated Record Properties
             :attr:`MIRNA_STR_PROPS` miRNA-Associated String Comparison Properties
-            :attr:`TARGET_PROPS`    miRNA-Target-Associated Properties
             ======================= =============================================
 
         Args:
-            prop (str):                   Property to check
+            prop (str):                          Property to check
             prop_compare (:obj:`str`, optional): Comparator to check.
 
         """
@@ -988,8 +992,8 @@ class HybRecord(object):
             # else:
             #    raise RuntimeError(prop)
 
-        elif prop in self._TARGET_PROPS_SET:
-            raise NotImplementedError('Target properties not yet implemented.')
+        # elif prop in self._TARGET_PROPS_SET:
+        #    raise NotImplementedError('Target properties not yet implemented.')
             # self._ensure_set('eval_target')
             # if prop == 'target_none':
             #     ret_val = (self._get_flag('target_reg') == 'N')
@@ -1010,7 +1014,7 @@ class HybRecord(object):
         """
         Return ``True`` if HybRecord has property: ``prop``.
 
-        .. deprecated:: v0.4.0
+        .. deprecated:: v0.3.0
            Use :meth:`prop` instead.
 
         """
@@ -1019,7 +1023,7 @@ class HybRecord(object):
     # HybRecord : Public Methods : Record Parsing
     def to_line(self, newline=True, sep='\t'):
         r"""
-        Return a hyb-ormat string representation of the record.
+        Return a hyb-format string representation of the record.
 
         Args:
             newline (:obj:`bool`, optional): Terminate returned string with
@@ -1105,11 +1109,11 @@ class HybRecord(object):
         if mode in {'mirna', 'target'}:
             if self.not_set('eval_mirna'):
                 _print_and_error('eval_mirna must be performed before miRNA/target fasta output')
-            elif self.has_prop('no_mirna'):
+            elif self.prop('no_mirna'):
                 message = 'miRNA / target cannot be output as fasta because record ' + str(self)
                 message += 'does not have a miRNA.'
                 _print_and_error(message)
-            elif self.has_prop('mirna_dimer') and not allow_mirna_dimers:
+            elif self.prop('mirna_dimer') and not allow_mirna_dimers:
                 message = 'miRNA / target cannot be output as fasta because record ' + str(self)
                 message += 'has a miRNA dimer.'
                 _print_and_error(message)
@@ -1117,12 +1121,12 @@ class HybRecord(object):
             if annotate:
                 fasta_description += mode + '--'
 
-            if self.has_prop('5p_mirna') or self.has_prop('mirna_dimer'):
+            if self.prop('5p_mirna') or self.prop('mirna_dimer'):
                 if mode == 'mirna':
                     mode = 'seg1'
                 else:
                     mode = 'seg2'
-            elif self.has_prop('3p_mirna'):
+            elif self.prop('3p_mirna'):
                 if mode == 'mirna':
                     mode = 'seg2'
                 else:
@@ -1199,13 +1203,13 @@ class HybRecord(object):
         ``hybformat_ref=True``.
 
         Args:
-            line (str): Hyb-format string containing record information.
+            line (str): hyb-format string containing record information.
             hybformat_id (:obj:`bool`, optional): If ``True``, read count
                 information from identifier in
-                "<read_number>_<read_count>" format.
+                ``<read_number>_<read_count>`` format.
             hybformat_ref (:obj:`bool`, optional): If ``True``, read
                 additional record information from
-                identifier in "<gene_id>_<transcript_id>_<gene_name>_<seg_type>" format.
+                identifier in ``<gene_id>_<transcript_id>_<gene_name>_<seg_type>`` format.
 
         Returns:
             :class:`HybRecord` instance containing record information.
@@ -1268,7 +1272,7 @@ class HybRecord(object):
         Create artificial HybRecord from two SeqRecord Objects
         For the hybrid:
 
-            | id: seg1_record.id + '--' + seg2_record.id
+            | id: ``[seg1_record.id]--[seg2_record.id]``
               (overwritten by "id" paramater if provided)
             | seq: seg1_record.seq + seg2_record
 
@@ -1291,7 +1295,7 @@ class HybRecord(object):
                 on the right/second/3p hybrid segment (seg2)
             hyb_id (:obj:`str`, optional): Identifier for the hyb record
                 (overwrites generated id if provided)
-            energy (:obj:`float`, optional): Predicted energy of sequence folding in kcal/mol
+            energy (:obj:`str` or :obj:`float`, optional): Predicted energy of sequence folding in kcal/mol
             flags (:obj:`dict`, optional): Dict with keys of flags for the record and their
                 associated values.
                 Any flags provided overwrite default-generated flags.
@@ -1345,7 +1349,7 @@ class HybRecord(object):
     _MIRNA_PROPS_SET = set(MIRNA_PROPS)
     _MIRNA_STR_PROPS_SET = set(MIRNA_STR_PROPS)
     _ALL_STR_PROPS_SET = _STR_PROPS_SET | _MIRNA_STR_PROPS_SET
-    _TARGET_PROPS_SET = set(TARGET_PROPS)
+    # _TARGET_PROPS_SET = set(TARGET_PROPS)
     _HAS_PROPS_SET = set(HAS_PROPS)
 
     # Placeholder for set of allowed flags filled on first use.
@@ -1882,46 +1886,45 @@ class FoldRecord(object):
 
     Two types of FoldRecord objects are supported, 'static' and 'dynamic'. Static
     FoldRecord objects are those where the 'seq' attribute
-    matches exactly to a :obj:`HybRecord`
-    :attr:`HybRecord.seq` attribute. Dynamic FoldRecord
-    objects are those where the :attr:`HybRecord.seq`
-    attribute
-    is reconstructed from aligned regions of a chimeric read: Longer for chimeras with
+    matches exactly to the corresponding
+    :attr:`HybRecord.seq` attribute (where applicable). Dynamic FoldRecord
+    objects are those where :attr:`FoldRecord.seq` is reconstructed from aligned
+    regions of a :attr:`HybRecord.seq` chimeric read: Longer for chimeras with
     overlapping alignments, shorter for chimeras with gapped alignments.
 
     Overlapping Alignment Example::
 
-        Static:
+        hyb.seq and static fold.seq:
         seg1: 1111111111111111111111
         seg2:                   222222222222222222222
         seq:  TAGCTTATCAGACTGATGTTTTAGCTTATCAGACTGATG
 
-        Dynamic:
+        Dynamic fold.seq:
         seg1: 1111111111111111111111
         seg2:                       222222222222222222222
         seq:  TAGCTTATCAGACTGATGTTTTTTTTAGCTTATCAGACTGATG
 
     Gapped Alignment Example::
 
-        Orignal:
-        seg1:  1111111111111111
-        seg2:                    222222222222222222
-        seq:  TAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
+        hyb.seq and static fold.seq:
+        seg1:   1111111111111111
+        seg2:                     222222222222222222
+        seq:  TTAGCTTATCAGACTGATGTTAGCTTATCAGACTGATG
 
-        Dynamic:
+        Dynamic fold.seq:
         seg1: 1111111111111111
         seg2:                 222222222222222222
         seq:  AGCTTATCAGACTGATTAGCTTATCAGACTGATG
 
-    This type of sequence is found in the Hyb program \*_hybrids_ua.hyb file type.
+    Dynamic sequences are found in the Hyb program \*_hybrids_ua.hyb file type.
     This is primarily relevant in error-checking when setting the :obj:`HybRecord.fold_record`
     of a :obj:`HybRecord` object.
 
-    | When the 'static' FoldRecord type is used, the following methods are used to for
+    | When the 'static' FoldRecord type is used, the following methods are used for
         :obj:`HybRecord.fold_record` error-checking:
     | :meth:`static_count_hyb_record_mismatches`
 
-    | When the 'dynamic' FoldRecord type is used, the following methods are used to for
+    | When the 'dynamic' FoldRecord type is used, the following methods are used for
         :obj:`HybRecord.fold_record` error-checking:
     | :meth:`dynamic_count_hyb_record_mismatches`
 
@@ -1932,7 +1935,7 @@ class FoldRecord(object):
         energy (str or :obj:`float`, optional): Energy of folding for record.
         seq_type (str, optional): Expect sequence to be
             'static' (match exactly to corresponding :attr:`HybRecord.seq`), or
-            'dynamic' (construct from pieces of :attr:`HybRecord.seq).
+            'dynamic' (construct from pieces of :attr:`HybRecord.seq`).
             if not provided, defaults to
             :attr:`~settings['seq_type'] <HybRecord.settings>` setting.
             See :obj:`settings.FoldRecord_settings` for descriptions.
@@ -2886,7 +2889,7 @@ class HybFoldIter(object):
 
             # Check for "InDel" errors
             if not error and 'hybrecord_indel' in self.settings['error_checks']:
-                if next_hyb_record.has_prop('has_indels'):
+                if next_hyb_record.prop('has_indels'):
                     error = 'HybRecord: %s has InDels.' % str(next_hyb_record)
 
             # Check for "Mismatch" errors
