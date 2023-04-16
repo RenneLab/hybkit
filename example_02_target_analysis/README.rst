@@ -32,6 +32,6 @@ The completed output of the analysis requires ~20 MB of space.
 Target Analysis Example Output
 ------------------------------
 
-.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_target_names.png
+.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_kshv-miR-K12-5_only_target_names.png
 
-.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_KSHV_only_target_types.png
+.. image:: ../example_02_target_analysis/example_output/GSM2720020_WT_BR1_kshv-miR-K12-5_only_target_types.png
