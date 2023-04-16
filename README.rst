@@ -137,7 +137,7 @@ Installation:
         * `matplotlib <https://matplotlib.org/>`_ >= 3.7.1 (|Hunter2007|_)
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
 
-    Via PyPI/Github:
+    Via PyPI / Python PIP:
         The recommended installation method is via hybkit's
         `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using
         `python3 pip <https://pip.pypa.io/en/stable/>`_, which will
@@ -145,7 +145,14 @@ Installation:
 
             $ python3 -m pip install hybkit
 
-        Acquisition of the package can also be performed by cloning the project's Github repository::
+    Via Conda:
+        Pending
+
+    Via Docker/Singularity:
+        Pending
+
+    Manually Download and Install
+        Acquisition of the package can be performed by cloning the project's Github repository::
 
             $ git clone git://github.com/RenneLab/hybkit
 
@@ -154,15 +161,9 @@ Installation:
             $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
             $ unzip master.zip
 
-        With either meth then followed by installation using python's setuptools::
+        With either method then followed by installation using python's setuptools::
 
             $ python setup.py install
-
-    Via Conda:
-        Pending
-
-    Via Docker/Singularity:
-        Pending
 
     Further documentation on hybkit usage can be found in |docs_link|_.
 
