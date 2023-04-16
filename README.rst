@@ -8,7 +8,6 @@ hybkit
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
-   :alt: CircleCI
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
 .. image:: https://img.shields.io/readthedocs/hybkit?logo=read-the-docs
