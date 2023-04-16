@@ -284,9 +284,9 @@ def validate_args(args, parser=None):
     Check supplied arguments to make sure there are no hidden contradictions.
 
     Current checks:
-        | If explicit output file names supplied, be sure that they match the number of
+        * If explicit output file names supplied, be sure that they match the number of
           input files provided.
-        | If fold files provided, make sure that they match the number of input hyb
+        * If fold files provided, make sure that they match the number of input hyb
           files provided.
 
     Args:

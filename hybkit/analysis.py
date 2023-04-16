@@ -23,40 +23,40 @@ class Analysis(object):
 
     .. _Analyses:
 
-    This class contains multiple conceptual analyses for HybRecord/FoldRecord Data::
+    This class contains multiple conceptual analyses for HybRecord/FoldRecord Data:
 
-        | Energy: Analysis of values of predicted intra-hybrid folding energy
-        | Type: Analysis of segment types
-        | miRNA: Analysis of miRNA segments distributions
-        | Target: Analysis of mirna target segment names and types
-        | Fold: Analysis of folding data included in the analyzed hyb_records.
+        | :ref:`Energy <EnergyAnalysis>`: Analysis of values of predicted intra-hybrid folding energy
+        | :ref:`Type <TypeAnalysis>`: Analysis of segment types
+        | :ref:`miRNA <MirnaAnalysis>`: Analysis of miRNA segments distributions
+        | :ref:`Target <TargetAnalysis>`: Analysis of mirna target segment names and types
+        | :ref:`Fold <FoldAnalysis>`: Analysis of folding data included in the analyzed hyb_records.
 
-    This class is utilized by selecting the analysis types to be performed on object
-    initialization. Analyses are performed either by using the :meth:`add_record` method
-    or by using the :meth:`add_all_records` method. The results of the analysis are
-    then available through the :meth:`get_all_results`, :meth:`get_analysis_results`, and
-    :meth:`get_specific_result` methods.
-    method, which can return the results
-    of all analyses or of one single analysis.
+    This class used by selecting the desired analysis types on object
+    initialization. Analyses are performed either by using either the :meth:`add_record`
+    or the :meth:`add_all_records` methods. The results of the analysis are
+    then available through the :meth:`get_all_results`, :meth:`get_analysis_results`,
+    :meth:`get_specific_result`, and :meth:`plot_analysis_results`
+    methods, which can return (or plot) the results
+    of all analyses or of a specific subset of analyses.
 
     Details for each respective analysis are provided here:
 
     .. _EnergyAnalysis:
 
-    Energy Analysis:
+    **Energy Analysis:**
 
         This analysis evaluates the energy of each :class:`~hybkit.HybRecord` object
         and provides a binned-histogram of all energy values represented.
 
         Output Results:
-            | energy_analysis_count (int): Count of energy values evaluated
-            | has_energy_val (int): Count of hyb_records with an energy value
-            | no_energy_val (int): Count of hyb_records without an energy value
-            | energy_min (float): Minimum energy value
-            | energy_max (float): Maximum energy value
-            | energy_mean (float): Mean energy value
-            | energy_std (float): Standard deviation of energy values
-            | binned_energy_vals (obj:`~collections.Counter`): Counter with integer keys of
+            | ``energy_analysis_count`` (:obj:`int`): Count of energy values evaluated
+            | ``has_energy_val`` (:obj:`int`): Count of hyb_records with an energy value
+            | ``no_energy_val`` (:obj:`int`): Count of hyb_records without an energy value
+            | ``energy_min`` (:obj:`float`): Minimum energy value
+            | ``energy_max`` (:obj:`float`): Maximum energy value
+            | ``energy_mean`` (:obj:`float`): Mean energy value
+            | ``energy_std`` (:obj:`float`): Standard deviation of energy values
+            | ``binned_energy_vals`` (:obj:`~collections.Counter`): Counter with integer keys of
               energy values from ``energy_min`` to ``energy_max`` storing the count of any
               hyb_records with energy values that fall within that range
               (rounded to the next highest integer (e.g. -12.5 -> -12).
@@ -64,7 +64,7 @@ class Analysis(object):
 
     .. _TypeAnalysis:
 
-    Type Analysis:
+    **Type Analysis:**
 
         This analysis evaluates the counts of each type of segment included in the
         :class:`~hybkit.HybRecord` objects. The types of segments are determined by
@@ -78,28 +78,29 @@ class Analysis(object):
               (can be done by :func:`hybkit.HybRecord.eval_types`).
 
         Output Results:
-            | types_analysis_count (int): Count of hybrid types analyzed
-            | hybrid_types (:obj:`~collections.Counter`): Counter containing annotated
-              types of seg1 and seg (in original order)
-            | reordered_hybrid_types (~collections.Counter): Counter containing annotated
+            | ``types_analysis_count`` (:obj:`int`): Count of hybrid types analyzed
+            | ``hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
+              types of seg1 and seg (in original |5p| / |3p| order)
+            | ``reordered_hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
               types of seg1 and seg2. This is provided in "sorted" order, where
-              types are sorted alphabetically.
-            | mirna_hybrid_types (~collections.Counter): Counter containing annotated
+              types are sorted alphabetically (independent of |5p| / |3p| position).
+            | ``mirna_hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
               types of seg1 and seg2. This is provided in "miRNA-prime" order, where a
-              miRNA type is always listed before an other types, and then remaining
-              types are sorted alphabetically.
-            | seg1_types (:obj:`~collections.Counter`): Counter containing annotated type of
+              miRNA type is always listed before other types, and then remaining
+              types are sorted alphabetically (independent of |5p| / |3p| position).
+            | ``seg1_types`` (:obj:`~collections.Counter`): Counter containing annotated type of
               segment in position seg1
-            | seg2_types (:obj:`~collections.Counter`): Counter containing annotated type of
+            | ``seg2_types`` (:obj:`~collections.Counter`): Counter containing annotated type of
               segment in position seg2
-            | all_seg_types (obj:`~collections.Counter`): Counter containing position-independent
+            | ``all_seg_types`` (:obj:`~collections.Counter`): Counter containing position-independent
               annotated types
 
     .. _MirnaAnalysis:
 
-    miRNA Analysis:
+    **miRNA Analysis:**
 
         Analysis of miRNA segments in hybrids.
+
         The mirna_analysis provides an analysis of what miRNA types are present in
         the hyb records. If a miRNA dimer is present in a hybrid, this is counted
         in ``mirna_dimers``. If a single miRNA is present in a hybrid, this is
@@ -111,23 +112,24 @@ class Analysis(object):
               (can be done by :func:`hybkit.HybRecord.eval_mirna`).
 
         Output Results:
-            | mirna_analysis_count (int): Count of miRNA hybrids analyzed
-            | mirnas_5p (int): Count of |5p| miRNAs detected
-            | mirnas_3p (int): Count of |3p| miRNAs detected
-            | mirna_dimers (int): Count of miRNA dimers (|5p| + |3p|) detected
-            | non_mirna (int): Count of non-miRNA hybrids detected
-            | has_mirna (int): Hybrids with |5p|, |3p|, or both as miRNA
+            | ``mirna_analysis_count`` (:obj:`int`): Count of miRNA hybrids analyzed
+            | ``mirnas_5p`` (:obj:`int`): Count of |5p| miRNAs detected
+            | ``mirnas_3p`` (:obj:`int`): Count of |3p| miRNAs detected
+            | ``mirna_dimers`` (:obj:`int`): Count of miRNA dimers (|5p| + |3p|) detected
+            | ``non_mirna`` (:obj:`int`): Count of non-miRNA hybrids detected
+            | ``has_mirna`` (:obj:`int`): Hybrids with |5p|, |3p|, or both as miRNA
 
     .. _TargetAnalysis:
 
-    Target Analysis:
+    **Target Analysis:**
 
         Analysis of targets in miRNA-containing hybrids.
-        The mirna_target analysis provides an analysis of what annotated sequences
+
+        The target analysis provides an analysis of what annotated sequences
         and sequence types are targeted by any miRNA within the hyb records. If a
         miRNA is not present in a hybrid, the hybrid is not included in the analysis.
-        If a miRNA dimer is present in a hybrid, the 5p miRNA is used for the analysis,
-        and the 3p miRNA is considered the "target."
+        If a miRNA dimer is present in a hybrid, the |5p| miRNA is used for the analysis,
+        and the |3p| miRNA is considered the "target."
 
         Requirements:
             | :ref:`mirna_seg <mirna_seg>` flag
@@ -135,16 +137,16 @@ class Analysis(object):
               (can be done by :func:`hybkit.HybRecord.eval_mirna`).
 
         Output Results:
-            | target_analysis_count (int): Count of hybrids analyzed
-            | target_evals (int): Count of target evaluations performed
-            | target_names (:obj:`~collections.Counter`): Counter containing names of
+            | ``target_analysis_count`` (:obj:`int`): Count of hybrids analyzed
+            | ``target_evals`` (:obj:`int`): Count of target evaluations performed
+            | ``target_names`` (:obj:`~collections.Counter`): Counter containing names of
               miRNA targets detected.
-            | target_types (:obj:`~collections.Counter`): Counter containing types of
+            | ``target_types`` (:obj:`~collections.Counter`): Counter containing types of
               miRNA targets detected.
 
     .. _FoldAnalysis:
 
-    Fold Analysis:
+    **Fold Analysis:**
 
         This analysis evaluates the predicted binding of miRNA within hyb records
         that contain a miRNA and have an associated :class:`~hybkit.FoldRecord` object
@@ -152,34 +154,41 @@ class Analysis(object):
         plotting of the predicted binding by position among the provided miRNA.
 
         Requirements:
-            | :ref:`mirna_seg <mirna_seg>` flag
+            | The :ref:`mirna_seg <mirna_seg>` flag
               must be set for each HybRecord
               (can be done by :func:`hybkit.HybRecord.eval_mirna`).
-            | :attr:`~hybkit.HybRecord.fold_record` attribute must be set for each HybRecord
-                with the corresponding :class:`~hybkit.FoldRecord` object. This can be done
-                using the :meth:`HybRecord.set_fold_record()` method.
+            | The :ref:`fold_record <HybRecord-Attributes>` attribute must be set for each HybRecord
+              with a corresponding :class:`~hybkit.FoldRecord` object. This can be done
+              using the :meth:`hybkit.HybRecord.set_fold_record()` method.
 
         Output Results:
-            | fold_analysis_count (int): Count of miRNA fold predictions analyzed
-            | folds_recorded (int): Count of fold predictions with a mirna fold
-            | mirna_nt_fold_counts (obj:`~collections.Counter`) : Counter with keys of
+            | ``fold_analysis_count`` (:obj:`int`): Count of miRNA fold predictions analyzed
+            | ``folds_recorded`` (:obj:`int`): Count of fold predictions with a mirna fold
+            | ``mirna_nt_fold_counts`` (:obj:`~collections.Counter`) : Counter with keys of
               miRNA position index and values of number of miRNAs with a predicted
               bound state at that index.
-            | mirna_nt_fold_props (obj:`~collections.Counter`) : Counter with keys of
+            | ``mirna_nt_fold_props`` (:obj:`~collections.Counter`) : Counter with keys of
               miRNA position index and values of proportion (0.0 - 1.0) of miRNAs
               with a predicted bound state at that index.
-            | fold_match_counts (obj:`~collections.Counter`) : Counter with keys of
+            | ``fold_match_counts`` (:obj:`~collections.Counter`) : Counter with keys of
               count of predicted matches between miRNA and target with
               values of count of miRNAs with that number of predicted matches.
 
     Args:
-        analysis_types (:obj:`str` or :obj:`list` of :obj:`str`): Analysis types to perform.
-        name (:obj:`str`, optional): Name of the analysis.
-        quant_mode (:obj:`str`, optional): Quantification mode to use for record quantification.
+        analysis_types (:obj:`str` or :obj:`list` of :obj:`str`): Analysis types to perform
+        name (:obj:`str`, optional): Name of the analysis
+        quant_mode (:obj:`str`, optional): Mode to use for record quantification.
             Options are "single": One count per record; "reads": If "read_count" flag is set, count
             all reads in record (else count 1); "records": if the "record_count" flag is set, count
             all individual records within combined record (else count 1). If not provided,
-            defaults to the value in :attr:`settings['quant_mode']`.
+            defaults to the value in :attr:`Analysis.settings['quant_mode'].`
+
+    .. _Analysis-Attributes:
+
+    Attributes:
+        name (:obj:`str`): Name of the analysis
+        analysis_types (:obj:`list` of :obj:`str`): List of analysis types to perform
+        quant_mode (:obj:`str`): Mode to use for record quantification.
     """
 
     #: Class-level settings. See :attr:`hybkit.settings.Analysis_settings` for descriptions.
@@ -277,21 +286,22 @@ class Analysis(object):
             getattr(self, '_add_' + analysis_type)(hyb_record)
 
     # Analysis : Public Methods : Add HybRecords
-    def add_hyb_records(self, hyb_record_iter, eval_types=False, eval_mirna=False):
+    def add_hyb_records(self, hyb_records, eval_types=False, eval_mirna=False):
         """
         Add a list of HybRecord objects to the analysis.
 
         Args:
-            hyb_records (:class:HybFile: or :obj:`list` of :class:`~hybkit.HybRecord`): HybFile
+            hyb_records (:class:`~hybkit.HybFile` or :obj:`list` of :class:`~hybkit.HybRecord`):
+                HybFile
                 to iterate over, or iterable
                 of HybRecord objects to be added to the analysis.
-            eval_types (bool): If True, evaluate the hybrid type of the HybRecord before adding
+            eval_types (bool): If ``True``, evaluate the hybrid type of the HybRecord before adding
                 it to the analysis using :meth:`hybkit.HybRecord.eval_types`.
-            eval_mirna (bool): If True, evaluate the miRNA segment of the HybRecord before
+            eval_mirna (bool): If ``True``, evaluate the miRNA segment of the HybRecord before
                 adding it to the analysis using :meth:`hybkit.HybRecord.eval_mirna`.
 
         """
-        for hyb_record in hyb_record_iter:
+        for hyb_record in hyb_records:
             if eval_types:
                 hyb_record.eval_types()
             if eval_mirna:
@@ -303,6 +313,8 @@ class Analysis(object):
     def get_all_results(self):
         """
         Return a dictionary with all results for all active analyses.
+
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
 
         Returns:
             dict: Dictionary with keys of analysis type and values of
@@ -318,12 +330,14 @@ class Analysis(object):
         """
         Return a dictionary with all results for a specific analysis.
 
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
+
         Args:
             analysis (str): Analysis type to return results for.
 
         Returns:
             dict: Dictionary with results for the specified analysis type.
-                see :ref:_Analyses for details.
+                see :ref:Analyses for details.
         """
         self._ensure_analyses_active(analysis)
         return getattr(self, '_get_' + analysis + '_results')()
@@ -332,6 +346,8 @@ class Analysis(object):
     def get_specific_result(self, result_key):
         """
         Get a specific result from the analysis.
+
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
 
         Args:
             result_key (str): Result key to return from one of the enabled analyses.
@@ -362,8 +378,10 @@ class Analysis(object):
         """
         Return a delimited string containing the results of the analysis.
 
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
+
         Args:
-            analysis (:obj:`str` or :obj:`list` of str): Analysis type to return results for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to return results for.
                 If not provided, return the results for all active analyses.
             out_delim (str): Delimiter to use for output. If not provided, defaults to
                 the value in :attr:`settings['out_delim'] <settings>`.
@@ -393,11 +411,13 @@ class Analysis(object):
         """
         Write the results of the analysis to a delimited text file.
 
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
+
         Args:
             out_file_name (str): Path to output file. If not provided, defaults to:
                 ./<analysis_name>_<analysis>.csv if analysis/analyses provided, or
                 ./<analysis_name>_multi_analysis.csv if no analysis/analyses provided.
-            analysis (:obj:`str` or :obj:`list` of str): Analysis type to return results for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to return results for.
                 If not provided, return the results for all active analyses.
             out_delim (str): Delimiter to use for output. If not provided, defaults to
                 the value in :attr:`settings['out_delim'] <settings>`.
@@ -432,12 +452,14 @@ class Analysis(object):
         """
         Write the results of the analyses to specilized text files.
 
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
+
         Args:
             out_file_basename (str): Path for basename of output file. Files will be renamed
                 using the provided path as the base name. If not provided, defaults to:
                 ./<analysis_name>_<analysis> if :attr:`name` is set, or
                 ./Analysis_multi_<analysis>  if name not set.
-            analysis (:obj:`str` or :obj:`list` of str): Analysis type to write results files
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to write results files
                 for.
                 If not provided, write results files for all active analyses.
             out_delim (str): Delimiter to use for output where applicable.
@@ -475,8 +497,10 @@ class Analysis(object):
         """
         Plot the results of the analyses.
 
+        See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
+
         Args:
-            analysis (:obj:`str` or :obj:`list` of str): Analysis type to plot results for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to plot results for.
                 If not provided, plot results for all active analyses.
             out_basename (str): Path to output file. If not provided, defaults to:
                 ./<analysis_name> if :attr:`name` provided or

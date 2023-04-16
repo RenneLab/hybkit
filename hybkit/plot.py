@@ -18,47 +18,22 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 
 # ----- Begin Plot Constants -----
+# Base defaults for matplotlib rcParams.
 RC_PARAMS_DEFAULTS = {
     'figure.dpi': 1200,
     'figure.figsize': matplotlib.rcParams['figure.figsize'],  # 6.4, 4.8 in
     'axes.titlepad': 15,
 }
 
+# Default matplotlib rcParams for pie charts.
 PIE_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
 PIE_RC_PARAMS.update({
     'axes.titleweight': 'bold',
     'axes.labelweight': 'bold',
     # 'figure.figsize': (10, 4.8),
 }),
-PIE_DEFAULTS = {
-    'SETTINGS': {
-        'autopct': '%1.1f%%',
-        'shadow': False,
-        'startangle': 90,
-        'counterclock': False,
-    },
-    'RC_PARAMS': PIE_RC_PARAMS,
-    'OTHER_THRESHHOLD': 0.1,
-    'MIN_WEDGE_SIZE': 0.04,
-}
-# PIE['DEFAULT_TARGET_SETTINGS'] = copy.deepcopy(PIE['DEFAULT_SETTINGS'])
-# PIE['DEFAULT_TARGET_SETTINGS'].update({'textprops': {'size': 'small'}})
 
-LINE_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
-LINE_RC_PARAMS.update({
-    'axes.titlesize': 'x-large',
-    'axes.titleweight': 'bold',
-    'axes.labelsize': 'large',
-    'axes.labelweight': 'bold',
-    'xtick.labelsize': 'medium',
-    'ytick.labelsize': 'large',
-})
-LINE_DEFAULTS = {
-    'RC_PARAMS': LINE_RC_PARAMS,
-    'LINE_DATA_FORMAT': '-',
-    'LINE_MIN_FRACTION_SIZE': 0.01,
-}
-
+# Default matplotlib rcParams for bar charts.
 BAR_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
 BAR_RC_PARAMS.update({
     'axes.titlesize': 'x-large',
@@ -68,22 +43,12 @@ BAR_RC_PARAMS.update({
     # 'xtick.labelsize': 'large',
     # 'ytick.labelsize': 'large',
 }),
-BAR_DEFAULTS = {
-    'RC_PARAMS': BAR_RC_PARAMS,
-    'BAR_WIDTH': 0.9,
-    'BAR_ALIGN': 'edge',
-}
 
+#: Default matplotlib rcParams for energy analysis histograms.
 ENERGY_HIST_RC_PARAMS = copy.deepcopy(BAR_RC_PARAMS)
 ENERGY_HIST_RC_PARAMS.update({})
-ENERGY_DEFAULTS = {
-    'MIN_COUNT': 0,
-    'MIN_DENSITY': 0.0,
-    'XLABEL': 'Hybrid Gibbs Free Energy (kcal/mol)',
-    'YLABEL': 'Hybrid Count',
-    'RC_PARAMS': ENERGY_HIST_RC_PARAMS,
-}
 
+#: Default matplotlib rcParams for type analysis pie charts.
 TYPE_PIE_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
 TYPE_PIE_RC_PARAMS.update({})
 # MATCH_DEFAULTS = {
@@ -92,6 +57,7 @@ TYPE_PIE_RC_PARAMS.update({})
 #     'MATCH_YLABEL': 'Hybrid Count',
 # }
 
+#: Default matplotlib rcParams for target analysis pie charts.
 TARGET_PIE_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
 TARGET_PIE_RC_PARAMS.update({
     'figure.figsize': (10, 4.8),
@@ -101,6 +67,7 @@ TARGET_PIE_RC_PARAMS.update({
 #     'TARGET_TYPE_TITLE': 'Target Types',
 # }
 
+#: Default matplotlib rcParams for fold match analysis histograms.
 FOLD_MATCH_HIST_RC_PARAMS = copy.deepcopy(BAR_RC_PARAMS)
 FOLD_MATCH_HIST_RC_PARAMS.update({})
 # FOLD_DEFAULTS = {
@@ -108,15 +75,63 @@ FOLD_MATCH_HIST_RC_PARAMS.update({})
 #     'MATCH_TITLE': 'Hybrid Predicted Base Pairs',
 # }
 
+#: Default matplotlib rcParams for fold nt counts analysis histograms.
 FOLD_NT_COUNTS_HIST_RC_PARAMS = copy.deepcopy(BAR_RC_PARAMS)
 FOLD_NT_COUNTS_HIST_RC_PARAMS.update({})
 
-FORMAT_NAME_MAP = {
-    'mirnas_5p': "5'_miRNA_Hybrids",
-    'mirnas_3p': "3'_miRNA_Hybrids",
-    'mirna_dimers': 'miRNA_Duplexes',
-    'non_mirnas': 'Non-miRNA_Hybrids'
+# _FORMAT_NAME_MAP = {
+#     'mirnas_5p': "5'_miRNA_Hybrids",
+#     'mirnas_3p': "3'_miRNA_Hybrids",
+#     'mirna_dimers': 'miRNA_Duplexes',
+#     'non_mirnas': 'Non-miRNA_Hybrids'
+# }
+
+
+#: Default Pie Chart Plot Settings.
+PIE_DEFAULTS = {
+    'SETTINGS': {
+        'autopct': '%1.1f%%',
+        'shadow': False,
+        'startangle': 90,
+        'counterclock': False,
+    },
+    'OTHER_THRESHHOLD': 0.1,
+    'MIN_WEDGE_SIZE': 0.04,
 }
+# PIE['DEFAULT_TARGET_SETTINGS'] = copy.deepcopy(PIE['DEFAULT_SETTINGS'])
+# PIE['DEFAULT_TARGET_SETTINGS'].update({'textprops': {'size': 'small'}})
+
+#: Default Bar Chart Plot Settings.
+BAR_DEFAULTS = {
+    'BAR_WIDTH': 0.9,
+    'BAR_ALIGN': 'edge',
+}
+
+#: Default Bar Chart Plot Settings for Histograms.
+ENERGY_DEFAULTS = {
+    'MIN_COUNT': 0,
+    'MIN_DENSITY': 0.0,
+    'XLABEL': 'Hybrid Gibbs Free Energy (kcal/mol)',
+    'YLABEL': 'Hybrid Count',
+}
+
+
+# LINE_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
+# LINE_RC_PARAMS.update({
+#     'axes.titlesize': 'x-large',
+#     'axes.titleweight': 'bold',
+#     'axes.labelsize': 'large',
+#     'axes.labelweight': 'bold',
+#     'xtick.labelsize': 'medium',
+#     'ytick.labelsize': 'large',
+# })
+# LINE_DEFAULTS = {
+#     'RC_PARAMS': LINE_RC_PARAMS,
+#     'LINE_DATA_FORMAT': '-',
+#     'LINE_MIN_FRACTION_SIZE': 0.01,
+# }
+
+
 
 
 # ----- Begin Plotting Methods -----
@@ -128,11 +143,11 @@ def energy_histogram(results,
                      rc_params=copy.deepcopy(ENERGY_HIST_RC_PARAMS),
                      ):
     """
-    Plot histogram of hybrid energy counts from a `~hybkit.analysis.Analysis` Fold Analysis.
+    Plot histogram of hybrid energies from an :class:`~hybkit.analysis.Analysis` fold analysis.
 
     Args:
-        results (dict): Dictionary of energy counts from a `~hybkit.analysis.Analysis`
-            Fold Analysis (Key: 'binned_energy_vals').
+        results (dict): Dictionary of energy counts from an :class:`~hybkit.analysis.Analysis`
+            fold analysis (Key: ``binned_energy_vals``).
         plot_file_name (str): Name of output file.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
         rc_params (:obj:`dict`, optional): Dictionary of matplotlib rcParams. Defaults
@@ -184,11 +199,11 @@ def type_count(results,
                rc_params=copy.deepcopy(TYPE_PIE_RC_PARAMS),
                ):
     """
-    Plot pie chart of hybrid type counts from a `~hybkit.analysis.Analysis` Type Analysis.
+    Plot pie chart of hybrid type counts from an :class:`~hybkit.analysis.Analysis` type analysis.
 
     Args:
-        results (~collections.Counter): Counter Object of type counts from a
-            `~hybkit.analysis.Analysis` Type Analysis.
+        results (~collections.Counter): Counter Object of type counts from an
+            :class:`~hybkit.analysis.Analysis` type analysis.
         plot_file_name (str): Name of output file.
         title (str): Title of plot.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
@@ -242,11 +257,11 @@ def fold_match_counts_histogram(results,
                                 rc_params=copy.deepcopy(FOLD_MATCH_HIST_RC_PARAMS),
                                 ):
     """
-    Plot histogram of predicted miRNA/target match count from `~hybkit.analysis.Analysis` Analysis.
+    Plot histogram of predicted miRNA/target match count.
 
     Args:
-        results (~collections.Counter): Counter Object of match counts from a
-            `~hybkit.analysis.Analysis` Type Analysis.
+        results (~collections.Counter): Counter Object of match counts from an
+            :class:`~hybkit.analysis.Analysis` type analysis.
         plot_file_name (str): Name of output file.
         title (str): Title of plot.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
