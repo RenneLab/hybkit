@@ -19,7 +19,7 @@ with resources.path('hybkit', '__init__.py') as path_obj:
 
 # Hybkit information
 project_name = 'hybkit'
-version = "0.3.0"
+version = "v0.3.0"
 python_requires = '>=3.8'
 description = 'Toolkit for analysis of chimeric (hybrid) RNA sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
@@ -89,7 +89,7 @@ __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel Stribling", "Rolf Renne"]
 __copyright__ = '2023, ' + __author__
-__date__ = "2021/09/30"
+__date__ = "2023/04/16"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
 __license__ = "GPLv3+"
