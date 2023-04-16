@@ -940,7 +940,7 @@ class Analysis(object):
 
         # Plot hybrid_types
         hybrid_types_file_name = basename + '_types_hybrid_types.png'
-        hybkit.plot.type_count(
+        hybkit.plot.type_count_dual(
             type_results['hybrid_types'],
             hybrid_types_file_name,
             title='Hybrid Types',
@@ -951,7 +951,7 @@ class Analysis(object):
 
         # Plot reordered_hybrid_types
         reordered_hybrid_types_file_name = basename + '_types_reordered_hybrid_types.png'
-        hybkit.plot.type_count(
+        hybkit.plot.type_count_dual(
             type_results['reordered_hybrid_types'],
             reordered_hybrid_types_file_name,
             title='Reordered Hybrid Types',
@@ -962,7 +962,7 @@ class Analysis(object):
 
         # Plot mirna_hybrid_types
         mirna_hybrid_types_file_name = basename + '_types_mirna_hybrids.png'
-        hybkit.plot.type_count(
+        hybkit.plot.type_count_dual(
             type_results['mirna_hybrid_types'],
             mirna_hybrid_types_file_name,
             title='miRNA Hybrid Types',

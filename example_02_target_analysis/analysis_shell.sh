@@ -53,7 +53,7 @@ hyb_eval -i "${IN_FILES[*]}" --verbose \
 EVAL_FILES=( $(ls ${OUT_DIR}/*evaluated*.hyb) )
 OUT_FILES=""
 for EVAL_FILE in ${EVAL_FILES[*]}; do
-  OUT_FILES+="${EVAL_FILE/evaluated/KSHV_only} "
+  OUT_FILES+="${EVAL_FILE/evaluated/kshv-miR-K12-5_only} "
 done
 
 # Filter records to only those where any reference contains the string "kshv"
@@ -61,7 +61,7 @@ done
 hyb_filter -i "${EVAL_FILES[*]}" --verbose \
            -o ${OUT_FILES} \
            --filter has_mirna \
-           --filter_2 mirna_contains kshv \
+           --filter_2 mirna_contains kshv-miR-K12-5 \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
 
@@ -74,7 +74,7 @@ for fn in ${OUT_FILES[*]} ; do
               --out_dir ${OUT_DIR} \
               --out_suffix '' \
               --analysis_types target \
-              --analysis_name "$(basename ${fn/_KSHV_only.hyb/})" \
+              --analysis_name "$(basename ${fn/_kshv-miR-K12-5_only.hyb/})" \
 
 done
 set +v

@@ -49,18 +49,24 @@ ENERGY_HIST_RC_PARAMS = copy.deepcopy(BAR_RC_PARAMS)
 ENERGY_HIST_RC_PARAMS.update({})
 
 #: Default matplotlib rcParams for type analysis pie charts.
-TYPE_PIE_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
-TYPE_PIE_RC_PARAMS.update({})
+TYPE_PIE_SINGLE_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
+TYPE_PIE_SINGLE_RC_PARAMS.update({})
 # MATCH_DEFAULTS = {
 #     'MATCH_MIN_COUNT': 0,
 #     'MATCH_XLABEL': 'Predicted Base-Pairs',
 #     'MATCH_YLABEL': 'Hybrid Count',
 # }
 
+#: Default matplotlib rcParams for type analysis pie charts.
+TYPE_PIE_DUAL_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
+TYPE_PIE_DUAL_RC_PARAMS.update({
+    'figure.figsize': (8, 4.8),
+})
+
 #: Default matplotlib rcParams for target analysis pie charts.
 TARGET_PIE_RC_PARAMS = copy.deepcopy(PIE_RC_PARAMS)
 TARGET_PIE_RC_PARAMS.update({
-    'figure.figsize': (10, 4.8),
+    'figure.figsize': (9.6, 4.8),
 })
 # TARGET_DEFAULTS = {
 #     'TARGET_TITLE': 'Targets',
@@ -95,7 +101,7 @@ PIE_DEFAULTS = {
         'startangle': 90,
         'counterclock': False,
     },
-    'OTHER_THRESHHOLD': 0.1,
+    'OTHER_THRESHHOLD': 0.05,
     'MIN_WEDGE_SIZE': 0.04,
 }
 # PIE['DEFAULT_TARGET_SETTINGS'] = copy.deepcopy(PIE['DEFAULT_SETTINGS'])
@@ -196,7 +202,7 @@ def type_count(results,
                title,
                name=None,
                join_entries=False,
-               rc_params=copy.deepcopy(TYPE_PIE_RC_PARAMS),
+               rc_params=copy.deepcopy(TYPE_PIE_SINGLE_RC_PARAMS),
                ):
     """
     Plot pie chart of hybrid type counts from an :class:`~hybkit.analysis.Analysis` type analysis.
@@ -237,6 +243,25 @@ def type_count(results,
     _plot_types_pie_chart(plot_params)
 
 
+# Public Methods : Type : type_count
+# Plot a pie plot for two types from a hybkit Type Analysis
+def type_count_dual(results,
+                    plot_file_name,
+                    title,
+                    name=None,
+                    join_entries=False,
+                    rc_params=copy.deepcopy(TYPE_PIE_DUAL_RC_PARAMS),
+                    ):
+    """Hold Place for replaced docstring."""
+    return type_count(results, plot_file_name, title, name, join_entries, rc_params)
+
+
+# Modify type_count_dual
+type_count_dual.__doc__ = type_count.__doc__
+
+
+# Public Methods : Target : tareget_count
+# Plot a pie plot for targets from a hybkit target analysis
 def target_count(*args, **kwargs):
     """Hold Place for replaced docstring."""
     return type_count(*args, rc_params=TARGET_PIE_RC_PARAMS, **kwargs)
