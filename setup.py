@@ -10,6 +10,7 @@ import os
 import hybkit
 import glob
 import fnmatch
+import pprint
 
 # Set project directory
 proj_dir = os.path.abspath(os.path.dirname(__file__))
@@ -51,30 +52,47 @@ for dir_name in data_file_dirs:
     target_dir_name = os.path.join(about_vars['name_and_version'], dir_name)
     data_files.append((target_dir_name, file_list))
 
+print('\nData Files:')
+pprint.pp(data_files)
+
+# Get Package Data:
+package_data = [
+    os.path.basename(f) for f in glob.glob('hybkit/*')
+    if not (os.path.basename(f).endswith('.py')
+            or os.path.basename(f).endswith('__'))
+]
+print('\nPackage Data:')
+pprint.pp(package_data)
+
+# Get Scripts
+scripts = [s for s in glob.glob('scripts/*') if not s.endswith('__')]
+print('\nScripts:')
+pprint.pp(scripts)
+
+# Print About Vars
+print('\nAbout Variables:')
+pprint.pp(about_vars)
+
 setuptools.setup(
-    name=about_vars['project_name'],
-    version=about_vars['__version__'],
-    description=about_vars['description'],
-    long_description=long_description,
-    long_description_content_type='text/x-rst',
-    url=about_vars['project_url'],
-    author=about_vars['__author__'],
-    author_email=about_vars['__contact__'],
-    classifiers=about_vars['classifiers'],
-    keywords=about_vars['keywords'],
-    packages=['hybkit'],
-    package_dir={'hybkit': 'hybkit'},
-    package_data={'hybkit': [
-        os.path.basename(f) for f in glob.glob('hybkit/*')
-        if not (os.path.basename(f).endswith('.py')
-                or os.path.basename(f).endswith('__'))
-    ]},
-    scripts=glob.glob('scripts/*'),
-    python_requires=about_vars['python_requires'],
-    project_urls=about_vars['info_urls'],
-    data_files=data_files,
-    install_requires=[
-        'matplotlib',
-        'biopython',
-    ],
+   name=about_vars['project_name'],
+   version=about_vars['__version__'],
+   description=about_vars['description'],
+   long_description=long_description,
+   long_description_content_type='text/x-rst',
+   url=about_vars['project_url'],
+   author=about_vars['__author__'],
+   author_email=about_vars['__contact__'],
+   classifiers=about_vars['classifiers'],
+   keywords=about_vars['keywords'],
+   packages=['hybkit'],
+   package_dir={'hybkit': 'hybkit'},
+   package_data={'hybkit': package_data},
+   scripts=scripts,
+   python_requires=about_vars['python_requires'],
+   project_urls=about_vars['info_urls'],
+   data_files=data_files,
+   install_requires=[
+       'matplotlib',
+       'biopython',
+   ],
 )
