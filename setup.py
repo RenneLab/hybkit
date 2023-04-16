@@ -50,6 +50,8 @@ for dir_name in data_file_dirs:
                          or any(fnmatch.fnmatch(f, ignore) for ignore in ignore_file_patterns)
                          )]
     target_dir_name = os.path.join(about_vars['name_and_version'], dir_name)
+    if dir_name == '':
+        file_list += ['.gitignore']
     data_files.append((target_dir_name, file_list))
 
 print('\nData Files:')
