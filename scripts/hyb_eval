@@ -57,6 +57,7 @@ Evaluation Types:
                         --mirna_types miRNA kshv-miRNA
 
     This can also be combined with the type evaluation, as such:
+        ::
 
             $ hyb_eval -t type mirna -i my_file_1.hyb \\
                         --type_method string_match \\

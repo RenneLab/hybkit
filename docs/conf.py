@@ -156,6 +156,9 @@ latex_elements = {
     'extraclassoptions': 'openany,oneside'
 }
 
+# Formatting Options
+smartquotes = False
+
 # add_module_names
 autodoc_member_order = 'bysource'
 autosectionlabel_maxdepth = 1

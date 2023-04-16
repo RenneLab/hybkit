@@ -4,44 +4,36 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format and corresponding ".vienna" or ".ct" format files
- and analyze the fold information in the contained hybrid sequences.
+Read one or more hyb format and corresponding vienna or ct format files
+and analyze the fold information in the contained hybrid sequences.
 
 Analysis Types:
 
     =============================== ==============================================================
-    ``fold`` : Fold Analysis        Analyze folding pattern of miRNAs in miRNA/target hybrids.
+    :ref:`Energy <EnergyAnalysis>`  Analysis of values of predicted intra-hybrid folding energy
+    :ref:`Type <TypeAnalysis>`      Analysis of segment types
+    :ref:`miRNA <MirnaAnalysis>`    Analysis of miRNA segments distributions
+    :ref:`Target <TargetAnalysis>`  Analysis of mirna target segment names and types
+    :ref:`Fold <FoldAnalysis>`      Analysis of folding data included in the analyzed hyb_records
     =============================== ==============================================================
 
 This utility reads in one or more files in hyb-format
-    (see the :ref:`Hybkit Hyb File Specification`)
-    along with a corresponding predicted RNA secondary structure file in the
-    "Vienna" (:ref:`Vienna Format <vienna_file_format>`) or
-    "CT" (:ref:`CT_Format <ct_file_format>`) formats,
-    and analyzes hybrid secondary structure properties.
+(see the :ref:`Hybkit Hyb File Specification`)
+along with a corresponding predicted RNA secondary structure file in the
+"Vienna" (:ref:`Vienna Format <vienna_file_format>`) or
+"CT" (:ref:`CT_Format <ct_file_format>`) formats,
+and analyzes hybrid secondary structure properties.
 
-    ``fold`` Analysis:
-        Analyze hybrid miRNA fold pattern information
-        and calculated per-base complimentarity counts for the miRNA portions of identified
-        miRNA / target hybrids. For miRNA-miRNA dimers, the 5p miRNA is considered the "miRNA"
-        and the 3p miRNA is considered the "target".
+For full information on the different analysis types, see the :ref:`Analyses <Analyses>`
+section of the hybkit documentation.
 
-        Iteration over both files simultaneously is performed using :class:`~hybkit.HybFoldIter`,
-        including error checking. Error checking settings can be modified in
-        :attr:`HybFoldIter.settings <hybkit.HybFoldIter.settings>`.
+Example system calls:
+    ::
 
-        This analysis requires the record flag: :ref:`miRNA_seg <mirna_seg>`
-        to be set by :meth:`hybkit.HybRecord.eval_mirna`. Only records with
-        :ref:`miRNA_seg <mirna_seg>` set to one of '5p', '3p', or 'B' will be evaluated.
+        $ hyb_analyze -a fold -i my_file_1.hyb -f my_file_1.vienna
 
-
-        Example system calls:
-            ::
-
-                $ hyb_analyze -a fold -i my_file_1.hyb -f my_file_1.vienna
-
-                $ hyb_analyze -a fold -i my_file_2.hyb -f my_file_2.ct \\
-                           --make_plots False
+        $ hyb_analyze -a fold -i my_file_2.hyb -f my_file_2.ct \\
+                    --make_plots False
 """
 
 import os

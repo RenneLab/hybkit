@@ -7,7 +7,7 @@
 Analysis for type/mirna analysis pipeline performed as a python workflow.
 
 Provided as an example of direct use of the Hybkit API.
-See: "type_mirna_analysis_notes.rst" for more information.
+See: "README.rst" for this analysis for more information.
 """
 
 import os

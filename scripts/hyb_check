@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and check for errors.
+Read one or more hyb (and optional fold) format files and check for errors.
 
 This utility reads in one or more files in hyb-format
 (see the :ref:`Hybkit Hyb File Specification`)
@@ -17,6 +17,7 @@ Example system calls:
         hyb_fold_check -i my_file_1.hyb -f my_file_1.vienna
         hyb_fold_check -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna \\
             my_file_2.vienna -v --custom_flags myflag
+
 
 """
 

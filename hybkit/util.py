@@ -858,7 +858,7 @@ all_analyze_parser.add_argument(
 # Start Documentation Settings
 # Argument Parser : Standardized Documentation Settings
 # output_description = textwrap.dedent(
-output_description = (
+output_description = textwrap.dedent(
     """
     Output File Naming:
         Output files can be named in two fashions: via automatic name generation,

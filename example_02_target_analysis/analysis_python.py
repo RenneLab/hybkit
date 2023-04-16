@@ -8,7 +8,8 @@ Example target analysis performed as a python workflow.
 
 Provided as an example of direct
 usage of hybkit functions. File names are hardcoded, and functions are accessed directly.
-See "target_analysis_notes.rst" for more information.
+
+See: 'README.rst' for this analysis for more information.
 """
 
 import os

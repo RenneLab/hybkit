@@ -12,7 +12,7 @@ Provided as an example of usage of hybkit shell executable scripts.
 This will produce identical output to analysis_python.py version,
 though that implementation is more efficeint.
 
-See: 'type_mirna_analysis_notes.rst' for more information.
+See: 'README.rst' for this analysis for more information.
 """
 
 printf """${NOTES}"""
@@ -26,15 +26,15 @@ if ! [ -d ${OUT_DIR} ]; then
   mkdir ${OUT_DIR}
 fi
 
-IN_FILES[0]="GSM2720017_UI_BR1.hyb"
-IN_FILES[1]="GSM2720018_UI_BR2.hyb"
-IN_FILES[2]="GSM2720019_UI_BR3.hyb"
-IN_FILES[3]="GSM2720020_WT_BR1.hyb"
-IN_FILES[4]="GSM2720021_WT_BR2.hyb"
-IN_FILES[5]="GSM2720022_WT_BR3.hyb"
-IN_FILES[6]="GSM2720023_D11_BR1.hyb"
-IN_FILES[7]="GSM2720024_D11_BR2.hyb"
-IN_FILES[8]="GSM2720025_D11_BR3.hyb"
+#IN_FILES[0]="GSM2720017_UI_BR1.hyb"
+#IN_FILES[1]="GSM2720018_UI_BR2.hyb"
+#IN_FILES[2]="GSM2720019_UI_BR3.hyb"
+IN_FILES[0]="GSM2720020_WT_BR1.hyb"
+IN_FILES[1]="GSM2720021_WT_BR2.hyb"
+IN_FILES[2]="GSM2720022_WT_BR3.hyb"
+#IN_FILES[6]="GSM2720023_D11_BR1.hyb"
+#IN_FILES[7]="GSM2720024_D11_BR2.hyb"
+#IN_FILES[8]="GSM2720025_D11_BR3.hyb"
 ALL_QC_FILES=""
 COMBINED_FILE="${OUT_DIR}/combined_analysis.hyb"
 STRING_MATCH_LEGEND_FILE="string_match_legend.csv"

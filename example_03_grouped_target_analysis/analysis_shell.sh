@@ -12,7 +12,7 @@ Provided as an example of usage of hybkit shell executable scripts.
 This will produce identical output to analysis_python.py version,
 though that implementation is more efficeint.
 
-See: 'grouoped_target_analysis_notes.rst' for more information.
+See: 'README.rst' for this analysis for more information.
 """
 echo -e """${NOTES}"""
 

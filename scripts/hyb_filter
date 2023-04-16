@@ -4,14 +4,14 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Filter hyb (and corresponding fold) files and filter to  meet (or exclude) speific criteria.
+Filter hyb (and corresponding fold) files to meet (or exclude) speific criteria.
 
 This script takes one or more filter and/or exclusion criteria
 and outputs only those records matching (/excluding) those criteria.
 
 The filter criteria and options are based on the options provided by the
 :func:`hybkit.HybRecord.prop` method of the Hybkit API. For more information see
-the full documentation for the :class:`HybRecord` class.
+the full documentation for the :class:`~hybkit.HybRecord` class.
 
 Example System Calls:
     ::
@@ -19,7 +19,7 @@ Example System Calls:
         hyb_filter -i my_file_1.hyb --filter has_seg_types
         # Outputs records that have completed a segtype analysis
 
-        hyb_filter -i my_file_1.hyb -f my_file_1.vienna \
+        hyb_filter -i my_file_1.hyb -f my_file_1.vienna \\
             --include seg_type mRNA
         # Outputs hyb and fold records where hyb record has either segtype of mRNA
 
@@ -27,9 +27,9 @@ Example System Calls:
         # Outputs records without either segtype of mRNA
 
         hyb_filter -i my_file_1.hyb --include seg1_type mRNA
-        # Outputs records with only the first / |5p| segtype of mRNA
+        # Outputs records with only the first / 5p segtype of mRNA
 
-        hyb_filter -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna my_file_2.vienna \
+        hyb_filter -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna my_file_2.vienna \\
             --include seg_type_contains RNA
         # Outputs all records with a segtype that includes
         #   the string "RNA" (case-sensitive)
@@ -46,10 +46,11 @@ Note: Matching any exclusion criteria results in exclusion of the record.
 Example System Calls (match ALL criteria):
     ::
 
-        hyb_filter -i my_file_1.hyb --filter seg_contains kshv \\
+        hyb_filter -i my_file_1.hyb -f my_file_1.vienna \\
+                    --filter seg_contains kshv \\
                     --filter_2 seg_type miRNA
         # Outputs records with either reference sequence identifier containing "kshv"
-        #   and with a segtype of miRNA
+        #   and with either segment having an assigned segtype of miRNA
 
 Example System Calls (match ANY criteria):
     ::

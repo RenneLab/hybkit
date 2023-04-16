@@ -6,7 +6,7 @@ hybkit Toolkit
     hyb and fold files. Scripts are implemented in Python3, and the hybkit module must be on the
     user's PYTHONPATH for script execution.
 
-    The command-line options and flags using the
+    The command-line options and flags are generated with the
     Python3 argparse module. Relevant settings pertaining to specific hybkit classes are accessible
     via command-line flags, as demonstrated in the "shell_analysis" implementations in the
     :ref:`Example Pipelines`.
@@ -17,11 +17,11 @@ hybkit Toolkit
         =================================== ===========================================================
         Utility                             Description
         =================================== ===========================================================
-        :ref:`hyb_check`                    Parse a hyb file and check for errors
-        :ref:`hyb_eval`                     Evaluate hyb records to identify segment types and miRNAs
-        :ref:`hyb_filter`                   Filter a hyb file to a specific subset of sequences
+        :ref:`hyb_check`                    Parse a hyb (/fold) file and check for errors
+        :ref:`hyb_eval`                     Evaluate hyb (/fold) records to identify segment types and miRNAs
+        :ref:`hyb_filter`                   Filter a hyb (/fold) file to a specific subset of sequences
         :ref:`hyb_analyze`                  Perform a type, miRNA, summary, or target analysis
-                                            on a hyb file
+                                            on a hyb (/fold) file
         =================================== ===========================================================
 
     Detailed descriptions and usage information are avilable at each respective script page.

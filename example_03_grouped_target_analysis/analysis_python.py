@@ -7,7 +7,8 @@
 Example grouped target analysis performed as a python workflow.
 
 Provided as an example of direct usage of hybkit functions.
-For more details, see: "grouped_target_analysis_notes.rst".
+
+See: 'README.rst' for this analysis for more information.
 """
 
 import os

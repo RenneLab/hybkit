@@ -7,7 +7,8 @@
 Example fold analysis performed as a python workflow.
 
 Provided as an example of direct usage of hybkit functions.
-For further detail, see the relevant "[analysis]_analysis_notes.rst".
+
+See: 'README.rst' for this analysis for more information.
 """
 
 import os
