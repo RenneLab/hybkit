@@ -4,7 +4,11 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and evaluate the contained hybrid sequences.
+Read hyb files (and optional matched fold files) and evaluate the contained hybrids.
+
+This utility reads in one or more files in hyb-format
+(see the :ref:`Hybkit Hyb File Specification`) and corresponding fold files
+(.vienna or .ct) and evaluates hybrid record properties.
 
 Evaluation Types:
 
@@ -12,93 +16,83 @@ Evaluation Types:
     ``type``   Assigns types to each segment within hyb records
     ``mirna``  Assigns which segments are a miRNA based on segment types.
     ========== ==========================================================
+
+``type`` Evaluation:
+    | The 'type' evaluation utilizes the :func:`hybkit.HybRecord.eval_types` method
+        to assign the record flags: :ref:`seg1_type <seg1_type>`
+        and :ref:`seg2_type <seg2_type>`
+
+    Example system calls:
+        ::
+
+            $ hyb_eval -t type -i my_file_1.hyb
+
+            $ hyb_eval -t type -i my_file_1.hyb -f my_file_1.vienna
+
+            $ hyb_eval -t type \\
+                        -i my_file_1.hyb my_file_2.hyb \\
+                        -f my_file_1.vienna my_file_2.vienna \\
+                        --type_method string_match \\
+                        --type_parameters my_parameters_file.csv \\
+                        --allow_unknown_seg_types
+
+``mirna`` Evaluation:
+    | The 'mirna' evaluation uses the :func:`hybkit.HybRecord.eval_mirna` method
+        to identify properties relating to mirna within the hybrids,
+        including mirna presence and positions.
+        This evaluation requires the seg_type flags to be filled, either by a type evaluation,
+        or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
+        reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
+        the presence and position of any miRNA within the hybrid.
+
+    Example system calls:
+        ::
+
+            $ hyb_eval -t mirna -i my_file_1.hyb
+
+            $ hyb_eval -t mirna -i my_file_1.hyb -f my_file_1.vienna
+
+            $ hyb_eval -t mirna -i my_file_1.hyb my_vile_2.hyb \\
+                        -f my_file_1.vienna my_file_2.vienna \\
+                        --mirna_types miRNA kshv-miRNA
+
+    This can also be combined with the type evaluation, as such:
+        ::
+
+            $ hyb_eval -t type mirna -i my_file_1.hyb \\
+                        --type_method string_match \\
+                        --type_parameters my_parameters_file.csv \\
+                        --allow_unknown_seg_types \\
+                        --mirna_types miRNA kshv-miRNA
 """
 
-import sys
 import os
 import argparse
-import textwrap
+import contextlib
 import hybkit
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-# Divide docstring into argparse and full portions.
-argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
-__doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format
-    (see the :ref:`Hybkit Hyb File Specification`)
-    and evaluates hybrid record properties.
-
-    ``type`` Evaluation:
-        | The 'type' evaluation utilizes the :func:`hybkit.HybRecord.eval_types` method
-          to assign the record flags: :ref:`seg1_type <seg1_type>`
-          and :ref:`seg2_type <seg2_type>`
-
-        Example system calls:
-            ::
-
-                $ hyb_eval -t type -i my_file_1.hyb
-
-                $ hyb_eval -t type -i my_file_1.hyb \\
-                           --type_method string_match \\
-                           --type_parameters my_parameters_file.csv \\
-                           --allow_unknown_seg_types
-
-    ``mirna`` Evaluation:
-        | The 'mirna' evaluation uses the :func:`hybkit.HybRecord.eval_mirna` method
-          to identify properties relating to mirna within the hybrids,
-          including mirna presence and positions.
-          This evaluation requires the seg_type flags to be filled, either by a type evaluation,
-          or by parsing the read using the ``--hybformat_ref True`` option with a hyb-format
-          reference. The :ref:`mirna_seg <mirna_seg>` flag is then set for each record, indicating
-          the presence and position of any miRNA within the hybrid.
-
-        Example system calls:
-            ::
-
-                $ hyb_eval -t mirna -i my_file_1.hyb
-
-                $ hyb_eval -t mirna -i my_file_1.hyb \\
-                           --mirna_types miRNA kshv-miRNA
-
-        This can also be combined with the type evaluation, as such:
-
-                $ hyb_eval -t type mirna -i my_file_1.hyb \\
-                           --type_method string_match \\
-                           --type_parameters my_parameters_file.csv \\
-                           --allow_unknown_seg_types \\
-                           --mirna_types miRNA kshv-miRNA
-
-    """)
-
 __doc__ += hybkit.util.output_description
 
 
 # Create Command-line Argument Parser
 def make_parser():
-    script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [hybkit.util.in_hybs_parser,
-                         hybkit.util.out_opts_parser,
-                         hybkit.util.hyb_eval_parser,
-                         hybkit.util.record_manip_parser,
-                         hybkit.util.gen_opts_parser,
-                         hybkit.util.hybrecord_parser,
-                         hybkit.util.hybfile_parser,
-                         ]
-
-    replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."'), ('``', '"')]
-    use_argparse_doc = argparse_doc
-    for q, r in replace_pairs:
-        use_argparse_doc = use_argparse_doc.replace(q, r)
-    use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
-    use_argparse_doc = use_argparse_doc.replace('. hyb', '.hyb').replace(':.', ':')
+    parser_components = [
+        hybkit.util.cmb_hyb_fold_io_parser,
+        hybkit.util.cmb_out_opts_parser,
+        hybkit.util.hyb_eval_parser,
+        hybkit.util.record_manip_parser,
+        hybkit.util.gen_opts_parser,
+        hybkit.util.cmb_hyb_fold_class_settings_parser,
+    ]
 
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
-        description=use_argparse_doc,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=hybkit.util.get_argparse_doc(__doc__),
+        formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )
 
@@ -108,20 +102,24 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_eval(in_hyb_files, eval_types,
+def hyb_eval(in_hyb_files,
+             eval_types,
              out_dir='.',
-             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
+             in_fold_files=None,
              out_hyb_files=None,
+             out_fold_files=None,
+             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
              type_method=None,
              type_params=None,
              type_params_file=None,
              set_dataset=None,
-             verbose=False, silent=False
+             verbose=False,
+             silent=False,
              ):
     """Perform main script function."""
 
     if not silent:
-        print('\nPerforming Evaluation of Hyb Files...')
+        print('\nPerforming Evaluation of Hyb and Fold Files...')
 
     # Set eval modes
     do_type = ('type' in eval_types)
@@ -136,14 +134,15 @@ def hyb_eval(in_hyb_files, eval_types,
         if type_method is None:
             message = '"type_method" argument is required for hyb_eval method.'
             print(message)
-            raise Error(message)
+            raise RuntimeError(message)
 
         if type_method != make_parser().get_default('type_method'):
             if verbose:
                 print('Setting non-default type finding method: %s' % type_method)
             params = {}
-            params_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
-            if params_method is not None:
+            params_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+            if params_method_str is not None:
+                params_method = getattr(hybkit.HybRecord.TypeFinder, params_method_str)
                 if type_params is None:
                     if hybkit.HybRecord.TypeFinder.param_methods_needs_file[type_method]:
                         if type_params_file is None:
@@ -154,7 +153,8 @@ def hyb_eval(in_hyb_files, eval_types,
                             raise Exception(message)
                         if verbose:
                             print('Using type parameter file: %s' % type_params_file)
-                        param_method = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+                        param_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
+                        param_method = getattr(hybkit.HybRecord.TypeFinder, param_method_str)
                         type_params = param_method(type_params_file)
                 if verbose:
                     print()
@@ -165,39 +165,92 @@ def hyb_eval(in_hyb_files, eval_types,
             print('Assigning types as miRNA:')
             print('   ', ', '.join(hybkit.settings.HybRecord_settings['mirna_types']), '\n')
 
-    for i, in_hyb_file in enumerate(in_hyb_files):
+    # Start Setup Input / Output Files
+    if in_fold_files:
+        file_iter = zip(in_hyb_files, in_fold_files)
+    else:
+        file_iter = in_hyb_files
+
+    for i, use_files in enumerate(file_iter):
+        if in_fold_files:
+            in_hyb_file, in_fold_file = use_files
+        else:
+            in_hyb_file, in_fold_file = use_files, None
         file_basename = os.path.basename(in_hyb_file)
         file_label = file_basename.replace('.hyb', '')
+
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
-            out_hyb_file = hybkit.util.make_out_file_name(in_hyb_file,
-                                                          name_suffix=out_suffix,
-                                                          in_suffix='.hyb',
-                                                          out_suffix='.hyb',
-                                                          out_dir=out_dir,
-                                                          seg_sep='_',)
+            out_hyb_file = hybkit.util.make_out_file_name(
+                in_hyb_file,
+                name_suffix=out_suffix,
+                in_suffix='.hyb',
+                out_suffix='.hyb',
+                out_dir=out_dir,
+                seg_sep='_',
+            )
+
+        if in_fold_file is None:
+            out_fold_file = None
+        elif out_fold_files is not None:
+            out_fold_file = out_fold_files[i]
+        else:
+            out_fold_file = out_hyb_file.replace('.hyb', '.vienna')
+
+        if in_fold_file is not None:
+            if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
+                InFoldClass = hybkit.ViennaFile
+            elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
+                InFoldClass = hybkit.CtFile
+            else:
+                raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
+            OutFoldClass = hybkit.ViennaFile
+            in_fold_args = (in_fold_file, 'r')
+            out_fold_args = (out_fold_file, 'w')
+        else:
+            InFoldClass = contextlib.nullcontext
+            OutFoldClass = contextlib.nullcontext
+            in_fold_args = tuple()
+            out_fold_args = tuple()
 
         if verbose:
-            print('Evaluating File:')
-            print('    Input : ' + in_hyb_file)
-            print('    Output: ' + out_hyb_file)
+            print('Evaluating Files:')
+            print('    Input Hyb:   ' + in_hyb_file)
+            if in_fold_files:
+                print('    Input Fold:  ' + in_fold_file)
+            print('    Output Hyb:  ' + out_hyb_file)
+            if in_fold_files:
+                print('    Output Fold: ' + out_fold_file)
 
-        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
-             hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
-            for record in in_hyb:
+        include_count = 0
+        exclude_count = 0
+
+        # Start Record Iteration
+        with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
+             hybkit.HybFile(out_hyb_file, 'w') as out_hyb, \
+             InFoldClass(*in_fold_args) as in_fold, \
+             OutFoldClass(*out_fold_args) as out_fold:
+            if in_fold_file is None:
+                record_iter = in_hyb
+            else:
+                record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
+
+            for i, hyb_record in enumerate(record_iter, start=1):
                 if set_dataset:
-                    record.set_flag('dataset', file_label)
-
+                    hyb_record.set_flag('dataset', file_label)
                 if do_type:
-                    record.eval_types()
-
+                    hyb_record.eval_types()
                 if do_mirna:
-                    record.eval_mirna()
-
-                out_hyb.write_record(record)
+                    hyb_record.eval_mirna()
+                out_hyb.write_record(hyb_record)
+                if in_fold_file is not None:
+                    out_fold.write_record(hyb_record.fold_record)
 
     if verbose:
+        if hasattr(record_iter, 'print_report'):
+            print('\nHybFoldIter Report:\n')
+            record_iter.print_report()
         print('\nEvaluation Complete.\n')
 
 
@@ -206,15 +259,17 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
-    hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_eval(args.in_hyb,
-             args.eval_types,
-             args.out_dir,
-             out_suffix=args.out_suffix,
-             out_hyb_files=args.out_hyb,
-             type_method=args.type_method,
-             type_params_file=args.type_params_file,
-             set_dataset=args.set_dataset,
-             verbose=args.verbose,
-             silent=args.silent,
-             )
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
+    hyb_eval(
+        in_hyb_files=args.in_hyb,
+        in_fold_files=args.in_fold,
+        eval_types=args.eval_types,
+        out_dir=args.out_dir,
+        out_fold_files=args.out_fold,
+        out_suffix=args.out_suffix,
+        type_method=args.type_method,
+        type_params_file=args.type_params_file,
+        set_dataset=args.set_dataset,
+        verbose=args.verbose,
+        silent=args.silent,
+    )

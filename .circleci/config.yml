@@ -1,0 +1,190 @@
+version: 2.1
+orbs:
+  python: circleci/python@2.1.1
+
+executors:
+  bash-env:
+    machine:
+      image: ubuntu-2004:202111-02
+  py-3-8:
+    docker:
+      - image: cimg/python:3.8
+  py-3-9:
+    docker:
+      - image: cimg/python:3.9
+  py-3-10:
+    docker:
+      - image: cimg/python:3.10
+  py-3-11:
+    docker:
+      - image: cimg/python:3.11
+
+jobs:
+  python_test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          args: pytest coverage coveralls pyyaml
+          pkg-manager: pip
+      - run:
+          name: Pytest-Test
+          command: |
+            coverage run --source=. --omit="conf*",setup.py -m pytest
+            coveralls
+
+  test-autotests:
+    parameters:
+      py-version:
+        type: executor
+    executor: << parameters.py-version >>
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python3 --version
+            python3 -m pip install -r requirements.txt
+            python3 setup.py install
+      - run:
+          name: Run Test
+          command: |
+            export PATH=$PATH:$PWD/scripts
+            cd auto_tests
+            ./auto_test.sh
+
+  prep_data:
+    executor: bash-env
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - all_examples-{{ checksum "example_01_type_mirna_analysis/download_data.sh" }}
+      - run:
+          name: Download Sample Data
+          command: |
+            ls example*
+            for data_dir in $(ls -d example_??_*); do
+              cd $data_dir
+              pwd
+              ls
+              ./download_data.sh
+              cd ..
+            done
+            ls example*
+      - save_cache:
+          key: all_examples-{{ checksum "example_01_type_mirna_analysis/download_data.sh" }}
+          paths:
+            - example_01_type_mirna_analysis
+            - example_02_target_analysis
+            - example_03_grouped_target_analysis
+            - example_04_fold_analysis
+
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - example_01_type_mirna_analysis
+            - example_02_target_analysis
+            - example_03_grouped_target_analysis
+            - example_04_fold_analysis
+
+  example_test_checkout:
+    parameters:
+      example:
+        type: string
+      test-command:
+        type: string
+      py-version:
+        type: executor
+    executor: << parameters.py-version >>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - all_examples-{{ checksum "example_01_type_mirna_analysis/download_data.sh" }}
+
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python3 --version
+            python3 -m pip install -r requirements.txt
+            python3 setup.py install
+      - run:
+          name: Run Test
+          command: |
+            export PATH=$PATH:$PWD/scripts
+            cd << parameters.example >>*
+            ./<< parameters.test-command >>
+            ls output_*
+
+  example_test_pip:
+    parameters:
+      example:
+        type: string
+      py-version:
+        type: executor
+    executor: << parameters.py-version >>
+    steps:
+      - restore_cache:
+          keys:
+            - all_examples-{{ checksum "example_01_type_mirna_analysis/download_data.sh" }}
+
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Re-initiate Environment and Install Hybkit
+          command: |
+            python3 --version
+            python3 -m pip install hybkit
+      - run:
+          name: Run Test
+          command: |
+            export PATH=$PATH:$PWD/scripts
+            echo "Stub for now"
+            cd << parameters.example >>*
+            python3 ./analysis_python.py
+            ./analysis_shell.sh
+            diff -r ./output_python ./output_shell
+
+workflows:
+  test-python:
+    jobs:
+      - python_test
+  test-autotests:
+      jobs:
+        - test-autotests:
+            matrix:
+              parameters:
+                # os: [linux, macos]
+                py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+  test-examples:
+      jobs:
+        - prep_data
+        - example_test_checkout:
+            requires:
+              - prep_data
+            matrix:
+              parameters:
+                # os: [linux, macos]
+                py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+                example: ["example_01", "example_02", "example_03", "example_04"]
+                test-command: ["analysis_python.py", "analysis_shell.sh"]
+
+        # - example_test_pip:
+        #     requires:
+        #       - prep_data
+        #     matrix:
+        #       parameters:
+        #         # os: [linux, macos]
+        #         py-version: ["py-3-8", "py-3-9", "py-3-10", "py-3-11"]
+        #         example: ["example_01", "example_02", "example_03", "example_04", "example_05"]
+

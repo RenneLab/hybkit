@@ -2,16 +2,19 @@
 hybkit API
 ==================================
 
-    The hybkit API provides a Python3 module implementation for interaction with hyb format
-    data as python objects. 
+    The hybkit API provides a Python3 module with classes allowing parsing and manipulation
+    of hyb-format data as python objects, including built-in analysis and plotting functionality
+    for common tasks in hybrid sequence analysis.
 
     ============================= =====================================================
-    :mod:`hybkit`                 Main classes and functionality of hybkit
+    :mod:`hybkit`                 Data classes for storing, evaluating, and iterating
+                                  over records
     :mod:`~hybkit.settings`       Constants and settings information for hybkit classes
-    :mod:`~hybkit.type_finder`    Class for flexible identification of segment type 
+                                  and toolkit scripts
+    :mod:`~hybkit.type_finder`    Class for customizable identification of segment type
                                   from reference identifiers
-    :mod:`~hybkit.analysis`       Classes for analysis of hyb records
-    :mod:`~hybkit.plot`           Functions for plotting hyb records
+    :mod:`~hybkit.analysis`       Classe for predefined analyses of hyb records
+    :mod:`~hybkit.plot`           Plotting methods for analysis results
     :mod:`~hybkit.util`           Support methods for executable scripts
     ============================= =====================================================
 
@@ -19,8 +22,8 @@ hybkit API
    :maxdepth: 2
 
    hybkit
-   hybkit.settings
    hybkit.type_finder
    hybkit.analysis
    hybkit.plot
+   hybkit.settings
    hybkit.util

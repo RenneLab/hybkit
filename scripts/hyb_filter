@@ -4,99 +4,91 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and output files that meet (or exclude) speific criteria.
+Filter hyb (and corresponding fold) files to meet (or exclude) speific criteria.
+
+This script takes one or more filter and/or exclusion criteria
+and outputs only those records matching (/excluding) those criteria.
+
+The filter criteria and options are based on the options provided by the
+:func:`hybkit.HybRecord.prop` method of the Hybkit API. For more information see
+the full documentation for the :class:`~hybkit.HybRecord` class.
+
+Example System Calls:
+    ::
+
+        hyb_filter -i my_file_1.hyb --filter has_seg_types
+        # Outputs records that have completed a segtype analysis
+
+        hyb_filter -i my_file_1.hyb -f my_file_1.vienna \\
+            --include seg_type mRNA
+        # Outputs hyb and fold records where hyb record has either segtype of mRNA
+
+        hyb_filter -i my_file_1.hyb --exclude seg_type mRNA
+        # Outputs records without either segtype of mRNA
+
+        hyb_filter -i my_file_1.hyb --include seg1_type mRNA
+        # Outputs records with only the first / 5p segtype of mRNA
+
+        hyb_filter -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna my_file_2.vienna \\
+            --include seg_type_contains RNA
+        # Outputs all records with a segtype that includes
+        #   the string "RNA" (case-sensitive)
+
+        hyb_filter -i my_file_1.hyb --filter seg_contains kshv
+        # Outputs records where either segment identifier contains the
+        #   the string: "kshv" (case-sensitive)
+
+Multiple filtering options can be used together.
+The ``-m`` / ``--filter_mode`` argument determines whether
+"any" (DEFAULT) or "all" filters are required to be true for inclusion.
+Note: Matching any exclusion criteria results in exclusion of the record.
+
+Example System Calls (match ALL criteria):
+    ::
+
+        hyb_filter -i my_file_1.hyb -f my_file_1.vienna \\
+                    --filter seg_contains kshv \\
+                    --filter_2 seg_type miRNA
+        # Outputs records with either reference sequence identifier containing "kshv"
+        #   and with either segment having an assigned segtype of miRNA
+
+Example System Calls (match ANY criteria):
+    ::
+
+        hyb_filter -i my_file_1.hyb --filter_mode any \\
+                    --filter seg_type miRNA \\
+                    --filter_2 seg_type lncRNA
+        # Outputs records containing either segment type matching
+        #   either "miRNA" or "lncRNA" (case-sensitive)
 """
 
-import sys
 import os
 import argparse
-import textwrap
 import hybkit
+import contextlib
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
-
-# Divide docstring into argparse and full portions.
-argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
-__doc__ += textwrap.dedent("""
-    This script takes one or more filter and/or exclusion criteria
-    and outputs only those records matching (/excluding) those criteria.
-
-    The filter criteria and options are based on the options provided by the
-    :func:`hybkit.HybRecord.has_prop` method of the Hybkit API.
-
-    Example System Calls:
-        ::
-
-            hyb_filter -i my_file_1.hyb --filter has_seg_types
-            # Outputs records that have completed a segtype analysis
-
-            hyb_filter -i my_file_1.hyb --include seg_type mRNA
-            # Outputs records with either segtype of mRNA
-
-            hyb_filter -i my_file_1.hyb --exclude seg_type mRNA
-            # Outputs records without either segtype of mRNA
-
-            hyb_filter -i my_file_1.hyb --include seg1_type mRNA
-            # Outputs records with only the first / |5p| segtype of mRNA
-
-            hyb_filter -i my_file_1.hyb --include seg_type_contains RNA
-            # Outputs all records with a segtype that includes
-            #   the string "RNA" (case-sensitive)
-
-            hyb_filter -i my_file_1.hyb --filter seg_contains kshv
-            # Outputs records where either segment identifier contains the
-            #   the string: "kshv" (case-sensitive)
-
-    Multiple filtering options can be used together.
-    The ``-m`` / ``--filter_mode`` argument determines whether
-    "any" (DEFAULT) or "all" filters are required to be true for inclusion.
-    Note: Matching any exclusion criteria results in exclusion of the record.
-
-    Example System Calls (match ALL criteria):
-        ::
-
-            hyb_filter -i my_file_1.hyb --filter seg_contains kshv \\
-                       --filter_2 seg_type miRNA
-            # Outputs records with either reference sequence identifier containing "kshv"
-            #   and with a segtype of miRNA
-
-    Example System Calls (match ANY criteria):
-        ::
-
-            hyb_filter -i my_file_1.hyb --filter_mode any \\
-                       --filter seg_type miRNA \\
-                       --filter_2 seg_type lncRNA
-            # Outputs records containing either segment type matching
-            #   either "miRNA" or "lncRNA" (case-sensitive)
-
-    """)
 
 __doc__ += hybkit.util.output_description
 
 
 # Create Command-line Argument Parser
 def make_parser():
-    script_args = argparse.ArgumentParser(add_help=False)
-    parser_components = [hybkit.util.in_hybs_parser,
-                         hybkit.util.out_opts_parser,
-                         hybkit.util.hyb_filter_parser,
-                         hybkit.util.record_manip_parser,
-                         hybkit.util.gen_opts_parser,
-                         hybkit.util.hybrecord_parser,
-                         hybkit.util.hybfile_parser,
-                         ]
-    # replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
-    use_argparse_doc = argparse_doc
-    # for q, r in replace_pairs:
-    #     use_argparse_doc = use_argparse_doc.replace(q, r)
-    # use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+    parser_components = [
+        hybkit.util.cmb_hyb_fold_io_parser,
+        hybkit.util.cmb_out_opts_parser,
+        hybkit.util.hyb_filter_parser,
+        hybkit.util.record_manip_parser,
+        hybkit.util.gen_opts_parser,
+        hybkit.util.cmb_hyb_fold_class_settings_parser,
+    ]
 
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
-        description=use_argparse_doc,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=hybkit.util.get_argparse_doc(__doc__),
+        formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )
 
@@ -106,13 +98,19 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
+def hyb_filter(in_hyb_files,
+               filter_params,
+               exclude_params,
+               in_fold_files=None,
+               filter_mode='all',
                out_dir='.',
                out_suffix=hybkit.settings._FILTER_OUT_SUFFIX,
-               exclusion_table=None,
                out_hyb_files=None,
+               out_fold_files=None,
                set_dataset=None,
-               verbose=False, silent=False):
+               verbose=False,
+               silent=False
+               ):
     """Perform main script function."""
 
     if not silent:
@@ -129,95 +127,124 @@ def hyb_filter(in_hyb_files, filter_params, exclude_params, filter_mode='all',
             print('    ' + '\n    '.join((' '.join(p) for p in exclude_params)) + '\n')
 
     allowed_modes = {'all', 'any'}
-
     if filter_mode not in allowed_modes:
         message = 'Unrecognized filtering mode: %s\n' % filter_mode
         message += 'Options are: %s' % str(allowed_modes)
 
-    for i, in_hyb_file in enumerate(in_hyb_files):
+    if verbose:
+        print('Using Out Suffix: "%s"' % out_suffix)
+
+    if in_fold_files:
+        file_iter = zip(in_hyb_files, in_fold_files)
+    else:
+        file_iter = in_hyb_files
+
+    for i, use_files in enumerate(file_iter):
+        if in_fold_files:
+            in_hyb_file, in_fold_file = use_files
+        else:
+            in_hyb_file, in_fold_file = use_files, None
         file_basename = os.path.basename(in_hyb_file)
         file_label = file_basename.replace('.hyb', '')
-        if exclusion_table:
-            out_exclusion_file = hybkit.util.make_out_file_name(in_hyb_file,
-                                                                name_suffix='',
-                                                                in_suffix='.hyb',
-                                                                out_suffix='exclude.csv',
-                                                                out_dir=out_dir,
-                                                                seg_sep='_',)
 
         if out_hyb_files is not None:
             out_hyb_file = out_hyb_files[i]
         else:
-            out_hyb_file = hybkit.util.make_out_file_name(in_hyb_file,
-                                                          name_suffix=out_suffix,
-                                                          in_suffix='.hyb',
-                                                          out_suffix='.hyb',
-                                                          out_dir=out_dir,
-                                                          seg_sep='_',)
+            out_hyb_file = hybkit.util.make_out_file_name(
+                in_hyb_file,
+                name_suffix=out_suffix,
+                in_suffix='.hyb',
+                out_suffix='.hyb',
+                out_dir=out_dir,
+                seg_sep='_',
+            )
+
+        if in_fold_file is None:
+            out_fold_file = None
+        elif out_fold_files is not None:
+            out_fold_file = out_fold_files[i]
+        else:
+            out_fold_file = out_hyb_file.replace('.hyb', '.vienna')
+
+        if in_fold_file is not None:
+            if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
+                InFoldClass = hybkit.ViennaFile
+            elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
+                InFoldClass = hybkit.CtFile
+            else:
+                raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
+            OutFoldClass = hybkit.ViennaFile
+            in_fold_args = (in_fold_file, 'r')
+            out_fold_args = (out_fold_file, 'w')
+        else:
+            InFoldClass = contextlib.nullcontext
+            OutFoldClass = contextlib.nullcontext
+            in_fold_args = tuple()
+            out_fold_args = tuple()
 
         if verbose:
             print('Filtering File:')
-            print('    Input : ' + in_hyb_file)
-            print('    Output: ' + out_hyb_file)
-            if exclusion_table:
-                print('Outputting an Exclusion Table to:')
-                print('   ', out_exclusion_file)
+            print('    Input Hyb:   ' + in_hyb_file)
+            if in_fold_files:
+                print('    Input Fold:  ' + in_fold_file)
+            print('    Output Hyb:  ' + out_hyb_file)
+            if in_fold_files:
+                print('    Output Fold: ' + out_fold_file)
 
         include_count = 0
         exclude_count = 0
 
-        if exclusion_table:
-            out_exclusion = open(out_exclusion_file, 'w')
-        else:
-            out_exclusion = None
+        with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
+             hybkit.HybFile(out_hyb_file, 'w') as out_hyb, \
+             InFoldClass(*in_fold_args) as in_fold, \
+             OutFoldClass(*out_fold_args) as out_fold:
+            if in_fold_file is None:
+                record_iter = in_hyb
+            else:
+                record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
 
-        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb,\
-             hybkit.HybFile.open(out_hyb_file, 'w') as out_hyb:
-            for i, record in enumerate(in_hyb, start=1):
+            for i, hyb_record in enumerate(record_iter, start=1):
                 if filter_mode == 'all':
                     use_record = True
                     for prop_type, prop_compare in filter_params:
-                        if not record.has_prop(prop_type, prop_compare):
+                        if not hyb_record.has_prop(prop_type, prop_compare):
                             use_record = False
                             break
 
                 elif filter_mode == 'any':
                     use_record = False
                     for prop_type, prop_compare in filter_params:
-                        if record.has_prop(prop_type, prop_compare):
+                        if hyb_record.has_prop(prop_type, prop_compare):
                             use_record = True
                             break
 
                 if use_record:
                     for prop_type, prop_compare in exclude_params:
-                        if record.has_prop(prop_type, prop_compare):
+                        if hyb_record.has_prop(prop_type, prop_compare):
                             use_record = False
                             break
 
                 if use_record:
                     if set_dataset:
-                        record.set_flag('dataset', file_label)
+                        hyb_record.set_flag('dataset', file_label)
 
-                    out_hyb.write_record(record)
+                    out_hyb.write_record(hyb_record)
                     include_count += 1
-                    if out_exclusion is not None:
-                        line = ','.join([str(i), '1', str(record.id)])
-                        out_exclusion.write(line + '\n')
+                    if in_fold_file is not None:
+                        out_fold.write_record(hyb_record.fold_record)
+
                 else:
                     exclude_count += 1
-                    if out_exclusion is not None:
-                        line = ','.join([str(i), '0', str(record.id)])
-                        out_exclusion.write(line + '\n')
 
         total_count = include_count + exclude_count
         if verbose:
             print('    Complete. %i Total,  ' % total_count
                   + '%i Included,  %i Excluded\n' % (include_count, exclude_count))
 
-        if out_exclusion is not None:
-            out_exclusion.close()
-
     if verbose:
+        if hasattr(record_iter, 'print_report'):
+            print('\nHybFoldIter Report:\n')
+            record_iter.print_report()
         print('\nFiltering Complete.\n')
 
 
@@ -226,7 +253,7 @@ if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
     hybkit.util.validate_args(args, script_parser)
-    hybkit.util.set_settings(args, verbose=args.verbose)
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
     filter_params = []
     for param_set in [getattr(args, key) for key in ['filter', 'filter_2', 'filter_3']]:
         if param_set is not None and bool(param_set):
@@ -250,14 +277,16 @@ if __name__ == '__main__':
                 param_set.append(None)
             exclude_params.append(param_set)
 
-    hyb_filter(args.in_hyb,
-               filter_params,
-               exclude_params,
-               exclusion_table=args.exclusion_table,
-               out_dir=args.out_dir,
-               out_suffix=args.out_suffix,
-               out_hyb_files=args.out_hyb,
-               set_dataset=args.set_dataset,
-               verbose=args.verbose,
-               silent=args.silent,
-               )
+    hyb_filter(
+        in_hyb_files=args.in_hyb,
+        in_fold_files=args.in_fold,
+        filter_params=filter_params,
+        exclude_params=exclude_params,
+        out_dir=args.out_dir,
+        out_suffix=args.out_suffix,
+        out_hyb_files=args.out_hyb,
+        out_fold_files=args.out_fold,
+        set_dataset=args.set_dataset,
+        verbose=args.verbose,
+        silent=args.silent,
+    )

@@ -8,6 +8,7 @@
 import copy
 
 
+# ----- Begin Settings Helper Functions -----
 # Util : Settings Helper Functions
 def _all_str_cases(in_str):
     return [in_str.lower(), in_str.title(), in_str.upper()]
@@ -21,6 +22,7 @@ def _settings_info_to_settings(settings_info_dict):
     return ret_dict
 
 
+# ----- Begin Settings Constants -----
 # Util : Global Variables
 #: Allowed suffixes for "Hyb" files.
 HYB_SUFFIXES = _all_str_cases('.hyb')
@@ -42,15 +44,20 @@ _EVAL_OUT_SUFFIX = '_evaluated'
 #: Default miRNA types for use in :func:`mirna_analysis`.
 MIRNA_TYPES = ['miRNA', 'microRNA']
 
+#: Analysis types for use by :class:`hybkit.Analysis`.
+ANALYSIS_TYPE_OPTIONS_HYB = ['energy', 'type', 'mirna', 'target']
+ANALYSIS_TYPE_OPTIONS_FOLD = ['fold']
+ANALYSIS_TYPE_OPTIONS = [*ANALYSIS_TYPE_OPTIONS_HYB, *ANALYSIS_TYPE_OPTIONS_FOLD]
 
-#: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis` 
-#: (range: ENERGY_MIN_BIN <= 0).
-ENERGY_MIN_BIN = '-45.0'
+# #: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
+# #: (range: ENERGY_MIN_BIN <= 0).
+# ENERGY_MIN_BIN = '-45.0'
 
-#: Default Gibbs Free Energy bin size for use by :class:`EnergyAnalysis` ('0.1' == no binning).
-ENERGY_BIN_SIZE = '0.4'
+# #: Default Gibbs Free Energy bin size for use by :class:`EnergyAnalysis` ('0.1' == no binning).
+# ENERGY_BIN_SIZE = '0.4'
 
-# settings_info : HybRecord
+# ----- Begin settings_info variables -----
+# Start settings_info : HybRecord
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -115,20 +122,20 @@ HybRecord_settings_info = {
         None,
         {'nargs': '?', 'const': True}
     ],
-    'check_complete_seg_types': [
-        False,
-        """
-        Check every segment possibility when assigning segment types, rather than
-        breaking after the first match is found. If True, finding segment types
-        is slower but better at catching errors.
-        """,
-        'custom_bool_from_str',
-        None,
-        {'nargs': '?', 'const': True}
-    ],
+    # 'check_complete_seg_types': [
+    #     False,
+    #     """
+    #     Check every segment possibility when assigning segment types, rather than
+    #     breaking after the first match is found. If True, finding segment types
+    #     is slower but better at catching errors.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {'nargs': '?', 'const': True}
+    # ],
 }
 
-# settings_info : HybFile
+# Start settings_info : HybFile
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -161,7 +168,7 @@ HybFile_settings_info = {
     ],
 }
 
-# settings_info : FoldRecord
+# Start settings_info : FoldRecord
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -187,9 +194,36 @@ FoldRecord_settings_info = {
         None,
         {}
     ],
+    'seq_type': [
+        'static',
+        """
+        Type of fold record object to use. Options:
+        "static": FoldRecord, requires an exact sequence
+        match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence
+        match to the "dynamic" annotated regions of a HybRecord, and may be shorter/longer
+        than the original sequence.
+        """,
+        'str',
+        '-y',
+        {'choices': ['static', 'dynamic']}
+    ],
+    'error_mode': [
+        'raise',
+        """
+        Mode for handling errors during reading of HybFiles
+        (overridden by HybFoldIter.settings['iter_error_mode'] when using HybFoldIter).
+        Options: "raise": Raise an error when encountered and exit program ;
+        "warn_return": Print a warning and return the error_value ;
+        "return": Return the error value with no program output.
+        record is encountered.
+        """,
+        'str',
+        None,
+        {'choices': ['raise', 'warn_return', 'return']}
+    ],
 }
 
-# settings_info : FoldFile
+# Start settings_info : FoldFile
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -197,36 +231,9 @@ FoldRecord_settings_info = {
 #: Information for settings of :class:`~hybkit.FoldFile` class.
 #: Copied into :data:`FoldFile_settings` for use at runtime.
 FoldFile_settings_info = {
-    'foldrecord_type': [
-        'strict',
-        """
-        Type of fold record object to use. Options:
-        "strict": FoldRecord, requires an exact sequence
-        match to be paired with a HybRecord; "dynamic": DynamicFoldRecord, requires a sequence
-        match to the "dynamic" annotated regions of a HybRecord, and may be shorter/longer
-        than the original sequence.
-        """,
-        'str',
-        None,
-        {'choices': ['strict', 'dynamic']}
-    ],
-    'foldfile_error_mode': [
-        'raise',
-        """
-        Mode for handling errors during reading of HybFiles
-        (overridden by HybFoldIter.settings['error_mode'] when using HybFoldIter).
-        Options: "raise": Raise an error when encountered and exit program;
-        "warn_return": Print a warning and return the error_value ;
-        "return": Return the error value with no program output.
-        record is encountered.
-        """,
-        'str',
-        None,
-        {'choices': {'raise', 'warn_return', 'return'}}
-    ],
 }
 
-# settings_info : HybFoldIter
+# Start settings_info : HybFoldIter
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -242,26 +249,31 @@ HybFoldIter_settings_info = {
         insertions/deletions in alignment, which prevents matching of sequences;
         "foldrecord_nofold": Error when failure in reading a fold_record object;
         "max_mismatch": Error when mismatch between hybrecord and foldrecord sequences is
+        greater than FoldRecord "allowed_mismatches" setting; "energy_mismatch": Error when
+        a mismatch exists between HybRecord and FoldRecord energy values.
         """,
         'str',
         None,
-        {'choices': {'hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch'}}
+        {'choices': ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch']}
     ],
-    'error_mode': [
+    'iter_error_mode': [
         'warn_skip',
         """
-        Mode for handling errors found during error checks. Options:
-        "raise": Raise an error when encountered and exit program;
-        "warn_return": Print a warning and return the value ;
+        Mode for handling errors found during error checks.
+        Overrides HybRecord "error_mode" setting when using HybFoldIter.
+        Options:
+        "raise": Raise an error when encountered;
+        "warn_return": Print a warning and return the value;
         "warn_skip": Print a warning and continue to the next iteration;
-        "skip": Continue to the next iteration without any output.
+        "skip": Continue to the next iteration without any output;
+        "return": return the value without any error output;
         """,
         'str',
         None,
-        {'choices': {'raise', 'warn_return', 'warn_skip', 'skip'}}
+        {'choices': ['raise', 'warn_return', 'warn_skip', 'skip', 'return']}
     ],
     'max_sequential_skips': [
-        20,
+        100,
         """
         Maximum number of record(-pairs) to skip in a row. Limited as several sequential skips
         usually indicates an issue with record formatting or a desynchrnoization between files.
@@ -272,7 +284,7 @@ HybFoldIter_settings_info = {
     ],
 }
 
-# settings_info : Analysis
+# Start settings_info : Analysis
 # setting_info format contains structure::
 # {
 #     setting_name : [ default_value, description, type_str, short_flag, argparse_fields ]
@@ -280,45 +292,18 @@ HybFoldIter_settings_info = {
 #: Information for settings of :class:`~hybkit.Analysis` class.
 #: Copied into :data:`Analysis_settings` for use at runtime.
 Analysis_settings_info = {
-    'count_mode': [
-        'record',
+    'quant_mode': [
+        'single',
         """
-        Method for counting records. "read": use the number of reads per hyb record as the count
-        (may contain PCR duplicates); "record" count the number of records represented by each
-        (hyb record entry 1 for "unmerged" records, >= 1 for "merged" records)
+        Method for counting records. Options:
+        "single": Count each record as a single entry;
+        "reads": Use the number of reads per hyb record as the count (may contain PCR duplicates);
+        "records": Count the number of records represented by each
+        hyb record entry (1 for "unmerged" records, >= 1 for "merged" records)
         """,
         'str',
         None,
-        {'choices': ['read', 'record']}
-    ],
-    'mirna_sort': [
-        True,
-        """
-        During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs.
-        If False, sort alphabetically.
-        """,
-        'custom_bool_from_str',
-        None,
-        {}
-    ],
-    'allow_mirna_dimers': [
-        False,
-        """
-        Include miRNA / miRNA dimers in TargetAnalysis.
-        If False, exclude these from analysis results.
-        """,
-        'custom_bool_from_str',
-        None,
-        {'nargs': '?', 'const': True}
-    ],
-    'type_sep': [
-        '-',
-        """
-        Separator-string to place between types in analysis output.
-        """,
-        'str',
-        None,
-        {}
+        {'choices': ['single', 'reads', 'records']}
     ],
     'out_delim': [
         ',',
@@ -329,25 +314,54 @@ Analysis_settings_info = {
         None,
         {}
     ],
-    'energy_min_bin': [
-        ENERGY_MIN_BIN,
-        """
-        Minimum Gibbs Free Energy value for binned analysis.
-        """,
-        'str',
-        None,
-        {}
-    ],
-    'energy_bin_size': [
-        ENERGY_BIN_SIZE,
-        """
-        Size of increment to bin energy values for binned energy analysis 
-        (allowed >= 0.1). A value of '0.1' represents no value binning.
-        """,
-        'str',
-        None,
-        {}
-    ],
+    # 'mirna_sort': [
+    #     True,
+    #     """
+    #     During TypeAnalysis, sort miRNAs first for "miRNA"-"Other" segtype pairs.
+    #     If False, sort alphabetically.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {}
+    # ],
+    # 'allow_mirna_dimers': [
+    #     False,
+    #     """
+    #     Include miRNA / miRNA dimers in TargetAnalysis.
+    #     If False, exclude these from analysis results.
+    #     """,
+    #     'custom_bool_from_str',
+    #     None,
+    #     {'nargs': '?', 'const': True}
+    # ],
+    # 'type_sep': [
+    #     '-',
+    #     """
+    #     Separator-string to place between types in analysis output.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
+    # 'energy_min_bin': [
+    #     ENERGY_MIN_BIN,
+    #     """
+    #     Minimum Gibbs Free Energy value for binned analysis.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
+    # 'energy_bin_size': [
+    #     ENERGY_BIN_SIZE,
+    #     """
+    #     Size of increment to bin energy values for binned energy analysis
+    #     (allowed >= 0.1). A value of '0.1' represents no value binning.
+    #     """,
+    #     'str',
+    #     None,
+    #     {}
+    # ],
 
 }
 

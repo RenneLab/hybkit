@@ -1,83 +1,127 @@
 #!/usr/bin/env python3
-# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
+# Daniel B. Stribling
 # Renne Lab, University of Florida
-# Hybkit Project : https://www.github.com/RenneLab/hybkit
+# Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Read one or more '.hyb' format files and check for errors.
+Read one or more hyb (and optional fold) format files and check for errors.
+
+This utility reads in one or more files in hyb-format
+(see the :ref:`Hybkit Hyb File Specification`)
+and uses hybkit's internal file error checking to check for errors. This can be useful
+as an intial preparation step for further analyses.
+
+Example system calls:
+    ::
+
+        hyb_fold_check -i my_file_1.hyb -f my_file_1.vienna
+        hyb_fold_check -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna \\
+            my_file_2.vienna -v --custom_flags myflag
+
+
 """
 
-import sys
 import os
 import argparse
-import textwrap
+import contextlib
 import hybkit
 
 # Import module-level dunder-names:
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-# Divide docstring into argparse and full portions.
-argparse_doc = __doc__ + '\nFor full script description and usage, see the hybkit documentation.'
-__doc__ += textwrap.dedent("""
-    This utility reads in one or more files in hyb-format
-    (see the :ref:`Hybkit Hyb File Specification`)
-    and uses hybkit's internal file error checking to check for errors. This can be useful
-    as an intial preparation step for further analyses.
-
-    Example system calls
-        ::
-
-            hyb_check -i my_file_1.hyb
-            hyb_check -i ../my_file_2.hyb /path/to/myfile_3.hyb -v --custom_flags myflag
-    """)
+__doc__ += hybkit.util.output_description
 
 
 # Create Command-line Argument Parser
 def make_parser():
-    parser_components = [hybkit.util.in_hybs_parser,
-                         hybkit.util.gen_opts_parser,
-                         hybkit.util.hybrecord_parser,
-                         hybkit.util.hybfile_parser,
-                         ]
-    # replace_pairs = [('|', ''), ('==', ''), ('`` :', '":'), (' ``', '."')]
-    use_argparse_doc = argparse_doc
-    # for q, r in replace_pairs:
-    #     use_argparse_doc = use_argparse_doc.replace(q, r)
-    # use_argparse_doc = '. '.join([x.strip() for x in use_argparse_doc.split('.')])
+    parser_components = [
+        hybkit.util.in_hybs_parser,
+        hybkit.util.in_folds_parser,
+        hybkit.util.gen_opts_parser,
+        hybkit.util.cmb_hyb_fold_class_settings_parser,
+    ]
 
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
-        description=use_argparse_doc,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=hybkit.util.get_argparse_doc(__doc__),
+        formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )
+
     return script_parser
 
 
 # Define main script function.
-def hyb_check(in_hyb_files, verbose=False, silent=False):
+def hyb_check(in_hyb_files,
+              in_fold_files,
+              verbose=False,
+              silent=False,
+              ):
     """Perform main script function."""
 
     if not silent:
-        print('\nPerforming Error Checking of Hyb Files...')
+        print('\nChecking Hyb and Fold Files...')
 
-    for in_hyb_file in in_hyb_files:
+    # Start Setup Input / Output Files
+    if in_fold_files:
+        file_iter = zip(in_hyb_files, in_fold_files)
+    else:
+        file_iter = in_hyb_files
+
+    for i, use_files in enumerate(file_iter):
+        if in_fold_files:
+            in_hyb_file, in_fold_file = use_files
+        else:
+            in_hyb_file, in_fold_file = use_files, None
+        file_basename = os.path.basename(in_hyb_file)
+        file_label = file_basename.replace('.hyb', '')
+
+        if in_fold_file is not None:
+            if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
+                InFoldClass = hybkit.ViennaFile
+            elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
+                InFoldClass = hybkit.CtFile
+            else:
+                raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
+            in_fold_args = (in_fold_file, 'r')
+        else:
+            InFoldClass = contextlib.nullcontext
+            in_fold_args = tuple()
+
         if verbose:
-            print('Checking File:\n    ' + in_hyb_file)
+            print('Checking Files:')
+            print('    Input Hyb:   ' + in_hyb_file)
+            if in_fold_files:
+                print('    Input Fold:  ' + in_fold_file)
 
-        with hybkit.HybFile.open(in_hyb_file, 'r') as in_hyb:
-            for record in in_hyb:
+        # Start Record Iteration
+        with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
+             InFoldClass(*in_fold_args) as in_fold:
+            if in_fold_file is None:
+                record_iter = in_hyb
+            else:
+                record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
+
+            for i, hyb_record in enumerate(record_iter, start=1):
                 pass
 
     if verbose:
-        print('\nError checking complete. No errors found.\n')
+        if hasattr(record_iter, 'print_report'):
+            print('\nHybFoldIter Report:\n')
+            record_iter.print_report()
+        print('\nError Checking Complete.\n')
 
 
 # Execute the script function
 if __name__ == '__main__':
     script_parser = make_parser()
     args = script_parser.parse_args()
-    hybkit.util.validate_args(args)
-    hybkit.util.set_settings(args, verbose=args.verbose)
-    hyb_check(args.in_hyb, verbose=args.verbose, silent=args.silent)
+    hybkit.util.validate_args(args, script_parser)
+    hybkit.util.set_settings_from_namespace(args, verbose=args.verbose)
+    hyb_check(
+        in_hyb_files=args.in_hyb,
+        in_fold_files=args.in_fold,
+        verbose=args.verbose,
+        silent=args.silent,
+    )

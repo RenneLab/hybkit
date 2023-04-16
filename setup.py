@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# Daniel Stribling
+# Daniel Stribling  |  ORCID: 0000-0002-0649-9506
 # Renne Lab, University of Florida
 # Hybkit Project : https://www.github.com/RenneLab/hybkit
 
-'''
-Setup module for the hybkit project.
-'''
+"""Setup module for the hybkit project."""
 
 import setuptools
 import os
@@ -31,8 +29,8 @@ with open(os.path.join(proj_dir, 'hybkit', '__about__.py')) as f:
 # Dynamically generate reference data file tuples:
 data_files = []
 data_file_dirs = ['', 'scripts', 'ref_data', 'hybkit']
-sample_directory_dirs = glob.glob('sample_0*')
-data_file_dirs += sample_directory_dirs
+example_directory_dirs = glob.glob('example_0*')
+data_file_dirs += example_directory_dirs
 for item in glob.glob('docs/**', recursive=True):
     if os.path.isdir(item) and not item.startswith(os.path.join('docs', '_')):
         data_file_dirs.append(item)
@@ -54,7 +52,7 @@ for dir_name in data_file_dirs:
     data_files.append((target_dir_name, file_list))
 
 setuptools.setup(
-    name='hybkit',
+    name=about_vars['project_name'],
     version=about_vars['__version__'],
     description=about_vars['description'],
     long_description=long_description,
@@ -66,28 +64,17 @@ setuptools.setup(
     keywords=about_vars['keywords'],
     packages=['hybkit'],
     package_dir={'hybkit': 'hybkit'},
-    package_data={'hybkit': [os.path.basename(f) for f in glob.glob('hybkit/*')
-                             if not (os.path.basename(f).endswith('.py')
-                             or os.path.basename(f).endswith('__'))]
-                  },
+    package_data={'hybkit': [
+        os.path.basename(f) for f in glob.glob('hybkit/*')
+        if not (os.path.basename(f).endswith('.py')
+                or os.path.basename(f).endswith('__'))
+    ]},
     scripts=glob.glob('scripts/*'),
-    python_requires='>=3.7',
+    python_requires=about_vars['python_requires'],
     project_urls=about_vars['info_urls'],
     data_files=data_files,
-    install_requires=['matplotlib',
-                      'biopython',
-                      ],
-
-    # To provide executable scripts, use entry points in preference to the
-    #  "scripts" keyword. Entry points provide cross-platform support and allow
-    #  `pip` to create the appropriate form of executable for the target
-    #  platform.
-    #
-    #  For example, the following would provide a command called `sample` which
-    #  executes the function `main` from this package when invoked:
-    # entry_points={  # Optional
-    #     'console_scripts': [
-    #         'sample=sample:main',
-    #     ],
-    # },
+    install_requires=[
+        'matplotlib',
+        'biopython',
+    ],
 )
