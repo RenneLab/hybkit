@@ -22,11 +22,11 @@ Lead Developer
 Changelog
 ---------
 
-    * 0.3.0a (ongoing) Major Codebase And API Overhaul. Changes include:
+    * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 
       * Simplifying HybRecord API
       * Simplifying FoldRecord API
-      * Unifying settings information for argparse and module
+      * Unifying settings information for argparse and modules
       * Removing Support for ViennaD format
       * Moving identifier-parsing code to module type_finder
       * Moving target region analysis code to module region_finder
@@ -34,7 +34,7 @@ Changelog
       * Renamed HybRecord type_analysis and mirna_analysis to
         eval_types and eval_mirna, respectively
         to differentiate from analysis module functions
-      * Reimplemented analyses methods within Analysis class
+      * Reimplemented analyses methods within a single Analysis class
       * Added error checking / catching to HybFoldIter
       * Removed Target-Region Analysis and associated files
         due to lack of archival database information,
@@ -43,6 +43,7 @@ Changelog
       * Added shell implementation to all example pipelines
       * Remove support for Python3.6, Python3.7
       * Migrate to CircleCI for CI/CD
+      * Added Pytest unit testing integrated with CircleCI
       * Other Misc. Improvements / Bugfixes
 
     * 0.2.0  (2020-03) Added Command-line Toolkit. Code Refinements.
