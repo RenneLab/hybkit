@@ -141,7 +141,9 @@ Installation:
         The recommended installation method is via hybkit's
         `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using
         `python3 pip <https://pip.pypa.io/en/stable/>`_, which will
-        automatically handle version control and dependency installation::
+        automatically handle version control and dependency installation:
+
+        .. code-block:: bash
 
             $ python3 -m pip install hybkit
 
@@ -152,16 +154,22 @@ Installation:
         Pending
 
     Manually Download and Install
-        Acquisition of the package can be performed by cloning the project's Github repository::
+        Use git to clone the project's Github repository:
+
+        .. code-block:: bash
 
             $ git clone git://github.com/RenneLab/hybkit
 
-        *OR* by downloading the zipped package::
+        *OR* downlod the zipped package:
 
-            $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
+        .. code-block:: bash
+
+            $ curl -OL https://github.com/RenneLab/hybkit/archive/master.zip
             $ unzip master.zip
 
-        With either method then followed by installation using python's setuptools::
+        Then install using python setuptools:
+
+        .. code-block:: bash
 
             $ python setup.py install
 
