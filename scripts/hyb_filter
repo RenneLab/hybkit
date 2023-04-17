@@ -71,8 +71,6 @@ import contextlib
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-__doc__ += hybkit.util.output_description
-
 
 # Create Command-line Argument Parser
 def make_parser():
@@ -87,7 +85,9 @@ def make_parser():
 
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
+        prog='hyb_filter',
         description=hybkit.util.get_argparse_doc(__doc__),
+        epilog=hybkit.util.output_description,
         formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )

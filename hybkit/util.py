@@ -567,9 +567,21 @@ cmb_out_opts_parser = argparse.ArgumentParser(
 # Start General Options
 # Argument Parser : General Options
 gen_opts_parser = argparse.ArgumentParser(add_help=False)
-verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
 
 # Argument Parser : General Options
+_this_arg_help = (
+    """
+    Print version and exit.
+    """
+)
+_arg_version_str = '%s  (hybkit API: %s)' % (__version__, __version__)
+gen_opts_parser.add_argument(
+    '--version', action='version', version='    %(prog)s ' + _arg_version_str,
+    help=_this_arg_help,
+)
+
+verbosity_group = gen_opts_parser.add_mutually_exclusive_group()
+# Argument Parser : General Options : Verbosity
 _this_arg_help = (
     """
     Print verbose output during run.
@@ -581,7 +593,7 @@ verbosity_group.add_argument(
     help=_this_arg_help
 )
 
-# Argument Parser : General Options
+# Argument Parser : General Options : Verbosity
 _this_arg_help = (
     """
     Print no output during run.
@@ -905,6 +917,7 @@ output_description = textwrap.dedent(
 
             Note: The directory provided with output file paths (MY_OUT_DIR above) must exist,
             otherwise an error will be raised.
+
     """
 )
 
