@@ -681,7 +681,24 @@ class Analysis(object):
             energy_results['energy_max'] = None
             energy_results['energy_mean'] = None
             energy_results['energy_std'] = None
-        energy_results['binned_energy_vals'] = copy.deepcopy(self._binned_energy_vals)
+        ret_vals = Counter()
+        if energy_results['energy_max'] is None:
+            ret_range_max = 0
+        else:
+            ret_range_max = max(0, int(np.ceil(energy_results['energy_max'])))
+        if energy_results['energy_min'] is None:
+            ret_range_min = -1
+        else:
+            ret_range_min = int(np.floor(energy_results['energy_min'])) - 1
+        for i in range(ret_range_max, ret_range_min, -1):
+            if i in self._binned_energy_vals:
+                ret_vals[i] = self._binned_energy_vals[i]
+            else:
+                ret_vals[i] = 0
+        # Conditionally trim artifact of floor/ceil:
+        if (ret_vals[ret_range_min + 1]) == 0:
+            del ret_vals[ret_range_min + 1]
+        energy_results['binned_energy_vals'] = ret_vals
         return energy_results
 
     # Analysis : Private Methods : Get Methods : Type Analysis

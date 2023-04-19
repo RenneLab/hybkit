@@ -22,6 +22,13 @@ Lead Developer
 Changelog
 ---------
 
+    * 0.3.1b (ongoing) Changes include:
+
+      * Misc Bugfixes and Refinements
+      * Add --version flag to scripts
+      * Change move scripts output file description to argparse epilog
+      * Refine Plotting Functions
+
     * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 
       * Simplifying HybRecord API

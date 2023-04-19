@@ -111,6 +111,7 @@ PIE_DEFAULTS = {
 BAR_DEFAULTS = {
     'BAR_WIDTH': 0.9,
     'BAR_ALIGN': 'edge',
+    'BAR_EDGE_COLOR': None,
 }
 
 #: Default Bar Chart Plot Settings for Histograms.
@@ -120,8 +121,6 @@ ENERGY_DEFAULTS = {
     'XLABEL': 'Hybrid Gibbs Free Energy (kcal/mol)',
     'YLABEL': 'Hybrid Count',
 }
-
-
 # LINE_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
 # LINE_RC_PARAMS.update({
 #     'axes.titlesize': 'x-large',
@@ -136,8 +135,6 @@ ENERGY_DEFAULTS = {
 #     'LINE_DATA_FORMAT': '-',
 #     'LINE_MIN_FRACTION_SIZE': 0.01,
 # }
-
-
 
 
 # ----- Begin Plotting Methods -----
@@ -179,7 +176,7 @@ def energy_histogram(results,
     if name is not None:
         title = name + ': ' + title
 
-    energy_width = float(energies[1]) + 0.02
+   # energy_width = float(energies[1]) + 0.02
 
     plot_params = {
         'x_vals': energies,
@@ -188,8 +185,10 @@ def energy_histogram(results,
         'title': title,
         'xlabel': ENERGY_DEFAULTS['XLABEL'],
         'ylabel': ENERGY_DEFAULTS['YLABEL'],
-        'width': energy_width,
+        'width': BAR_DEFAULTS['BAR_WIDTH'],
+        # 'width': energy_width,
         'align': BAR_DEFAULTS['BAR_ALIGN'],
+        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
         'rc_params': rc_params,
     }
     _plot_energy_histogram(plot_params)
@@ -327,9 +326,10 @@ def fold_match_counts_histogram(results,
         'title': title,
         'xlabel': 'Predicted miRNA/Target Matches',
         'ylabel': 'Hybrid Count',
-        # 'width': 1,
-        # 'align': BAR_DEFAULTS['BAR_ALIGN'],
+        'width': BAR_DEFAULTS['BAR_WIDTH'],
+        'align': BAR_DEFAULTS['BAR_ALIGN'],
         'rc_params': rc_params,
+        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
     }
 
     _plot_int_hist(plot_params=plot_params)
@@ -361,16 +361,22 @@ def _plot_energy_histogram(plot_params):
         plot_params['x_vals'],
         plot_params['y_vals'],
         width=plot_params['width'],
-        align=plot_params['align']
+        align=plot_params['align'],
+        edgecolor=plot_params['edgecolor'],
     )
+
+    # for items in zip(plot_params['x_vals'], plot_params['y_vals']):
+    #     print(items)
 
     # Invert the x-axis and set tick locators
     ax.invert_xaxis()
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
 
     # Set x-axis limits and ticks
-    plt.xlim(left=0)
-    plt.xticks(range(0, (int(plot_params['x_vals'][-1]) - 1), (-2)), rotation=-30)
+    left_xlim = max(0, int(plot_params['x_vals'][0]))
+    last_x_tick = int(plot_params['x_vals'][-1]) - 1
+    plt.xlim(left=left_xlim, right=last_x_tick)
+    plt.xticks(range(0, last_x_tick, -2), rotation=-30)
 
     # Set x-axis and y-axis labels
     plt.xlabel(plot_params['xlabel'])
@@ -473,8 +479,10 @@ def _plot_int_hist(plot_params):
     bars = ax.bar(
         plot_params['x_vals'],
         plot_params['y_vals'],
-        # width=plot_params['width'],
-        # align=plot_params['align']
+        width=plot_params['width'],
+        align=plot_params['align'],
+        edgecolor=plot_params['edgecolor'],
+
     )
 
     # Invert the x-axis and set tick locators
