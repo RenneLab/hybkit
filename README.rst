@@ -13,9 +13,6 @@ hybkit
 .. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Hybkit Downloads on Bioconda
-.. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat
-   :target: http://bioconda.github.io/recipes/hybkit/README.html
-   :alt: Install with Bioconda
 .. image:: https://img.shields.io/docker/v/biocontainers/hybkit?logo=docker
    :target: https://hub.docker.com/r/biocontainers/hybkit
    :alt: Docker Image Version
@@ -159,7 +156,7 @@ Installation:
 
             $ python3 -m pip install hybkit
 
-    Via Conda:
+    Via Conda: |InstallBioconda|
         For users of conda, the hybkit package and dependencies are hosted on the
         the `Bioconda <https://bioconda.github.io/>`_ channel, and can be installed
         using conda:
@@ -229,6 +226,9 @@ Installation:
 .. _Hunter2007: https://doi.org/10.1109/MCSE.2007.55
 .. |Cock2009| replace:: *Cock et al. (Bioinformatics 2009)*
 .. _Cock2009: https://doi.org/10.1093/bioinformatics/btp163
+.. |InstallBioconda| image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat&logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Install with Bioconda
 
 .. Github Only
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
