@@ -16,6 +16,9 @@ hybkit
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Install with Bioconda
+.. image:: https://img.shields.io/docker/v/biocontainers/hybkit?logo=docker
+   :target: https://hub.docker.com/r/biocontainers/hybkit
+   :alt: Docker Image Version
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
@@ -166,15 +169,26 @@ Installation:
             $ conda install -c bioconda hybkit
 
     Via Docker/Singularity:
+        Pending
         The hybkit package is also available as a `Docker <https://www.docker.com/>`_
-        image and `Singularity <https://sylabs.io/singularity/>`_ container, which
-        can be used to run hybkit scripts without installation of the package or
-        its dependencies. The Docker image is hosted on quay.io and can be pulled
-        using docker:
+        image and `Singularity <https://sylabs.io/singularity/>`_ container, hosted
+        via the `BioContainers <https://biocontainers.pro/>`_ project on
+        `quay.io <https://quay.io/repository/biocontainers/hybkit>`_.
+        To pull the image via docker:
 
         .. code-block:: bash
 
-            $ docker pull quay.io/rennelab/hybkit
+            # Pending
+
+        .. $ docker pull quay.io/rennelab/hybkit
+
+        To pull the image via singularity:
+
+        .. code-block:: bash
+
+            # Pending
+
+        .. $ singularity pull --name hybkit.sif docker://quay.io/rennelab/hybkit
 
     Manually Download and Install
         Use git to clone the project's Github repository:
