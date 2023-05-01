@@ -13,8 +13,8 @@ hybkit
 .. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Hybkit Downloads on Bioconda
-.. image:: https://img.shields.io/docker/v/biocontainers/hybkit?logo=docker
-   :target: https://hub.docker.com/r/biocontainers/hybkit
+.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
+   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
    :alt: Docker Image Version
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
