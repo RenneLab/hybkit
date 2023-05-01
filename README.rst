@@ -4,14 +4,14 @@ hybkit
 .. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
    :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
-.. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
-   :target: https://pypi.org/project/hybkit/
-   :alt: PyPI Package Version
+|PipVersion|
 |CondaVersion|
+
 .. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Hybkit Downloads on Bioconda
 |DockerVersion|
+
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
@@ -143,6 +143,8 @@ Installation:
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
 
     Via PyPI / Python PIP:
+        |PipVersion|
+
         The recommended installation method is via hybkit's
         `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using
         `python3 pip <https://pip.pypa.io/en/stable/>`_, which will
@@ -221,6 +223,9 @@ Installation:
 .. _Hunter2007: https://doi.org/10.1109/MCSE.2007.55
 .. |Cock2009| replace:: *Cock et al. (Bioinformatics 2009)*
 .. _Cock2009: https://doi.org/10.1093/bioinformatics/btp163
+.. |PipVersion| image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI Package Version
 .. |InstallBioconda| image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat&logo=anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Install with Bioconda
