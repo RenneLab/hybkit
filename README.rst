@@ -4,14 +4,18 @@ hybkit
 .. image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
    :target: https://github.com/RenneLab/hybkit/releases
    :alt: GitHub release (latest by date including pre-releases)
-|PipVersion|
-|CondaVersion|
-
+.. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI Package Version
+.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Bioconda Release
 .. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Hybkit Downloads on Bioconda
-|DockerVersion|
-
+.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
+   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
+   :alt: Docker Image Version
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
