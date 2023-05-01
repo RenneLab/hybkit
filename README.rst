@@ -7,15 +7,11 @@ hybkit
 .. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
-.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?logo=anaconda
-   :target: http://bioconda.github.io/recipes/hybkit/README.html
-   :alt: Bioconda Release
+|CondaVersion|
 .. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Hybkit Downloads on Bioconda
-.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
-   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
-   :alt: Docker Image Version
+|DockerVersion|
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
@@ -156,7 +152,9 @@ Installation:
 
             $ python3 -m pip install hybkit
 
-    Via Conda: |InstallBioconda|
+    Via Conda:
+        |CondaVersion| |InstallBioconda|
+
         For users of conda, the hybkit package and dependencies are hosted on the
         the `Bioconda <https://bioconda.github.io/>`_ channel, and can be installed
         using conda:
@@ -166,26 +164,23 @@ Installation:
             $ conda install -c bioconda hybkit
 
     Via Docker/Singularity:
-        Pending
+        |DockerVersion|
+
         The hybkit package is also available as a `Docker <https://www.docker.com/>`_
         image and `Singularity <https://sylabs.io/singularity/>`_ container, hosted
         via the `BioContainers <https://biocontainers.pro/>`_ project on
-        `quay.io <https://quay.io/repository/biocontainers/hybkit>`_.
+        `quay.io <https://quay.io/repository/biocontainers/hybkit?tab=tags>`_.
         To pull the image via docker:
 
         .. code-block:: bash
 
-            # Pending
-
-        .. $ docker pull quay.io/rennelab/hybkit
+            $ docker pull quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
 
         To pull the image via singularity:
 
         .. code-block:: bash
 
-            # Pending
-
-        .. $ singularity pull --name hybkit.sif docker://quay.io/rennelab/hybkit
+            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
 
     Manually Download and Install
         Use git to clone the project's Github repository:
@@ -229,6 +224,12 @@ Installation:
 .. |InstallBioconda| image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat&logo=anaconda
    :target: http://bioconda.github.io/recipes/hybkit/README.html
    :alt: Install with Bioconda
+.. |CondaVersion| image:: https://img.shields.io/conda/vn/bioconda/hybkit?logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Bioconda Release
+.. |DockerVersion| image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
+   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
+   :alt: Docker Image Version
 
 .. Github Only
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
