@@ -47,7 +47,7 @@ Project components:
        for creation of custom analyses of hyb-format data.
     #. Integrated analysis of predicted secondary structure (fold) information for
        the API and command-line utilities.
-    #. Example pipelines for analysis of publicly available qCLASH hybrid
+    #. Example analyses for publicly available qCLASH hybrid
        sequence data implemented in each of command-line scripts and hybkit Python API.
 
 Hybkit Toolkit:
@@ -113,8 +113,8 @@ Hybkit API:
     Further documentation on the hybkit API can be found in the
     |hybkit API| section of |docs_link|_.
 
-Pipelines:
-    Hybkit provides several example pipelines for analysis of hyb data using the
+Example Analyses:
+    Hybkit provides several example analyses for hyb data using the
     utilities provided in the toolkit. These include:
 
         ============================= ===========================================================
@@ -129,7 +129,7 @@ Pipelines:
                                       miRNA-containing hybrids
         ============================= ===========================================================
 
-    These pipelines provide analysis results in both tabular and graph form.
+    These analyses provide analysis results in both tabular and graph form.
     As an illustration, the example summary analysis includes the return of
     the contained hybrid sequence types as both a csv table and as a pie chart:
 
@@ -138,7 +138,7 @@ Pipelines:
         |example_01_image|
 
     Further detail on each provided pipeline can be found in
-    the |Example Pipelines| section of |docs_link|_.
+    the |Example Analyses| section of |docs_link|_.
 
 Installation:
     Dependencies:
@@ -188,7 +188,9 @@ Installation:
 
             $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
 
-    Manually Download and Install
+    Manually Download and Install:
+        |GitVersion|
+
         Use git to clone the project's Github repository:
 
         .. code-block:: bash
@@ -239,10 +241,13 @@ Installation:
 .. |DockerVersion| image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
    :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
    :alt: Docker Image Version
+.. |GithubVersion| image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
+   :target: https://github.com/RenneLab/hybkit/releases
+   :alt: GitHub release (latest by date including pre-releases)
 
 .. Github Only
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
-.. |Example Pipelines| replace:: *Example Pipelines*
+.. |Example Analyses| replace:: *Example Analyses*
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
