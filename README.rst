@@ -189,7 +189,7 @@ Installation:
             $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
 
     Manually Download and Install:
-        |GitVersion|
+        |GithubVersion|
 
         Use git to clone the project's Github repository:
 
