@@ -27,7 +27,9 @@ Changelog
       * Misc Bugfixes and Refinements
       * Add --version flag to scripts
       * Change move scripts output file description to argparse epilog
-      * Refine Plotting Functions
+      * Refine plot functions
+      * Change default plot colors to the Bang Wong scheme [Wong2011]_ for
+        colorblind accessibility
 
     * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 
@@ -90,6 +92,8 @@ References
     .. [Lorenz2011] Lorenz, R., Bernhart, S.H., Höner zu Siederdissen, C. et al.
            ViennaRNA Package 2.0. Algorithms Mol Biol 6, 26 (2011).
            doi: `10.1186/1748-7188-6-26 <https://doi.org/10.1186/1748-7188-6-26>`_
+    .. [Wong2011] Wong, B. Points of view: Color blindness. Nat Methods 8, 441 (2011).
+           doi: `10.1038/nmeth.1618 <https://doi.org/10.1038/nmeth.1618>`_
     .. [Helwak2013] Helwak A, Kudla G, Dudnakova T, Tollervey D. Mapping the human miRNA
            interactome by CLASH reveals frequent noncanonical binding. Cell. 2013
            Apr 25;153(3):654-65. doi:
@@ -113,6 +117,7 @@ References
     * [Hunter2007]_
     * [Cock2009]_
     * [Lorenz2011]_
+    * [Wong2011]_
     * [Helwak2013]_
     * [Travis2014]_
     * [Gay2018]_
