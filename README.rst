@@ -58,8 +58,8 @@ Hybkit Toolkit:
         Utility                             Description
         =================================== ===========================================================
         hyb_check                           Parse hyb (and fold) files and check for errors
-        hyb_eval                            Evaluate hyb (and fold) records to identify segment
-                                            types and miRNAs
+        hyb_eval                            Evaluate hyb (and fold) records to identify / assign
+                                            segment types and miRNAs using custom criteria
         hyb_filter                          Filter hyb (and fold) records to a specific
                                             custom subset
         hyb_analyze                         Perform an energy, type, miRNA, target, or fold analysis
