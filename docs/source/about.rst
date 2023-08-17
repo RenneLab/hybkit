@@ -23,6 +23,10 @@ Changelog
 ---------
 
 
+    * 0.3.3 (ongoing) Changes include:
+
+      * Misc Bugfixes and Refinements
+
     * 0.3.2 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
