@@ -23,10 +23,10 @@ Changelog
 ---------
 
 
-    * 0.3.2b (ongoing) Changes include:
+    * 0.3.2 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
-      * Add duplicate hybrid filtration (by HybRecord.id) to hyb_filter
+      * Add duplicate hybrid filtration (by HybRecord.id) options to hyb_filter
       * Add duplicate hybrid filtration to example analyses
 
     * 0.3.1 (2023-08) Changes include:
