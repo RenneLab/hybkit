@@ -124,7 +124,7 @@ PIE_DEFAULTS = {
         'counterclock': False,
     },
     'COLORS': COLOR_LIST,
-    'OTHER_THRESHHOLD': 0.05,
+    'OTHER_THRESHOLD': 0.05,
     'MIN_WEDGE_SIZE': 0.04,
 }
 # PIE['DEFAULT_TARGET_SETTINGS'] = copy.deepcopy(PIE['DEFAULT_SETTINGS'])
@@ -258,7 +258,7 @@ def type_count(results,
         'sizes': counts,
         'plot_file_name': plot_file_name,
         'title': title,
-        'other_threshhold': PIE_DEFAULTS['OTHER_THRESHHOLD'],
+        'other_threshold': PIE_DEFAULTS['OTHER_THRESHOLD'],
         'min_wedge_size': PIE_DEFAULTS['MIN_WEDGE_SIZE'],
         'colors': PIE_DEFAULTS['COLORS'],
         'rc_params': rc_params,
@@ -285,7 +285,7 @@ def type_count_dual(results,
 type_count_dual.__doc__ = type_count.__doc__
 
 
-# Public Methods : Target : tareget_count
+# Public Methods : Target : target_count
 # Plot a pie plot for targets from a hybkit target analysis
 def target_count(*args, **kwargs):
     """Hold Place for replaced docstring."""
@@ -453,7 +453,7 @@ def _plot_types_pie_chart(plot_params):
         total_fraction = sum(use_sizes) / total_size
         if fraction_sizes[i] < plot_params['min_wedge_size']:
             break
-        elif (total_fraction > (1 - plot_params['other_threshhold'])
+        elif (total_fraction > (1 - plot_params['other_threshold'])
               and i != (len(plot_params['labels']) - 1)):
             break
         else:

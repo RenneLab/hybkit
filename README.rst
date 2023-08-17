@@ -197,7 +197,7 @@ Installation:
 
             $ git clone git://github.com/RenneLab/hybkit
 
-        *OR* downlod the zipped package:
+        *OR* download the zipped package:
 
         .. code-block:: bash
 
