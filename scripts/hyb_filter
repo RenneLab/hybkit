@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Filter hyb (and corresponding fold) files to meet (or exclude) speific criteria.
+Filter hyb (and corresponding fold) files to meet (or exclude) specific criteria.
 
 This script takes one or more filter and/or exclusion criteria
 and outputs only those records matching (/excluding) those criteria.
@@ -62,6 +62,7 @@ Example System Calls (match ANY criteria):
         #   either "miRNA" or "lncRNA" (case-sensitive)
 """
 
+import sys
 import os
 import argparse
 import hybkit
@@ -108,8 +109,10 @@ def hyb_filter(in_hyb_files,
                out_hyb_files=None,
                out_fold_files=None,
                set_dataset=None,
+               skip_dup_id_before=False,
+               skip_dup_id_after=False,
                verbose=False,
-               silent=False
+               silent=False,
                ):
     """Perform main script function."""
 
@@ -203,7 +206,14 @@ def hyb_filter(in_hyb_files,
             else:
                 record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
 
+            last_record_id = None
+
             for i, hyb_record in enumerate(record_iter, start=1):
+                if skip_dup_id_before:
+                    if hyb_record.id == last_record_id:
+                        continue
+                    last_record_id = hyb_record.id
+
                 if filter_mode == 'all':
                     use_record = True
                     for prop_type, prop_compare in filter_params:
@@ -223,6 +233,12 @@ def hyb_filter(in_hyb_files,
                         if hyb_record.has_prop(prop_type, prop_compare):
                             use_record = False
                             break
+
+                if skip_dup_id_after and use_record:
+                    if hyb_record.id == last_record_id:
+                        use_record = False
+                    else:
+                        last_record_id = hyb_record.id
 
                 if use_record:
                     if set_dataset:
@@ -287,6 +303,8 @@ if __name__ == '__main__':
         out_hyb_files=args.out_hyb,
         out_fold_files=args.out_fold,
         set_dataset=args.set_dataset,
+        skip_dup_id_before=args.skip_dup_id_before,
+        skip_dup_id_after=args.skip_dup_id_after,
         verbose=args.verbose,
         silent=args.silent,
     )

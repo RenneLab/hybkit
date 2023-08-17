@@ -754,7 +754,6 @@ _this_arg_help = (
     (Note: matching any exclusion filter is grounds for exclusion of record.)
     """
 )
-
 # Argument Parser : hyb_filter : filter_mode
 hyb_filter_parser.add_argument(
     '-m', '--filter_mode',
@@ -762,6 +761,34 @@ hyb_filter_parser.add_argument(
     # nargs='+',
     default='all',
     choices={'all', 'any'},
+    help=_this_arg_help
+)
+
+_this_arg_help = (
+    """
+    Skip sequential duplicate read IDs before filtering.
+    """
+)
+# Argument Parser : hyb_filter : skip_dup_id_before
+hyb_filter_parser.add_argument(
+    '--skip_dup_id_before',
+    # required=True,
+    # nargs='+',
+    action='store_true',
+    help=_this_arg_help
+)
+
+_this_arg_help = (
+    """
+    Skip sequential duplicate read IDs after filtering.
+    """
+)
+# Argument Parser : hyb_filter : skip_dup_id_after
+hyb_filter_parser.add_argument(
+    '--skip_dup_id_after',
+    # required=True,
+    # nargs='+',
+    action='store_true',
     help=_this_arg_help
 )
 
