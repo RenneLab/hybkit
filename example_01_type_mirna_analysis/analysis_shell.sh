@@ -9,7 +9,7 @@ NOTES="""
 Analysis for type/mirna analysis performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
-This will produce identical output to analysis_python.py version,
+This will produce identical output to the analysis_python.py version,
 though that implementation is more efficient.
 
 See: 'README.rst' for this analysis for more information.
@@ -70,6 +70,7 @@ hyb_filter -i ${EVAL_FILES[*]} --verbose \
            -o ${QC_FILES} \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
+           --skip_dup_id_after \
 
 # Cleanup intermediate files
 rm -v ${OUT_DIR}/*evaluated*.hyb

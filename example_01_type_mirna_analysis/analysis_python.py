@@ -40,6 +40,11 @@ hybkit.HybRecord.TypeFinder.set_method('string_match', match_params)
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
 
+# Initialize Combined Analysis
+combined_analysis = hybkit.analysis.Analysis(
+    analysis_types=['type', 'mirna'], name='Combined Analysis'
+)
+
 # Iterate over each input file, find the segment types, and save the output
 #   in the output directory.
 for in_file_path in input_files:
@@ -56,13 +61,14 @@ for in_file_path in input_files:
     file_analysis = hybkit.analysis.Analysis(
         analysis_types=['type', 'mirna'], name=in_file_label
     )
-    combined_analysis = hybkit.analysis.Analysis(
-        analysis_types=['type', 'mirna'], name='Combined Analysis'
-    )
 
     # Open one HybFile entry for reading, and one for writing
     with hybkit.HybFile(in_file_path, 'r', hybformat_id=True) as in_file, \
          hybkit.HybFile(out_file_path, 'w') as out_file:
+
+        # Track last record identifier, to use only one record per read
+        last_record_id = None
+
         # Iterate over each record of the input file
         for hyb_record in in_file:
             hyb_record.eval_types()  # Find segment types
@@ -74,9 +80,15 @@ for in_file_path in input_files:
                 if hyb_record.has_prop('any_seg_type_is', remove_type):
                     use_record = False
                     break
+
             # If record has an excluded type, continue to next record without analyzing.
             if not use_record:
                 continue
+
+            # If record is a duplicate, skip it.
+            elif hyb_record.id == last_record_id:
+                continue
+            last_record_id = hyb_record.id
 
             # Set the dataset label for the record
             hyb_record.set_flag('dataset', in_file_label)

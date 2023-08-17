@@ -26,6 +26,7 @@ analysis_label = 'kshv_combined'
 analysis_name = 'KSHV Combined'
 out_dir = os.path.join(analysis_dir, 'output_python')
 input_files = [f for f in os.listdir(analysis_dir) if f.endswith('.hyb')]
+input_files.sort()
 out_file_path = os.path.join(analysis_dir, 'output_python', analysis_label + '.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
@@ -57,6 +58,9 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
         print('Analyzing:\n    %s' % in_file_path)
 
         with hybkit.HybFile(in_file_path, 'r') as in_file:
+            # Track last record identifier, to use only one record per read
+            last_record_id = None
+
             # Iterate over each record of the input file
             for hyb_record in in_file:
 
@@ -86,6 +90,10 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
                         or not hyb_record.has_prop('mirna_contains', 'kshv')):
 
                     continue
+                # If record is a duplicate, skip it.
+                elif hyb_record.id == last_record_id:
+                    continue
+                last_record_id = hyb_record.id
 
                 # Set dataset flag of record
                 hyb_record.set_flag('dataset', in_file_label)
@@ -97,7 +105,7 @@ print('\nPerforming Combined Target Analysis...\n')
 # Repeat iteration over output HybFile and perform target analysis.
 with hybkit.HybFile(out_file_path, 'r') as out_kshv_file:
     # Initialize target analysis:
-    hyb_analysis = hybkit.analysis.Analysis(analysis_types='target', name=analysis_label)
+    hyb_analysis = hybkit.analysis.Analysis(analysis_types='target', name=analysis_name)
 
     # Perform target-analysis of mirna within kshv-associated data.
     hyb_analysis.add_hyb_records(out_kshv_file)
