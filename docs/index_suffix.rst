@@ -14,6 +14,6 @@
    source/specification
    source/hybkit_api
    source/hybkit_toolkit
-   source/example_pipelines
+   source/example_analyses
    source/about
 

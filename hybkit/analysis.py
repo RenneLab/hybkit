@@ -453,7 +453,7 @@ class Analysis(object):
     def write_analysis_results_special(self, out_basename=None,
                                        analysis=None, out_delim=None):
         """
-        Write the results of the analyses to specilized text files.
+        Write the results of the analyses to specialized text files.
 
         See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
 

@@ -30,6 +30,7 @@ Changelog
       * Refine plot functions
       * Change default plot colors to the Bang Wong scheme [Wong2011]_ for
         colorblind accessibility
+      * Documentation corrections
 
     * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 
@@ -47,9 +48,9 @@ Changelog
       * Added error checking / catching to HybFoldIter
       * Removed Target-Region Analysis and associated files
         due to lack of archival database information,
-        pending furure development
+        pending future development
       * Added "dynamic" seq_type to FoldRecord for non-identical fold/hybrid sequence handling
-      * Added shell implementation to all example pipelines
+      * Added shell implementation to all example analyses
       * Remove support for Python3.6, Python3.7
       * Migrate to CircleCI for CI/CD
       * Added Pytest unit testing integrated with CircleCI

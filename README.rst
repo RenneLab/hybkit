@@ -34,7 +34,7 @@ hybkit
 
 | Welcome to *hybkit*, a toolkit for analysis of hyb-format chimeric
   (hybrid) RNA sequence data defined with the Hyb software package by |Travis2014|_.
-  This genomic data-type is generated from RNA proximitiy-ligation and ribonomics
+  This genomic data-type is generated from RNA proximity-ligation and ribonomics
   techniques such as Crosslinking, Ligation, and
   Sequencing of Hybrids (CLASH; |Helwak2013|_), Quick CLASH (qCLASH; |Gay2018|_).
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
@@ -118,7 +118,7 @@ Example Analyses:
     utilities provided in the toolkit. These include:
 
         ============================= ===========================================================
-        Pipeline                      Description
+        Analysis                      Description
         ============================= ===========================================================
         Type/miRNA Analysis           Quantify sequence types and miRNA types in a hyb file
         Target Analysis               Analyze targets of a set of miRNAs from a single
@@ -137,7 +137,7 @@ Example Analyses:
 
         |example_01_image|
 
-    Further detail on each provided pipeline can be found in
+    Further detail on each provided analysis can be found in
     the |Example Analyses| section of |docs_link|_.
 
 Installation:

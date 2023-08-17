@@ -250,7 +250,7 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
         in_suffix (str): File type suffix on in_file_name (to remove).
         out_suffix (str): File type suffix to add to final output file.
         out_dir (str): Directory path in which to place output file.
-        seg_sep (str): Separator string between file name segements.
+        seg_sep (str): Separator string between file name segments.
 
     Returns:
         An output file path based on the input file template.
@@ -496,13 +496,13 @@ out_suffix_parser.add_argument(
 
 # Start I/O Combined
 # Argument Parser : Input/Output : I/O Combined
-cmb_hyb_fold_imputs_parser = argparse.ArgumentParser(
-    add_help=False,
-    parents=[
-        in_hybs_parser,
-        in_folds_parser,
-    ],
-)
+# cmb_hyb_fold_inputs_parser = argparse.ArgumentParser(
+#     add_help=False,
+#     parents=[
+#         in_hybs_parser,
+#         in_folds_parser,
+#     ],
+# )
 
 # Argument Parser : Input/Output : I/O Combined
 cmb_hyb_fold_io_parser = argparse.ArgumentParser(
@@ -727,7 +727,7 @@ type_opts_group.add_argument(
 # Argument Parser : type_opts : type
 _this_arg_help = (
     """
-    Segment-type finding paramaters file to use for type evaluation with some type
+    Segment-type finding parameters file to use for type evaluation with some type
     finding methods: {string_match, id_map}.
     For a description of the different methods, see the HybRecord documentation
     for the find_seg_types method.
@@ -735,7 +735,7 @@ _this_arg_help = (
 )
 type_opts_group.add_argument(
     '--type_params_file', type=file_exists,
-    metavar='PATH_TO/PARAMATERS_FILE',
+    metavar='PATH_TO/PARAMETERS_FILE',
     # required=True,
     # nargs='?',
     # default='hyb',

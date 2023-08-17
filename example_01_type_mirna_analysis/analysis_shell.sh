@@ -6,11 +6,11 @@
 # usage: "bash ./analysis_shell.sh"
 
 NOTES="""
-Analysis for type/mirna analysis pipeline performed using shell scripts.
+Analysis for type/mirna analysis performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
 This will produce identical output to analysis_python.py version,
-though that implementation is more efficeint.
+though that implementation is more efficient.
 
 See: 'README.rst' for this analysis for more information.
 """

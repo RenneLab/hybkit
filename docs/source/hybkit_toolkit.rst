@@ -24,7 +24,7 @@ hybkit Toolkit
                                             on a hyb (/fold) file
         =================================== ===========================================================
 
-    Detailed descriptions and usage information are avilable at each respective script page.
+    Detailed descriptions and usage information are available at each respective script page.
 
 .. toctree::
    :maxdepth: 4

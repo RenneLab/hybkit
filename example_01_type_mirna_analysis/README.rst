@@ -12,7 +12,7 @@ Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybr
 This analysis first performs quality control on the data. It then summarizes and analyzes the hybrid, segment, and miRNA characteristics of each input file.
 Analyses for each individual file, and a combined summary analysis are all produced.
 
-The sequencing information is available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
+The sequencing information is available at NCBI Gene Expression Omnibus (GEO) GSE101978, at:
 
   https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 

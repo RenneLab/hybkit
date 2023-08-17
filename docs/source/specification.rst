@@ -11,7 +11,7 @@ hybkit Hyb File Specification
     Each line in a hyb file (a hyb "record") contains information about an
     RNA sequence read identified as a chimera by an RNA hybridization analysis.
     Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
-    information on each of the two aligned segements identified within the sequence read.
+    information on each of the two aligned segments identified within the sequence read.
     The columns are described as follows by [Travis2014]_:
 
         | Column 1, unique sequence identifier.

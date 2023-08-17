@@ -60,7 +60,7 @@ with hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
             # Iterate over each record of the input file
             for hyb_record in in_file:
 
-                # Analyze only sequences where anya segment identifier contains the string "kshv"
+                # Analyze only sequences where any segment identifier contains the string "kshv"
                 if not hyb_record.has_prop('any_seg_contains', 'kshv'):
                     continue
 
