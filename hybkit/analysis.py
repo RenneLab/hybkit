@@ -985,7 +985,7 @@ class Analysis(object):
         hybkit.plot.type_count_dual(
             type_results['mirna_hybrid_types'],
             mirna_hybrid_types_file_name,
-            title='miRNA Hybrid Types',
+            title='Reordered miRNA\' Hybrid Types',
             name=self.name,
             join_entries=True,
         )

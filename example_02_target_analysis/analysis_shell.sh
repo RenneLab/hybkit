@@ -47,7 +47,7 @@ hyb_eval -i "${IN_FILES[*]}" --verbose \
          --type_params_file "${STRING_MATCH_LEGEND_FILE}" \
          --mirna_types miRNA KSHV-miRNA \
          --hybformat_id True \
-         --set_dataset
+         --set_dataset 
 
 # Generate file names to match python analysis
 EVAL_FILES=( $(ls ${OUT_DIR}/*evaluated*.hyb) )
@@ -64,6 +64,7 @@ hyb_filter -i "${EVAL_FILES[*]}" --verbose \
            --filter_2 mirna_contains kshv-miR-K12-5 \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
+           --skip_dup_id_after
 
 # Cleanup intermediate files
 rm -v ${OUT_DIR}/*evaluated*.hyb

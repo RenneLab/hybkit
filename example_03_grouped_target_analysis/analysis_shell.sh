@@ -68,6 +68,7 @@ hyb_filter -i ${EVAL_FILES[*]} --verbose \
            --filter_2 mirna_contains kshv \
            --exclude any_seg_type_is rRNA \
            --exclude_2 any_seg_type_is mitoch-rRNA \
+           --skip_dup_id_after \
 
 # Cleanup intermediate eval files
 rm -v ${OUT_DIR}/*evaluated*.hyb

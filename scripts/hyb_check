@@ -9,7 +9,7 @@ Read one or more hyb (and optional fold) format files and check for errors.
 This utility reads in one or more files in hyb-format
 (see the :ref:`Hybkit Hyb File Specification`)
 and uses hybkit's internal file error checking to check for errors. This can be useful
-as an intial preparation step for further analyses.
+as an initial preparation step for further analyses.
 
 Example system calls:
     ::

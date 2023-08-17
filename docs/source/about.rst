@@ -22,6 +22,13 @@ Lead Developer
 Changelog
 ---------
 
+
+    * 0.3.2 (2023-08) Changes include:
+
+      * Misc Bugfixes and Refinements
+      * Add duplicate hybrid filtration (by HybRecord.id) options to hyb_filter
+      * Add duplicate hybrid filtration to example analyses
+
     * 0.3.1 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
@@ -31,6 +38,7 @@ Changelog
       * Change default plot colors to the Bang Wong scheme [Wong2011]_ for
         colorblind accessibility
       * Documentation corrections
+      * Spellcheck
 
     * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 

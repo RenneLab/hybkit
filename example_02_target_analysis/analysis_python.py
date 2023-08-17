@@ -27,7 +27,8 @@ out_dir = os.path.join(analysis_dir, 'output_python')
 
 in_file_label = 'GSM2720020_WT_BR1'
 in_file_path = os.path.join(analysis_dir, 'GSM2720020_WT_BR1.hyb')
-out_file_path = os.path.join(analysis_dir, 'output_python', 'GSM2720020_WT_BR1_kshv-miR-K12-5_only.hyb')
+out_file_path = os.path.join(
+    analysis_dir, 'output_python', 'GSM2720020_WT_BR1_kshv-miR-K12-5_only.hyb')
 match_legend_file = os.path.join(analysis_dir, 'string_match_legend.csv')
 
 # Begin Analysis
@@ -54,9 +55,12 @@ print('Outputting KSHV-Specific Hybrids to:\n    %s\n' % out_file_path)
 with hybkit.HybFile(in_file_path, 'r') as in_file, \
      hybkit.HybFile(out_file_path, 'w') as out_kshv_file:
 
+    # Track last record identifier, to use only one record per read
+    last_record_id = None
+
     # Iterate over each record of the input file
     for hyb_record in in_file:
-        # Analyze and output only sequences where a segment identifier 
+        # Analyze and output only sequences where a segment identifier
         #   contains the string "kshv-miR-K12-5"
         if not hyb_record.has_prop('any_seg_contains', 'kshv-miR-K12-5'):
             continue
@@ -81,6 +85,11 @@ with hybkit.HybFile(in_file_path, 'r') as in_file, \
                 or not hyb_record.has_prop('mirna_contains', 'kshv')):
 
             continue
+
+        # If record is a duplicate, skip it.
+        if hyb_record.id == last_record_id:
+            continue
+        last_record_id = hyb_record.id
 
         # Set dataset flag of record
         hyb_record.set_flag('dataset', in_file_label)

@@ -86,7 +86,7 @@ def hyb_analyze(in_hyb_files,
     """Perform main script function."""
 
     if not silent:
-        print('\nPerforming Fold Pattern Analysis of Hyb Files...')
+        print('\nPerforming Analysis of Hyb Files...')
 
     if verbose:
         print('\nPerforming Analysis Types: ' + ', '.join(analysis_types))
