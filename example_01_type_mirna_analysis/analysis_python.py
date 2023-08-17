@@ -4,7 +4,7 @@
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
 """
-Analysis for type/mirna analysis pipeline performed as a python workflow.
+Analysis for type/mirna analysis performed as a python workflow.
 
 Provided as an example of direct use of the Hybkit API.
 See: "README.rst" for this analysis for more information.

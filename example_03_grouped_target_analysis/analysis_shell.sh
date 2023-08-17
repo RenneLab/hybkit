@@ -6,11 +6,11 @@
 # usage: "bash ./analysis_shell.sh"
 
 NOTES="""
-Example grouped target analysis pipeline performed using shell scripts.
+Example grouped target analysis performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
 This will produce identical output to analysis_python.py version,
-though that implementation is more efficeint.
+though that implementation is more efficient.
 
 See: 'README.rst' for this analysis for more information.
 """

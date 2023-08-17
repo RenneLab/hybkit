@@ -6,11 +6,11 @@
 # usage: "bash ./analysis_shell.sh"
 
 NOTES="""
-Example fold analysis pipeline performed using shell scripts.
+Example fold analysis performed using shell scripts.
 
 Provided as an example of usage of hybkit shell executable scripts.
 This will produce identical output to analysis_python.py version,
-though that implementation is more efficeint.
+though that implementation is more efficient.
 
 See: 'README.rst' for this analysis for more information.
 """
@@ -27,7 +27,6 @@ fi
 
 IN_HYB_FILES[0]="WT_BR1_comp_hOH7_KSHV_hybrids_ua.hyb"
 IN_FOLD_FILES[0]="WT_BR1_comp_hOH7_KSHV_hybrids_ua.vienna"
-ALL_FOLD_QC_FILES_STR=""
 STRING_MATCH_LEGEND_FILE="string_match_legend.csv"
 
 echo "Analyzing Files:"

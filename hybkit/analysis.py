@@ -25,11 +25,13 @@ class Analysis(object):
 
     This class contains multiple conceptual analyses for HybRecord/FoldRecord Data:
 
-        | :ref:`Energy <EnergyAnalysis>`: Analysis of values of predicted intra-hybrid folding energy
+        | :ref:`Energy <EnergyAnalysis>`: Analysis of values of predicted intra-hybrid folding
+            energy
         | :ref:`Type <TypeAnalysis>`: Analysis of segment types
         | :ref:`miRNA <MirnaAnalysis>`: Analysis of miRNA segments distributions
         | :ref:`Target <TargetAnalysis>`: Analysis of mirna target segment names and types
-        | :ref:`Fold <FoldAnalysis>`: Analysis of folding data included in the analyzed hyb_records.
+        | :ref:`Fold <FoldAnalysis>`: Analysis of folding data included in the analyzed
+            hyb_records.
 
     This class used by selecting the desired analysis types on object
     initialization. Analyses are performed either by using either the :meth:`add_record`
@@ -81,8 +83,8 @@ class Analysis(object):
             | ``types_analysis_count`` (:obj:`int`): Count of hybrid types analyzed
             | ``hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
               types of seg1 and seg (in original |5p| / |3p| order)
-            | ``reordered_hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
-              types of seg1 and seg2. This is provided in "sorted" order, where
+            | ``reordered_hybrid_types`` (:obj:`~collections.Counter`): Counter containing
+              annotated types of seg1 and seg2. This is provided in "sorted" order, where
               types are sorted alphabetically (independent of |5p| / |3p| position).
             | ``mirna_hybrid_types`` (:obj:`~collections.Counter`): Counter containing annotated
               types of seg1 and seg2. This is provided in "miRNA-prime" order, where a
@@ -92,7 +94,8 @@ class Analysis(object):
               segment in position seg1
             | ``seg2_types`` (:obj:`~collections.Counter`): Counter containing annotated type of
               segment in position seg2
-            | ``all_seg_types`` (:obj:`~collections.Counter`): Counter containing position-independent
+            | ``all_seg_types`` (:obj:`~collections.Counter`): Counter containing
+                position-independent
               annotated types
 
     .. _MirnaAnalysis:
@@ -157,8 +160,8 @@ class Analysis(object):
             | The :ref:`mirna_seg <mirna_seg>` flag
               must be set for each HybRecord
               (can be done by :func:`hybkit.HybRecord.eval_mirna`).
-            | The :ref:`fold_record <HybRecord-Attributes>` attribute must be set for each HybRecord
-              with a corresponding :class:`~hybkit.FoldRecord` object. This can be done
+            | The :ref:`fold_record <HybRecord-Attributes>` attribute must be set for each
+              HybRecord with a corresponding :class:`~hybkit.FoldRecord` object. This can be done
               using the :meth:`hybkit.HybRecord.set_fold_record()` method.
 
         Output Results:
@@ -381,7 +384,7 @@ class Analysis(object):
         See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
 
         Args:
-            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to return results for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type for return results.
                 If not provided, return the results for all active analyses.
             out_delim (str): Delimiter to use for output. If not provided, defaults to
                 the value in :attr:`settings['out_delim'] <settings>`.
@@ -417,7 +420,7 @@ class Analysis(object):
             out_file_name (str): Path to output file. If not provided, defaults to:
                 ./<analysis_name>_<analysis>.csv if analysis/analyses provided, or
                 ./<analysis_name>_multi_analysis.csv if no analysis/analyses provided.
-            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to return results for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type for return results.
                 If not provided, return the results for all active analyses.
             out_delim (str): Delimiter to use for output. If not provided, defaults to
                 the value in :attr:`settings['out_delim'] <settings>`.
@@ -450,17 +453,17 @@ class Analysis(object):
     def write_analysis_results_special(self, out_basename=None,
                                        analysis=None, out_delim=None):
         """
-        Write the results of the analyses to specilized text files.
+        Write the results of the analyses to specialized text files.
 
         See :ref:`Analyses <Analyses>` for details on the results for each analysis type.
 
         Args:
-            out_file_basename (str): Path for basename of output file. Files will be renamed
+            out_basename (str): Path for basename of output file. Files will be renamed
                 using the provided path as the base name. If not provided, defaults to:
                 ./<analysis_name>_<analysis> if :attr:`name` is set, or
                 ./Analysis_multi_<analysis>  if name not set.
-            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to write results files
-                for.
+            analysis (:obj:`str` or :obj:`list` of :obj:`str`): Analysis type to write results
+                files for.
                 If not provided, write results files for all active analyses.
             out_delim (str): Delimiter to use for output where applicable.
                 If not provided, defaults to
@@ -681,7 +684,24 @@ class Analysis(object):
             energy_results['energy_max'] = None
             energy_results['energy_mean'] = None
             energy_results['energy_std'] = None
-        energy_results['binned_energy_vals'] = copy.deepcopy(self._binned_energy_vals)
+        ret_vals = Counter()
+        if energy_results['energy_max'] is None:
+            ret_range_max = 0
+        else:
+            ret_range_max = max(0, int(np.ceil(energy_results['energy_max'])))
+        if energy_results['energy_min'] is None:
+            ret_range_min = -1
+        else:
+            ret_range_min = int(np.floor(energy_results['energy_min'])) - 1
+        for i in range(ret_range_max, ret_range_min, -1):
+            if i in self._binned_energy_vals:
+                ret_vals[i] = self._binned_energy_vals[i]
+            else:
+                ret_vals[i] = 0
+        # Conditionally trim artifact of floor/ceil:
+        if (ret_vals[ret_range_min + 1]) == 0:
+            del ret_vals[ret_range_min + 1]
+        energy_results['binned_energy_vals'] = ret_vals
         return energy_results
 
     # Analysis : Private Methods : Get Methods : Type Analysis
@@ -1053,12 +1073,13 @@ class Analysis(object):
         )
         out_files.append(mirna_nt_fold_counts_histogram_file_name)
 
-        # Plot miRNA nt Fold Counts Histogram
+        # Plot miRNA nt Fold Props Histogram
         mirna_nt_fold_props_histogram_file_name = basename + '_fold_mirna_nt_props_histogram.png'
         hybkit.plot.fold_mirna_nt_counts_histogram(
             results=fold_results['mirna_nt_fold_props'],
             plot_file_name=mirna_nt_fold_props_histogram_file_name,
             title='Predicted Match Proportion per miRNA Nucleotide',
+            is_prop=True,
             name=self.name,
         )
         out_files.append(mirna_nt_fold_props_histogram_file_name)

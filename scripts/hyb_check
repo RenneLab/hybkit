@@ -14,8 +14,8 @@ as an intial preparation step for further analyses.
 Example system calls:
     ::
 
-        hyb_fold_check -i my_file_1.hyb -f my_file_1.vienna
-        hyb_fold_check -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna \\
+        hyb_check -i my_file_1.hyb -f my_file_1.vienna
+        hyb_check -i my_file_1.hyb my_file_2.hyb -f my_file_1.vienna \\
             my_file_2.vienna -v --custom_flags myflag
 
 
@@ -30,8 +30,6 @@ import hybkit
 from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
                               __email__, __license__, __maintainer__, __status__, __version__)
 
-__doc__ += hybkit.util.output_description
-
 
 # Create Command-line Argument Parser
 def make_parser():
@@ -44,7 +42,9 @@ def make_parser():
 
     script_parser = argparse.ArgumentParser(
         parents=parser_components,
+        prog='hyb_check',
         description=hybkit.util.get_argparse_doc(__doc__),
+        epilog=hybkit.util.output_description,
         formatter_class=hybkit.util._HybkitFormatter,
         allow_abbrev=False,
     )

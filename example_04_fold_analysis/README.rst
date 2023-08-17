@@ -23,7 +23,7 @@ are characterized to determine the per-base folding folds.
 Hybrid sequence information created by the Hyb program and the fold output are
 provided with the hybkit package in the databases directory, created
 by downstream analysis of files
-available at NCBI Gene Expression Ombnibus (GEO) GSE101978, at:
+available at NCBI Gene Expression Omnibus (GEO) GSE101978, at:
 
     https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
 

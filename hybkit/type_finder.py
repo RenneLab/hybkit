@@ -7,7 +7,7 @@
 hybkit TypeFinder Class.
 
 This module contains the TypeFinder class to work with :class:`HybRecord` to
-parse sequence identifiers to idenfity sequence type.
+parse sequence identifiers to identify sequence type.
 """
 
 import os
@@ -136,7 +136,7 @@ class TypeFinder(object):
         Find type of segment using :meth:`TypeFinder.find_custom_method`.
 
         If a TypeFinder method has been set with :meth:`set_method`.
-        use the current paramaters set in
+        use the current parameters set in
         :attr:`params` to find the type of the provided segment by calling::
 
             seg_type = :meth:`TypeFinder.find_custom_method`(seg_props, :attr`TypeFinder.params`)
@@ -188,7 +188,7 @@ class TypeFinder(object):
             <gene_id>_<transcript_id>_<gene_name>_<seg_type>
 
         This method returns the last component of the identifier,
-        split by "_", as the identfied sequence type.
+        split by "_", as the identified sequence type.
         (returns :obj:`None` if the segment identifier does not contain "_").
 
         Example:
@@ -232,7 +232,7 @@ class TypeFinder(object):
         This dict can be generated with the associated :meth:`make_string_match_params`
         method and an associated csv legend file with format::
 
-            #commentline
+            #comment line
             #search_type,search_string,seg_type
             endswith,_miR,microRNA
             endswith,_trans,mRNA
@@ -240,7 +240,7 @@ class TypeFinder(object):
         Args:
             seg_props (dict): :class:`~hybkit.HybRecord` segment properties dict
                 to evaluate.
-            params (dict, optional): Dict with search paramaters as described above.
+            params (dict, optional): Dict with search parameters as described above.
         """
         if not params:
             message = 'method_string_match requires params, but none were provided.'
@@ -280,7 +280,7 @@ class TypeFinder(object):
 
         The my_legend.csv file should have the format::
 
-            #commentline
+            #comment line
             #search_type,search_string,seg_type
             endswith,_miR,microRNA
             endswith,_trans,mRNA
@@ -343,7 +343,7 @@ class TypeFinder(object):
         """
         Return the type of the provided segment or None if it cannot be identified.
 
-        This method checks to see if the identifer of the segment is present in the params dict.
+        This method checks to see if the identifier of the segment is present in the params dict.
         params should be formatted as a dict with keys as
         sequence identifier names, and the corresponding type as the respective values.
 
@@ -380,7 +380,7 @@ class TypeFinder(object):
         of mapped_id_files.
         Files listed in the mapped_id_files argument should have the format::
 
-            #commentline
+            #comment line
             #seg_id,seg_type
             segA_unique_id,segA_type
             segB_unique_id,segB_type

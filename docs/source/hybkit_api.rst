@@ -13,7 +13,7 @@ hybkit API
                                   and toolkit scripts
     :mod:`~hybkit.type_finder`    Class for customizable identification of segment type
                                   from reference identifiers
-    :mod:`~hybkit.analysis`       Classe for predefined analyses of hyb records
+    :mod:`~hybkit.analysis`       Classes for predefined analyses of hyb records
     :mod:`~hybkit.plot`           Plotting methods for analysis results
     :mod:`~hybkit.util`           Support methods for executable scripts
     ============================= =====================================================

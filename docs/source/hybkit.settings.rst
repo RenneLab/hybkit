@@ -6,33 +6,33 @@ hybkit.settings
 
 .. autodata:: hybkit.settings.HybRecord_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.HybRecord_settings_info  
+.. ppdict::
+   hybkit.settings.HybRecord_settings_info
 
 .. autodata:: hybkit.settings.HybFile_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.HybFile_settings_info  
+.. ppdict::
+   hybkit.settings.HybFile_settings_info
 
 .. autodata:: hybkit.settings.FoldRecord_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.FoldRecord_settings_info  
+.. ppdict::
+   hybkit.settings.FoldRecord_settings_info
 
 .. autodata:: hybkit.settings.FoldFile_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.FoldFile_settings_info  
+.. ppdict::
+   hybkit.settings.FoldFile_settings_info
 
 .. autodata:: hybkit.settings.HybFoldIter_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.HybFoldIter_settings_info  
+.. ppdict::
+   hybkit.settings.HybFoldIter_settings_info
 
 .. autodata:: hybkit.settings.Analysis_settings_info
     :no-value:
-.. ppdict:: 
-   hybkit.settings.Analysis_settings_info  
+.. ppdict::
+   hybkit.settings.Analysis_settings_info
 
 
 .. autodata:: hybkit.settings.HybRecord_settings

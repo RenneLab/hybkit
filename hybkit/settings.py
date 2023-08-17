@@ -94,7 +94,7 @@ HybRecord_settings_info = {
     'reorder_flags': [
         True,
         """
-        Re-order flags to the hybkit-specificiation order when
+        Re-order flags to the hybkit-specification order when
         writing hyb records.
         """,
         'custom_bool_from_str',
@@ -104,10 +104,10 @@ HybRecord_settings_info = {
     'allow_undefined_flags': [
         False,
         """
-        Allow use of flags not definied in the hybkit-specificiation order when
+        Allow use of flags not defined in the hybkit-specification order when
         reading and writing hyb records. As the preferred alternative to
         using this setting,
-        the --custom_flags arguement can be be used to supply custom allowed flags.
+        the --custom_flags argument can be be used to supply custom allowed flags.
         """,
         'custom_bool_from_str',
         None,
@@ -276,7 +276,7 @@ HybFoldIter_settings_info = {
         100,
         """
         Maximum number of record(-pairs) to skip in a row. Limited as several sequential skips
-        usually indicates an issue with record formatting or a desynchrnoization between files.
+        usually indicates an issue with record formatting or a desynchronization between files.
         """,
         'int',
         None,

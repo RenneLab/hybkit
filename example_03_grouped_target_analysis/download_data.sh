@@ -10,7 +10,7 @@ if [ -f GSM2720020_WT_BR1.hyb ]; then
 else
     printf "\nDownloading Data for example analysis."
 
-   # Download tar-compressed hyb-format genomic sequence datafile GSE101978_RAW.tar from NCBI Gene Expression Ombnibus (GEO) GSE101978, at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
+   # Download tar-compressed hyb-format genomic sequence data file GSE101978_RAW.tar from NCBI Gene Expression Omnibus (GEO) GSE101978, at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978
    printf "Downloading tar-compressed data-file..."
    #wget -O GSE101978_RAW.tar "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE101978&format=file"
    curl -o GSE101978_RAW.tar "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE101978&format=file"
@@ -20,7 +20,7 @@ else
    tar -xf GSE101978_RAW.tar
    rm GSE101978_RAW.tar
 
-   # Remove unneded (non-KSHV-relevant) hyb files.
+   # Remove unneeded (non-KSHV-relevant) hyb files.
    rm GSM2720017_UI_BR1.hyb.txt.gz \
       GSM2720018_UI_BR2.hyb.txt.gz \
       GSM2720019_UI_BR3.hyb.txt.gz

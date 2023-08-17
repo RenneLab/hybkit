@@ -1,14 +1,14 @@
 
-Example Pipelines
+Example Analyses
 =================
 
-    This section includes multiple example pipelines analyzing data from a
+    This section includes multiple example stepwise analyses of data from a
     qCLASH experiment described in [Gay2018]_, with data acquired from
-    the NCBI Gene Expression Ombnibus (GEO) accession
+    the NCBI Gene Expression Omnibus (GEO) accession
     `GSE101978 <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE101978>`_.
 
     Each analysis is implemented both using the Python3 API, and as a sequence of shell
-    executable comands in a bash script. The Python API implementations are generally
+    executable commands in a bash script. The Python API implementations are generally
     significantly more efficient as more steps can be performed on a single iteration
     over the input data.
 

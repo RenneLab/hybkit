@@ -18,6 +18,27 @@ from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __
                               __email__, __license__, __maintainer__, __status__, __version__)
 
 # ----- Begin Plot Constants -----
+#: Default Colors for colored plots:
+#: Colors selected based on "Points of view: Color blindness" by Bang Wong, Nature Methods, 2011.
+#: Colors in RGB nomenclature (1-255):
+#: Black (0,0,0), Orange (230,159,0), Sky Blue (86,180,233), Bluish Green (0,158,115),
+#: Yellow (240,228,66), Blue (0,114,178), Vermilion (213,94,0), Reddish Purple (204,121,167)
+COLOR_DICT = {
+    'Blue': '#0072B2',
+    'Vermilion': '#D55E00',
+    'Bluish Green': '#009E73',
+    'Reddish Purple': '#CC79A7',
+    'Orange': '#E69F00',
+    'Sky Blue': '#56B4E9',
+    # 'Reddish Purple': '#CC79A7',
+    # 'Orange': '#E69F00',
+    'Yellow': '#F0E442',
+    # 'Black': '#000000',
+}
+
+#: List of default colors for colored plots.
+COLOR_LIST = list(COLOR_DICT.values())
+
 # Base defaults for matplotlib rcParams.
 RC_PARAMS_DEFAULTS = {
     'figure.dpi': 1200,
@@ -36,7 +57,8 @@ PIE_RC_PARAMS.update({
 # Default matplotlib rcParams for bar charts.
 BAR_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
 BAR_RC_PARAMS.update({
-    'axes.titlesize': 'x-large',
+    'axes.titlesize': 'large',
+    # 'axes.titlesize': 'x-large',
     'axes.titleweight': 'bold',
     # 'axes.labelsize': 'large',
     'axes.labelweight': 'bold',
@@ -101,7 +123,8 @@ PIE_DEFAULTS = {
         'startangle': 90,
         'counterclock': False,
     },
-    'OTHER_THRESHHOLD': 0.05,
+    'COLORS': COLOR_LIST,
+    'OTHER_THRESHOLD': 0.05,
     'MIN_WEDGE_SIZE': 0.04,
 }
 # PIE['DEFAULT_TARGET_SETTINGS'] = copy.deepcopy(PIE['DEFAULT_SETTINGS'])
@@ -111,16 +134,16 @@ PIE_DEFAULTS = {
 BAR_DEFAULTS = {
     'BAR_WIDTH': 0.9,
     'BAR_ALIGN': 'edge',
+    'BAR_EDGE_COLOR': None,
 }
 
-#: Default Bar Chart Plot Settings for Histograms.
+#: Default Bar Chart Plot Settings for Energy Histograms.
 ENERGY_DEFAULTS = {
     'MIN_COUNT': 0,
     'MIN_DENSITY': 0.0,
     'XLABEL': 'Hybrid Gibbs Free Energy (kcal/mol)',
     'YLABEL': 'Hybrid Count',
 }
-
 
 # LINE_RC_PARAMS = copy.deepcopy(RC_PARAMS_DEFAULTS)
 # LINE_RC_PARAMS.update({
@@ -138,8 +161,6 @@ ENERGY_DEFAULTS = {
 # }
 
 
-
-
 # ----- Begin Plotting Methods -----
 # Public Methods : Energy : energy_histogram
 def energy_histogram(results,
@@ -155,6 +176,7 @@ def energy_histogram(results,
         results (dict): Dictionary of energy counts from an :class:`~hybkit.analysis.Analysis`
             fold analysis (Key: ``binned_energy_vals``).
         plot_file_name (str): Name of output file.
+        title (str): Title of plot.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
         rc_params (:obj:`dict`, optional): Dictionary of matplotlib rcParams. Defaults
             to :obj:`~hybkit.plot.ENERGY_HIST_RC_PARAMS`.
@@ -179,7 +201,7 @@ def energy_histogram(results,
     if name is not None:
         title = name + ': ' + title
 
-    energy_width = float(energies[1]) + 0.02
+    # energy_width = float(energies[1]) + 0.02
 
     plot_params = {
         'x_vals': energies,
@@ -188,8 +210,10 @@ def energy_histogram(results,
         'title': title,
         'xlabel': ENERGY_DEFAULTS['XLABEL'],
         'ylabel': ENERGY_DEFAULTS['YLABEL'],
-        'width': energy_width,
+        'width': BAR_DEFAULTS['BAR_WIDTH'],
+        # 'width': energy_width,
         'align': BAR_DEFAULTS['BAR_ALIGN'],
+        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
         'rc_params': rc_params,
     }
     _plot_energy_histogram(plot_params)
@@ -234,8 +258,9 @@ def type_count(results,
         'sizes': counts,
         'plot_file_name': plot_file_name,
         'title': title,
-        'other_threshhold': PIE_DEFAULTS['OTHER_THRESHHOLD'],
+        'other_threshold': PIE_DEFAULTS['OTHER_THRESHOLD'],
         'min_wedge_size': PIE_DEFAULTS['MIN_WEDGE_SIZE'],
+        'colors': PIE_DEFAULTS['COLORS'],
         'rc_params': rc_params,
         'settings': copy.deepcopy(PIE_DEFAULTS['SETTINGS']),
     }
@@ -260,7 +285,7 @@ def type_count_dual(results,
 type_count_dual.__doc__ = type_count.__doc__
 
 
-# Public Methods : Target : tareget_count
+# Public Methods : Target : target_count
 # Plot a pie plot for targets from a hybkit target analysis
 def target_count(*args, **kwargs):
     """Hold Place for replaced docstring."""
@@ -277,8 +302,8 @@ for q, r in [('hybrid type counts', 'target counts'),
 def fold_match_counts_histogram(results,
                                 plot_file_name,
                                 title,
+                                is_prop=False,
                                 name=None,
-                                join_entries=False,
                                 rc_params=copy.deepcopy(FOLD_MATCH_HIST_RC_PARAMS),
                                 ):
     """
@@ -289,6 +314,7 @@ def fold_match_counts_histogram(results,
             :class:`~hybkit.analysis.Analysis` type analysis.
         plot_file_name (str): Name of output file.
         title (str): Title of plot.
+        is_prop (:obj:`bool`, optional): If True, y axis is proportion.
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
         rc_params (:obj:`dict`, optional): Dictionary of matplotlib rcParams. Defaults
             to :obj:`~hybkit.plot.FOLD_MATCH_HIST_RC_PARAMS`.
@@ -320,16 +346,22 @@ def fold_match_counts_histogram(results,
     if name is not None:
         title = str(name) + ': ' + title
 
+    if is_prop:
+        y_label = 'Proportion of Hybrids'
+    else:
+        y_label = 'Hybrid Count'
+
     plot_params = {
         'x_vals': x_vals,
         'y_vals': y_vals,
         'plot_file_name': plot_file_name,
         'title': title,
         'xlabel': 'Predicted miRNA/Target Matches',
-        'ylabel': 'Hybrid Count',
-        # 'width': 1,
-        # 'align': BAR_DEFAULTS['BAR_ALIGN'],
+        'ylabel': y_label,
+        'width': BAR_DEFAULTS['BAR_WIDTH'],
+        'align': BAR_DEFAULTS['BAR_ALIGN'],
         'rc_params': rc_params,
+        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
     }
 
     _plot_int_hist(plot_params=plot_params)
@@ -361,16 +393,22 @@ def _plot_energy_histogram(plot_params):
         plot_params['x_vals'],
         plot_params['y_vals'],
         width=plot_params['width'],
-        align=plot_params['align']
+        align=plot_params['align'],
+        edgecolor=plot_params['edgecolor'],
     )
+
+    # for items in zip(plot_params['x_vals'], plot_params['y_vals']):
+    #     print(items)
 
     # Invert the x-axis and set tick locators
     ax.invert_xaxis()
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
 
     # Set x-axis limits and ticks
-    plt.xlim(left=0)
-    plt.xticks(range(0, (int(plot_params['x_vals'][-1]) - 1), (-2)), rotation=-30)
+    left_xlim = max(0, int(plot_params['x_vals'][0]))
+    last_x_tick = int(plot_params['x_vals'][-1]) - 1
+    plt.xlim(left=left_xlim, right=last_x_tick)
+    plt.xticks(range(0, last_x_tick, -2), rotation=-30)
 
     # Set x-axis and y-axis labels
     plt.xlabel(plot_params['xlabel'])
@@ -415,7 +453,7 @@ def _plot_types_pie_chart(plot_params):
         total_fraction = sum(use_sizes) / total_size
         if fraction_sizes[i] < plot_params['min_wedge_size']:
             break
-        elif (total_fraction > (1 - plot_params['other_threshhold'])
+        elif (total_fraction > (1 - plot_params['other_threshold'])
               and i != (len(plot_params['labels']) - 1)):
             break
         else:
@@ -434,9 +472,15 @@ def _plot_types_pie_chart(plot_params):
     # fig, ax = plt.subplots(figsize=plot_params['figsize'])
     fig, ax = plt.subplots()
 
+    # Set colors, and match length if more slices than colors.
+    colors = plot_params['colors']
+    if len(use_sizes) > len(colors):
+        colors = colors * (len(use_sizes) // len(colors)) + colors[:len(use_sizes) % len(colors)]
+
     # Create the pie chart
     patches, texts, autotexts = ax.pie(
         use_sizes,
+        colors=colors,
         labels=use_labels,
         **plot_params['settings']
     )
@@ -473,8 +517,10 @@ def _plot_int_hist(plot_params):
     bars = ax.bar(
         plot_params['x_vals'],
         plot_params['y_vals'],
-        # width=plot_params['width'],
-        # align=plot_params['align']
+        width=plot_params['width'],
+        align=plot_params['align'],
+        edgecolor=plot_params['edgecolor'],
+
     )
 
     # Invert the x-axis and set tick locators

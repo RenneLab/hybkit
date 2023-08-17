@@ -24,7 +24,7 @@ python_requires = '>=3.8'
 description = 'Toolkit for analysis of chimeric (hybrid) RNA sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
 keywords = 'genetics genomics ribonomics bioinformatics hyb CLASH qCLASH miRNA '
-keywords += 'RNA DNA vienna viennad unafold'
+keywords += 'RNA DNA vienna UNAfold'
 name_and_version = project_name + '-' + version
 
 prefix_data_dir = os.path.join(sys.prefix, name_and_version)

@@ -7,6 +7,15 @@ hybkit
 .. image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI Package Version
+.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Bioconda Release
+.. image:: https://img.shields.io/conda/dn/bioconda/hybkit?logo=Anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Hybkit Downloads on Bioconda
+.. image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
+   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
+   :alt: Docker Image Version
 .. image:: https://img.shields.io/circleci/build/github/RenneLab/hybkit?label=CircleCI&logo=circleci
    :target: https://app.circleci.com/pipelines/github/RenneLab/hybkit
    :alt: Circle-CI Build Status
@@ -25,7 +34,7 @@ hybkit
 
 | Welcome to *hybkit*, a toolkit for analysis of hyb-format chimeric
   (hybrid) RNA sequence data defined with the Hyb software package by |Travis2014|_.
-  This genomic data-type is generated from RNA proximitiy-ligation and ribonomics
+  This genomic data-type is generated from RNA proximity-ligation and ribonomics
   techniques such as Crosslinking, Ligation, and
   Sequencing of Hybrids (CLASH; |Helwak2013|_), Quick CLASH (qCLASH; |Gay2018|_).
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
@@ -38,7 +47,7 @@ Project components:
        for creation of custom analyses of hyb-format data.
     #. Integrated analysis of predicted secondary structure (fold) information for
        the API and command-line utilities.
-    #. Example pipelines for analysis of publicly available qCLASH hybrid
+    #. Example analyses for publicly available qCLASH hybrid
        sequence data implemented in each of command-line scripts and hybkit Python API.
 
 Hybkit Toolkit:
@@ -49,8 +58,8 @@ Hybkit Toolkit:
         Utility                             Description
         =================================== ===========================================================
         hyb_check                           Parse hyb (and fold) files and check for errors
-        hyb_eval                            Evaluate hyb (and fold) records to identify segment
-                                            types and miRNAs
+        hyb_eval                            Evaluate hyb (and fold) records to identify / assign
+                                            segment types and miRNAs using custom criteria
         hyb_filter                          Filter hyb (and fold) records to a specific
                                             custom subset
         hyb_analyze                         Perform an energy, type, miRNA, target, or fold analysis
@@ -104,12 +113,12 @@ Hybkit API:
     Further documentation on the hybkit API can be found in the
     |hybkit API| section of |docs_link|_.
 
-Pipelines:
-    Hybkit provides several example pipelines for analysis of hyb data using the
+Example Analyses:
+    Hybkit provides several example analyses for hyb data using the
     utilities provided in the toolkit. These include:
 
         ============================= ===========================================================
-        Pipeline                      Description
+        Analysis                      Description
         ============================= ===========================================================
         Type/miRNA Analysis           Quantify sequence types and miRNA types in a hyb file
         Target Analysis               Analyze targets of a set of miRNAs from a single
@@ -120,7 +129,7 @@ Pipelines:
                                       miRNA-containing hybrids
         ============================= ===========================================================
 
-    These pipelines provide analysis results in both tabular and graph form.
+    These analyses provide analysis results in both tabular and graph form.
     As an illustration, the example summary analysis includes the return of
     the contained hybrid sequence types as both a csv table and as a pie chart:
 
@@ -128,8 +137,8 @@ Pipelines:
 
         |example_01_image|
 
-    Further detail on each provided pipeline can be found in
-    the |Example Pipelines| section of |docs_link|_.
+    Further detail on each provided analysis can be found in
+    the |Example Analyses| section of |docs_link|_.
 
 Installation:
     Dependencies:
@@ -138,30 +147,66 @@ Installation:
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
 
     Via PyPI / Python PIP:
+        |PipVersion|
+
         The recommended installation method is via hybkit's
         `PyPI Package Index <https://pypi.org/project/hybkit/>`_ using
         `python3 pip <https://pip.pypa.io/en/stable/>`_, which will
-        automatically handle version control and dependency installation::
+        automatically handle version control and dependency installation:
+
+        .. code-block:: bash
 
             $ python3 -m pip install hybkit
 
     Via Conda:
-        Pending
+        |CondaVersion| |InstallBioconda|
+
+        For users of conda, the hybkit package and dependencies are hosted on the
+        the `Bioconda <https://bioconda.github.io/>`_ channel, and can be installed
+        using conda:
+
+        .. code-block:: bash
+
+            $ conda install -c bioconda hybkit
 
     Via Docker/Singularity:
-        Pending
+        |DockerVersion|
 
-    Manually Download and Install
-        Acquisition of the package can be performed by cloning the project's Github repository::
+        The hybkit package is also available as a `Docker <https://www.docker.com/>`_
+        image and `Singularity <https://sylabs.io/singularity/>`_ container, hosted
+        via the `BioContainers <https://biocontainers.pro/>`_ project on
+        `quay.io <https://quay.io/repository/biocontainers/hybkit?tab=tags>`_.
+        To pull the image via docker:
+
+        .. code-block:: bash
+
+            $ docker pull quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+
+        To pull the image via singularity:
+
+        .. code-block:: bash
+
+            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+
+    Manually Download and Install:
+        |GithubVersion|
+
+        Use git to clone the project's Github repository:
+
+        .. code-block:: bash
 
             $ git clone git://github.com/RenneLab/hybkit
 
-        *OR* by downloading the zipped package::
+        *OR* download the zipped package:
 
-            $ curl -OL https://github.com/dstrib/hybkit/archive/master.zip
+        .. code-block:: bash
+
+            $ curl -OL https://github.com/RenneLab/hybkit/archive/master.zip
             $ unzip master.zip
 
-        With either method then followed by installation using python's setuptools::
+        Then install using python setuptools:
+
+        .. code-block:: bash
 
             $ python setup.py install
 
@@ -184,10 +229,25 @@ Installation:
 .. _Hunter2007: https://doi.org/10.1109/MCSE.2007.55
 .. |Cock2009| replace:: *Cock et al. (Bioinformatics 2009)*
 .. _Cock2009: https://doi.org/10.1093/bioinformatics/btp163
+.. |PipVersion| image:: https://img.shields.io/pypi/v/hybkit?logo=pypi&logoColor=white
+   :target: https://pypi.org/project/hybkit/
+   :alt: PyPI Package Version
+.. |InstallBioconda| image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat&logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Install with Bioconda
+.. |CondaVersion| image:: https://img.shields.io/conda/vn/bioconda/hybkit?logo=anaconda
+   :target: http://bioconda.github.io/recipes/hybkit/README.html
+   :alt: Bioconda Release
+.. |DockerVersion| image:: https://img.shields.io/conda/vn/bioconda/hybkit?color=lightgrey&label=Image%20%28quay.io%29&logo=docker
+   :target: https://quay.io/repository/biocontainers/hybkit?tab=tags
+   :alt: Docker Image Version
+.. |GithubVersion| image:: https://img.shields.io/github/v/release/RenneLab/hybkit?include_prereleases&logo=github
+   :target: https://github.com/RenneLab/hybkit/releases
+   :alt: GitHub release (latest by date including pre-releases)
 
 .. Github Only
 .. |hybkit Toolkit| replace:: *hybkit Toolkit*
-.. |Example Pipelines| replace:: *Example Pipelines*
+.. |Example Analyses| replace:: *Example Analyses*
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
