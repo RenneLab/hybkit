@@ -22,7 +22,7 @@ Lead Developer
 Changelog
 ---------
 
-    * 0.3.1b (ongoing) Changes include:
+    * 0.3.1 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
       * Add --version flag to scripts
