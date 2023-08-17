@@ -22,6 +22,11 @@ Lead Developer
 Changelog
 ---------
 
+
+    * 0.3.2b (ongoing) Changes include:
+
+      * Misc Bugfixes and Refinements
+
     * 0.3.1 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
@@ -31,6 +36,7 @@ Changelog
       * Change default plot colors to the Bang Wong scheme [Wong2011]_ for
         colorblind accessibility
       * Documentation corrections
+      * Spellcheck
 
     * 0.3.0 (2023-04) Major Codebase And API Overhaul. Changes include:
 
