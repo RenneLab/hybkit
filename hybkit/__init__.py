@@ -79,7 +79,7 @@ class HybRecord(object):
     Class for storing and analyzing chimeric (hybrid) RNA-seq reads in hyb format.
 
     Hyb file (hyb) format entries are a GFF-related file format described by [Travis2014]_
-    that contain information about a genomic sequence read identified to be ahybrid by
+    that contain information about a genomic sequence read identified to be a hybrid by
     a chimeric read caller. Each line contains 15 or 16
     columns separated by tabs ("\\t") and provides
     annotations on each components. An example hyb-format line
@@ -230,7 +230,7 @@ class HybRecord(object):
         'two_way_merged',
         'seq_IDs_in_cluster',
     ]
-    # Additional flag specifications utilized by hybkit, see specificiation.
+    # Additional flag specifications utilized by hybkit, see specification.
     _HYBKIT_FLAGS = [
         'read_count',
         'orient',
@@ -321,9 +321,9 @@ class HybRecord(object):
     #: * ``no_mirna``        : **Both** Seg1 and seg2 have been identified as **Not** a miRNA
     #: * ``mirna_dimer``     : **Both** seg1 and seg2 have been **identified as** a miRNA
     #: * ``mirna_not_dimer`` : **One and Only One** of seg1 or seg2
-    #:   has been **identifed as** a miRNA
-    #: * ``5p_mirna``        : Seg1 (5p) has been identifed as a miRNA
-    #: * ``3p_mirna``        : Seg2 (3p) has been identifed as a miRNA
+    #:   has been **identified as** a miRNA
+    #: * ``5p_mirna``        : Seg1 (5p) has been identified as a miRNA
+    #: * ``3p_mirna``        : Seg2 (3p) has been identified as a miRNA
     #:
     MIRNA_PROPS = [
         'has_mirna', 'no_mirna', 'mirna_dimer', 'mirna_not_dimer',
@@ -416,7 +416,7 @@ class HybRecord(object):
 
         if read_count is not None:
             if 'read_count' in flags and int(flags['read_count']) != int(read_count):
-                message = '"read_count" paramater defined both in function call and flags,\n'
+                message = '"read_count" parameter defined both in function call and flags,\n'
                 message += 'but values do not match. Please define only once.'
                 _print_and_error(message)
             self.set_flag('read_count', str(read_count))
@@ -646,7 +646,6 @@ class HybRecord(object):
         """
         Check and set provided fold_record (:class:`FoldRecord`) as attribute fold_record.
 
-
         Ensures that fold_record argument is an instance of FoldRecord and
         has a matching sequence to this HybRecord, then set as
         :ref:`HybRecord.fold_record <HybRecord-Attributes>`.
@@ -687,7 +686,7 @@ class HybRecord(object):
 
         If not already done, determine whether a miRNA exists within this record and
         set the :ref:`miRNA_seg <mirna_seg>` flag.
-        This evaluation requries the :ref:`seg1_type <seg1_type>`
+        This evaluation requires the :ref:`seg1_type <seg1_type>`
         and :ref:`seg2_type <seg2_type>` flags to
         be populated, which can be performed by the :func:`eval_types` method.
 
@@ -725,7 +724,7 @@ class HybRecord(object):
         """
         Provide a detail about the miRNA or target following :func:`eval_mirna`.
 
-        Analyze miRNA properties within the sequence record and provide a detail as ouptut.
+        Analyze miRNA properties within the sequence record and provide a detail as output.
         Unless ``allow_mirna_dimers`` is ``True``,
         this method requires record to contain a non-dimer miRNA,
         otherwise an error will be raised.
@@ -754,7 +753,7 @@ class HybRecord(object):
         if ((not self.prop('has_mirna'))
                 or (not allow_mirna_dimers and not self.prop('mirna_not_dimer'))):
             message = 'mirna_detail method requires a hybrid containing a single mirna.\n'
-            message += 'hybrecord: %s does not meet this criteria ' % str(self)
+            message += 'hyb_record: %s does not meet this criteria ' % str(self)
             message += 'with miRNA_seg flag: %s' % mirna_flag
             _print_and_error(message)
 
@@ -782,7 +781,7 @@ class HybRecord(object):
             mirna_props = self.seg2_props
             target_props = self.seg1_props
         # else:
-        #     message = 'Problem with eval_mirna for hybrecord: %s ' % str(self)
+        #     message = 'Problem with eval_mirna for hyb_record: %s ' % str(self)
         #     message += 'Undefined value: %s found for flag: miRNA_seg' % mirna_flag
         #     print(message)
         #     raise RuntimeError(message)
@@ -824,7 +823,7 @@ class HybRecord(object):
         """
         if prop not in self._SET_PROPS_SET:
             message = 'Requested Property: %s is not defined. ' % prop
-            message += 'Available proprties are:\n' + ', '.join(self.SET_PROPS)
+            message += 'Available properties are:\n' + ', '.join(self.SET_PROPS)
             _print_and_error(message)
 
         if prop in {'energy', 'fold_record'}:
@@ -886,7 +885,7 @@ class HybRecord(object):
         """
         if prop not in self._HAS_PROPS_SET:
             message = 'Requested Property: %s is not defined. ' % prop
-            message += 'Available proprties are:\n' + ', '.join(self.HAS_PROPS)
+            message += 'Available properties are:\n' + ', '.join(self.HAS_PROPS)
             _print_and_error(message)
 
         # Check if a substring compares to a desired property string.
@@ -970,7 +969,7 @@ class HybRecord(object):
                 ret_val = any((val.endswith(prop_compare)) for val in check_info)
             elif check_type == 'is':
                 ret_val = bool(prop_compare in check_info)
-                # ret_val = any((prop_copmpare == val) for val in check_info)
+                # ret_val = any((prop_compare == val) for val in check_info)
             # else:
             #    raise RuntimeError(prop)
 
@@ -1243,8 +1242,23 @@ class HybRecord(object):
             flags = cls._read_flags(line_items[15])
 
         if hybformat_id:
-            read_id, read_count = cls._parse_hybformat_id(hyb_id)
-            if 'read_count' not in flags:
+            # If 'seq_IDs_in_cluster' flag is set, use it to set count information
+            if 'seq_IDs_in_cluster' in flags and flags['seq_IDs_in_cluster'].strip():
+                if 'read_count' not in flags or 'count_total' not in flags:
+                    combined_read_count = 0
+                    combined_record_count = 0
+                    for cluster_hyb_id in flags['seq_IDs_in_cluster'].strip(' ,').split(','):
+                        cluster_id, cluster_count = cls._parse_hybformat_id(cluster_hyb_id)
+                        combined_read_count += int(cluster_count)
+                        combined_record_count += 1
+                    if 'read_count' not in flags:
+                        flags['read_count'] = combined_read_count
+                    if 'count_total' not in flags:
+                        flags['count_total'] = combined_record_count
+
+            # Otherwise, read count information directly from hybrid identifier
+            elif 'read_count' not in flags:
+                read_id, read_count = cls._parse_hybformat_id(hyb_id)
                 flags['read_count'] = read_count
 
         if hybformat_ref:
@@ -1273,7 +1287,7 @@ class HybRecord(object):
         For the hybrid:
 
             | id: ``[seg1_record.id]--[seg2_record.id]``
-              (overwritten by "id" paramater if provided)
+              (overwritten by "id" parameter if provided)
             | seq: seg1_record.seq + seg2_record
 
         For each segment:
@@ -1290,12 +1304,13 @@ class HybRecord(object):
 
         Args:
             seg1_record (SeqRecord): Biopython SeqRecord object containing information
-                on the left/first/5p hybrid segnment (seg1)
+                on the left/first/5p hybrid segment (seg1)
             seg2_record (SeqRecord): Biopython SeqRecord object containing information
                 on the right/second/3p hybrid segment (seg2)
             hyb_id (:obj:`str`, optional): Identifier for the hyb record
                 (overwrites generated id if provided)
-            energy (:obj:`str` or :obj:`float`, optional): Predicted energy of sequence folding in kcal/mol
+            energy (:obj:`str` or :obj:`float`, optional): Predicted energy of
+                sequence folding in kcal/mol
             flags (:obj:`dict`, optional): Dict with keys of flags for the record and their
                 associated values.
                 Any flags provided overwrite default-generated flags.
@@ -1391,7 +1406,7 @@ class HybRecord(object):
                 err_message = 'seq must be alphabetic. Provided seq is non-alphabetic: %s' % value
 
         # Check "energy" is valid float, int, or str,
-        # if float or int, convert to str of float with one decmial.
+        # if float or int, convert to str of float with one decimal.
         elif attribute == 'energy':
             if not isinstance(value, (float, int, type(None), str)):
                 err_message = ('energy must be a float, int, numeric str, or None. '
@@ -1503,7 +1518,7 @@ class HybRecord(object):
 
     # HybRecord : Private Methods : Record Parsing
     def _format_seg_props(self, seg_props, prefix='', suffix='', indent_str=''):
-        # Returns a formatted string of the segement properties
+        # Returns a formatted string of the segment properties
         ret_string = prefix
         ret_string += indent_str + 'Map Reference:  %s\n' % seg_props['ref_name']
         ret_string += indent_str + 'Read Start Pos: %s\n' % seg_props['read_start']
@@ -1516,7 +1531,7 @@ class HybRecord(object):
 
     # HybRecord : Private Methods : Record Parsing
     def _format_seg_props_line(self, seg_props, prefix='', suffix=''):
-        # Returns a single-line formatted string of the segement properties
+        # Returns a single-line formatted string of the segment properties
         ret_string = prefix
         if seg_props['ref_name'] is not None:
             ret_string += seg_props['ref_name']
@@ -1545,7 +1560,7 @@ class HybRecord(object):
     # HybRecord : Private Methods : Segment Parsing
     def _get_seg_seq(self, seg_props):
         if any(seg_props[v] is None for v in ['read_start', 'read_end']):
-            message = 'Segement subsequence cannot be obtained for '
+            message = 'Segment subsequence cannot be obtained for '
             message += 'Record %s, Segment %s.\n' % (str(self), seg_props['ref_name'])
             message += 'Record segment is missing one of read_start/read_end.'
             _print_and_error(message)
@@ -1579,7 +1594,7 @@ class HybRecord(object):
 
     # HybRecord : Private Methods : flags
     def _get_flag_keys(self, reorder_flags=None):
-        # reorder_flags option returns flags in deafult ordering scheme.
+        # reorder_flags option returns flags in default ordering scheme.
         #  If reorder-flags argument provided, it overrides default behavior.
         #  Otherwise, the method falls back to the object-default.
         return_list = []
@@ -1642,7 +1657,7 @@ class HybRecord(object):
     def _ensure_set(self, prop):
         if self.not_set(prop):
             message = 'Problem with HybRecord instance: %s\n' % str(self)
-            message += 'Method requries set attribute/evaluation: "%s" before use.' % prop
+            message += 'Method requires set attribute/evaluation: "%s" before use.' % prop
             _print_and_error(message)
         return True
 
@@ -1692,7 +1707,7 @@ class HybRecord(object):
         flags = {}
         for flag_key, flag_value in flag_pairs:
             if not allow_undefined_flags and flag_key not in cls._flagset:
-                message = 'Problem: Unidefined Flag: %s\n' % flag_key
+                message = 'Problem: Undefined Flag: %s\n' % flag_key
                 message += 'Defined Flags: '
                 message += ', '.join(cls.ALL_FLAGS + cls.settings['custom_flags'])
                 _print_and_error(message)
@@ -1883,7 +1898,7 @@ class FoldRecord(object):
 
 
     A minimum amount of data necessary for a FoldRecord object is a sequence identifier,
-    a genomic sequence, and its fold representaiton.
+    a genomic sequence, and its fold representation.
 
     .. _fold_record_types:
 
@@ -2020,7 +2035,7 @@ class FoldRecord(object):
             energy_str = "%i" % int(round(self.energy))
 
         line_3 = '%s\t(%s)' % (self.fold, energy_str)
-        ret_lines.append(line_3 + suffix)    # Add line 3, fold representaiton and energy
+        ret_lines.append(line_3 + suffix)    # Add line 3, fold representation and energy
         return ret_lines
 
     # FoldRecord : Public Methods : Parsing : Vienna
@@ -2464,7 +2479,7 @@ class FoldRecord(object):
     # @classmethod
     # def _format_seg_props(cls, seg_props, prefix='', suffix='', indent_str=''):
     #    raise NotImplementedError
-    #    # Returns a formatted string of the sgement info information
+    #    # Returns a formatted string of the segment info information
     #    ret_string = prefix
     #    ret_string += indent_str + 'Map Reference:  %s\n' % seg_props['ref']
     #    ret_string += indent_str + 'Read Start Pos: %s\n' % seg_props['read_start']
@@ -2741,7 +2756,7 @@ class ViennaFile(FoldFile):
 
     # ViennaFile : Private Methods
     def _post_init_tasks(self):
-        """Hold place for any post-initializaiton tasks."""
+        """Hold place for any post-initialization tasks."""
         pass
 
     # ViennaFile : Private Methods
@@ -2798,13 +2813,13 @@ class CtFile(FoldFile):
 
     # CtFile : Private Methods
     def _post_init_tasks(self):
-        """Hold place for any post-initializaiton tasks."""
+        """Hold place for any post-initialization tasks."""
         pass
 
     # CtFile : Private Methods
     def _to_record_string(self, write_record, newline):
-        """ (NOOP / Not-Implemented) Return a :class:`Fold Record` as a CT-format string."""
-        message = 'No write_record is implmeneted for ct files, as the FoldRecord '
+        """(NOOP / Not-Implemented) Return a :class:`Fold Record` as a CT-format string."""
+        message = 'No write_record is implemented for ct files, as the FoldRecord '
         message += 'object does not contain the complete set of ct record information.'
         print(message)
         raise NotImplementedError(message)
@@ -2849,7 +2864,7 @@ class HybFoldIter(object):
     # Start HybFoldIter Methods
     # HybFoldIter : Public Methods
     def __init__(self, hybfile_handle, foldfile_handle, combine=False, iter_error_mode=None):
-        """Please see :class:`HybFoldIfter` for initialization information."""
+        """Please see :class:`HybFoldIter` for initialization information."""
         if not isinstance(hybfile_handle, HybFile):
             message = 'hybfile_handle must be an instance of a HybFile object.'
             _print_and_error(message)
