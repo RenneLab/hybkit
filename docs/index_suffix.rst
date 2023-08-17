@@ -1,6 +1,6 @@
 
 .. |hybkit Toolkit| replace:: :ref:`hybkit Toolkit`
-.. |Example Pipelines| replace:: :ref:`Example Pipelines`
+.. |Example Analyses| replace:: :ref:`Example Analyses`
 .. |hybkit API| replace:: :ref:`hybkit API`
 .. |docs_link| replace:: this documentation
 .. _docs_link: #
