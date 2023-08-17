@@ -23,7 +23,7 @@ The data files can be downloaded and uncompressed by using the command::
 The unpacked hyb data-files require ~2 GB of space.
 The completed output of the analysis requires ~1.5 GB of space.
 
-Summary Analysis Example Output
+Type-miRNA Analysis Example Output
 -------------------------------
 
 .. image:: ../example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
