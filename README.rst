@@ -251,4 +251,4 @@ Installation:
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
-.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_hybrid_types.png
+.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
