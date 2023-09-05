@@ -36,7 +36,7 @@ hybkit
   (hybrid) RNA sequence data defined with the Hyb software package by |Travis2014|_.
   This genomic data-type is generated from RNA proximity-ligation and ribonomics
   techniques such as Crosslinking, Ligation, and
-  Sequencing of Hybrids (CLASH; |Helwak2013|_), Quick CLASH (qCLASH; |Gay2018|_).
+  Sequencing of Hybrids (CLASH; |Helwak2013|_) and quick CLASH (qCLASH; |Gay2018|_).
 | This software is available via Github, at http://www.github.com/RenneLab/hybkit .
 | Full project documentation is available at |docs_link|_.
 

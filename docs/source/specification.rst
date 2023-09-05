@@ -10,7 +10,7 @@ hybkit Hyb File Specification
 
     Each line in a hyb file (a hyb "record") contains information about an
     RNA sequence read identified as a chimera by an RNA hybridization analysis.
-    Each line contains 15 or 16 columns separated by tab characters ("\\\\t") and provides
+    Each line contains 15 or 16 columns separated by tab characters ("\\t") and provides
     information on each of the two aligned segments identified within the sequence read.
     The columns are described as follows by [Travis2014]_:
 
@@ -123,14 +123,14 @@ Flags
 
         .. _mirna_seg:
 
-        :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA
-        options are "N" (none), "5p" (seg1), "3p" (seg2),
+        :obj:`miRNA_seg` -  String: Indicates which (if any) segment mapping is a miRNA.
+        Options are "N" (none), "5p" (seg1), "3p" (seg2),
         "B" (both), or "U" (unknown).
 
         .. _target_reg:
 
         :obj:`target_reg` -  String: Assigned region of the miRNA target.
-        options are "5pUTR", "C" ([C]oding), "3pUTR",
+        Options are "5pUTR", "C" ([C]oding), "3pUTR",
         "NON" ([NON]coding), "N" ([N]one), or "U" ([U]nknown).
 
         .. _ext:

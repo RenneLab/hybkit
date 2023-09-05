@@ -105,7 +105,9 @@ FOLD_MATCH_HIST_RC_PARAMS.update({})
 
 #: Default matplotlib rcParams for fold nt counts analysis histograms.
 FOLD_NT_COUNTS_HIST_RC_PARAMS = copy.deepcopy(BAR_RC_PARAMS)
-FOLD_NT_COUNTS_HIST_RC_PARAMS.update({})
+FOLD_NT_COUNTS_HIST_RC_PARAMS.update({
+
+})
 
 # _FORMAT_NAME_MAP = {
 #     'mirnas_5p': "5'_miRNA_Hybrids",
@@ -136,6 +138,12 @@ BAR_DEFAULTS = {
     'BAR_ALIGN': 'edge',
     'BAR_EDGE_COLOR': None,
 }
+
+#: Default Bar Chart of Integer Plot Settings.
+BAR_INT_DEFAULTS = copy.deepcopy(BAR_DEFAULTS)
+BAR_INT_DEFAULTS.update({
+    'BAR_ALIGN': 'center',
+})
 
 #: Default Bar Chart Plot Settings for Energy Histograms.
 ENERGY_DEFAULTS = {
@@ -168,6 +176,7 @@ def energy_histogram(results,
                      title,
                      name=None,
                      rc_params=copy.deepcopy(ENERGY_HIST_RC_PARAMS),
+                     bar_params=copy.deepcopy(BAR_DEFAULTS),
                      ):
     """
     Plot histogram of hybrid energies from an :class:`~hybkit.analysis.Analysis` fold analysis.
@@ -180,6 +189,8 @@ def energy_histogram(results,
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
         rc_params (:obj:`dict`, optional): Dictionary of matplotlib rcParams. Defaults
             to :obj:`~hybkit.plot.ENERGY_HIST_RC_PARAMS`.
+        bar_params (:obj:`dict`, optional): Dictionary of bar plot parameters. Defaults
+            to :obj:`~hybkit.plot.BAR_DEFAULTS`.
     """
     # Check if empty
     max_count = 0
@@ -210,10 +221,10 @@ def energy_histogram(results,
         'title': title,
         'xlabel': ENERGY_DEFAULTS['XLABEL'],
         'ylabel': ENERGY_DEFAULTS['YLABEL'],
-        'width': BAR_DEFAULTS['BAR_WIDTH'],
+        'width': bar_params['BAR_WIDTH'],
         # 'width': energy_width,
-        'align': BAR_DEFAULTS['BAR_ALIGN'],
-        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
+        'align': bar_params['BAR_ALIGN'],
+        'edgecolor': bar_params['BAR_EDGE_COLOR'],
         'rc_params': rc_params,
     }
     _plot_energy_histogram(plot_params)
@@ -305,6 +316,7 @@ def fold_match_counts_histogram(results,
                                 is_prop=False,
                                 name=None,
                                 rc_params=copy.deepcopy(FOLD_MATCH_HIST_RC_PARAMS),
+                                bar_params=copy.deepcopy(BAR_INT_DEFAULTS),
                                 ):
     """
     Plot histogram of predicted miRNA/target match count.
@@ -318,6 +330,8 @@ def fold_match_counts_histogram(results,
         name (:obj:`str`, optional): Name of analysis to be included in plot title.
         rc_params (:obj:`dict`, optional): Dictionary of matplotlib rcParams. Defaults
             to :obj:`~hybkit.plot.FOLD_MATCH_HIST_RC_PARAMS`.
+        bar_params (:obj:`dict`, optional): Dictionary of bar plot parameters. Defaults
+            to :obj:`~hybkit.plot.BAR_INT_DEFAULTS`.
     """
     x_vals = []
     y_vals = []
@@ -358,10 +372,10 @@ def fold_match_counts_histogram(results,
         'title': title,
         'xlabel': 'Predicted miRNA/Target Matches',
         'ylabel': y_label,
-        'width': BAR_DEFAULTS['BAR_WIDTH'],
-        'align': BAR_DEFAULTS['BAR_ALIGN'],
+        'width': bar_params['BAR_WIDTH'],
+        'align': bar_params['BAR_ALIGN'],
         'rc_params': rc_params,
-        'edgecolor': BAR_DEFAULTS['BAR_EDGE_COLOR'],
+        'edgecolor': bar_params['BAR_EDGE_COLOR'],
     }
 
     _plot_int_hist(plot_params=plot_params)
@@ -369,7 +383,9 @@ def fold_match_counts_histogram(results,
 
 def fold_mirna_nt_counts_histogram(*args, **kwargs):
     """Hold Place for replaced docstring."""
-    return fold_match_counts_histogram(*args, rc_params=FOLD_NT_COUNTS_HIST_RC_PARAMS, **kwargs)
+    if 'rc_params' not in kwargs:
+        kwargs['rc_params'] = copy.deepcopy(FOLD_NT_COUNTS_HIST_RC_PARAMS)
+    return fold_match_counts_histogram(*args, **kwargs)
 
 
 # Modify target_count doc
@@ -506,7 +522,7 @@ def _plot_types_pie_chart(plot_params):
 
 
 # Private Methods : Energy : _plot_energy_histogram
-def _plot_int_hist(plot_params):
+def _plot_int_hist(plot_params, truncate_to_first_int=True):
     # Update plot parameters
     plt.rcParams.update(plot_params['rc_params'])
 
@@ -528,8 +544,10 @@ def _plot_int_hist(plot_params):
     # ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
 
     # Set x-axis limits and ticks
-    # plt.xlim(left=0)
-    # plt.xticks(range(0, (int(plot_params['x_vals'][-1]) - 1), (-2)), rotation=-30)
+    if truncate_to_first_int and int(plot_params['x_vals'][0]) > 0:
+        left_xlim = int(plot_params['x_vals'][0]) - 1
+        plt.xlim(left=left_xlim)
+    plt.xticks(range(2, int(plot_params['x_vals'][-1]) + 1, 2))
 
     # Set x-axis and y-axis labels
     plt.xlabel(plot_params['xlabel'])

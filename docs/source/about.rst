@@ -23,6 +23,11 @@ Changelog
 ---------
 
 
+    * 0.3.3 (2023-09) Changes include:
+
+      * Misc Bugfixes and Refinements
+      * Update integer bar-plot functions
+
     * 0.3.2 (2023-08) Changes include:
 
       * Misc Bugfixes and Refinements
