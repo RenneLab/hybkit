@@ -5,6 +5,10 @@
 
 """Package details for the hybkit project."""
 
+# To update:
+#   Change Version
+#   Change Date
+
 import os
 import sys
 from importlib import resources
@@ -89,7 +93,7 @@ __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
 __credits__ = ["Daniel Stribling", "Rolf Renne"]
 __copyright__ = '2023, ' + __author__
-__date__ = "2023/04/16"
+__date__ = "2023/09/05"
 __deprecated__ = False
 __email__ = "ds@ufl.edu"
 __license__ = "GPLv3+"
