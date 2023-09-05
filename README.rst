@@ -48,7 +48,7 @@ Project components:
     #. Integrated analysis of predicted secondary structure (fold) information for
        the API and command-line utilities.
     #. Example analyses for publicly available qCLASH hybrid
-       sequence data implemented in each of command-line scripts and hybkit Python API.
+       sequence data implemented in each of the command-line scripts and hybkit Python API.
 
 Hybkit Toolkit:
     The hybkit toolkit includes several command-line utilities

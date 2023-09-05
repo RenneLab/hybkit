@@ -9,7 +9,7 @@ hybkit Toolkit
     The command-line options and flags are generated with the
     Python3 argparse module. Relevant settings pertaining to specific hybkit classes are accessible
     via command-line flags, as demonstrated in the "shell_analysis" implementations in the
-    :ref:`Example Pipelines`.
+    :ref:`Example Analyses`.
 
     This version of hybkit includes the following executables:
 
