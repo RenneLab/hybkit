@@ -82,7 +82,7 @@ class HybRecord(object):
     that contain information about a genomic sequence read identified to be a hybrid by
     a chimeric read caller. Each line contains 15 or 16
     columns separated by tabs ("\\t") and provides
-    annotations on each components. An example hyb-format line
+    annotations on each component. An example hyb-format line
     from [Gay2018]_::
 
         2407_718\tATCACATTGCCAGGGATTTCCAATCCCCAACAATGTGAAAACGGCTGTC\t.\tMIMAT0000078_MirBase_miR-23a_microRNA\t1\t21\t1\t21\t0.0027\tENSG00000188229_ENST00000340384_TUBB2C_mRNA\t23\t49\t1181\t1207\t1.2e-06
