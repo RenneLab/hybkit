@@ -64,7 +64,7 @@ docs_dir = os.path.join(hybkit_data_dir, 'docs')
 # Python package classifiers for PyPI
 # For a list of valid classifiers, see https://pypi.org/classifiers/
 classifiers = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Natural Language :: English',
     'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',
@@ -87,7 +87,8 @@ info_urls = {
     'https://www.sciencedirect.com/science/article/pii/S1046202313004180',
 }
 
-keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
+keywords = 'genetics, genomics, microRNAs, Ribonomics, Hyb, Hybrids, CLASH, qCLASH, '
+keywords += 'CLEAR-CLIP, Chimeric e-CLIP'
 
 __author__ = "Daniel Stribling"
 __contact__ = "ds@ufl.edu"
