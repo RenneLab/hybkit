@@ -180,13 +180,13 @@ Installation:
 
         .. code-block:: bash
 
-            $ docker pull quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+            $ docker pull quay.io/biocontainers/hybkit:0.3.3--pyhdfd78af_0
 
         To pull the image via singularity:
 
         .. code-block:: bash
 
-            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.3--pyhdfd78af_0
 
     Manually Download and Install:
         |GithubVersion|
