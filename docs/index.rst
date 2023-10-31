@@ -48,7 +48,7 @@ Project components:
     #. Integrated analysis of predicted secondary structure (fold) information for
        the API and command-line utilities.
     #. Example analyses for publicly available qCLASH hybrid
-       sequence data implemented in each of command-line scripts and hybkit Python API.
+       sequence data implemented in each of the command-line scripts and hybkit Python API.
 
 Hybkit Toolkit:
     The hybkit toolkit includes several command-line utilities
@@ -180,13 +180,13 @@ Installation:
 
         .. code-block:: bash
 
-            $ docker pull quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+            $ docker pull quay.io/biocontainers/hybkit:0.3.3--pyhdfd78af_0
 
         To pull the image via singularity:
 
         .. code-block:: bash
 
-            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.0--pyhdfd78af_0
+            $ singularity pull docker://quay.io/biocontainers/hybkit:0.3.3--pyhdfd78af_0
 
     Manually Download and Install:
         |GithubVersion|
