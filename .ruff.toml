@@ -1,0 +1,9 @@
+# Load the ruff formatter settings.
+extend = "/home/ds/scripts/ruff.toml"
+
+# select = ["ALL"]
+
+ignore = [
+    "PT012", # Limit Pytest Raises: One Simple Statement
+    "SIM117", # Disallow compound with statements
+]

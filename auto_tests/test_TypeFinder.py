@@ -7,38 +7,45 @@
 Automatic testing of the hybkit TypeFinder class.
 """
 
-import os
-import sys
+# import sys
 import copy
-from contextlib import nullcontext as does_not_raise
+import os
+
+# from contextlib import nullcontext as does_not_raise
 import pytest
+
 import hybkit
 
 # ----- Import Testing Helper Data -----
-from auto_tests.test_helper_data import *
-# Includes the following variables:
-# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
-# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
-# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
-# test_out_dir, hyb_autotest_file_name, hyb_file_name
+from auto_tests.test_helper_data import (
+    ART_HYB_MATCHTYPE_PROPS,
+    ART_HYB_NOTYPE_PROPS,
+    ART_HYB_PROPS_ALL,
+    BAD_ID_MAP_PARAMS_1,
+    BAD_ID_MAP_PARAMS_2,
+    BAD_STRING_MATCH_PARAMS_1,
+    BAD_STRING_MATCH_PARAMS_2,
+    HYB_STR_1,
+    ID_MAP_PARAMS_1,
+    STRING_MATCH_PARAMS_1,
+)
 
 # ----- Import Testing Helper Functions -----
-from auto_tests.test_helper_functions import *
-# Includes the following functions:
-# get_expected_result_string(is_allowed=False)
-# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
+from auto_tests.test_helper_functions import get_expected_result_context
 
+# ----- Linting Directives -----
+# ruff: noqa: SLF001 ARG001
 
 # ----- TypeFinder Misc - Minimal -----
 def test_typefinder_misc():
     """Test construction of HybRecord class with minimal information."""
-    Type_Finder = hybkit.type_finder.TypeFinder
+    type_finder = hybkit.type_finder.TypeFinder
     with pytest.raises((RuntimeError, TypeError)):
-        Type_Finder()
-    Type_Finder.set_custom_method(print)
-    Type_Finder._reset()
+        type_finder()
+    type_finder.set_custom_method(print)
+    type_finder._reset()
     with pytest.raises((RuntimeError, TypeError)):
-        Type_Finder.find({})
+        type_finder.find({})
 
 
 test_parameters = [
@@ -55,11 +62,12 @@ test_parameters = [
     ('make_id_map_params', 'Raise',
      BAD_ID_MAP_PARAMS_2['params_str'], BAD_ID_MAP_PARAMS_2['params_dict']),
 ]
-arg_string = "method,expect_str,params_str,params_dict"
+arg_string = 'method,expect_str,params_str,params_dict'
 
 
 @pytest.mark.parametrize(arg_string, [*test_parameters])
 def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp_path):
+    """Test TypeFinder.make_params methods."""
     make_params_autotest_file_name = os.path.join(tmp_path, 'make_params_autotest_file.txt')
     expect_context = get_expected_result_context(expect_str)
     with pytest.raises(TypeError):
@@ -99,11 +107,12 @@ test_parameters = []
 for test_parameter_set in test_parameter_sets:
     for test_record_set in test_records:
         test_parameters.append((*test_parameter_set, test_record_set))
-arg_string = "method,expect_str,method_params,test_params,hyb_record_params"
+arg_string = 'method,expect_str,method_params,test_params,hyb_record_params'
 
 
 @pytest.mark.parametrize(arg_string, [*test_parameters])
 def test_typefinder_methods(method, expect_str, method_params, test_params, hyb_record_params):
+    """Test TypeFinder methods."""
     expect_context = get_expected_result_context(expect_str)
     hybkit.type_finder.TypeFinder._reset()
     with expect_context:

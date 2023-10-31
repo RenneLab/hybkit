@@ -12,13 +12,13 @@ See: 'README.rst' for this analysis for more information.
 """
 
 import os
-import sys
+
 import hybkit
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.util.set_setting('mirna_types', ['miRNA', 'KSHV-miRNA'])
+hybkit.util.set_setting('mirna_types', set_value=['miRNA', 'KSHV-miRNA'])
 # Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.util.set_setting('hybformat_id', True)
+hybkit.util.set_setting('hybformat_id', set_value=True)
 # Set FoldRecord seq_type as "dynamic" to work with Hyb-format *_hybrid_ua.vienna files
 #   which have a modified sequence.
 hybkit.util.set_setting('seq_type', 'dynamic')
@@ -40,7 +40,7 @@ if not os.path.isdir(out_dir):
     os.mkdir(out_dir)
 
 print('Using Input Files:')
-print('    ' + '\n    '.join([input_hyb_name, input_vienna_name]) + '\n')
+print(f'    {input_hyb_name}\n    {input_vienna_name}\n')
 
 # Set hybrid segment types to remove as part of quality control (QC)
 remove_types = ['rRNA', 'mitoch-rRNA']
@@ -60,7 +60,7 @@ with hybkit.HybFile.open(input_hyb_name, 'r') as input_hyb,\
     # hybkit.HybFile.open(out_hyb_name, 'w') as out_hyb:
 
     hyb_fold_iter = hybkit.HybFoldIter(input_hyb, input_vienna, combine=True)
-    for i, hyb_record in enumerate(hyb_fold_iter):
+    for _, hyb_record in enumerate(hyb_fold_iter):
         # Find Segment types and miRNA information
         hyb_record.eval_types()
         hyb_record.eval_mirna()

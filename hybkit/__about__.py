@@ -9,13 +9,18 @@
 #   Change Version
 #   Change Date
 
+
 import os
 import sys
 from importlib import resources
 
 # Check Python version and throw error if not 3.8+
-if not (sys.version_info.major >= 3 and sys.version_info.minor >= 8):
-    raise RuntimeError('Python 3.8+ is required for hybkit.')
+if sys.version_info < (3, 8):  #noqa: UP036
+    message = 'Python 3.8+ is required for hybkit.'
+    message += ' Current version is ' + str(sys.version_info.major) + '.'
+    message += str(sys.version_info.minor) + '.' + str(sys.version_info.micro)
+    message += '.' + str(sys.version_info.releaselevel)
+    raise RuntimeError(message)
 
 # Set hybkit module directory
 with resources.path('hybkit', '__init__.py') as path_obj:
@@ -23,7 +28,7 @@ with resources.path('hybkit', '__init__.py') as path_obj:
 
 # Hybkit information
 project_name = 'hybkit'
-version = "v0.3.3"
+version = 'v0.3.3'
 python_requires = '>=3.8'
 description = 'Toolkit for analysis of chimeric (hybrid) RNA sequence data.'
 project_url = 'https://github.com/RenneLab/hybkit'
@@ -89,16 +94,16 @@ info_urls = {
 
 keywords = 'genetics genomics ribonomics bioinformatics CLASH qCLASH miRNA'
 
-__author__ = "Daniel Stribling"
-__contact__ = "ds@ufl.edu"
-__credits__ = ["Daniel Stribling", "Rolf Renne"]
+__author__ = 'Daniel Stribling'
+__contact__ = 'ds@ufl.edu'
+__credits__ = ['Daniel Stribling', 'Rolf Renne']
 __copyright__ = '2023, ' + __author__
-__date__ = "2023/09/05"
+__date__ = '2023/09/05'
 __deprecated__ = False
-__email__ = "ds@ufl.edu"
-__license__ = "GPLv3+"
-__maintainer__ = "Renne Group, University of Florida"
-__status__ = "Development"
+__email__ = 'ds@ufl.edu'
+__license__ = 'GPLv3+'
+__maintainer__ = 'Renne Group, University of Florida'
+__status__ = 'Development'
 __version__ = version
 # Hyb file specification version.
 spec_version = __version__

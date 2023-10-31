@@ -13,13 +13,13 @@ See: 'README.rst' for this analysis for more information.
 """
 
 import os
-import sys
+
 import hybkit
 
 # Set mirna types as custom to include KSHV-miRNAs
-hybkit.util.set_setting('mirna_types', ['miRNA', 'KSHV-miRNA'])
+hybkit.util.set_setting('mirna_types', set_value=['miRNA', 'KSHV-miRNA'])
 # Tell hybkit that identifiers are in Hyb-Program standard format.
-hybkit.util.set_setting('hybformat_id', True)
+hybkit.util.set_setting('hybformat_id', set_value=True)
 
 # Set script directories and input file names.
 analysis_dir = os.path.abspath(os.path.dirname(__file__))

@@ -9,7 +9,21 @@ Helper data objects for automatic testing of hybkit code.
 
 import copy
 import os
-from contextlib import nullcontext as does_not_raise
+
+# from contextlib import nullcontext as does_not_raise
+
+# ----- Start Data Constants -----
+NEG_10 = -10.0
+ZERO = 0.0
+HALF = 0.5
+ONE = 1.0
+TWO = 2.0
+TWO_I = 2
+FIVE = 5.0
+FIVE_I = 5
+TEN = 10.0
+TEN_I = 10
+FORTY_I = 40
 
 # ----- Start Real Hyb/Vienna Data Examples -----
 # Example hyb record string for testing.
@@ -310,10 +324,10 @@ ART_HYB_STR_PROPS['true_prop_argsets'] = [
 
 ART_HYB_STR_PROPS['false_prop_argsets'] = [
     (vals[0], (vals[1] + 'XXX')) for vals
-    in ART_HYB_STR_PROPS['true_prop_argsets'] if len(vals) == 2
+    in ART_HYB_STR_PROPS['true_prop_argsets'] if len(vals) == TWO
 ]
 
-# Add bad hyb stirngs with missing name or seq
+# Add bad hyb strings with missing name or seq
 ART_BAD_HYB_STRS = []
 for i in range(2):
     source_str = ART_HYB_PROPS_1['hyb_str']
@@ -467,7 +481,7 @@ TEST_SEG_PROPS = {
     'ref_end': 21,
     'score': 'e-10'
 }
-TEST_SEG_PROPS_STR = {p: str(TEST_SEG_PROPS[p]) for p in TEST_SEG_PROPS.keys()}
+TEST_SEG_PROPS_STR = {p: str(TEST_SEG_PROPS[p]) for p in TEST_SEG_PROPS}
 TEST_FLAGS_OBJ = {
     'count_total': 10,
     'count_last_clustering': 11,
@@ -490,7 +504,7 @@ TEST_READ_COUNT_STR = str(TEST_READ_COUNT)
 TEST_RECORD_COUNT = TEST_FLAGS_OBJ['count_total']
 TEST_RECORD_COUNT_STR = str(TEST_RECORD_COUNT)
 TEST_FLAGS_STR = {flag: str(TEST_FLAGS_OBJ[flag])
-                  for flag in TEST_FLAGS_OBJ.keys()}
+                  for flag in TEST_FLAGS_OBJ}
 TEST_FLAGS_STR_LINE = (
     'count_total=10;count_last_clustering=11;two_way_merged=TRUE;'
     + 'seq_IDs_in_cluster=test_id_1,test_id_2;'

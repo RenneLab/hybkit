@@ -7,38 +7,34 @@
 Automatic testing of hybkit code.
 """
 
-import os
-import sys
-import copy
-from contextlib import nullcontext as does_not_raise
+# import sys
+# import copy
+# from contextlib import nullcontext as does_not_raise
 import argparse
+import os
+
 import pytest
+
 import hybkit
+from auto_tests.test_helper_data import (
+    test_ct_file_name,
+    test_hyb_file_name,
+    test_out_dir,
+    test_vienna_file_name,
+)
+from auto_tests.test_helper_functions import get_expected_result_context
 
-
-# ----- Import Testing Helper Data -----
-from auto_tests.test_helper_data import *
-# Includes the following variables:
-# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
-# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
-# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
-# test_out_dir, hyb_autotest_file_name, test_hyb_file_name
-
-
-# ----- Import Testing Helper Functions -----
-from auto_tests.test_helper_functions import *
-# Includes the following functions:
-# get_expected_result_string(is_allowed=False)
-# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
-
+# ----- Linting Directives:
+# ruff: noqa: SLF001 ARG001 FBT003
 
 # ----- Start Test Util -----
 def test_util_misc():
-    original_abspath = hybkit.settings._USE_ABSPATH
+    """Test miscellaneous functions in hybkit.util."""
+    _original_abspath = hybkit.settings._USE_ABSPATH
     hybkit.settings._USE_ABSPATH = True
 
     # Test get_argparse_doc
-    source_str = ":ref:`|==``::\n::\n"
+    source_str = ':ref:`|==``::\n::\n'
     assert hybkit.util.get_argparse_doc(source_str) == '":\n'
 
     # Test _bool_from_string
@@ -131,11 +127,11 @@ settings_info_dicts = [
 ]
 test_parameters = []
 for source, settings_info_dict in settings_info_dicts:
-    for setting in settings_info_dict.keys():
+    for setting in settings_info_dict:
         default_value, description, type_str = settings_info_dict[setting][:3]
         short_flag, argparse_fields = settings_info_dict[setting][3:]
         if 'choices' in argparse_fields:
-            good_choice = list(argparse_fields['choices'])[0]
+            good_choice = next(iter(argparse_fields['choices']))
             bad_choice_1, bad_choice_2 = 'invalid', ['invalid']
         else:
             good_choice = default_value
@@ -146,10 +142,11 @@ for source, settings_info_dict in settings_info_dicts:
                                     bad_choice_1, settings_info_dict[setting]))
             test_parameters.append((source, setting, 'Raise',
                                     bad_choice_2, settings_info_dict[setting]))
+use_parameters = ('source', 'setting', 'expectation', 'set_val', 'setting_props')
 
-
-@pytest.mark.parametrize("source,setting,expectation,set_val,setting_props", [*test_parameters])
+@pytest.mark.parametrize(use_parameters, [*test_parameters])
 def test_util_set_settings(source, setting, expectation, set_val, setting_props):
+    """Test hybkit.util.set_settings_from_namespace."""
     expect_context = get_expected_result_context(expectation)
     use_namespace = argparse.Namespace()
     setattr(use_namespace, setting, set_val)
@@ -166,6 +163,7 @@ def test_util_set_settings(source, setting, expectation, set_val, setting_props)
 
 # ----- Test hybkit.util parser generation
 def test_util_validate_args():
+    """Test hybkit.util parser generation."""
     original_abspath = hybkit.settings._USE_ABSPATH
     hybkit.settings._USE_ABSPATH = True
 

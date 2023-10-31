@@ -7,29 +7,36 @@
 Automatic testing of hybkit code.
 """
 
-import os
-import sys
+# import argparse
 import copy
-from contextlib import nullcontext as does_not_raise
-import argparse
+
+# import os
+# import sys
+# from contextlib import nullcontext as does_not_raise
 import pytest
+
 import hybkit
+from auto_tests.test_helper_data import (
+    ART_HYB_VIENNA_PROPS_1,
+    ART_HYB_VIENNA_PROPS_2,
+    EMPTY_SEG_PROPS,
+    ENERGY_ALLOWED_TYPES,
+    FOLD_ALLOWED_TYPES,
+    ID_ALLOWED_TYPES,
+    SEQ_ALLOWED_TYPES,
+    TEST_ENERGY_STR,
+    TEST_FOLD_STR,
+    TEST_HYB_ID_STR,
+    TEST_OBJECTS,
+    TEST_SEQ_STR,
+)
+from auto_tests.test_helper_functions import (
+    get_expected_result_context,
+    get_expected_result_string,
+)
 
-
-# ----- Import Testing Helper Data -----
-from auto_tests.test_helper_data import *
-# Includes the following variables:
-# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
-# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
-# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
-# test_out_dir, hyb_autotest_file_name, hyb_file_name
-
-
-# ----- Import Testing Helper Functions -----
-from auto_tests.test_helper_functions import *
-# Includes the following functions:
-# get_expected_result_string(is_allowed=False)
-# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
+# ----- Linting Directives:
+# ruff: noqa: SLF001 ARG001
 
 hybkit.util.set_setting('error_mode', 'raise')
 hybkit.util.set_setting('iter_error_mode', 'raise')
@@ -73,7 +80,7 @@ def test_foldrecord_constructor_main():
         )
 
     # Test Magicmethods
-    assert test_record == test_record
+    assert test_record == copy.deepcopy(test_record)
     test_record_2.id = 'test2'
     assert test_record != test_record_2
     assert len(test_record) == len(TEST_SEQ_STR)
@@ -91,22 +98,23 @@ def test_foldrecord_constructor_vienna_to_line():
         seq_type='static',
     )
     format_energy_str = '(%s)' % TEST_ENERGY_STR
-    assert (
-        test_record.to_vienna_string()
-        == """>%s\n%s\n%s\t%s\n""" % (TEST_HYB_ID_STR, TEST_SEQ_STR,
-                                      TEST_FOLD_STR, format_energy_str)
+    compare_string = (
+            f""">{TEST_HYB_ID_STR}\n{TEST_SEQ_STR}\n"""
+            f"""{TEST_FOLD_STR}\t{format_energy_str}\n"""
     )
+    assert test_record.to_vienna_string() == compare_string
 
     test_record_2 = hybkit.FoldRecord(
         id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
         fold=TEST_FOLD_STR, energy=None,
         seq_type='static',
     )
-    assert (
-        test_record_2.to_vienna_string()
-        == """>%s\n%s\n%s\t%s\n""" % (TEST_HYB_ID_STR, TEST_SEQ_STR,
-                                      TEST_FOLD_STR, '(.)')
+    compare_string = (
+        f""">{TEST_HYB_ID_STR}\n{TEST_SEQ_STR}\n"""
+        f"""{TEST_FOLD_STR}\t{"(.)"}\n"""
     )
+    assert test_record_2.to_vienna_string() == compare_string
+
 
 
 # ----- FoldRecord Type Tests -----
@@ -125,7 +133,7 @@ field_allowed_types = {
 }
 test_parameters = []
 # Setup test constructor types for each attribute in default_constructor_args:
-for constructor_field in default_constructor_args.keys():
+for constructor_field in default_constructor_args:
     # Setup testing of each possible data type for each field
     for test_name, test_object in TEST_OBJECTS.items():
         # Get types allowed for this field
@@ -145,8 +153,10 @@ for constructor_field in default_constructor_args.keys():
         test_parameters.append(test_param_set)
 
 
-@pytest.mark.parametrize("test_field,test_name,expect_str,test_input", [*test_parameters])
+@pytest.mark.parametrize(('test_field', 'test_name', 'expect_str', 'test_input'),
+                         [*test_parameters])
 def test_foldrecord_obj_types(test_field, test_name, expect_str, test_input):
+    """Test FoldRecord constructor with various data types."""
     expect_context = get_expected_result_context(expect_str)
     with expect_context:
         print(test_input)
@@ -161,9 +171,10 @@ test_parameters = [
 ]
 
 
-@pytest.mark.parametrize("test_name,expectation,test_props", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'expectation', 'test_props'), [*test_parameters])
 def test_foldrecord_vienna_io(test_name, expectation, test_props):
-    hyb_str = test_props['hyb_str']
+    """Test FoldRecord reading/writing of vienna-format records."""
+    hyb_str = test_props['hyb_str']  # noqa: F841
     vienna_str = test_props['vienna_str']
     vienna_id = vienna_str.splitlines()[0].split()[0].lstrip('>')
     vienna_lines = vienna_str.splitlines()
@@ -184,7 +195,7 @@ def test_foldrecord_vienna_io(test_name, expectation, test_props):
         assert fold_record.energy == energy
 
     assert fold_record.to_vienna_lines(newline=False) == vienna_lines
-    assert ''.join(fold_record.to_vienna_lines(True)) == '\n'.join(vienna_lines_mod_last)
+    assert ''.join(fold_record.to_vienna_lines(newline=True)) == '\n'.join(vienna_lines_mod_last)
     assert fold_record.to_vienna_string(newline=False) == vienna_str.rstrip()
     assert fold_record.to_vienna_string(newline=True) == (vienna_str)
 
@@ -203,8 +214,9 @@ test_parameters = [
 ]
 
 
-@pytest.mark.parametrize("test_name,test_kws", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'test_kws'), [*test_parameters])
 def test_foldrecord_vienna_io_errors(test_name, test_kws):
+    """Test FoldRecord reading vienna-format records with errors."""
     with pytest.raises(RuntimeError):
         hybkit.FoldRecord.from_vienna_lines(**test_kws)
 
@@ -217,8 +229,9 @@ test_parameters = [
 ]
 
 
-@pytest.mark.parametrize("test_name,test_kws", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'test_kws'), [*test_parameters])
 def test_foldrecord_vienna_io_warnings(test_name, test_kws):
+    """Test FoldRecord reading vienna-format records with allowed errors."""
     hybkit.FoldRecord.from_vienna_lines(**test_kws)
 
 # ----- Begin CT-format FoldRecord tests -----

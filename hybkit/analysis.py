@@ -5,19 +5,32 @@
 
 """Functions for analysis of HybRecord and FoldRecord objects."""
 
-import sys
 import copy
 from collections import Counter
-import hybkit
+
 import numpy as np
 
-# Import module-level dunder-names:
-from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
-                              __email__, __license__, __maintainer__, __status__, __version__)
+import hybkit
 
+# Import module-level dunder-names:
+from hybkit.__about__ import (
+    __author__,
+    __contact__,
+    __credits__,
+    __date__,
+    __deprecated__,
+    __email__,
+    __license__,
+    __maintainer__,
+    __status__,
+    __version__,
+)
+
+# ----- File-Specific Linting Directives:
+# ruff: noqa: F401 SLF001
 
 # --- Hybkit Analysis --- #
-class Analysis(object):
+class Analysis:
     """
     Class for analysis of hybkit HybRecord and FoldRecord objects.
 
@@ -224,12 +237,17 @@ class Analysis(object):
             'fold_match_counts',
         ],
     }
-    _all_result_keys_list = []
+    _all_result_keys_list_temp = []  # noqa: RUF012
     for key in _result_keys:
-        _all_result_keys_list += _result_keys[key]
-    _all_result_keys_set = set(_all_result_keys_list)
+        _all_result_keys_list_temp += _result_keys[key]
 
-    _quant_mode_options = set(hybkit.settings.Analysis_settings_info['quant_mode'][4]['choices'])
+    _all_result_keys_list = tuple(_all_result_keys_list_temp)
+    _all_result_keys_set = frozenset(_all_result_keys_list_temp)
+    del _all_result_keys_list_temp
+
+    _quant_mode_options = frozenset(
+        hybkit.settings.Analysis_settings_info['quant_mode'][4]['choices']
+        )
 
     # ----- Begin Analysis Class -----
     # Start Analysis Public Methods
@@ -252,8 +270,8 @@ class Analysis(object):
             if (not isinstance(analysis_type, str)
                     or analysis_type.lower() not in self.analysis_options):
                 message = (
-                    'Analysis type "%s" not recognized.'
-                    '\nChoices: %s' % (str(analysis_type), ', '.join(self.analysis_options))
+                    f'Analysis type "{analysis_type!s}" not recognized.'
+                    '\nChoices: {}'.format(', '.join(self.analysis_options))
                 )
                 print(message)
                 raise RuntimeError(message)
@@ -265,8 +283,8 @@ class Analysis(object):
             self.quant_mode = self.settings['quant_mode']
         elif quant_mode not in self._quant_mode_options:
             message = (
-                'Quantification mode "%s" not recognized.'
-                '\nChoices: %s' % (str(quant_mode), ', '.join(self._quant_mode_options))
+                f'Quantification mode "{quant_mode!s}" not recognized.'
+                '\nChoices: {}'.format(', '.join(self._quant_mode_options))
             )
             print(message)
             raise RuntimeError(message)
@@ -360,8 +378,8 @@ class Analysis(object):
         """
         if result_key not in self._all_result_keys_set:
             message = (
-                'Result key "%s" not recognized.'
-                '\nChoices: %s' % (result_key, ', '.join(self._all_result_keys_list))
+                f'Result key "{result_key!s}" not recognized.'
+                '\nChoices: {}'.format(', '.join(self._all_result_keys_list))
             )
             print(message)
             raise RuntimeError(message)
@@ -369,12 +387,13 @@ class Analysis(object):
             if result_key in self._result_keys[analysis_type]:
                 if analysis_type not in self.analysis_types:
                     message = (
-                        'Result "%s" cannot be gotten because analysis type "%s" is not'
-                        'active.' % (result_key, analysis_type)
+                        f'Result "{result_key}" cannot be gotten because analysis '
+                        f'type "{analysis_type}" is not active'
                     )
                     print(message)
                     raise RuntimeError(message)
                 return getattr(self, '_get_' + analysis_type + '_results')()[result_key]
+        raise RuntimeError('Result key "%s" not found.' % result_key)
 
     # Analysis : Public Methods : Results : get_analysis_delim_str
     def get_analysis_delim_str(self, analysis=None, out_delim=None):
@@ -541,6 +560,8 @@ class Analysis(object):
             return hyb_record.get_read_count(require=True)
         elif self.quant_mode == 'records':
             return hyb_record.get_record_count(require=True)
+        else:
+            raise RuntimeError('Quantification mode "%s" not recognized.' % self.quant_mode)
 
     # Start Init Methods
     # Analysis : Private Methods : Init Methods : Energy Analysis
@@ -949,7 +970,7 @@ class Analysis(object):
     def _plot_type_results(self, basename):
         type_results = self._get_type_results()
         out_files = []
-        ype_results = {}
+        type_results = {}
         type_results['types_analysis_count'] = copy.deepcopy(self._types_analysis_count)
         type_results['hybrid_types'] = copy.deepcopy(self._hybrid_types)
         type_results['reordered_hybrid_types'] = copy.deepcopy(self._reordered_hybrid_types)
@@ -985,7 +1006,7 @@ class Analysis(object):
         hybkit.plot.type_count_dual(
             type_results['mirna_hybrid_types'],
             mirna_hybrid_types_file_name,
-            title='Reordered miRNA\' Hybrid Types',
+            title="Reordered miRNA' Hybrid Types",
             name=self.name,
             join_entries=True,
         )
@@ -1092,19 +1113,20 @@ class Analysis(object):
         elif isinstance(analyses, list):
             all_test_analyses = analyses
         else:
-            raise TypeError('Analyses must be a string or list of strings.')
+            message = 'Analyses must be a string or list of strings.'
+            raise TypeError(message)
         for test_analysis in all_test_analyses:
             if test_analysis not in self.analysis_types:
                 message = (
-                    'Analysis type "%s" not an active analysis.'
-                    '\nActive choices: %s' % (test_analysis, ', '.join(self.analysis_types))
+                    f'Analysis type "{test_analysis!s}" not an active analysis.'
+                    '\nActive choices: {}'.format(', '.join(self.analysis_types))
                 )
                 print(message)
                 raise RuntimeError(message)
 
     # Analysis : Private Classmethods
     @classmethod
-    def _sanitize_name(self, file_name):
+    def _sanitize_name(cls, file_name):
         for char, replace in [('*', 'star'), (',', 'com')]:
             file_name = file_name.replace(char, replace)
         return file_name

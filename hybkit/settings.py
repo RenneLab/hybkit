@@ -49,6 +49,12 @@ ANALYSIS_TYPE_OPTIONS_HYB = ['energy', 'type', 'mirna', 'target']
 ANALYSIS_TYPE_OPTIONS_FOLD = ['fold']
 ANALYSIS_TYPE_OPTIONS = [*ANALYSIS_TYPE_OPTIONS_HYB, *ANALYSIS_TYPE_OPTIONS_FOLD]
 
+#: Minimum number of fields in hyb line:
+MIN_RECORD_FIELDS = 15
+
+#: Maximum number of fields in hyb line:
+MAX_RECORD_FIELDS = 16
+
 # #: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
 # #: (range: ENERGY_MIN_BIN <= 0).
 # ENERGY_MIN_BIN = '-45.0'

@@ -12,6 +12,7 @@ See: "README.rst" for this analysis for more information.
 
 import os
 import sys
+
 import hybkit
 
 # Set mirna types as custom to include KSHV-miRNAs
@@ -82,7 +83,7 @@ for in_file_path in input_files:
                     break
 
             # If record has an excluded type, continue to next record without analyzing.
-            if not use_record:
+            if not use_record:  # noqa: SIM114
                 continue
 
             # If record is a duplicate, skip it.
