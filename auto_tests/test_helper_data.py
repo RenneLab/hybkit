@@ -10,6 +10,14 @@ Helper data objects for automatic testing of hybkit code.
 import copy
 import os
 
+from hybkit.errors import (
+    HybkitArgError,
+    HybkitConstructorError,
+    HybkitError,
+    HybkitIterError,
+    HybkitMiscError,
+)
+
 # from contextlib import nullcontext as does_not_raise
 
 # ----- Start Data Constants -----
@@ -24,6 +32,17 @@ FIVE_I = 5
 TEN = 10.0
 TEN_I = 10
 FORTY_I = 40
+
+# ----- Start Error Constants -----
+ERROR_TYPE_STRINGS = {
+    'HybkitError': HybkitError,
+    'HybkitMiscError': HybkitMiscError,
+    'HybkitArgError': HybkitArgError,
+    'HybkitConstructorError': HybkitConstructorError,
+    'HybkitIterError': HybkitIterError,
+}
+for init_str in list(ERROR_TYPE_STRINGS):
+    ERROR_TYPE_STRINGS[init_str.lower()] = ERROR_TYPE_STRINGS[init_str]
 
 # ----- Start Real Hyb/Vienna Data Examples -----
 # Example hyb record string for testing.

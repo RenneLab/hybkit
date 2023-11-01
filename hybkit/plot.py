@@ -13,8 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 
 import hybkit
-
-# Import module-level dunder-names:
 from hybkit.__about__ import (
     __author__,
     __contact__,
@@ -27,6 +25,7 @@ from hybkit.__about__ import (
     __status__,
     __version__,
 )
+from hybkit.errors import HybkitMiscError
 
 # ----- File-Specific Linting Directives:
 # ruff: noqa: F401 SLF001
@@ -222,8 +221,7 @@ def energy_histogram(results,
         max_count = max(max_count, count)
     if not max_count:
         message = 'Warning: Attempted to create empty plot to name: %s' % plot_file_name
-        print(message)
-        raise RuntimeError(message)
+        raise HybkitMiscError(message)
 
     # Plot energy bins
     energies, counts = [], []
@@ -440,7 +438,7 @@ def _plot_energy_histogram(plot_params):
     )
 
     # for items in zip(plot_params['x_vals'], plot_params['y_vals']):
-    #     print(items)
+    #     pass
 
     # Invert the x-axis and set tick locators
     ax.invert_xaxis()

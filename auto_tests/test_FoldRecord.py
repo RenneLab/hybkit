@@ -34,6 +34,7 @@ from auto_tests.test_helper_functions import (
     get_expected_result_context,
     get_expected_result_string,
 )
+from hybkit.errors import HybkitConstructorError
 
 # ----- Linting Directives:
 # ruff: noqa: SLF001 ARG001
@@ -72,7 +73,7 @@ def test_foldrecord_constructor_main():
             seq_type=seq_type
         )
         assert test_record_2.seq_type == seq_type
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitConstructorError):
         test_record_2 = hybkit.FoldRecord(
             id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR,
             fold=TEST_FOLD_STR, energy=TEST_ENERGY_STR,
@@ -85,7 +86,7 @@ def test_foldrecord_constructor_main():
     assert test_record != test_record_2
     assert len(test_record) == len(TEST_SEQ_STR)
     assert bool(test_record)
-    print(str(test_record))
+    str(test_record)
     hash(test_record)
 
 
@@ -143,7 +144,10 @@ for constructor_field in default_constructor_args:
         # Set test data for this field
         constructor_args[constructor_field] = test_object
         # Determine Error vs. Null Context for this test
-        expect_result = get_expected_result_string(test_name in allowed_types)
+        expect_result = get_expected_result_string(
+            test_name in allowed_types,
+            err_string='HybkitConstructorError'
+            )
         test_param_set = (
             constructor_field,
             test_name,
@@ -159,7 +163,6 @@ def test_foldrecord_obj_types(test_field, test_name, expect_str, test_input):
     """Test FoldRecord constructor with various data types."""
     expect_context = get_expected_result_context(expect_str)
     with expect_context:
-        print(test_input)
         assert hybkit.FoldRecord(**test_input) is not None
 
 
@@ -202,11 +205,11 @@ def test_foldrecord_vienna_io(test_name, expectation, test_props):
 
 # ----- FoldRecord test reading vienna-format records with errors. -----
 test_parameters = [
-    ('empty3', {'record_lines': ['', '', '']}),
-    ('empty2', {'record_lines': ['', '']}),
-    ('empty1', {'record_lines': ['abc', '123', 'singleval']}),
-    ('empty0', {'record_lines': ['abc', '123', '(99']}),
-    ('bad_error', {
+    ('empty3', 'HybkitConstructorError', {'record_lines': ['', '', '']}),
+    ('empty2', 'HybkitConstructorError', {'record_lines': ['', '']}),
+    ('empty1', 'HybkitConstructorError', {'record_lines': ['abc', '123', 'singleval']}),
+    ('empty0', 'HybkitConstructorError', {'record_lines': ['abc', '123', '(99']}),
+    ('bad_error', 'HybkitArgError', {
         'record_lines': ART_HYB_VIENNA_PROPS_1['vienna_str'].split('\n')[:3],
         'error_mode': 'bad_error_mode',
     }),
@@ -214,10 +217,11 @@ test_parameters = [
 ]
 
 
-@pytest.mark.parametrize(('test_name', 'test_kws'), [*test_parameters])
-def test_foldrecord_vienna_io_errors(test_name, test_kws):
+@pytest.mark.parametrize(('test_name', 'expect_str', 'test_kws'), [*test_parameters])
+def test_foldrecord_vienna_io_errors(test_name, expect_str, test_kws):
     """Test FoldRecord reading vienna-format records with errors."""
-    with pytest.raises(RuntimeError):
+    expect_context = get_expected_result_context(expect_str)
+    with expect_context:
         hybkit.FoldRecord.from_vienna_lines(**test_kws)
 
 
@@ -278,7 +282,7 @@ def test_foldrecord_vienna_io_warnings(test_name, test_kws):
 # ]
 # @pytest.mark.parametrize("test_name,test_kws", [*test_parameters])
 # def test_foldrecord_ct_io_errors(test_name, test_kws):
-#     with pytest.raises(RuntimeError):
+#     with pytest.raises(HybkitMiscError):
 #         hybkit.FoldRecord.from_ct_lines(**test_kws)
 
 # # ----- FoldRecord test reading ct-format records with allowed errors. -----

@@ -7,16 +7,12 @@
 Automatic testing of the hybkit TypeFinder class.
 """
 
-# import sys
 import copy
 import os
 
-# from contextlib import nullcontext as does_not_raise
 import pytest
 
 import hybkit
-
-# ----- Import Testing Helper Data -----
 from auto_tests.test_helper_data import (
     ART_HYB_MATCHTYPE_PROPS,
     ART_HYB_NOTYPE_PROPS,
@@ -29,9 +25,8 @@ from auto_tests.test_helper_data import (
     ID_MAP_PARAMS_1,
     STRING_MATCH_PARAMS_1,
 )
-
-# ----- Import Testing Helper Functions -----
 from auto_tests.test_helper_functions import get_expected_result_context
+from hybkit.errors import HybkitArgError, HybkitMiscError
 
 # ----- Linting Directives -----
 # ruff: noqa: SLF001 ARG001
@@ -57,9 +52,9 @@ test_parameters = [
      BAD_STRING_MATCH_PARAMS_2['params_str'], BAD_STRING_MATCH_PARAMS_2['params_dict']),
     ('make_id_map_params', 'Pass',
      ID_MAP_PARAMS_1['params_str'], ID_MAP_PARAMS_1['params_dict']),
-    ('make_id_map_params', 'Raise',
+    ('make_id_map_params', 'HybkitMiscError',
      BAD_ID_MAP_PARAMS_1['params_str'], BAD_ID_MAP_PARAMS_1['params_dict']),
-    ('make_id_map_params', 'Raise',
+    ('make_id_map_params', 'HybkitMiscError',
      BAD_ID_MAP_PARAMS_2['params_str'], BAD_ID_MAP_PARAMS_2['params_dict']),
 ]
 arg_string = 'method,expect_str,params_str,params_dict'
@@ -70,7 +65,7 @@ def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp
     """Test TypeFinder.make_params methods."""
     make_params_autotest_file_name = os.path.join(tmp_path, 'make_params_autotest_file.txt')
     expect_context = get_expected_result_context(expect_str)
-    with pytest.raises(TypeError):
+    with pytest.raises((HybkitArgError, TypeError)):
         gen_params = getattr(hybkit.type_finder.TypeFinder, method)(23)
     with pytest.raises(FileNotFoundError):
         gen_params = getattr(hybkit.type_finder.TypeFinder, method)(make_params_autotest_file_name)
@@ -82,11 +77,11 @@ def test_typefinder_make_params(method, expect_str, params_str, params_dict, tmp
 
 
 test_parameter_sets = [
-    ('badmethod', 'Raise', None, {}),
+    ('badmethod', 'HybkitArgError', None, {}),
     ('hybformat', 'Pass', None, {}),
-    ('hybformat', 'Raise', {'badparam': True}, {}),
+    ('hybformat', 'HybkitArgError', {'badparam': True}, {}),
     ('string_match', 'Pass', STRING_MATCH_PARAMS_1['params_dict'], {}),
-    ('string_match', 'Raise', {}, {}),
+    ('string_match', 'HybkitArgError', {}, {}),
     # ('string_match', 'Raise', BAD_STRING_MATCH_PARAMS_1['params_dict'], {}),
     # ('string_match', 'Raise', BAD_STRING_MATCH_PARAMS_2['params_dict'], {}),
     ('id_map', 'Pass', ID_MAP_PARAMS_1['params_dict'], {}),
@@ -140,5 +135,5 @@ def test_typefinder_methods(method, expect_str, method_params, test_params, hyb_
 
             if test_seg1_type is None:
                 use_test_hyb_record_2 = copy.deepcopy(test_hyb_record)
-                with pytest.raises(RuntimeError):
+                with pytest.raises(HybkitMiscError):
                     use_test_hyb_record_2.eval_types()

@@ -13,6 +13,8 @@ parse sequence identifiers to identify sequence type.
 import os
 import types
 
+from hybkit.errors import HybkitArgError, HybkitMiscError
+
 
 class TypeFinder:
     """
@@ -105,8 +107,7 @@ class TypeFinder:
         if method not in cls.methods:
             message = 'Selected method: %s is not defined.\n' % method
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         cls.find_with_params = getattr(cls, cls.methods[method])
         if params is not None:
             use_params = params
@@ -212,8 +213,7 @@ class TypeFinder:
         if params is not None and params:
             message = 'method_hybformat does not use params, but params were provided:\n'
             message += str(params)
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         if '_' not in seg_props['ref_name']:
             return None
         else:
@@ -253,8 +253,7 @@ class TypeFinder:
         """
         if params is None or not params:
             message = 'method_string_match requires params, but none were provided.'
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         seg_name = seg_props['ref_name']
         found_type = None
         if 'startswith' in params and not found_type:
@@ -307,12 +306,10 @@ class TypeFinder:
         return_dict = {}
         if not isinstance(legend_file, (str)):
             message = 'legend_file must be a string, not %s' % type(legend_file)
-            print(message)
-            raise TypeError(message)
+            raise HybkitArgError(message)
         if not os.path.isfile(legend_file):
             message = 'File: %s for make_string_match_params() method ' % legend_file
             message += 'not found.'
-            print(message)
             raise FileNotFoundError(message)
 
         with open(legend_file, 'r') as legend_file_obj:
@@ -405,7 +402,6 @@ class TypeFinder:
         if not isinstance(mapped_id_files, (str, list, tuple)):
             message = 'arguments passed to mapped_id_files and type_file_pairs must be '
             message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files)
-            print(message)
             raise TypeError(message)
         if isinstance(mapped_id_files, str):
             mapped_id_files = [mapped_id_files]
@@ -414,7 +410,6 @@ class TypeFinder:
             # Check if file not exists and raise error
             if not os.path.isfile(mapped_id_file):
                 message = 'File: %s for make_id_map_params() method not found.' % mapped_id_file
-                print(message)
                 raise FileNotFoundError(message)
             with open(mapped_id_file, 'r') as mapped_id_file_obj:
                 for raw_line in mapped_id_file_obj:
@@ -430,15 +425,13 @@ class TypeFinder:
                         message = 'Error reading mapped-id line: '
                         message += f'\n{line!s}\n{split_line!s}'
                         message += '\nTwo comma-separated entries expected.'
-                        print(message)
-                        raise RuntimeError(message)
+                        raise HybkitMiscError(message)
                     seq_id, seg_type = split_line
 
                     if seq_id in return_dict and seg_type != return_dict[seq_id]:
                         message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
                         message += f'  {return_dict[seq_id]}  |  {seg_type}'
-                        print(message)
-                        raise RuntimeError(message)
+                        raise HybkitMiscError(message)
                     else:
                         return_dict[seq_id] = seg_type
 

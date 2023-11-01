@@ -21,6 +21,7 @@ from auto_tests.test_helper_data import (
     ONE,
     ZERO,
 )
+from hybkit.errors import HybkitArgError, HybkitError
 
 # from auto_tests.test_helper_functions import ()
 
@@ -161,9 +162,9 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
     hyb_analysis.plot_analysis_results(out_basename=out_special_file_base)
 
     # Check erroring on bad results requests:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_analysis_results('bad_analysis')
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('bad_result')
 
 
@@ -181,21 +182,21 @@ def test_analysis_problems(tmp_path):
         hyb_autotest_file.write(combined_hyb_strs)
 
     # Test raise error with no analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=[],
             name='test_analysis',
         )
 
     # Test raise error with bad analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=['bad_analysis'],
             name='test_analysis',
         )
 
     # Test raise error with non-string analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=[1],
             name='test_analysis',
@@ -207,20 +208,20 @@ def test_analysis_problems(tmp_path):
     )
 
     # Test raise error if no energy values
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path) as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.energy = None
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error if no type values
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path) as hyb_file:
             for hyb_record in hyb_file:
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error if no mirna values
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()
@@ -231,18 +232,18 @@ def test_analysis_problems(tmp_path):
         analysis_types=['target'],
         name='test_analysis',
     )
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error for bad detail request
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('bad_result')
 
     # Test raise error for inactive detail request
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('fold_match_counts')
 
     # Test raise error if no fold_record values
@@ -250,7 +251,7 @@ def test_analysis_problems(tmp_path):
         analysis_types=['mirna', 'fold'],
         name='test_analysis',
     )
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()

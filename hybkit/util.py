@@ -11,8 +11,6 @@ import os
 import sys
 import textwrap
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# Import module-level dunder-names:
 from hybkit import settings, type_finder
 from hybkit.__about__ import (
     __author__,
@@ -26,6 +24,7 @@ from hybkit.__about__ import (
     __status__,
     __version__,
 )
+from hybkit.errors import HybkitArgError
 
 # ----- Linting Directives:
 # ruff: noqa: F401 E402 SLF001
@@ -140,10 +139,9 @@ def file_exists(file_name, required_suffixes=None):
                        + ' does not have an allowed suffix.'
                        + ' {%s} ' % ', '.join(required_suffixes)
                        )
-            print(message)
             raise argparse.ArgumentTypeError(message)
 
-    # Normalize the file path
+    # Normalize the file patha
     file_name = os.path.normpath(file_name)
 
     # If global option set, then find the absolute path.
@@ -1002,18 +1000,18 @@ def set_setting(setting, set_value, verbose=False):
                         if check_value not in choices:
                             message = f'Invalid value for {setting} setting: {check_value}'
                             message += '\nChoices are: %s' % str(choices)
-                            raise RuntimeError(message)
+                            raise HybkitArgError(message)
                 elif set_value not in choices:
                     message = f'Invalid value for {setting} setting: {set_value}'
                     message += '\nChoices are: %s' % str(choices)
-                    raise RuntimeError(message)
+                    raise HybkitArgError(message)
             if old_setting is not None and set_value != old_setting:
                 out_report += 'Setting %s Setting: ' % class_name
                 out_report += f'"{setting}" to "{set_value!s}"\n'
                 cls_settings[setting] = set_value
     if not setting_found:
         message = 'Setting "%s" not found' % setting
-        raise RuntimeError(message)
+        raise HybkitArgError(message)
     if verbose and out_report.strip():
         print(out_report)
     if out_report:

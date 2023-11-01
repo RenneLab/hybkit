@@ -11,8 +11,6 @@ from collections import Counter
 import numpy as np
 
 import hybkit
-
-# Import module-level dunder-names:
 from hybkit.__about__ import (
     __author__,
     __contact__,
@@ -25,6 +23,7 @@ from hybkit.__about__ import (
     __status__,
     __version__,
 )
+from hybkit.errors import HybkitArgError
 
 # ----- File-Specific Linting Directives:
 # ruff: noqa: F401 SLF001
@@ -261,8 +260,7 @@ class Analysis:
         if analysis_types is None or not analysis_types:
             message = 'No analysis types provided. Analysis types must be provided'
             message += ' as a list of strings.\nOptions: %s' % ', '.join(self.analysis_options)
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         if isinstance(analysis_types, str):
             analysis_types = [analysis_types]
         self.analysis_types = []
@@ -273,8 +271,7 @@ class Analysis:
                     f'Analysis type "{analysis_type!s}" not recognized.'
                     '\nChoices: {}'.format(', '.join(self.analysis_options))
                 )
-                print(message)
-                raise RuntimeError(message)
+                raise HybkitArgError(message)
             else:
                 self.analysis_types.append(analysis_type.lower())
         self.name = self._sanitize_name(name)
@@ -286,8 +283,7 @@ class Analysis:
                 f'Quantification mode "{quant_mode!s}" not recognized.'
                 '\nChoices: {}'.format(', '.join(self._quant_mode_options))
             )
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         else:
             self.quant_mode = quant_mode
 
@@ -381,8 +377,7 @@ class Analysis:
                 f'Result key "{result_key!s}" not recognized.'
                 '\nChoices: {}'.format(', '.join(self._all_result_keys_list))
             )
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         for analysis_type in self.analysis_options:
             if result_key in self._result_keys[analysis_type]:
                 if analysis_type not in self.analysis_types:
@@ -390,10 +385,9 @@ class Analysis:
                         f'Result "{result_key}" cannot be gotten because analysis '
                         f'type "{analysis_type}" is not active'
                     )
-                    print(message)
-                    raise RuntimeError(message)
+                    raise HybkitArgError(message)
                 return getattr(self, '_get_' + analysis_type + '_results')()[result_key]
-        raise RuntimeError('Result key "%s" not found.' % result_key)
+        raise HybkitArgError('Result key "%s" not found.' % result_key)
 
     # Analysis : Public Methods : Results : get_analysis_delim_str
     def get_analysis_delim_str(self, analysis=None, out_delim=None):
@@ -561,7 +555,7 @@ class Analysis:
         elif self.quant_mode == 'records':
             return hyb_record.get_record_count(require=True)
         else:
-            raise RuntimeError('Quantification mode "%s" not recognized.' % self.quant_mode)
+            raise HybkitArgError('Quantification mode "%s" not recognized.' % self.quant_mode)
 
     # Start Init Methods
     # Analysis : Private Methods : Init Methods : Energy Analysis
@@ -1121,8 +1115,7 @@ class Analysis:
                     f'Analysis type "{test_analysis!s}" not an active analysis.'
                     '\nActive choices: {}'.format(', '.join(self.analysis_types))
                 )
-                print(message)
-                raise RuntimeError(message)
+                raise HybkitArgError(message)
 
     # Analysis : Private Classmethods
     @classmethod

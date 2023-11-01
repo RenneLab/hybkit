@@ -30,14 +30,13 @@ from auto_tests.test_helper_data import (
     ART_HYB_VIENNA_PROPS_2,
 )
 from auto_tests.test_helper_functions import get_expected_result_context
+from hybkit.errors import HybkitConstructorError, HybkitIterError
 
 # ----- Linting Directives:
 # ruff: noqa: SLF001 ARG001
 
 hybkit.util.set_setting('error_mode', 'raise')
 hybkit.util.set_setting('iter_error_mode', 'raise')
-
-
 
 
 # ----- Begin HybFoldIter Tests -----
@@ -48,13 +47,12 @@ def test_hybfolditer_constructor_misc(tmp_path):
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     hyb_file = hybkit.HybFile(hyb_autotest_file_name, 'w')
     fold_file = hybkit.ViennaFile(vienna_autotest_file_name, 'w')
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitIterError):
         use_iter = hybkit.HybFoldIter(hyb_file, None)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitIterError):
         use_iter = hybkit.HybFoldIter(None, fold_file)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitIterError):
         use_iter = hybkit.HybFoldIter(hyb_file, fold_file, iter_error_mode='BadMode')  # noqa: F841
-
 
 
 # ----- Direct Match Tests -----
@@ -67,7 +65,7 @@ def test_hybfolditer_direct_match_misc():
         copy.deepcopy(fold_record),
         allow_energy_mismatch=True
     )
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitConstructorError):
         copy.deepcopy(hyb_record).set_fold_record(
             copy.deepcopy(fold_record),
             allow_energy_mismatch=False
@@ -84,15 +82,15 @@ for prop_set in [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]:
     test_param_sets.append(
         (test_name, 'Pass', prop_set, False)
     )
-test_param_sets.append(('Mismatch_Seq_Static', 'Raise', ART_BAD_HYB_VIENNA_PROPS_1, False))
-test_param_sets.append(('Disallowed-Overlap', 'Raise', ART_BAD_HYB_VIENNA_PROPS_2, False))
-test_param_sets.append(('Mismatch_Seq_Dynamic', 'Raise', ART_BAD_HYB_VIENNA_PROPS_3, False))
-test_param_sets.append(('Mismatch_Energy', 'Raise', ART_BAD_HYB_VIENNA_PROPS_4, True))
-test_param_sets.append(('Missing_Vienna', 'Raise', ART_BAD_HYB_VIENNA_PROPS_5, False))
-test_param_sets.append(('Bad_Vienna', 'Raise', ART_BAD_HYB_VIENNA_PROPS_6, True))
-test_param_sets.append(('Error99', 'Raise', ART_BAD_HYB_VIENNA_PROPS_7, True))
-test_param_sets.append(('Insertion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_8, True))
-test_param_sets.append(('Deletion', 'Raise', ART_BAD_HYB_VIENNA_PROPS_9, True))
+test_param_sets.append(('Mismatch_Seq_Static', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_1, False))
+test_param_sets.append(('Disallowed-Overlap', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_2, False))
+test_param_sets.append(('Mismatch_Seq_Dynamic', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_3, False))
+test_param_sets.append(('Mismatch_Energy', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_4, True))
+test_param_sets.append(('Missing_Vienna', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_5, False))
+test_param_sets.append(('Bad_Vienna', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_6, True))
+test_param_sets.append(('Error99', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_7, True))
+test_param_sets.append(('Insertion', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_8, True))
+test_param_sets.append(('Deletion', 'HybkitIterError', ART_BAD_HYB_VIENNA_PROPS_9, True))
 
 
 test_parameters = []
@@ -126,7 +124,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
     assert hybkit.util.hyb_exists(hyb_autotest_file_name)
     assert hybkit.util.vienna_exists(vienna_autotest_file_name)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitIterError):
         use_iter = hybkit.HybFoldIter(
             hyb_autotest_file_name,
             vienna_autotest_file_name,
@@ -165,7 +163,7 @@ def test_hybfolditer_io(test_name, expectation, test_props, combine_str,
         assert hyb_record
         assert fold_record
 
-    if expectation == 'Raise':
+    if expectation in {'Raise', 'HybkitIterError'}:
         hyb_record = hybkit.HybFile(hyb_autotest_file_name, 'r').read_record()
         fold_file = hybkit.ViennaFile(
             vienna_autotest_file_name,
@@ -251,7 +249,8 @@ for test_name, test_props in test_param_sets.items():
         if iter_error_mode in allowed_errors:
             expectation = 'Pass'
         else:
-            expectation = 'Raise'
+            # expectation = 'Raise'
+            expectation = 'HybkitIterError'
         test_parameters.append((test_name, iter_error_mode, expectation, seq_type, test_props))
 arg_string = 'test_name,iter_error_mode,expectation,seq_type,test_props'
 
@@ -283,8 +282,12 @@ def test_hybfolditer_iter_error_mode(test_name, iter_error_mode,
 
 default_skips = hybkit.settings.HybFoldIter_settings_info['max_sequential_skips'][0]
 test_parameters = [
-    ('Allowed_Skips', 'warn_skip', 'Pass', ART_BAD_HYB_VIENNA_PROPS_1, (default_skips - 1)),
-    ('Disallowed_Skips', 'warn_skip', 'Raise', ART_BAD_HYB_VIENNA_PROPS_1, (default_skips + 2))
+    ('Allowed_Skips', 'warn_skip', 'Pass',
+     ART_BAD_HYB_VIENNA_PROPS_1, (default_skips - 1)
+     ),
+    ('Disallowed_Skips', 'warn_skip', 'HybkitIterError',
+     ART_BAD_HYB_VIENNA_PROPS_1, (default_skips + 2)
+     )
 ]
 arg_string = 'test_name,iter_error_mode,expectation,test_props,num_skips'
 

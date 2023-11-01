@@ -9,15 +9,12 @@ Automatic testing of hybkit ViennaFile Class.
 
 import os
 
-# import sys
-# import copy
-# from contextlib import nullcontext as does_not_raise
-# import argparse
 import pytest
 
 import hybkit
 from auto_tests.test_helper_data import ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2, test_out_dir
 from auto_tests.test_helper_functions import get_expected_result_context
+from hybkit.errors import HybkitMiscError
 
 # ----- Linting Directives:
 # ruff: noqa: SLF001 ARG001
@@ -28,8 +25,8 @@ hybkit.util.set_setting('iter_error_mode', 'raise')
 
 # ----- Begin ViennaFile Tests -----
 test_parameters = [
-    ('bad_type', 'Raise', {'seq_type': 'badtype'}),
-    ('bad_error_mode', 'Raise', {'error_mode': 'badmode'}),
+    ('bad_type', 'HybkitArgError', {'seq_type': 'badtype'}),
+    ('bad_error_mode', 'HybkitArgError', {'error_mode': 'badmode'}),
 ]
 
 
@@ -94,5 +91,5 @@ def test_viennafile_misc(tmp_path):
     """Test miscellaneous properties of ViennaFiles."""
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     vienna_file = hybkit.ViennaFile.open(vienna_autotest_file_name, 'w')
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitMiscError):
         vienna_file._ensure_foldrecord(None)
