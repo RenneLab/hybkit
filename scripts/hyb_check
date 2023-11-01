@@ -3,7 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-"""
+r"""
 Read one or more hyb (and optional fold) format files and check for errors.
 
 This utility reads in one or more files in hyb-format
@@ -21,18 +21,30 @@ Example system calls:
 
 """
 
-import os
 import argparse
 import contextlib
+import os
+
 import hybkit
+from hybkit.__about__ import (
+    __author__,
+    __contact__,
+    __credits__,
+    __date__,
+    __deprecated__,
+    __email__,
+    __license__,
+    __maintainer__,
+    __status__,
+    __version__,
+)
 
-# Import module-level dunder-names:
-from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
-                              __email__, __license__, __maintainer__, __status__, __version__)
-
+# ----- Linting Directives:
+# ruff: noqa: F401 SLF001
 
 # Create Command-line Argument Parser
 def make_parser():
+    """Create and return the argparse.ArgumentParser for the hyb_check script."""
     parser_components = [
         hybkit.util.in_hybs_parser,
         hybkit.util.in_folds_parser,
@@ -59,7 +71,6 @@ def hyb_check(in_hyb_files,
               silent=False,
               ):
     """Perform main script function."""
-
     if not silent:
         print('\nChecking Hyb and Fold Files...')
 
@@ -69,25 +80,25 @@ def hyb_check(in_hyb_files,
     else:
         file_iter = in_hyb_files
 
-    for i, use_files in enumerate(file_iter):
+    for _i, use_files in enumerate(file_iter):
         if in_fold_files:
             in_hyb_file, in_fold_file = use_files
         else:
             in_hyb_file, in_fold_file = use_files, None
         file_basename = os.path.basename(in_hyb_file)
-        file_label = file_basename.replace('.hyb', '')
+        _file_label = file_basename.replace('.hyb', '')
 
         if in_fold_file is not None:
             if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
-                InFoldClass = hybkit.ViennaFile
+                in_fold_class = hybkit.ViennaFile
             elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
-                InFoldClass = hybkit.CtFile
+                in_fold_class = hybkit.CtFile
             else:
                 raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
             in_fold_args = (in_fold_file, 'r')
         else:
-            InFoldClass = contextlib.nullcontext
-            in_fold_args = tuple()
+            in_fold_class = contextlib.nullcontext
+            in_fold_args = ()
 
         if verbose:
             print('Checking Files:')
@@ -97,13 +108,13 @@ def hyb_check(in_hyb_files,
 
         # Start Record Iteration
         with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
-             InFoldClass(*in_fold_args) as in_fold:
+             in_fold_class(*in_fold_args) as in_fold:
             if in_fold_file is None:
                 record_iter = in_hyb
             else:
                 record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
 
-            for i, hyb_record in enumerate(record_iter, start=1):
+            for _j, _hyb_record in enumerate(record_iter, start=1):
                 pass
 
     if verbose:

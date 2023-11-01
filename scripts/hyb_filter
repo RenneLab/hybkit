@@ -3,7 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-"""
+r"""
 Filter hyb (and corresponding fold) files to meet (or exclude) specific criteria.
 
 This script takes one or more filter and/or exclusion criteria
@@ -62,19 +62,31 @@ Example System Calls (match ANY criteria):
         #   either "miRNA" or "lncRNA" (case-sensitive)
 """
 
-import sys
-import os
 import argparse
-import hybkit
 import contextlib
+import os
+import sys
 
-# Import module-level dunder-names:
-from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
-                              __email__, __license__, __maintainer__, __status__, __version__)
+import hybkit
+from hybkit.__about__ import (
+    __author__,
+    __contact__,
+    __credits__,
+    __date__,
+    __deprecated__,
+    __email__,
+    __license__,
+    __maintainer__,
+    __status__,
+    __version__,
+)
 
+# ----- Linting Directives:
+# ruff: noqa: F401 SLF001
 
 # Create Command-line Argument Parser
 def make_parser():
+    """Create and return the argparse.ArgumentParser for the hyb_filter script."""
     parser_components = [
         hybkit.util.cmb_hyb_fold_io_parser,
         hybkit.util.cmb_out_opts_parser,
@@ -115,7 +127,6 @@ def hyb_filter(in_hyb_files,
                silent=False,
                ):
     """Perform main script function."""
-
     if not silent:
         print('\nFiltering Hyb Files...')
 
@@ -127,7 +138,7 @@ def hyb_filter(in_hyb_files,
 
         if exclude_params:
             print('Using Exclusion Filter Parameters:')
-            print('    ' + '\n    '.join((' '.join(p) for p in exclude_params)) + '\n')
+            print('    ' + '\n    '.join(' '.join(p) for p in exclude_params) + '\n')
 
     allowed_modes = {'all', 'any'}
     if filter_mode not in allowed_modes:
@@ -171,19 +182,19 @@ def hyb_filter(in_hyb_files,
 
         if in_fold_file is not None:
             if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
-                InFoldClass = hybkit.ViennaFile
+                in_fold_class = hybkit.ViennaFile
             elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
-                InFoldClass = hybkit.CtFile
+                in_fold_class = hybkit.CtFile
             else:
                 raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
-            OutFoldClass = hybkit.ViennaFile
+            out_fold_class = hybkit.ViennaFile
             in_fold_args = (in_fold_file, 'r')
             out_fold_args = (out_fold_file, 'w')
         else:
-            InFoldClass = contextlib.nullcontext
-            OutFoldClass = contextlib.nullcontext
-            in_fold_args = tuple()
-            out_fold_args = tuple()
+            in_fold_class = contextlib.nullcontext
+            out_fold_class = contextlib.nullcontext
+            in_fold_args = ()
+            out_fold_args = ()
 
         if verbose:
             print('Filtering File:')
@@ -199,8 +210,8 @@ def hyb_filter(in_hyb_files,
 
         with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
              hybkit.HybFile(out_hyb_file, 'w') as out_hyb, \
-             InFoldClass(*in_fold_args) as in_fold, \
-             OutFoldClass(*out_fold_args) as out_fold:
+             in_fold_class(*in_fold_args) as in_fold, \
+             out_fold_class(*out_fold_args) as out_fold:
             if in_fold_file is None:
                 record_iter = in_hyb
             else:
@@ -208,7 +219,7 @@ def hyb_filter(in_hyb_files,
 
             last_record_id = None
 
-            for i, hyb_record in enumerate(record_iter, start=1):
+            for _i, hyb_record in enumerate(record_iter, start=1):
                 if skip_dup_id_before:
                     if hyb_record.id == last_record_id:
                         continue
@@ -273,7 +284,7 @@ if __name__ == '__main__':
     filter_params = []
     for param_set in [getattr(args, key) for key in ['filter', 'filter_2', 'filter_3']]:
         if param_set is not None and bool(param_set):
-            if len(param_set) > 2:
+            if len(param_set) > 2:  # noqa: PLR2004
                 print('Invalid Filtering Parameter Set Encountered: %s ' % str(param_set))
                 print('Parameter sets should have 1 or 2 arguments.\n')
                 sys.exit()
@@ -284,7 +295,7 @@ if __name__ == '__main__':
     exclude_params = []
     for param_set in [getattr(args, key) for key in ['exclude', 'exclude_2', 'exclude_3']]:
         if param_set is not None and bool(param_set):
-            if len(param_set) > 2:
+            if len(param_set) > 2:  # noqa: PLR2004
                 print('Invalid Exclusion Filtering Parameter Set Encountered: '
                       + '%s ' % str(param_set))
                 print('Parameter sets should have 1 or 2 arguments.\n')
