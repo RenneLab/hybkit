@@ -44,6 +44,26 @@ ERROR_TYPE_STRINGS = {
 for init_str in list(ERROR_TYPE_STRINGS):
     ERROR_TYPE_STRINGS[init_str.lower()] = ERROR_TYPE_STRINGS[init_str]
 
+# ----- Start Expected Fields Header -----
+EXPECTED_FIELDS_HEADER = (
+    'id',
+    'seq',
+    'energy',
+    'seg1_ref_name',
+    'seg1_read_start',
+    'seg1_read_end',
+    'seg1_ref_start',
+    'seg1_ref_end',
+    'seg1_score',
+    'seg2_ref_name',
+    'seg2_read_start',
+    'seg2_read_end',
+    'seg2_ref_start',
+    'seg2_ref_end',
+    'seg2_score',
+    'flags',
+)
+
 # ----- Start Real Hyb/Vienna Data Examples -----
 # Example hyb record string for testing.
 HYB_STR_1 = (
@@ -533,6 +553,36 @@ TEST_FLAGS_STR_LINE = (
 )
 TEST_FLAGS_STR_REVERSED = {flag: TEST_FLAGS_STR[flag] for flag
                            in reversed([*TEST_FLAGS_STR.keys()])}
+TEST_HYB_FIELDS = {
+    'id': TEST_HYB_ID_STR,
+    'seq': TEST_SEQ_STR,
+    'energy': TEST_ENERGY_STR,
+    'seg1_ref_name': TEST_SEG_PROPS['ref_name'],
+    'seg1_read_start': TEST_SEG_PROPS['read_start'],
+    'seg1_read_end': TEST_SEG_PROPS['read_end'],
+    'seg1_ref_start': TEST_SEG_PROPS['ref_start'],
+    'seg1_ref_end': TEST_SEG_PROPS['ref_end'],
+    'seg1_score': TEST_SEG_PROPS['score'],
+    'seg2_ref_name': TEST_SEG_PROPS['ref_name'],
+    'seg2_read_start': TEST_SEG_PROPS['read_start'],
+    'seg2_read_end': TEST_SEG_PROPS['read_end'],
+    'seg2_ref_start': TEST_SEG_PROPS['ref_start'],
+    'seg2_ref_end': TEST_SEG_PROPS['ref_end'],
+    'seg2_score': TEST_SEG_PROPS['score'],
+    'flags': TEST_FLAGS_STR,
+}
+
+TEST_HYB_LINE = (
+    f'{TEST_HYB_ID_STR}\t{TEST_SEQ_STR}\t{TEST_ENERGY_STR}\t'
+    f'{TEST_SEG_PROPS_STR["ref_name"]}\t{TEST_SEG_PROPS_STR["read_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["read_end"]}\t{TEST_SEG_PROPS_STR["ref_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_end"]}\t{TEST_SEG_PROPS_STR["score"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_name"]}\t{TEST_SEG_PROPS_STR["read_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["read_end"]}\t{TEST_SEG_PROPS_STR["ref_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_end"]}\t{TEST_SEG_PROPS_STR["score"]}\t'
+    f'{TEST_FLAGS_STR_LINE}'
+)
+
 TEST_OBJECTS = {
     'None': None,
     'id_str': TEST_HYB_ID_STR,

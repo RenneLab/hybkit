@@ -21,6 +21,7 @@ from auto_tests.test_helper_data import (
     ART_HYB_STR_PROPS,
     EMPTY_SEG_PROPS,
     ENERGY_ALLOWED_TYPES,
+    EXPECTED_FIELDS_HEADER,
     FIVE_I,
     FORTY_I,
     ID_ALLOWED_TYPES,
@@ -34,8 +35,11 @@ from auto_tests.test_helper_data import (
     SEQ_ALLOWED_TYPES,
     TEN_I,
     TEST_ENERGY_STR,
+    TEST_FLAGS_OBJ,
     TEST_FLAGS_STR,
+    TEST_HYB_FIELDS,
     TEST_HYB_ID_STR,
+    TEST_HYB_LINE,
     TEST_HYB_MINIMAL_STRING,
     TEST_OBJECTS,
     TEST_READ_COUNT,
@@ -102,13 +106,6 @@ def test_hybrecord_constructor_minimal():
 def test_hybrecord_constructor_details():
     """Test construction of HybRecord class with minimal information."""
     test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
-
-    # Test "to_line" method with minimal information
-    assert test_record.to_line(newline=False) == TEST_HYB_MINIMAL_STRING
-    # Test "to_csv" method with minimal information
-    assert (test_record.to_csv(newline=False)
-            == TEST_HYB_MINIMAL_STRING.replace('\t', ','))
-
     # Test HybRecord Constructor with missing id
     with pytest.raises(HybkitConstructorError):
         hybkit.HybRecord(id=None, seq=TEST_SEQ_STR)
@@ -144,6 +141,46 @@ def test_hybrecord_constructor_details():
             read_count=5,
             flags={'read_count': TEN_I},
         )
+
+# ----- HybRecord Formatter Tests - Details -----
+def test_hybrecord_formatter_details():
+    """Test formatting methods of HybRecord class."""
+    test_record = hybkit.HybRecord(id=TEST_HYB_ID_STR, seq=TEST_SEQ_STR)
+    # Test "to_fields_header" method
+    assert test_record.to_fields_header() == EXPECTED_FIELDS_HEADER
+    # Test "to_csv_header" method
+    assert test_record.to_csv_header() == ','.join(EXPECTED_FIELDS_HEADER)
+    # Test "to_line" method with minimal information
+    assert test_record.to_line(newline=False) == TEST_HYB_MINIMAL_STRING
+    # Test "to_csv" method with minimal information
+    assert (test_record.to_csv(newline=False)
+            == TEST_HYB_MINIMAL_STRING.replace('\t', ','))
+    #Test "to_fields" method with minimal information
+    expected_fields = {
+        'id': TEST_HYB_ID_STR,
+        'seq': TEST_SEQ_STR,
+    }
+    for field in EXPECTED_FIELDS_HEADER:
+        if field not in expected_fields:
+            expected_fields[field] = None
+    assert test_record.to_fields() == expected_fields
+
+    # Test with more information
+    test_record = hybkit.HybRecord(
+        id=TEST_HYB_ID_STR,
+        seq=TEST_SEQ_STR,
+        energy=TEST_ENERGY_STR,
+        seg1_props=TEST_SEG_PROPS_STR,
+        seg2_props=TEST_SEG_PROPS_STR,
+        flags=TEST_FLAGS_OBJ,
+    )
+
+    # Test "to_line" method with detailed information
+    assert test_record.to_line(newline=False) == TEST_HYB_LINE
+    # Test "to_csv" method with detailed information
+    assert test_record.to_csv(newline=False) == TEST_HYB_LINE.replace('\t', ',')
+    # Test "to_fields" method with detailed information
+    assert test_record.to_fields() == TEST_HYB_FIELDS
 
 
 # ----- HybRecord Method Tests -----

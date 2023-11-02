@@ -6,6 +6,7 @@
 """Methods for plotting analyses of HybRecord and FoldRecord objects."""
 
 import copy
+import warnings
 from collections import Counter
 
 import matplotlib as mpl
@@ -368,7 +369,7 @@ def fold_match_counts_histogram(results,
         max_val = max(max_val, y_val)
 
     if max_val == init_max_val:
-        print('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        warnings.warn('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
         return
 
     for x_val in range(min_x, (max_x + 1)):
@@ -482,7 +483,6 @@ def _plot_types_pie_chart(plot_params):
     if total_size < 0.00000001:  #noqa: PLR2004
         message = 'Warning: Attempted to create empty plot to name:'
         message += ' %s' % plot_params['plot_file_name']
-        print(message)
         raise RuntimeError(message)
 
     fraction_sizes = [(size / total_size) for size in plot_params['sizes']]

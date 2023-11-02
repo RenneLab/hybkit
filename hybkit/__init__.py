@@ -51,6 +51,7 @@ information:
 import copy
 import os
 import sys
+import warnings
 from collections import Counter
 
 Bio, Seq, SeqRecord = None, None, None
@@ -64,7 +65,7 @@ except ModuleNotFoundError:
     pass
 
 # ----- Linting Directives:
-# ruff: noqa: D214 E402 F401 SLF001 TRY301
+# ruff: noqa: D214 E402 F401 SLF001 TRY301 B028
 
 # Perform *Initial* hybkit submodule imports, remainder at code end.
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -1090,6 +1091,38 @@ class HybRecord:
         """
         return self.to_line(newline, sep=',')
 
+# HybRecord : Public Methods : Record Parsing
+    def to_fields(self, missing_obj=None):
+        """
+        Return a python dictionary representation of the record.
+
+        Returns a dictionary with keys corresponding to the fields in the hyb-format
+        file, and values corresponding to the values in the record. Output can be
+        used with the pandas DataFrame constructor or csv.DictWriter.
+
+        Args:
+            missing_obj (optional): Object to use for missing values. Default = :obj:`None`.
+
+        """
+        ret_dict = {}
+        for item_key in self.HYBRID_COLUMNS:
+            item_val = getattr(self, item_key, None)
+            if item_val is None:
+                item_val = copy.deepcopy(missing_obj)
+            ret_dict[item_key] = item_val
+        for i, seg_dict in enumerate([self.seg1_props, self.seg2_props], start=1):
+            for item_key in self.SEGMENT_COLUMNS:
+                out_item_key = f'seg{i}_{item_key}'
+                if item_key in seg_dict and seg_dict[item_key] is not None:
+                    ret_dict[out_item_key] = seg_dict[item_key]
+                else:
+                    ret_dict[out_item_key] = copy.deepcopy(missing_obj)
+        if self.flags:
+            ret_dict['flags'] = copy.deepcopy(self.flags)
+        else:
+            ret_dict['flags'] = copy.deepcopy(missing_obj)
+        return ret_dict
+
     # HybRecord : Public Methods : Record Parsing
     def to_fasta_record(self, mode='hybrid', annotate=True, allow_mirna_dimers=False):
         """
@@ -1386,6 +1419,38 @@ class HybRecord:
         return_obj = cls(hyb_id, seq, energy, seg1_props, seg2_props, flags)
         return return_obj
 
+    @classmethod
+    # HybRecord : Public Classmethods : Record Parsing
+    def to_fields_header(cls):
+        """
+        Return a list of the fields in a :class:`HybRecord` object.
+
+        For use with the :func:`to_fields` method.
+        """
+        ret_fields = copy.deepcopy(list(cls.HYBRID_COLUMNS))
+        for i in range(1,3):
+            for item_key in cls.SEGMENT_COLUMNS:
+                out_item_key = f'seg{i}_{item_key}'
+                ret_fields.append(out_item_key)
+        ret_fields.append('flags')
+        return tuple(ret_fields)
+
+    @classmethod
+    # HybRecord : Public Classmethods : Record Parsing
+    def to_csv_header(cls, newline=False):
+        """
+        Return a comma-separated string representation of the fields in the record.
+
+        For use with the :func:`to_csv` method.
+
+        Args:
+            newline (:obj:`bool`, optional): If ``True``, end the returned string with a newline.
+        """
+        ret_str = ','.join(cls.to_fields_header())
+        if newline:
+            ret_str += '\n'
+        return ret_str
+
     # Start HybRecord Private Constants
     # HybRecord : Private Constants
     _SET_PROPS_SET = frozenset(SET_PROPS)
@@ -1612,7 +1677,6 @@ class HybRecord:
         elif require:
             message = 'Expected Flag Key: %s, but it is not present in record.' % flag_key
             raise HybkitMiscError(message)
-            return None
         else:
             return None
 
@@ -1757,6 +1821,8 @@ class HybFile:
     Wrapper for a hyb-format text file which returns entries (lines) as HybRecord objects.
 
     Args:
+        path (str): Path to text file to open as hyb-format file.
+        *args: Arguments passed to :func:`open` function to open a text file for reading/writing.
         hybformat_id (:obj:`bool`, optional): If ``True``, during parsing of lines read count
             information from identifier in ``<read_number>_<read_count>`` format.
             Defaults to value in :attr:`settings['hybformat_id'] <HybFile.settings>`.
@@ -1764,11 +1830,17 @@ class HybFile:
             additional record information from
             identifier in ``<gene_id>_<transcript_id>_<gene_name>_<seg_type>`` format.
             Defaults to value in :attr:`settings['hybformat_ref'] <HybFile.settings>`.
+        from_file_like (:obj:`bool`, optional): If ``True``, the first argument is treated as a
+            file-like object (such as io.StringIO or gzip.GzipFile) and the remaining positional
+            arguments are ignored. (Default False``)
+        **kwargs: Keyword arguments passed to :func:`open` function to open a text file for
+            reading/writing.
 
     Attributes:
         hybformat_id (bool): Read count information from identifier during line parsing
         hybformat_ref (bool): Read type information from reference name
             during line parsing
+        fh (file): Underlying file handle for the HybFile object.
 
     """
 
@@ -1778,13 +1850,18 @@ class HybFile:
     # Start HybFile Public Methods
     # HybFile : Public Methods : Initialization / Closing
     def __init__(self,
+                 path,
                  *args,
                  hybformat_id=None,
                  hybformat_ref=None,
-                 **kwargs
+                 from_file_like=False,
+                 **kwargs,
                  ):
         """Describe __init__ method description in class docstring."""
-        self.fh = open(*args, **kwargs)  # noqa: SIM115
+        if from_file_like:
+            self.fh = path
+        else:
+            self.fh = open(path, *args, **kwargs)  # noqa: SIM115
         if hybformat_id is None:
             self.hybformat_id = self.settings['hybformat_id']
         else:
@@ -1885,9 +1962,50 @@ class HybFile:
     # Start HybFile Public Classmethods
     # HybFile : Public Classmethods : Initialization
     @classmethod
-    def open(cls, *args, **kwargs):  # noqa: A003
-        """Return a new HybFile object."""
-        return cls(*args, **kwargs)
+    def open(cls, path, *args, hybformat_id=None, hybformat_ref=None, **kwargs):  # noqa: A003
+        """
+        Open a path to a text file using :func:`open` and return a HybFile object.
+
+        Arguments match those of the Python3 built-in :func:`open` function and are
+        passed directly to it.
+
+        This method is provided as a convenience function for drop-in replacement of the
+        built-in :func:`open` function.
+
+        Specific keyword arguments are provided for HybFile-specific settings:
+
+        Args:
+            path (str): Path to file to open.
+            hybformat_id (:obj:`bool`, optional): If ``True``, during parsing of lines read count
+                information from identifier in ``<read_number>_<read_count>`` format.
+                Defaults to value in :attr:`settings['hybformat_id'] <HybFile.settings>`.
+            hybformat_ref (:obj:`bool`, optional): If ``True``, during parsing of lines read
+                additional record information from
+                identifier in ``<gene_id>_<transcript_id>_<gene_name>_<seg_type>`` format.
+                Defaults to value in :attr:`settings['hybformat_ref'] <HybFile.settings>`.
+
+        Example usage:
+            ::
+
+                with HybFile.open('path/to/file.hyb', 'r') as hyb_file:
+                    for record in hyb_file:
+                        print(record)
+
+        Args:
+            *args: Passed directly to :func:`open`.
+            **kwargs: Passed directly to :func:`open`.
+
+        Returns:
+            :class:`HybFile` object.
+        """
+        return cls(
+            path,
+            *args,
+            hybformat_id=hybformat_id,
+            hybformat_ref=hybformat_ref,
+            from_file_like=False
+            **kwargs,
+        )
 
     # HybFile : Private Methods
     # Check if provided argument ("record") is an instance of HybRecord.
@@ -2279,7 +2397,7 @@ class FoldRecord:
             error += '\n  ... are not in required 3-line format.'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    print('WARNING: ' + error)
+                    warnings.warn('WARNING: ' + error)
                 return fail_ret_val
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2294,7 +2412,7 @@ class FoldRecord:
             error = 'Improper Vienna: No Fold (Energy = 99*.*)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    print('WARNING: ' + error)
+                    warnings.warn('WARNING: ' + error)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2306,7 +2424,7 @@ class FoldRecord:
             error += '\n  ... does not have required "..((.))..<tab>(-1.23)" format.'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    print('WARNING: ' + error)
+                    warnings.warn('WARNING: ' + error)
                 return ('NOENERGY', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2387,7 +2505,7 @@ class FoldRecord:
             message = 'Improper CT: No Fold (Energy = 99*.*)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    print('WARNING:', message)
+                    warnings.warn('WARNING:', message)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + message)
@@ -2424,7 +2542,7 @@ class FoldRecord:
             message = 'Improper CT: No Fold (Len = 0)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    print('WARNING:', message)
+                    warnings.warn('WARNING:', message)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + message)
@@ -3020,9 +3138,9 @@ class HybFoldIter:
                 if iter_error_mode == 'raise':
                     raise HybkitIterError('ERROR: ' + error)
                 elif iter_error_mode == 'warn_skip':
-                    print('WARNING: SkipPair:', error)
+                    warnings.warn('WARNING: SkipPair: ' + error)
                 elif iter_error_mode == 'warn_return':
-                    print('WARNING:', error)
+                    warnings.warn('WARNING: ' + error)
 
                 if 'skip' in iter_error_mode:
                     self.sequential_skips += 1
@@ -3047,7 +3165,7 @@ class HybFoldIter:
             if next_fold_record is not None:
                 message += 'Next FoldRecord: %s\n' % str(next_fold_record)
             message += '\n' + '\n'.join(self.report()) + '\n'
-            # print(message)
+            warnings.warn(message)
             raise
 
         if do_skip:

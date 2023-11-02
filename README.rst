@@ -91,7 +91,9 @@ Hybkit API:
     Record attributes can be analyzed, set, and evaluated using included class methods.
 
     For example, a workflow to print the identifiers of only sequences within a ".hyb" file
-    that contain a miRNA can be performed as such::
+    that contain a miRNA can be performed as such:
+
+    .. code-block:: Python
 
         #!/usr/bin/env python3
         import hybkit
