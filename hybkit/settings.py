@@ -6,12 +6,12 @@
 """This module contains settings information for hybkit classes and methods."""
 
 import copy
-from typing import Dict
+from typing import Dict, List
 
 
 # ----- Begin Settings Helper Functions -----
 # Util : Settings Helper Functions
-def _all_str_cases(in_str: str) -> list[str]:
+def _all_str_cases(in_str: str) -> List[str]:
     return [in_str.lower(), in_str.title(), in_str.upper()]
 
 

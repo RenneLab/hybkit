@@ -29,7 +29,8 @@ Changelog
       * Switch code linting to Ruff
       * Add hybkit.errors module and HybkitError classes
       * Moved warnings to python Warnings module
-      * Add option for direct passage of file-like object for construction of HybFile
+      * Add option for direct passage of file-like object for construction of
+        HybFile and ViennaFile
       * Add HybRecord.to_csv_header(), HybRecord.to_fields(),
         and HybRecord.to_fields_header() methods
       * Refine description of HybFile.open() constructor method
