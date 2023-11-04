@@ -66,6 +66,7 @@ import argparse
 import contextlib
 import os
 import sys
+from typing import List, Literal, Optional, Tuple
 
 import hybkit
 from hybkit.__about__ import (
@@ -85,7 +86,7 @@ from hybkit.__about__ import (
 # ruff: noqa: F401 SLF001
 
 # Create Command-line Argument Parser
-def make_parser():
+def make_parser() -> argparse.ArgumentParser:
     """Create and return the argparse.ArgumentParser for the hyb_filter script."""
     parser_components = [
         hybkit.util.cmb_hyb_fold_io_parser,
@@ -111,21 +112,22 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_filter(in_hyb_files,
-               filter_params,
-               exclude_params,
-               in_fold_files=None,
-               filter_mode='all',
-               out_dir='.',
-               out_suffix=hybkit.settings._FILTER_OUT_SUFFIX,
-               out_hyb_files=None,
-               out_fold_files=None,
-               set_dataset=None,
-               skip_dup_id_before=False,
-               skip_dup_id_after=False,
-               verbose=False,
-               silent=False,
-               ):
+def hyb_filter(
+        in_hyb_files: List[str],
+        filter_params: List[Tuple[str, str]],
+        exclude_params: List[Tuple[str, str]],
+        in_fold_files: Optional[List[str]] = None,
+        filter_mode: Literal['all', 'any'] = 'all',
+        out_dir: str = '.',
+        out_suffix: str = hybkit.settings._FILTER_OUT_SUFFIX,
+        out_hyb_files: Optional[List[str]] = None,
+        out_fold_files: Optional[List[str]] = None,
+        set_dataset: Optional[str] = None,
+        skip_dup_id_before: bool = False,
+        skip_dup_id_after: bool = False,
+        verbose: bool = False,
+        silent: bool = False,
+        ) -> None:
     """Perform main script function."""
     if not silent:
         print('\nFiltering Hyb Files...')

@@ -69,6 +69,7 @@ Evaluation Types:
 import argparse
 import contextlib
 import os
+from typing import List, Optional, Union
 
 import hybkit
 from hybkit import HybkitMiscError
@@ -89,7 +90,7 @@ from hybkit.__about__ import (
 # ruff: noqa: F401 SLF001
 
 # Create Command-line Argument Parser
-def make_parser():
+def make_parser() -> argparse.ArgumentParser:
     """Create the command-line argument parser for the hyb_eval script."""
     parser_components = [
         hybkit.util.cmb_hyb_fold_io_parser,
@@ -115,20 +116,21 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_eval(in_hyb_files,
-             eval_types,
-             out_dir='.',
-             in_fold_files=None,
-             out_hyb_files=None,
-             out_fold_files=None,
-             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
-             type_method=None,
-             type_params=None,
-             type_params_file=None,
-             set_dataset=None,
-             verbose=False,
-             silent=False,
-             ):
+def hyb_eval(
+        in_hyb_files: List[str],
+        eval_types: Union[str, List[str]],
+        out_dir: str = '.',
+        in_fold_files: Optional[List[str]] = None,
+        out_hyb_files: Optional[List[str]] = None,
+        out_fold_files: Optional[List[str]] = None,
+        out_suffix: str = hybkit.settings._EVAL_OUT_SUFFIX,
+        type_method: Optional[str] = None,
+        type_params: Optional[dict] = None,
+        type_params_file: Optional[str] = None,
+        set_dataset: Optional[str] = None,
+        verbose: bool = False,
+        silent: bool = False,
+        ) -> None:
     """Perform main script function."""
     if not silent:
         print('\nPerforming Evaluation of Hyb and Fold Files...')

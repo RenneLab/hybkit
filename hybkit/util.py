@@ -10,6 +10,7 @@ import copy
 import os
 import sys
 import textwrap
+from typing import Any, List, Optional, Union
 
 from hybkit import settings, type_finder
 from hybkit.__about__ import (
@@ -31,7 +32,7 @@ from hybkit.errors import HybkitArgError
 
 # ----- Begin Argparse Helper Functions -----
 # Util : Argparse Helper Functions
-def get_argparse_doc(docstring):
+def get_argparse_doc(docstring: str) -> str:
     """
     Get the argparse description from a docstring.
 
@@ -59,7 +60,7 @@ def get_argparse_doc(docstring):
 
 
 # Util : Argparse Helper Functions
-def _bool_from_string(value):
+def _bool_from_string(value: Optional[Union[str, bool]]) -> bool:
     if isinstance(value, bool):
         return value
     if value.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -83,7 +84,7 @@ _custom_type_choices = {
 
 
 # Util : Path Helper Functions
-def dir_exists(dir_name):
+def dir_exists(dir_name: str) -> str:
     """
     Check if a directory exists at the provided path (else raise), and return a normalized path.
 
@@ -110,7 +111,7 @@ def dir_exists(dir_name):
 
 
 # Util : Path Helper Functions
-def file_exists(file_name, required_suffixes=None):
+def file_exists(file_name: str, required_suffixes: Optional[List[str]]=None) -> str:
     """
     Check if a file exists at the provided path, and return a normalized path.
 
@@ -152,7 +153,7 @@ def file_exists(file_name, required_suffixes=None):
 
 
 # Util : Path Helper Functions
-def hyb_exists(file_name):
+def hyb_exists(file_name: str) -> str:
     """
     Check if a .hyb file exists at the provided path, and return a normalized path.
 
@@ -170,7 +171,7 @@ def hyb_exists(file_name):
 
 
 # Util : Path Helper Functions
-def vienna_exists(file_name):
+def vienna_exists(file_name: str) -> str:
     """
     Check if a .vienna file exists at the provided path, and return a normalized path.
 
@@ -188,7 +189,7 @@ def vienna_exists(file_name):
 
 
 # Util : Path Helper Functions
-def ct_exists(file_name):
+def ct_exists(file_name: str) -> str:
     """
     Check if a .ct file exists at the provided path, and return a normalized path.
 
@@ -206,7 +207,7 @@ def ct_exists(file_name):
 
 
 # Util : Path Helper Functions
-def fold_exists(file_name):
+def fold_exists(file_name: str) -> str:
     """
     Check if a fold-representing file exists at the provided path, and return a normalized path.
 
@@ -224,7 +225,7 @@ def fold_exists(file_name):
 
 
 # Util : Path Helper Functions
-def out_path_exists(file_name):
+def out_path_exists(file_name: str) -> str:
     """
     Check if the directory of the specified output path exists, and return a normalized path.
 
@@ -249,8 +250,14 @@ def out_path_exists(file_name):
 
 
 # Util : Path Helper Functions
-def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix='',
-                       out_dir='', seg_sep='_'):
+def make_out_file_name(
+        in_file_name: str,
+        name_suffix: str = 'out',
+        in_suffix: str = '',
+        out_suffix: str = '',
+        out_dir: str = '',
+        seg_sep: str = '_'
+        ) -> str:
     """
     Given an input file name, generate an output file name.
 
@@ -289,7 +296,10 @@ def make_out_file_name(in_file_name, name_suffix='out', in_suffix='', out_suffix
 
 
 # Util : Path Helper Functions
-def validate_args(args, parser=None):
+def validate_args(
+        args: argparse.Namespace,
+        parser: Optional[argparse.ArgumentParser] = None
+        ) -> bool:
     """
     Check supplied arguments to make sure there are no hidden contradictions.
 
@@ -356,7 +366,10 @@ def validate_args(args, parser=None):
 
 
 # Util : Path Helper Functions
-def validate_args_exit(args, parser=None):
+def validate_args_exit(
+        args: argparse.Namespace,
+        parser: Optional[argparse.ArgumentParser] = None
+        ) -> None:
     """
     Check supplied arguments using :func:`validate_args`, and exit if a conflict exists.
 
@@ -371,8 +384,10 @@ def validate_args_exit(args, parser=None):
 
 # ----- Begin Argparse Helper Classes -----
 # Util : Argparse Helper Formatter Class
-class _HybkitFormatter(argparse.ArgumentDefaultsHelpFormatter,
-                       argparse.RawDescriptionHelpFormatter):
+class _HybkitFormatter(
+    argparse.ArgumentDefaultsHelpFormatter,
+    argparse.RawDescriptionHelpFormatter,
+    ):
     pass
 
 
@@ -960,7 +975,11 @@ output_description = textwrap.dedent(
 
 
 # ------ Begin Settings Manipulation Functions ------
-def set_setting(setting, set_value, verbose=False):
+def set_setting(
+        setting: str,
+        set_value: Any,  # noqa: ANN401
+        verbose: bool = False
+        ) -> str:
     """
     Take a namespace object as from an argparse parser and update settings.
 
@@ -1019,7 +1038,10 @@ def set_setting(setting, set_value, verbose=False):
     return out_report
 
 
-def set_settings_from_namespace(nspace, verbose=False):
+def set_settings_from_namespace(
+        nspace: argparse.Namespace,
+        verbose: bool = False,
+        ) -> None:
     """
     Take a namespace object as from an argparse parser and update settings.
 

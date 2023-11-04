@@ -8,6 +8,7 @@
 import copy
 import warnings
 from collections import Counter
+from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -30,6 +31,12 @@ from hybkit.errors import HybkitMiscError
 
 # ----- File-Specific Linting Directives:
 # ruff: noqa: F401 SLF001
+
+# ----- Begin Typing Assist -----
+# F = TypeVar('F', bound=Callable[..., Any])
+# class copy_signature(Generic[F]):
+#     def __init__(self, target: F) -> None: ...
+#     def __call__(self, wrapped: Callable[..., Any]) -> F: ...
 
 mpl.use('Agg')
 
@@ -167,7 +174,7 @@ BAR_INT_DEFAULTS = dict(copy.deepcopy(BAR_DEFAULTS))
 BAR_INT_DEFAULTS.update({
     'BAR_ALIGN': 'center',
 })
-BAR_INT_DEFAULTS = (BAR_INT_DEFAULTS)
+# BAR_INT_DEFAULTS = (BAR_INT_DEFAULTS)
 
 #: Default Bar Chart Plot Settings for Energy Histograms.
 ENERGY_DEFAULTS = ({
@@ -195,13 +202,14 @@ ENERGY_DEFAULTS = ({
 
 # ----- Begin Plotting Methods -----
 # Public Methods : Energy : energy_histogram
-def energy_histogram(results,
-                     plot_file_name,
-                     title,
-                     name=None,
-                     rc_params=ENERGY_HIST_RC_PARAMS,
-                     bar_params=BAR_DEFAULTS,
-                     ):
+def energy_histogram(
+        results: Dict[str, Any],
+        plot_file_name: str,
+        title: str,
+        name: Optional[str] = None,
+        rc_params: Dict[str, Any] = ENERGY_HIST_RC_PARAMS,
+        bar_params: Dict[str, Any] = BAR_DEFAULTS,
+        ) -> None:
     """
     Plot histogram of hybrid energies from an :class:`~hybkit.analysis.Analysis` fold analysis.
 
@@ -255,13 +263,14 @@ def energy_histogram(results,
 
 # Public Methods : Type : type_count
 # Plot a pie plot from a hybkit Type Analysis
-def type_count(results,
-               plot_file_name,
-               title,
-               name=None,
-               join_entries=False,
-               rc_params=TYPE_PIE_SINGLE_RC_PARAMS,
-               ):
+def type_count(
+        results: Counter,
+        plot_file_name: str,
+        title: str,
+        name: Optional[str] = None,
+        join_entries: bool = False,
+        rc_params: Dict[str, Any] = TYPE_PIE_SINGLE_RC_PARAMS,
+        ) -> None:
     """
     Plot pie chart of hybrid type counts from an :class:`~hybkit.analysis.Analysis` type analysis.
 
@@ -305,13 +314,14 @@ def type_count(results,
 
 # Public Methods : Type : type_count
 # Plot a pie plot for two types from a hybkit Type Analysis
-def type_count_dual(results,
-                    plot_file_name,
-                    title,
-                    name=None,
-                    join_entries=False,
-                    rc_params=TYPE_PIE_DUAL_RC_PARAMS,
-                    ):
+def type_count_dual(
+        results: Counter,
+        plot_file_name: str,
+        title: str,
+        name: Optional[str] = None,
+        join_entries: bool = False,
+        rc_params: Dict[str, Any] = TYPE_PIE_DUAL_RC_PARAMS,
+        ) -> None:
     """Hold Place for replaced docstring."""
     return type_count(results, plot_file_name, title, name, join_entries, rc_params)
 
@@ -322,7 +332,8 @@ type_count_dual.__doc__ = type_count.__doc__
 
 # Public Methods : Target : target_count
 # Plot a pie plot for targets from a hybkit target analysis
-def target_count(*args, **kwargs):
+# @copy_signature(type_count)
+def target_count(*args, **kwargs) -> None:  # noqa: ANN003, ANN002
     """Hold Place for replaced docstring."""
     return type_count(*args, rc_params=TARGET_PIE_RC_PARAMS, **kwargs)
 
@@ -334,14 +345,15 @@ for q, r in [('hybrid type counts', 'target counts'),
     target_count.__doc__ = target_count.__doc__.replace(q, r)
 
 
-def fold_match_counts_histogram(results,
-                                plot_file_name,
-                                title,
-                                is_prop=False,
-                                name=None,
-                                rc_params=FOLD_MATCH_HIST_RC_PARAMS,
-                                bar_params=BAR_INT_DEFAULTS,
-                                ):
+def fold_match_counts_histogram(
+        results: Counter,
+        plot_file_name: str,
+        title: str,
+        name: Optional[str] = None,
+        is_prop: bool = False,
+        rc_params: Dict[str, Any]= FOLD_MATCH_HIST_RC_PARAMS,
+        bar_params: Dict[str, Any] = BAR_INT_DEFAULTS,
+        ) -> None:
     """
     Plot histogram of predicted miRNA/target match count.
 
@@ -369,7 +381,8 @@ def fold_match_counts_histogram(results,
         max_val = max(max_val, y_val)
 
     if max_val == init_max_val:
-        warnings.warn('Warning: Attempted to create empty plot to name: %s' % plot_file_name)
+        message = f'Warning: Attempted to create empty plot to name: {plot_file_name}'
+        warnings.warn(message=message, stacklevel=1)
         return
 
     for x_val in range(min_x, (max_x + 1)):
@@ -405,8 +418,8 @@ def fold_match_counts_histogram(results,
 
     _plot_int_hist(plot_params=plot_params)
 
-
-def fold_mirna_nt_counts_histogram(*args, **kwargs):
+# @copy_signature(fold_match_counts_histogram)
+def fold_mirna_nt_counts_histogram(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
     """Hold Place for replaced docstring."""
     if 'rc_params' not in kwargs:
         kwargs['rc_params'] = copy.deepcopy(FOLD_NT_COUNTS_HIST_RC_PARAMS)
@@ -422,7 +435,7 @@ for q, r in [('predicted miRNA/target match count ', 'predicted binding at nt po
 
 # ----- Begin Private Plotting Methods -----
 # Private Methods : Energy : _plot_energy_histogram
-def _plot_energy_histogram(plot_params):
+def _plot_energy_histogram(plot_params: Dict[str, Any]) -> None:
     # Update plot parameters
     plt.rcParams.update(plot_params['rc_params'])
 
@@ -477,7 +490,7 @@ def _plot_energy_histogram(plot_params):
 
 
 # Private Methods : Energy : _plot_types_pie_chart
-def _plot_types_pie_chart(plot_params):
+def _plot_types_pie_chart(plot_params: Dict[str, Any]) -> None:
     # Calculate the total size and the size of each fraction
     total_size = sum(plot_params['sizes'])
     if total_size < 0.00000001:  #noqa: PLR2004
@@ -545,7 +558,10 @@ def _plot_types_pie_chart(plot_params):
 
 
 # Private Methods : Energy : _plot_energy_histogram
-def _plot_int_hist(plot_params, truncate_to_first_int=True):
+def _plot_int_hist(
+        plot_params: Dict[str, Any],
+        truncate_to_first_int: bool = True
+        ) -> None:
     # Update plot parameters
     plt.rcParams.update(plot_params['rc_params'])
 

@@ -6,4 +6,11 @@ extend = "/home/ds/scripts/ruff.toml"
 ignore = [
     "PT012", # Limit Pytest Raises: One Simple Statement
     "SIM117", # Disallow compound with statements
+    # "ANN202", # Require type annotations on private methods
+    "ANN101", # Missing type annotation for self in method
+    "ANN102", # Missing type annotation for cls in classmethod
+]
+
+select = [
+    "ANN", # Add type annotations
 ]

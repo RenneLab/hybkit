@@ -6,16 +6,17 @@
 """This module contains settings information for hybkit classes and methods."""
 
 import copy
+from typing import Dict
 
 
 # ----- Begin Settings Helper Functions -----
 # Util : Settings Helper Functions
-def _all_str_cases(in_str):
+def _all_str_cases(in_str: str) -> list[str]:
     return [in_str.lower(), in_str.title(), in_str.upper()]
 
 
 # Util : Settings Helper Functions
-def _settings_info_to_settings(settings_info_dict):
+def _settings_info_to_settings(settings_info_dict: Dict) -> dict:
     ret_dict = {}
     for key in settings_info_dict:
         ret_dict[key] = copy.deepcopy(settings_info_dict[key][0])

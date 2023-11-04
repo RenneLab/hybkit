@@ -12,10 +12,15 @@ parse sequence identifiers to identify sequence type.
 
 import os
 import types
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Union
 
 from hybkit.errors import HybkitArgError, HybkitMiscError
 
+# ----- Begin Typing Variables ----- #
+SegProps = Dict[str, Union[float, int, str]]
 
+
+# ----- Begin TypeFinder Class ----- #
 class TypeFinder:
     """
     Class for parsing identifiers to identify sequence 'type'.
@@ -86,14 +91,18 @@ class TypeFinder:
 
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
-    def __init__(self):
+    def __init__(self) -> NoReturn:
         """Class not used with initialization."""
         message = 'TypeFinder class not intended to be initialized for use.'
         raise RuntimeError(message)
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def set_method(cls, method, params=None):
+    def set_method(
+            cls,
+            method: str,
+            params: Optional[Dict[str, Any]] = None
+            ) -> None:
         """
         Select method to use when finding types.
 
@@ -117,7 +126,7 @@ class TypeFinder:
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def method_is_set(cls):
+    def method_is_set(cls) -> bool:
         """
         Return whether a TypeFinder method has been set.
 
@@ -130,14 +139,14 @@ class TypeFinder:
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def check_set_method(cls):
+    def check_set_method(cls) -> None:
         """If no TypeFinder method set, set as :attr:`default_method`."""
         if not cls.method_is_set():
             cls.set_method(cls.default_method)
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def find(cls, seg_props):
+    def find(cls, seg_props: SegProps) -> Optional[str]:
         """
         Find type of segment using :meth:`TypeFinder.find_custom_method`.
 
@@ -160,7 +169,11 @@ class TypeFinder:
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def set_custom_method(cls, method, params=None):
+    def set_custom_method(
+            cls,
+            method: Callable,
+            params: Optional[dict] = None
+            ) -> None:
         """
         Set the method for use to find seg types.
 
@@ -187,7 +200,10 @@ class TypeFinder:
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def method_hybformat(seg_props, params=None):
+    def method_hybformat(
+            seg_props: SegProps,
+            params: Optional[dict] = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment, or None if segment cannot be identified.
 
@@ -222,7 +238,10 @@ class TypeFinder:
 
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
-    def method_string_match(seg_props, params=None):
+    def method_string_match(
+            seg_props: SegProps,
+            params: Optional[dict] = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment, or None if unidentified.
 
@@ -281,7 +300,7 @@ class TypeFinder:
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_string_match_params(legend_file):
+    def make_string_match_params(legend_file: str) -> dict:
         """
         Read csv and return a dict of search parameters for :meth:`method_string_match`.
 
@@ -342,7 +361,10 @@ class TypeFinder:
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     @staticmethod
-    def method_id_map(seg_props, params=None):
+    def method_id_map(
+            seg_props: SegProps,
+            params: dict = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment or None if it cannot be identified.
 
@@ -377,7 +399,7 @@ class TypeFinder:
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_id_map_params(mapped_id_files):
+    def make_id_map_params(mapped_id_files: List[str]) -> dict:
         """
         Read file(s) into a mapping of sequence identifiers.
 
@@ -439,7 +461,7 @@ class TypeFinder:
 
     # TypeFinder : Private classmethods : find_seg_type
     @classmethod
-    def _reset(cls):
+    def _reset(cls) -> None:
         """
         Reset the class to its initial state.
 

@@ -38,6 +38,7 @@ Example system calls:
 import argparse
 import contextlib
 import os
+from typing import List, Optional, Union
 
 import hybkit
 from hybkit.__about__ import (
@@ -56,8 +57,11 @@ from hybkit.__about__ import (
 # ----- Linting Directives:
 # ruff: noqa: F401 SLF001
 
+# ----- Begin Custom Types -----
+AnalysisTypesArg = Union[str, List[str]]
+
 # Create Command-line Argument Parser
-def make_parser():
+def make_parser() -> argparse.ArgumentParser:
     """Create the command-line argument parser for the hyb_analyze script."""
     parser_components = [
         hybkit.util.in_hybs_parser,
@@ -84,16 +88,18 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_analyze(in_hyb_files,
-                analysis_types,
-                in_fold_files=None,
-                out_dir='.',
-                out_suffix=None,
-                out_basenames=None,
-                analysis_name=None,
-                make_plots=False,
-                verbose=False, silent=False
-                ):
+def hyb_analyze(
+        in_hyb_files: List[str],
+        analysis_types: AnalysisTypesArg,
+        in_fold_files: Optional[List[str]] = None,
+        out_dir: str = '.',
+        out_suffix: Optional[str] = None,
+        out_basenames: Optional[List[str]] = None,
+        analysis_name: Optional[str] = None,
+        make_plots: bool = False,
+        verbose: bool = False,
+        silent: bool = False,
+        ) -> None:
     """Perform main script function."""
     if not silent:
         print('\nPerforming Analysis of Hyb Files...')

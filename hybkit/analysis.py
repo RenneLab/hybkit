@@ -7,6 +7,7 @@
 
 import copy
 from collections import Counter
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import numpy as np
 
@@ -27,6 +28,11 @@ from hybkit.errors import HybkitArgError
 
 # ----- File-Specific Linting Directives:
 # ruff: noqa: F401 SLF001
+
+# ----- Begin Typing Directives -----
+AnalysisOptions = Literal['energy', 'type', 'mirna', 'target']
+AnalysisArg = Union[AnalysisOptions, List[AnalysisOptions]]
+QuantModeArg = Literal['single', 'reads', 'records']
 
 # --- Hybkit Analysis --- #
 class Analysis:
@@ -215,26 +221,26 @@ class Analysis:
 
     # Class private variables:
     _result_keys = {
-        'energy': [
+        'energy': (
             'energy_analysis_count', 'has_energy_val', 'no_energy_val',
             'energy_min', 'energy_max', 'energy_mean', 'energy_std',
             'binned_energy_vals',
-        ],
-        'type': [
+        ),
+        'type': (
             'types_analysis_count', 'hybrid_types', 'reordered_hybrid_types',
             'mirna_hybrid_types', 'seg1_types', 'seg2_types', 'all_seg_types',
-        ],
-        'mirna': [
+        ),
+        'mirna': (
             'mirna_analysis_count', 'mirnas_5p', 'mirnas_3p', 'mirna_dimers',
             'non_mirna', 'has_mirna',
-        ],
-        'target': [
+        ),
+        'target': (
             'target_analysis_count', 'target_evals', 'target_names', 'target_types',
-        ],
-        'fold': [
+        ),
+        'fold': (
             'fold_analysis_count', 'mirna_nt_fold_counts', 'mirna_nt_fold_props',
             'fold_match_counts',
-        ],
+        ),
     }
     _all_result_keys_list_temp = []  # noqa: RUF012
     for key in _result_keys:
@@ -251,11 +257,12 @@ class Analysis:
     # ----- Begin Analysis Class -----
     # Start Analysis Public Methods
     # Analysis : Public Methods
-    def __init__(self,
-                 analysis_types=None,
-                 name=None,
-                 quant_mode=None,
-                 ):
+    def __init__(
+            self,
+            analysis_types: AnalysisArg,
+            name: Optional[str] = None,
+            quant_mode: Optional[QuantModeArg] = None,
+            ) -> None:
         """Describe in class docstring."""
         if analysis_types is None or not analysis_types:
             message = 'No analysis types provided. Analysis types must be provided'
@@ -291,7 +298,7 @@ class Analysis:
             getattr(self, '_init_' + analysis_type)()
 
     # Analysis : Public Methods : Add HybRecord
-    def add_hyb_record(self, hyb_record):
+    def add_hyb_record(self, hyb_record: hybkit.HybRecord) -> None:
         """
         Add a HybRecord object to the analysis.
 
@@ -303,7 +310,12 @@ class Analysis:
             getattr(self, '_add_' + analysis_type)(hyb_record)
 
     # Analysis : Public Methods : Add HybRecords
-    def add_hyb_records(self, hyb_records, eval_types=False, eval_mirna=False):
+    def add_hyb_records(
+            self,
+            hyb_records: List[hybkit.HybRecord],
+            eval_types: bool = False,
+            eval_mirna: bool = False
+            ) -> None:
         """
         Add a list of HybRecord objects to the analysis.
 
@@ -327,7 +339,7 @@ class Analysis:
 
     # Start Results Methods
     # Analysis : Public Methods : Results : get_all_results
-    def get_all_results(self):
+    def get_all_results(self) -> dict:
         """
         Return a dictionary with all results for all active analyses.
 
@@ -343,7 +355,7 @@ class Analysis:
         return results
 
     # Analysis : Public Methods : Results : get_analysis_result
-    def get_analysis_results(self, analysis):
+    def get_analysis_results(self, analysis: AnalysisOptions) -> Dict:
         """
         Return a dictionary with all results for a specific analysis.
 
@@ -360,7 +372,7 @@ class Analysis:
         return getattr(self, '_get_' + analysis + '_results')()
 
     # Analysis : Public Methods : Results : get_specific_result
-    def get_specific_result(self, result_key):
+    def get_specific_result(self, result_key: str) -> Any:  # noqa: ANN401
         """
         Get a specific result from the analysis.
 
@@ -390,7 +402,11 @@ class Analysis:
         raise HybkitArgError('Result key "%s" not found.' % result_key)
 
     # Analysis : Public Methods : Results : get_analysis_delim_str
-    def get_analysis_delim_str(self, analysis=None, out_delim=None):
+    def get_analysis_delim_str(
+            self,
+            analysis: AnalysisOptions = None,
+            out_delim: Optional[str] = None,
+            ) -> str:
         """
         Return a delimited string containing the results of the analysis.
 
@@ -423,7 +439,12 @@ class Analysis:
 
     # Start Write Methods
     # Analysis : Public Methods : Write Results : All Analyses
-    def write_analysis_delim_str(self, out_file_name=None, analysis=None, out_delim=None):
+    def write_analysis_delim_str(
+            self,
+            out_file_name: Optional[str] = None,
+            analysis: Optional[AnalysisArg] = None,
+            out_delim: Optional[str] = None,
+            ) -> None:
         """
         Write the results of the analysis to a delimited text file.
 
@@ -463,8 +484,12 @@ class Analysis:
             out_file.write(out_delim_str)
 
     # Analysis : Public Methods : Write Results : write_analysis_results_special
-    def write_analysis_results_special(self, out_basename=None,
-                                       analysis=None, out_delim=None):
+    def write_analysis_results_special(
+            self,
+            out_basename: Optional[str] = None,
+            analysis: Optional[AnalysisArg] = None,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         """
         Write the results of the analyses to specialized text files.
 
@@ -509,7 +534,11 @@ class Analysis:
         return all_out_files
 
     # Analysis : Public Methods : Plot Results : plot_analysis_results
-    def plot_analysis_results(self, out_basename=None, analysis=None):
+    def plot_analysis_results(
+            self,
+            out_basename: Optional[str] = None,
+            analysis: Optional[AnalysisArg] = None,
+            ) -> List[str]:
         """
         Plot the results of the analyses.
 
@@ -547,7 +576,7 @@ class Analysis:
 
     # Start Helper Methods
     # Analysis : Private Methods : Helper Methods
-    def _get_quant(self, hyb_record):
+    def _get_quant(self, hyb_record: hybkit.HybRecord) -> int:
         if self.quant_mode == 'single':
             return 1
         elif self.quant_mode == 'reads':
@@ -559,7 +588,7 @@ class Analysis:
 
     # Start Init Methods
     # Analysis : Private Methods : Init Methods : Energy Analysis
-    def _init_energy(self):
+    def _init_energy(self) -> None:
         self._energy_analysis_count = 0
         self._has_energy_val = 0
         self._no_energy_val = 0
@@ -569,7 +598,7 @@ class Analysis:
             self._binned_energy_vals[i] = 0
 
     # Analysis : Private Methods : Init Methods : Type Analysis
-    def _init_type(self):
+    def _init_type(self) -> None:
         self._types_analysis_count = 0
         self._hybrid_types = Counter()
         self._reordered_hybrid_types = Counter()
@@ -579,7 +608,7 @@ class Analysis:
         self._all_seg_types = Counter()
 
     # Analysis : Private Methods : Init Methods : miRNA Analysis
-    def _init_mirna(self):
+    def _init_mirna(self) -> None:
         self._mirna_analysis_count = 0
         self._mirnas_5p = 0
         self._mirnas_3p = 0
@@ -588,14 +617,14 @@ class Analysis:
         self._has_mirna = 0
 
     # Analysis : Private Methods : Init Methods : Target Analysis
-    def _init_target(self):
+    def _init_target(self) -> None:
         self._target_analysis_count = 0
         self._target_evals = 0
         self._target_names = Counter()
         self._target_types = Counter()
 
     # Analysis : Private Methods : Init Methods : Fold Analysis
-    def _init_fold(self):
+    def _init_fold(self) -> None:
         self._fold_analysis_count = 0
         self._folds_recorded = 0
         self._mirna_nt_fold_counts = Counter()
@@ -603,7 +632,7 @@ class Analysis:
 
     # Start Add Methods
     # Analysis : Private Methods : Add Methods : Energy Analysis
-    def _add_energy(self, hyb_record):
+    def _add_energy(self, hyb_record: hybkit.HybRecord) -> None:
         count = self._get_quant(hyb_record)
         self._energy_analysis_count += 1
         if hyb_record.energy is not None:
@@ -616,7 +645,7 @@ class Analysis:
             self._no_energy_val += count
 
     # Analysis : Private Methods : Add Methods : Type Analysis
-    def _add_type(self, hyb_record):
+    def _add_type(self, hyb_record: hybkit.HybRecord) -> None:
         hyb_record._ensure_set('eval_types')
         count = self._get_quant(hyb_record)
         self._types_analysis_count += 1
@@ -640,7 +669,7 @@ class Analysis:
         self._all_seg_types[seg2_type] += count
 
     # Analysis : Private Methods : Add Methods : miRNA Analysis
-    def _add_mirna(self, hyb_record):
+    def _add_mirna(self, hyb_record: hybkit.HybRecord) -> None:
         hyb_record._ensure_set('eval_mirna')
         count = self._get_quant(hyb_record)
         self._mirna_analysis_count += 1
@@ -656,7 +685,7 @@ class Analysis:
             self._non_mirna += count
 
     # Analysis : Private Methods : Add Methods : Target Analysis
-    def _add_target(self, hyb_record):
+    def _add_target(self, hyb_record: hybkit.HybRecord) -> None:
         hyb_record._ensure_set('eval_mirna')
         self._target_analysis_count += 1
         count = self._get_quant(hyb_record)
@@ -667,7 +696,7 @@ class Analysis:
             self._target_types[mirna_details['target_seg_type']] += count
 
     # Analysis : Private Methods : Add Methods : Fold Analysis
-    def _add_fold(self, hyb_record):
+    def _add_fold(self, hyb_record: hybkit.HybRecord) -> None:
         hyb_record._ensure_set('fold_record')
         hyb_record._ensure_set('eval_mirna')
         self._fold_analysis_count += 1
@@ -684,7 +713,7 @@ class Analysis:
 
     # Start Get Results Methods
     # Analysis : Private Methods : Get Methods : Energy Analysis
-    def _get_energy_results(self):
+    def _get_energy_results(self) -> dict:
         energy_results = {}
         energy_results['energy_analysis_count'] = copy.deepcopy(self._energy_analysis_count)
         energy_results['has_energy_val'] = copy.deepcopy(self._has_energy_val)
@@ -720,7 +749,7 @@ class Analysis:
         return energy_results
 
     # Analysis : Private Methods : Get Methods : Type Analysis
-    def _get_type_results(self):
+    def _get_type_results(self) -> dict:
         type_results = {}
         type_results['types_analysis_count'] = copy.deepcopy(self._types_analysis_count)
         type_results['hybrid_types'] = copy.deepcopy(self._hybrid_types)
@@ -732,7 +761,7 @@ class Analysis:
         return type_results
 
     # Analysis : Private Methods : Get Methods : miRNA Analysis
-    def _get_mirna_results(self):
+    def _get_mirna_results(self) -> dict:
         mirna_results = {}
         mirna_results['mirna_analysis_count'] = copy.deepcopy(self._mirna_analysis_count)
         mirna_results['has_mirna'] = copy.deepcopy(self._has_mirna)
@@ -743,7 +772,7 @@ class Analysis:
         return mirna_results
 
     # Analysis : Private Methods : Get Methods : Target Analysis
-    def _get_target_results(self):
+    def _get_target_results(self) -> dict:
         target_results = {}
         target_results['target_analysis_count'] = copy.deepcopy(self._target_analysis_count)
         target_results['target_evals'] = copy.deepcopy(self._target_evals)
@@ -752,7 +781,7 @@ class Analysis:
         return target_results
 
     # Analysis : Private Methods : Get Methods : Fold Analysis
-    def _get_fold_results(self):
+    def _get_fold_results(self) -> dict:
         fold_results = {}
         fold_results['fold_analysis_count'] = copy.deepcopy(self._fold_analysis_count)
         fold_results['folds_recorded'] = copy.deepcopy(self._folds_recorded)
@@ -765,7 +794,11 @@ class Analysis:
 
     # Start Get Results String Methods
     # Analysis : Private Methods : Result String Methods : All Analyses
-    def _get_analysis_results_delim_str(self, analysis, out_delim=None):
+    def _get_analysis_results_delim_str(
+            self,
+            analysis: AnalysisOptions,
+            out_delim: Optional[str] = None,
+            ) -> str:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -794,7 +827,11 @@ class Analysis:
 
     # Start Write Methods
     # Analysis : Private Methods : Result Special Writing Methods : Energy Analysis
-    def _write_energy_results_special(self, basename, out_delim=None):
+    def _write_energy_results_special(
+            self,
+            basename: str,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -820,7 +857,11 @@ class Analysis:
         return out_file_names
 
     # Analysis : Private Methods : Result Special Writing Methods : Type Analysis
-    def _write_type_results_special(self, basename, out_delim=None):
+    def _write_type_results_special(
+            self,
+            basename: str,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -855,7 +896,11 @@ class Analysis:
         return out_file_names
 
     # Analysis : Private Methods : Result Special Writing Methods : miRNA Analysis
-    def _write_mirna_results_special(self, basename, out_delim=None):
+    def _write_mirna_results_special(
+            self,
+            basename: str,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -876,7 +921,11 @@ class Analysis:
         return out_file_names
 
     # Analysis : Private Methods : Result Special Writing Methods : Target Analysis
-    def _write_target_results_special(self, basename, out_delim=None):
+    def _write_target_results_special(
+            self,
+            basename: str,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -908,7 +957,11 @@ class Analysis:
         return out_file_names
 
     # Analysis : Private Methods : Result Special Writing Methods : Fold Analysis
-    def _write_fold_results_special(self, basename, out_delim=None):
+    def _write_fold_results_special(
+            self,
+            basename: str,
+            out_delim: Optional[str] = None,
+            ) -> List[str]:
         if out_delim is None:
             out_delim = self.settings['out_delim']
 
@@ -946,7 +999,7 @@ class Analysis:
 
     # Start Plot Methods
     # Analysis : Private Methods : Result Plotting Methods : Energy Analysis
-    def _plot_energy_results(self, basename):
+    def _plot_energy_results(self, basename: str) -> List[str]:
         energy_results = self._get_energy_results()
         out_files = []
         # Plot Histogram
@@ -961,7 +1014,7 @@ class Analysis:
         return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Type Analysis
-    def _plot_type_results(self, basename):
+    def _plot_type_results(self, basename: str) -> List[str]:
         type_results = self._get_type_results()
         out_files = []
         type_results = {}
@@ -1038,7 +1091,7 @@ class Analysis:
         return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Target Analysis
-    def _plot_target_results(self, basename):
+    def _plot_target_results(self, basename: str) -> List[str]:
         target_results = self._get_target_results()
         out_files = []
 
@@ -1064,7 +1117,7 @@ class Analysis:
         return out_files
 
     # Analysis : Private Methods : Result Plotting Methods : Fold Analysis
-    def _plot_fold_results(self, basename):
+    def _plot_fold_results(self, basename: str) -> List[str]:
         fold_results = self._get_fold_results()
         out_files = []
 
@@ -1101,7 +1154,7 @@ class Analysis:
         return out_files
 
     # Analysis : Private Methods : Utility Methods
-    def _ensure_analyses_active(self, analyses):
+    def _ensure_analyses_active(self, analyses: AnalysisArg) -> None:
         if isinstance(analyses, str):
             all_test_analyses = [analyses]
         elif isinstance(analyses, list):
@@ -1119,7 +1172,7 @@ class Analysis:
 
     # Analysis : Private Classmethods
     @classmethod
-    def _sanitize_name(cls, file_name):
+    def _sanitize_name(cls, file_name: str) -> str:
         for char, replace in [('*', 'star'), (',', 'com')]:
             file_name = file_name.replace(char, replace)
         return file_name
