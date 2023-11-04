@@ -119,9 +119,9 @@ CsvHeaderReturn = Literal[
     'seg2_score,flags'
     ]
 FoldReturn = Union[
-    tuple[None, str],
-    tuple[Literal['NOFOLD'], str],
-    tuple[Literal['NOENERGY'], str],
+    Tuple[None, str],
+    Tuple[Literal['NOFOLD'], str],
+    Tuple[Literal['NOENERGY'], str],
     Self
     ]
 
@@ -547,7 +547,7 @@ class HybRecord:
     def get_seg_types(
             self,
             require: bool = False
-            ) -> tuple[Union[str, None], Union[str, None]]:
+            ) -> Tuple[Union[str, None], Union[str, None]]:
         """
         Return "seg1_type" (or None), "seg2_type" (or None) flags.
 
@@ -1908,7 +1908,7 @@ class HybRecord:
     # Start HybRecord Private Classmethods
     # HybRecord : Private Classmethods : hybformat record parsing
     @classmethod
-    def _parse_hybformat_id(cls, record_id: str) -> tuple[str, str]:
+    def _parse_hybformat_id(cls, record_id: str) -> Tuple[str, str]:
         # Parse id in format: "48_50002" into read_id, read_count
         split_id = tuple(record_id.split('_'))
         if len(split_id) != 2:  # noqa: PLR2004
@@ -1920,7 +1920,7 @@ class HybRecord:
 
     # HybRecord : Private Classmethods : hybformat record parsing
     @classmethod
-    def _parse_hybformat_ref(cls, seg_ref: str) -> tuple[str, str, str, str]:
+    def _parse_hybformat_ref(cls, seg_ref: str) -> Tuple[str, str, str, str]:
         # Parse reference sequence identifier in format:
         # "ENSG00000146425_ENST00000367089_DYNLT1_mRNA"
         # into <gene_id>_<transcript_id>_<gene_name>_<seg_type> information.
