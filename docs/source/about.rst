@@ -33,6 +33,7 @@ Changelog
       * Add HybRecord.to_csv_header(), HybRecord.to_fields(),
         and HybRecord.to_fields_header() methods
       * Refine description of HybFile.open() constructor method
+      * Add Python3.8-compatible type hints to API
 
     * 0.3.3 (2023-09) Changes include:
 
