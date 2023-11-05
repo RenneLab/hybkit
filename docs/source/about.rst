@@ -28,7 +28,7 @@ Changelog
       * Misc Bugfixes and Refinements
       * Switch code linting to Ruff
       * Add hybkit.errors module and HybkitError classes
-      * Moved printing of warnings to python Warnings module
+      * Moved printing of warnings to python logging module
       * Add option for direct passage of file-like object for construction of
         HybFile and ViennaFile
       * Add HybRecord.to_csv_header(), HybRecord.to_fields(),

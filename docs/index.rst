@@ -147,6 +147,7 @@ Installation:
         * Python3.8+
         * `matplotlib <https://matplotlib.org/>`_ >= 3.7.1 (|Hunter2007|_)
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
+        * `typing_extensions <https://pypi.org/project/typing-extensions/>` >= 4.8.0
 
     Via PyPI / Python PIP:
         |PipVersion|
@@ -214,12 +215,30 @@ Installation:
 
     Further documentation on hybkit usage can be found in |docs_link|_.
 
-    Copyright:
-        | hybkit is a free, sharable, open-source project.
-        | All source code and executable scripts contained within this package are considered
-          part of the "hybkit" project and are distributed without any warranty or implied warranty
-          under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
-          file.
+Setup Testing:
+    Hybkit provides a suite of unit tests to maintain stability of the API and script
+    functionalities. To run the API test suite, install pytest and run the tests from the
+    root directory of the hybkit package:
+
+    .. code-block:: bash
+
+        $ pip install pytest
+        $ pytest
+
+    Command-line scripts can be tested by running the auto_test.sh script in
+    the auto_tests directory:
+
+    .. code-block:: bash
+
+        $ ./auto_tests/auto_test.sh
+
+
+Copyright:
+    | hybkit is a free, sharable, open-source project.
+    | All source code and executable scripts contained within this package are considered
+        part of the "hybkit" project and are distributed without any warranty or implied warranty
+        under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
+        file.
 
 .. |Helwak2013| replace:: *Helwak et al. (Cell 2013)*
 .. _Helwak2013: https://doi.org/10.1016/j.cell.2013.03.043
