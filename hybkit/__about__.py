@@ -10,9 +10,9 @@
 #   Change Date
 
 
+import logging
 import os
 import sys
-import warnings
 from importlib import resources
 
 # Check Python version and throw error if not 3.8+
@@ -52,8 +52,8 @@ elif os.path.isdir(os.path.join(local_data_dir, 'ref_data')):
 elif os.path.isdir(os.path.join(local_prefix_data_dir, 'ref_data')):
     hybkit_data_dir = local_prefix_data_dir
 else:
-    message = 'WARNING: hybkit_data_dir variable cannot be set, ignore during setup.py.'
-    warnings.warn(message, stacklevel=1)
+    message = 'hybkit_data_dir variable cannot be set, ignore during setup.py.'
+    logging.warning(message)
     hybkit_data_dir = ''
 
 ref_data_dir = os.path.join(hybkit_data_dir, 'reference_data')

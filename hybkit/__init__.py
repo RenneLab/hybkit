@@ -49,9 +49,9 @@ information:
 """
 
 import copy
+import logging
 import os
 import sys
-import warnings
 from collections import Counter
 from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Type, Union
 
@@ -2579,7 +2579,7 @@ class FoldRecord:
             error += '\n  ... are not in required 3-line format.'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    warnings.warn('WARNING: ' + error, stacklevel=1)
+                    logging.warning(error)
                 return fail_ret_val
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2594,7 +2594,7 @@ class FoldRecord:
             error = 'Improper Vienna: No Fold (Energy = 99*.*)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    warnings.warn('WARNING: ' + error, stacklevel=1)
+                    logging.warning(error)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2606,7 +2606,7 @@ class FoldRecord:
             error += '\n  ... does not have required "..((.))..<tab>(-1.23)" format.'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    warnings.warn('WARNING: ' + error, stacklevel=1)
+                    logging.warning(error)
                 return ('NOENERGY', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + error)
@@ -2697,7 +2697,7 @@ class FoldRecord:
             message = 'Improper CT: No Fold (Energy = 99*.*)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    warnings.warn('WARNING:' + message, stacklevel=1)
+                    logging.warning(message)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + message)
@@ -2734,7 +2734,7 @@ class FoldRecord:
             message = 'Improper CT: No Fold (Len = 0)'
             if 'return' in error_mode:
                 if 'warn' in error_mode:
-                    warnings.warn('WARNING:' + message, stacklevel=1)
+                    logging.warning(message)
                 return ('NOFOLD', ''.join(record_lines))
             else:
                 raise HybkitConstructorError('ERROR: ' + message)
@@ -3409,9 +3409,9 @@ class HybFoldIter:
                 if iter_error_mode == 'raise':
                     raise HybkitIterError('ERROR: ' + error)
                 elif iter_error_mode == 'warn_skip':
-                    warnings.warn('WARNING: SkipPair: ' + error, stacklevel=1)
+                    logging.warning(error)
                 elif iter_error_mode == 'warn_return':
-                    warnings.warn('WARNING: ' + error, stacklevel=1)
+                    logging.warning(error)
 
                 if 'skip' in iter_error_mode:
                     self.sequential_skips += 1
@@ -3436,7 +3436,7 @@ class HybFoldIter:
             if next_fold_record is not None:
                 message += 'Next FoldRecord: %s\n' % str(next_fold_record)
             message += '\n' + '\n'.join(self.report()) + '\n'
-            warnings.warn(message, stacklevel=1)
+            logging.warning(message)
             raise
 
         if do_skip:

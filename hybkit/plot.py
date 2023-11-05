@@ -6,7 +6,7 @@
 """Methods for plotting analyses of HybRecord and FoldRecord objects."""
 
 import copy
-import warnings
+import logging
 from collections import Counter
 from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 
@@ -230,7 +230,7 @@ def energy_histogram(
         max_count = max(max_count, count)
     if not max_count:
         message = 'Warning: Attempted to create empty plot to name: %s' % plot_file_name
-        raise HybkitMiscError(message)
+        logging.warning(message)
 
     # Plot energy bins
     energies, counts = [], []
@@ -382,7 +382,7 @@ def fold_match_counts_histogram(
 
     if max_val == init_max_val:
         message = f'Warning: Attempted to create empty plot to name: {plot_file_name}'
-        warnings.warn(message=message, stacklevel=1)
+        logging.warning(message)
         return
 
     for x_val in range(min_x, (max_x + 1)):
@@ -496,7 +496,7 @@ def _plot_types_pie_chart(plot_params: Dict[str, Any]) -> None:
     if total_size < 0.00000001:  #noqa: PLR2004
         message = 'Warning: Attempted to create empty plot to name:'
         message += ' %s' % plot_params['plot_file_name']
-        raise RuntimeError(message)
+        logging.warning(message)
 
     fraction_sizes = [(size / total_size) for size in plot_params['sizes']]
 
