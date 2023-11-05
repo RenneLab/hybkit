@@ -147,6 +147,7 @@ Installation:
         * Python3.8+
         * `matplotlib <https://matplotlib.org/>`_ >= 3.7.1 (|Hunter2007|_)
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
+        * `typing_extensions <https://pypi.org/project/typing-extensions/>` >= 4.8.0
 
     Via PyPI / Python PIP:
         |PipVersion|
@@ -253,4 +254,5 @@ Installation:
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
-.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
+.. |example_01_image| image:: https://raw.githubusercontent.com/RenneLab/hybkit/master/example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
+

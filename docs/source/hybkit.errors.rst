@@ -1,6 +1,6 @@
-hybkit.util
+hybkit.errors
 ======================
 
-.. automodule:: hybkit.util
+.. automodule:: hybkit.errors
    :members:
 
