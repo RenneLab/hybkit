@@ -9,7 +9,60 @@ Helper data objects for automatic testing of hybkit code.
 
 import copy
 import os
-from contextlib import nullcontext as does_not_raise
+
+from hybkit.errors import (
+    HybkitArgError,
+    HybkitConstructorError,
+    HybkitError,
+    HybkitIterError,
+    HybkitMiscError,
+)
+
+# from contextlib import nullcontext as does_not_raise
+
+# ----- Start Data Constants -----
+NEG_10 = -10.0
+ZERO = 0.0
+HALF = 0.5
+ONE = 1.0
+TWO = 2.0
+TWO_I = 2
+FIVE = 5.0
+FIVE_I = 5
+TEN = 10.0
+TEN_I = 10
+FORTY_I = 40
+
+# ----- Start Error Constants -----
+ERROR_TYPE_STRINGS = {
+    'HybkitError': HybkitError,
+    'HybkitMiscError': HybkitMiscError,
+    'HybkitArgError': HybkitArgError,
+    'HybkitConstructorError': HybkitConstructorError,
+    'HybkitIterError': HybkitIterError,
+}
+for init_str in list(ERROR_TYPE_STRINGS):
+    ERROR_TYPE_STRINGS[init_str.lower()] = ERROR_TYPE_STRINGS[init_str]
+
+# ----- Start Expected Fields Header -----
+EXPECTED_FIELDS_HEADER = (
+    'id',
+    'seq',
+    'energy',
+    'seg1_ref_name',
+    'seg1_read_start',
+    'seg1_read_end',
+    'seg1_ref_start',
+    'seg1_ref_end',
+    'seg1_score',
+    'seg2_ref_name',
+    'seg2_read_start',
+    'seg2_read_end',
+    'seg2_ref_start',
+    'seg2_ref_end',
+    'seg2_score',
+    'flags',
+)
 
 # ----- Start Real Hyb/Vienna Data Examples -----
 # Example hyb record string for testing.
@@ -310,10 +363,10 @@ ART_HYB_STR_PROPS['true_prop_argsets'] = [
 
 ART_HYB_STR_PROPS['false_prop_argsets'] = [
     (vals[0], (vals[1] + 'XXX')) for vals
-    in ART_HYB_STR_PROPS['true_prop_argsets'] if len(vals) == 2
+    in ART_HYB_STR_PROPS['true_prop_argsets'] if len(vals) == TWO
 ]
 
-# Add bad hyb stirngs with missing name or seq
+# Add bad hyb strings with missing name or seq
 ART_BAD_HYB_STRS = []
 for i in range(2):
     source_str = ART_HYB_PROPS_1['hyb_str']
@@ -467,7 +520,7 @@ TEST_SEG_PROPS = {
     'ref_end': 21,
     'score': 'e-10'
 }
-TEST_SEG_PROPS_STR = {p: str(TEST_SEG_PROPS[p]) for p in TEST_SEG_PROPS.keys()}
+TEST_SEG_PROPS_STR = {p: str(TEST_SEG_PROPS[p]) for p in TEST_SEG_PROPS}
 TEST_FLAGS_OBJ = {
     'count_total': 10,
     'count_last_clustering': 11,
@@ -490,7 +543,7 @@ TEST_READ_COUNT_STR = str(TEST_READ_COUNT)
 TEST_RECORD_COUNT = TEST_FLAGS_OBJ['count_total']
 TEST_RECORD_COUNT_STR = str(TEST_RECORD_COUNT)
 TEST_FLAGS_STR = {flag: str(TEST_FLAGS_OBJ[flag])
-                  for flag in TEST_FLAGS_OBJ.keys()}
+                  for flag in TEST_FLAGS_OBJ}
 TEST_FLAGS_STR_LINE = (
     'count_total=10;count_last_clustering=11;two_way_merged=TRUE;'
     + 'seq_IDs_in_cluster=test_id_1,test_id_2;'
@@ -500,6 +553,36 @@ TEST_FLAGS_STR_LINE = (
 )
 TEST_FLAGS_STR_REVERSED = {flag: TEST_FLAGS_STR[flag] for flag
                            in reversed([*TEST_FLAGS_STR.keys()])}
+TEST_HYB_FIELDS = {
+    'id': TEST_HYB_ID_STR,
+    'seq': TEST_SEQ_STR,
+    'energy': TEST_ENERGY_STR,
+    'seg1_ref_name': TEST_SEG_PROPS['ref_name'],
+    'seg1_read_start': TEST_SEG_PROPS['read_start'],
+    'seg1_read_end': TEST_SEG_PROPS['read_end'],
+    'seg1_ref_start': TEST_SEG_PROPS['ref_start'],
+    'seg1_ref_end': TEST_SEG_PROPS['ref_end'],
+    'seg1_score': TEST_SEG_PROPS['score'],
+    'seg2_ref_name': TEST_SEG_PROPS['ref_name'],
+    'seg2_read_start': TEST_SEG_PROPS['read_start'],
+    'seg2_read_end': TEST_SEG_PROPS['read_end'],
+    'seg2_ref_start': TEST_SEG_PROPS['ref_start'],
+    'seg2_ref_end': TEST_SEG_PROPS['ref_end'],
+    'seg2_score': TEST_SEG_PROPS['score'],
+    'flags': TEST_FLAGS_STR,
+}
+
+TEST_HYB_LINE = (
+    f'{TEST_HYB_ID_STR}\t{TEST_SEQ_STR}\t{TEST_ENERGY_STR}\t'
+    f'{TEST_SEG_PROPS_STR["ref_name"]}\t{TEST_SEG_PROPS_STR["read_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["read_end"]}\t{TEST_SEG_PROPS_STR["ref_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_end"]}\t{TEST_SEG_PROPS_STR["score"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_name"]}\t{TEST_SEG_PROPS_STR["read_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["read_end"]}\t{TEST_SEG_PROPS_STR["ref_start"]}\t'
+    f'{TEST_SEG_PROPS_STR["ref_end"]}\t{TEST_SEG_PROPS_STR["score"]}\t'
+    f'{TEST_FLAGS_STR_LINE}'
+)
+
 TEST_OBJECTS = {
     'None': None,
     'id_str': TEST_HYB_ID_STR,

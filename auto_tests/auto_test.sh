@@ -57,14 +57,13 @@ hyb_filter -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated.hyb}" \
            --exclude_2 any_seg_type_is mitoch-rRNA \
 
 for mode in "energy" "type" "mirna" "target" "fold" "energy type mirna target fold"; do
-
-hyb_analyze -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb}" --verbose \
-            -f "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.vienna}" \
-            --out_dir "${OUT_DIR}" \
-            --analysis_types ${mode} \
-            --analysis_name "TEST_FOLD" \
-            --seq_type dynamic \
-            --allowed_mismatches 0
+  hyb_analyze -i "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.hyb}" --verbose \
+              -f "${OUT_DIR}/${IN_HYB/.hyb/_evaluated_filtered.vienna}" \
+              --out_dir "${OUT_DIR}" \
+              --analysis_types ${mode} \
+              --analysis_name "TEST_FOLD" \
+              --seq_type dynamic \
+              --allowed_mismatches 0
 
 done
 

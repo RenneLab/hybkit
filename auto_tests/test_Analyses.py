@@ -7,27 +7,26 @@
 Automatic testing of hybkit code.
 """
 
+import os
 
-import copy
-from contextlib import nullcontext as does_not_raise
 import pytest
-# mport hybkit
 
-# ----- Import Testing Helper Data -----
-from auto_tests.test_helper_data import *
-# Includes the following variables:
-# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
-# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
-# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
-# test_out_dir, hyb_autotest_file_name, hyb_file_name
+import hybkit
+from auto_tests.test_helper_data import (
+    ART_HYB_PROPS_ALL,
+    ART_HYB_VIENNA_PROPS_1,
+    ART_HYB_VIENNA_PROPS_2,
+    HALF,
+    NEG_10,
+    ONE,
+    ZERO,
+)
+from hybkit.errors import HybkitArgError, HybkitError
 
+# from auto_tests.test_helper_functions import ()
 
-# ----- Import Testing Helper Functions -----
-from auto_tests.test_helper_functions import *
-# Includes the following functions:
-# get_expected_result_string(is_allowed=False)
-# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
-
+# ----- Linting Directives:
+# ruff: noqa: SLF001 ARG001
 
 # ----- Begin Analysis Tests -----
 # ----- Test Analysis Class Standard energy, type, and mirna Analyses -----
@@ -37,8 +36,9 @@ test_parameters = [
 ]
 
 
-@pytest.mark.parametrize("test_name,individual_add", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'individual_add'), [*test_parameters])
 def test_analysis_hyb(test_name, individual_add, tmp_path):
+    """Test Analysis class with standard energy, type, and mirna analyses."""
     hyb_autotest_file_path = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
     test_hyb_strs = [props['hyb_str'] for props in ART_HYB_PROPS_ALL]
     test_hyb_strs_dup = []
@@ -70,11 +70,11 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
     # Check energy results
     assert all_results['energy']['energy_analysis_count'] == record_count
     assert all_results['energy']['has_energy_val'] == record_count
-    assert all_results['energy']['no_energy_val'] == 0
-    assert all_results['energy']['energy_min'] == -10.0
-    assert all_results['energy']['energy_max'] == -10.0
-    assert all_results['energy']['energy_mean'] == -10.0
-    assert all_results['energy']['energy_std'] == 0.0
+    assert all_results['energy']['no_energy_val'] == ZERO
+    assert all_results['energy']['energy_min'] == NEG_10
+    assert all_results['energy']['energy_max'] == NEG_10
+    assert all_results['energy']['energy_mean'] == NEG_10
+    assert all_results['energy']['energy_std'] == ZERO
     assert all_results['energy']['binned_energy_vals'][-10] == record_count
 
     # Check type results
@@ -139,8 +139,8 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
 
     # Get Analysis Delim String:
     out_analysis_file_name = os.path.join(tmp_path, 'analysis_delim_str.csv')
-    mirna_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='mirna')
-    analysis_delim_str = hyb_analysis.get_analysis_delim_str()
+    mirna_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='mirna')  # noqa: F841
+    analysis_delim_str = hyb_analysis.get_analysis_delim_str()  # noqa: F841
 
     # Execution-only writing tests
     hyb_analysis.write_analysis_delim_str(analysis='mirna', out_file_name=out_analysis_file_name)
@@ -162,40 +162,41 @@ def test_analysis_hyb(test_name, individual_add, tmp_path):
     hyb_analysis.plot_analysis_results(out_basename=out_special_file_base)
 
     # Check erroring on bad results requests:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_analysis_results('bad_analysis')
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('bad_result')
 
 
 # ----- Test Analysis Class Standard energy, type, and mirna Analyses -----
 def test_analysis_problems(tmp_path):
+    """Test Analysis class with standard energy, type, and mirna analyses."""
     hyb_autotest_file_path = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
     test_hyb_strs = [props['hyb_str'] for props in ART_HYB_PROPS_ALL]
     test_hyb_strs_dup = []
     for test_hyb_str in test_hyb_strs:
         test_hyb_strs_dup += ([test_hyb_str] * 15)
-    record_count = len(test_hyb_strs_dup)
+    record_count = len(test_hyb_strs_dup)  # noqa: F841
     combined_hyb_strs = ''.join(test_hyb_strs_dup)
     with open(hyb_autotest_file_path, 'w') as hyb_autotest_file:
         hyb_autotest_file.write(combined_hyb_strs)
 
     # Test raise error with no analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=[],
             name='test_analysis',
         )
 
     # Test raise error with bad analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=['bad_analysis'],
             name='test_analysis',
         )
 
     # Test raise error with non-string analysis
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis = hybkit.analysis.Analysis(
             analysis_types=[1],
             name='test_analysis',
@@ -207,20 +208,20 @@ def test_analysis_problems(tmp_path):
     )
 
     # Test raise error if no energy values
-    with pytest.raises(RuntimeError):
-        with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
+    with pytest.raises(HybkitError):
+        with hybkit.HybFile(hyb_autotest_file_path) as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.energy = None
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error if no type values
-    with pytest.raises(RuntimeError):
-        with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
+    with pytest.raises(HybkitError):
+        with hybkit.HybFile(hyb_autotest_file_path) as hyb_file:
             for hyb_record in hyb_file:
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error if no mirna values
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()
@@ -231,18 +232,18 @@ def test_analysis_problems(tmp_path):
         analysis_types=['target'],
         name='test_analysis',
     )
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()
                 hyb_analysis.add_hyb_record(hyb_record)
 
     # Test raise error for bad detail request
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('bad_result')
 
     # Test raise error for inactive detail request
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitArgError):
         hyb_analysis.get_specific_result('fold_match_counts')
 
     # Test raise error if no fold_record values
@@ -250,7 +251,7 @@ def test_analysis_problems(tmp_path):
         analysis_types=['mirna', 'fold'],
         name='test_analysis',
     )
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HybkitError):
         with hybkit.HybFile(hyb_autotest_file_path, 'r') as hyb_file:
             for hyb_record in hyb_file:
                 hyb_record.eval_types()
@@ -260,6 +261,7 @@ def test_analysis_problems(tmp_path):
 
 # ----- Test Analysis Class Standard fold Analysis -----
 def test_analysis_fold(tmp_path):
+    """Test Analysis class with standard fold analysis."""
     hyb_autotest_file_path = os.path.join(tmp_path, 'hyb_autotest_file.hyb')
     vienna_autotest_file_path = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     all_hyb_vienna_props = [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]
@@ -283,8 +285,8 @@ def test_analysis_fold(tmp_path):
         analysis_types='fold',
         name='test_analysis',
     )
-    with open(hyb_autotest_file_path, 'r') as hyb_autotest_file, \
-         open(vienna_autotest_file_path, 'r') as vienna_autotest_file:
+    with open(hyb_autotest_file_path) as hyb_autotest_file, \
+         open(vienna_autotest_file_path) as vienna_autotest_file:
         assert len(hyb_autotest_file.readlines()) == record_count
         assert len(vienna_autotest_file.readlines()) == record_count * 3
 
@@ -317,14 +319,14 @@ def test_analysis_fold(tmp_path):
     }
     assert fold_results['mirna_nt_fold_counts'][4] == record_count
     assert fold_results['mirna_nt_fold_counts'][24] == (record_count / 2)
-    assert fold_results['mirna_nt_fold_props'][4] == 1.0
-    assert fold_results['mirna_nt_fold_props'][24] == 0.5
+    assert fold_results['mirna_nt_fold_props'][4] == ONE
+    assert fold_results['mirna_nt_fold_props'][24] == HALF
 
     # Execution-only writing tests
     # Get Analysis Delim String:
     out_analysis_file_name = os.path.join(tmp_path, 'analysis_delim_str.csv')
-    fold_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='fold')
-    analysis_delim_str = hyb_analysis.get_analysis_delim_str()
+    fold_analysis_delim_str = hyb_analysis.get_analysis_delim_str(analysis='fold')  # noqa: F841
+    analysis_delim_str = hyb_analysis.get_analysis_delim_str()  # noqa: F841
     hyb_analysis.write_analysis_delim_str(analysis='fold', out_file_name=out_analysis_file_name)
     hyb_analysis.write_analysis_delim_str(analysis=['fold'], out_file_name=out_analysis_file_name)
     hyb_analysis.write_analysis_delim_str(out_file_name=out_analysis_file_name)

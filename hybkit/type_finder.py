@@ -12,9 +12,16 @@ parse sequence identifiers to identify sequence type.
 
 import os
 import types
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Union
+
+from hybkit.errors import HybkitArgError, HybkitMiscError
+
+# ----- Begin Typing Variables ----- #
+SegProps = Dict[str, Union[float, int, str]]
 
 
-class TypeFinder(object):
+# ----- Begin TypeFinder Class ----- #
+class TypeFinder:
     """
     Class for parsing identifiers to identify sequence 'type'.
 
@@ -84,13 +91,18 @@ class TypeFinder(object):
 
     # TypeFinder : Public Methods : Initialization
     # STUB, class is designed to be used with class-level functions.
-    def __init__(self):
+    def __init__(self) -> NoReturn:
         """Class not used with initialization."""
-        raise RuntimeError('WARN: TypeFinder class not intended to be initialized for use.')
+        message = 'TypeFinder class not intended to be initialized for use.'
+        raise RuntimeError(message)
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def set_method(cls, method, params={}):
+    def set_method(
+            cls,
+            method: str,
+            params: Optional[Dict[str, Any]] = None
+            ) -> None:
         """
         Select method to use when finding types.
 
@@ -104,14 +116,17 @@ class TypeFinder(object):
         if method not in cls.methods:
             message = 'Selected method: %s is not defined.\n' % method
             message += 'Allowed Options:' + ', '.join(cls.methods.keys())
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         cls.find_with_params = getattr(cls, cls.methods[method])
-        cls.params = params
+        if params is not None:
+            use_params = params
+        else:
+            use_params = {}
+        cls.params = use_params
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def method_is_set(cls):
+    def method_is_set(cls) -> bool:
         """
         Return whether a TypeFinder method has been set.
 
@@ -124,14 +139,14 @@ class TypeFinder(object):
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def check_set_method(cls):
+    def check_set_method(cls) -> None:
         """If no TypeFinder method set, set as :attr:`default_method`."""
         if not cls.method_is_set():
             cls.set_method(cls.default_method)
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def find(cls, seg_props):
+    def find(cls, seg_props: SegProps) -> Optional[str]:
         """
         Find type of segment using :meth:`TypeFinder.find_custom_method`.
 
@@ -148,12 +163,17 @@ class TypeFinder(object):
             str: Type of the provided segment, or None if a type cannot be identified.
         """
         if cls.find_with_params is None:
-            raise RuntimeError('TypeFinder method has not been set.')
+            message = 'TypeFinder method has not been set.'
+            raise RuntimeError(message)
         return cls.find_with_params(seg_props, cls.params)
 
     # TypeFinder : Public Classmethods : method
     @classmethod
-    def set_custom_method(cls, method, params={}):
+    def set_custom_method(
+            cls,
+            method: Callable,
+            params: Optional[dict] = None
+            ) -> None:
         """
         Set the method for use to find seg types.
 
@@ -173,11 +193,17 @@ class TypeFinder(object):
             params (dict, optional): dict of custom parameters to set for use.
         """
         cls.find_with_params = types.MethodType(method, cls)
-        cls.params = params
+        if params is not None:
+            cls.params = params
+        else:
+            cls.params = {}
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def method_hybformat(seg_props, params={}):
+    def method_hybformat(
+            seg_props: SegProps,
+            params: Optional[dict] = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment, or None if segment cannot be identified.
 
@@ -200,11 +226,10 @@ class TypeFinder(object):
             seg_props (dict): :obj:`seg_props` from :class:`hybkit.HybRecord`
             params (dict, optional): Unused in this method.
         """
-        if params:
+        if params is not None and params:
             message = 'method_hybformat does not use params, but params were provided:\n'
             message += str(params)
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         if '_' not in seg_props['ref_name']:
             return None
         else:
@@ -213,7 +238,10 @@ class TypeFinder(object):
 
     # TypeFinder : Public Staticmethods : methods
     @staticmethod
-    def method_string_match(seg_props, params={}):
+    def method_string_match(
+            seg_props: SegProps,
+            params: Optional[dict] = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment, or None if unidentified.
 
@@ -242,13 +270,11 @@ class TypeFinder(object):
                 to evaluate.
             params (dict, optional): Dict with search parameters as described above.
         """
-        if not params:
+        if params is None or not params:
             message = 'method_string_match requires params, but none were provided.'
-            print(message)
-            raise RuntimeError(message)
+            raise HybkitArgError(message)
         seg_name = seg_props['ref_name']
         found_type = None
-        check_done = False
         if 'startswith' in params and not found_type:
             for search_string, search_type in params['startswith']:
                 if seg_name.startswith(search_string):
@@ -274,7 +300,7 @@ class TypeFinder(object):
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_string_match_params(legend_file):
+    def make_string_match_params(legend_file: str) -> dict:
         """
         Read csv and return a dict of search parameters for :meth:`method_string_match`.
 
@@ -295,16 +321,14 @@ class TypeFinder(object):
                           ('_trans', 'mRNA')   ]}
 
         """
-        ALLOWED_SEARCH_TYPES = {'startswith', 'contains', 'endswith', 'matches'}
+        allowed_search_types = {'startswith', 'contains', 'endswith', 'matches'}
         return_dict = {}
         if not isinstance(legend_file, (str)):
             message = 'legend_file must be a string, not %s' % type(legend_file)
-            print(message)
-            raise TypeError(message)
+            raise HybkitArgError(message)
         if not os.path.isfile(legend_file):
             message = 'File: %s for make_string_match_params() method ' % legend_file
             message += 'not found.'
-            print(message)
             raise FileNotFoundError(message)
 
         with open(legend_file, 'r') as legend_file_obj:
@@ -315,19 +339,17 @@ class TypeFinder(object):
                 # Skip Commented Lines
                 if line.lstrip().startswith('#'):
                     continue
-                line = line.strip()
-                split_line = line.split(',')
-                if len(split_line) != 3:
-                    message = 'Error reading legend line: \n%s\n%s' % (str(line), str(split_line))
+                use_line = line.strip()
+                split_line = use_line.split(',')
+                if len(split_line) != 3: # noqa: PLR2004
+                    message = f'Error reading legend line: \n{use_line!s}\n{split_line!s}'
                     message += '\nThree comma-separated entries expected.'
-                    print(message)
                     raise RuntimeError(message)
                 search_type, search_string, seg_type = split_line
-                if search_type not in ALLOWED_SEARCH_TYPES:
-                    message = 'Read Search type: "%s"\n' % search_type
-                    message += 'Not in allowed types: %s' % ', '.join(ALLOWED_SEARCH_TYPES)
-                    message += '\nFor legend line: \n%s\n' % (str(line))
-                    print(message)
+                if search_type not in allowed_search_types:
+                    message = f'Read Search type: "{search_type}"\n'
+                    message += 'Not in allowed types: {}'.format(', '.join(allowed_search_types))
+                    message += f'\nFor legend line: \n{use_line!s}\n'
                     raise RuntimeError(message)
 
                 if search_type not in return_dict:
@@ -339,7 +361,10 @@ class TypeFinder(object):
 
     # TypeFinder : Public Methods : Flag_Info : find_seg_type
     @staticmethod
-    def method_id_map(seg_props, params={}):
+    def method_id_map(
+            seg_props: SegProps,
+            params: dict = None,
+            ) -> Optional[str]:
         """
         Return the type of the provided segment or None if it cannot be identified.
 
@@ -356,6 +381,8 @@ class TypeFinder(object):
         This dict can be generated with the associated :meth:`make_id_map_params` method.
 
         Args:
+            seg_props (dict): :class:`~hybkit.HybRecord` segment properties dict
+                to evaluate.
             params (dict): Dict of mapping of sequence identifiers to sequence types.
 
         Returns:
@@ -363,6 +390,8 @@ class TypeFinder(object):
 
         """
         seg_name = seg_props['ref_name']
+        if params is None:
+            params = {}
         if seg_name in params:
             return params[seg_name]
         else:
@@ -370,7 +399,7 @@ class TypeFinder(object):
 
     # TypeFinder : Public Staticmethods : find_seg_type
     @staticmethod
-    def make_id_map_params(mapped_id_files):
+    def make_id_map_params(mapped_id_files: List[str]) -> dict:
         """
         Read file(s) into a mapping of sequence identifiers.
 
@@ -395,7 +424,6 @@ class TypeFinder(object):
         if not isinstance(mapped_id_files, (str, list, tuple)):
             message = 'arguments passed to mapped_id_files and type_file_pairs must be '
             message += 'provided as a list or tuple.\n  Provided: "%s"' % str(mapped_id_files)
-            print(message)
             raise TypeError(message)
         if isinstance(mapped_id_files, str):
             mapped_id_files = [mapped_id_files]
@@ -404,31 +432,28 @@ class TypeFinder(object):
             # Check if file not exists and raise error
             if not os.path.isfile(mapped_id_file):
                 message = 'File: %s for make_id_map_params() method not found.' % mapped_id_file
-                print(message)
                 raise FileNotFoundError(message)
             with open(mapped_id_file, 'r') as mapped_id_file_obj:
-                for line in mapped_id_file_obj:
+                for raw_line in mapped_id_file_obj:
                     # Skip Blank Lines
-                    line = line.strip()
+                    line = raw_line.strip()
                     if not line.split():
                         continue
                     # Skip Commented Lines
                     if line.startswith('#'):
                         continue
                     split_line = line.split(',')
-                    if len(split_line) != 2:
+                    if len(split_line) != 2:  # noqa: PLR2004
                         message = 'Error reading mapped-id line: '
-                        message += '\n%s\n%s' % (str(line), str(split_line))
+                        message += f'\n{line!s}\n{split_line!s}'
                         message += '\nTwo comma-separated entries expected.'
-                        print(message)
-                        raise RuntimeError(message)
+                        raise HybkitMiscError(message)
                     seq_id, seg_type = split_line
 
                     if seq_id in return_dict and seg_type != return_dict[seq_id]:
                         message = 'Conflicting types assigned for sequence id: %s\n' % seq_id
-                        message += '  %s  |  %s' % (return_dict[seq_id], seg_type)
-                        print(message)
-                        raise RuntimeError(message)
+                        message += f'  {return_dict[seq_id]}  |  {seg_type}'
+                        raise HybkitMiscError(message)
                     else:
                         return_dict[seq_id] = seg_type
 
@@ -436,7 +461,7 @@ class TypeFinder(object):
 
     # TypeFinder : Private classmethods : find_seg_type
     @classmethod
-    def _reset(cls):
+    def _reset(cls) -> None:
         """
         Reset the class to its initial state.
 

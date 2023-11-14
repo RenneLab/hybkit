@@ -91,7 +91,9 @@ Hybkit API:
     Record attributes can be analyzed, set, and evaluated using included class methods.
 
     For example, a workflow to print the identifiers of only sequences within a ".hyb" file
-    that contain a miRNA can be performed as such::
+    that contain a miRNA can be performed as such:
+
+    .. code-block:: Python
 
         #!/usr/bin/env python3
         import hybkit
@@ -145,6 +147,7 @@ Installation:
         * Python3.8+
         * `matplotlib <https://matplotlib.org/>`_ >= 3.7.1 (|Hunter2007|_)
         * `BioPython <https://biopython.org/>`_ >= 1.79 (|Cock2009|_)
+        * `typing_extensions <https://pypi.org/project/typing-extensions/>` >= 4.8.0
 
     Via PyPI / Python PIP:
         |PipVersion|
@@ -212,12 +215,30 @@ Installation:
 
     Further documentation on hybkit usage can be found in |docs_link|_.
 
-    Copyright:
-        | hybkit is a free, sharable, open-source project.
-        | All source code and executable scripts contained within this package are considered
-          part of the "hybkit" project and are distributed without any warranty or implied warranty
-          under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
-          file.
+Setup Testing:
+    Hybkit provides a suite of unit tests to maintain stability of the API and script
+    functionalities. To run the API test suite, install pytest and run the tests from the
+    root directory of the hybkit package:
+
+    .. code-block:: bash
+
+        $ pip install pytest
+        $ pytest
+
+    Command-line scripts can be tested by running the auto_test.sh script in
+    the auto_tests directory:
+
+    .. code-block:: bash
+
+        $ ./auto_tests/auto_test.sh
+
+
+Copyright:
+    | hybkit is a free, sharable, open-source project.
+    | All source code and executable scripts contained within this package are considered
+        part of the "hybkit" project and are distributed without any warranty or implied warranty
+        under the GNU General Public License v3.0 or any later version, described in the "LICENSE"
+        file.
 
 .. |Helwak2013| replace:: *Helwak et al. (Cell 2013)*
 .. _Helwak2013: https://doi.org/10.1016/j.cell.2013.03.043
@@ -251,4 +272,5 @@ Installation:
 .. |hybkit API| replace:: *hybkit API*
 .. |docs_link| replace:: hybkit's ReadTheDocs
 .. _docs_link: https://hybkit.readthedocs.io#
-.. |example_01_image| image:: example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
+.. |example_01_image| image:: https://raw.githubusercontent.com/RenneLab/hybkit/master/example_01_type_mirna_analysis/example_output/combined_analysis_types_mirna_hybrids.png
+

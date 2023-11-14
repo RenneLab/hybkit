@@ -8,27 +8,16 @@ Automatic testing of hybkit ViennaFile Class.
 """
 
 import os
-import sys
-import copy
-from contextlib import nullcontext as does_not_raise
-import argparse
+
 import pytest
+
 import hybkit
+from auto_tests.test_helper_data import ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2, test_out_dir
+from auto_tests.test_helper_functions import get_expected_result_context
+from hybkit.errors import HybkitMiscError
 
-# ----- Import Testing Helper Data -----
-from auto_tests.test_helper_data import *
-# Includes the following variables:
-# TEST_HYBID_STR, TEST_SEQ_STR, TEST_FOLD_STR, TEST_ENERGY_STR
-# ART_HYB_PROPS_1, ART_HYB_PROPS_ALL, ART_BAD_HYB_STRS
-# ID_ALLOWED_TYPES, SEQ_ALLOWED_TYPES, FOLD_ALLOWED_TYPES, ENERGY_ALLOWED_TYPES
-# test_out_dir, vienna_autotest_file_name, hyb_file_name
-
-
-# ----- Import Testing Helper Functions -----
-from auto_tests.test_helper_functions import *
-# Includes the following functions:
-# get_expected_result_string(is_allowed=False)
-# get_expected_result_context(expect_str, error_types = (TypeError, RuntimeError))
+# ----- Linting Directives:
+# ruff: noqa: SLF001 ARG001
 
 hybkit.util.set_setting('error_mode', 'raise')
 hybkit.util.set_setting('iter_error_mode', 'raise')
@@ -36,18 +25,19 @@ hybkit.util.set_setting('iter_error_mode', 'raise')
 
 # ----- Begin ViennaFile Tests -----
 test_parameters = [
-    ('bad_type', 'Raise', {'seq_type': 'badtype'}),
-    ('bad_error_mode', 'Raise', {'error_mode': 'badmode'}),
+    ('bad_type', 'HybkitArgError', {'seq_type': 'badtype'}),
+    ('bad_error_mode', 'HybkitArgError', {'error_mode': 'badmode'}),
 ]
 
 
-@pytest.mark.parametrize("test_name,expectation,test_kwargs", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'expectation', 'test_kwargs'), [*test_parameters])
 # ----- Test Misc Properties of ViennaFiles -----
 def test_viennafile_constructor_misc(test_name, expectation, test_kwargs, tmp_path):
+    """Test miscellaneous properties of ViennaFiles."""
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     expect_context = get_expected_result_context(expectation)
     with expect_context:
-        vienna_file = hybkit.ViennaFile.open(
+        _vienna_file = hybkit.ViennaFile.open(
             vienna_autotest_file_name, 'w',
             **test_kwargs
         )
@@ -65,8 +55,9 @@ for prop_set in [ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2]:
     )
 
 
-@pytest.mark.parametrize("test_name,expectation,test_props", [*test_parameters])
+@pytest.mark.parametrize(('test_name', 'expectation', 'test_props'), [*test_parameters])
 def test_viennafile_io(test_name, expectation, test_props, tmp_path):
+    """Test reading and writing of ViennaFile objects."""
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     if not os.path.isdir(test_out_dir):
         os.mkdir(test_out_dir)
@@ -97,7 +88,8 @@ def test_viennafile_io(test_name, expectation, test_props, tmp_path):
 
 # ----- Test ViennaFile Misc -----
 def test_viennafile_misc(tmp_path):
+    """Test miscellaneous properties of ViennaFiles."""
     vienna_autotest_file_name = os.path.join(tmp_path, 'vienna_autotest_file.vienna')
     vienna_file = hybkit.ViennaFile.open(vienna_autotest_file_name, 'w')
-    with pytest.raises(RuntimeError):
-        vienna_file._ensure_FoldRecord(None)
+    with pytest.raises(HybkitMiscError):
+        vienna_file._ensure_foldrecord(None)

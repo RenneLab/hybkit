@@ -13,6 +13,12 @@ Gay, Lauren A., et al. "Modified cross-linking, ligation, and sequencing of hybr
 herpesvirus microRNA targets in endothelial cells."
 Journal of virology 92.8 (2018): e02138-17.
 
+The analysis is carried out in multiple example implementations which produce identical output:
+    * via the `Command-Line
+      <https://github.com/RenneLab/hybkit/blob/master/example_04_fold_analysis/analysis_shell.sh/>`_
+    * via the `Python3 API
+      <https://github.com/RenneLab/hybkit/blob/master/example_04_fold_analysis/analysis_python.py/>`_
+
 This analysis investigates the predicted folding of miRNA
 from an experimental replicate infected with
 Kaposi's Sarcoma-Associated Herpesvirus (KSHV), which are given the type name "KSHV-miRNA".

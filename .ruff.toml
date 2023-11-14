@@ -1,0 +1,16 @@
+# Load the ruff formatter settings.
+extend = "/home/ds/scripts/ruff.toml"
+
+# select = ["ALL"]
+
+ignore = [
+    "PT012", # Limit Pytest Raises: One Simple Statement
+    "SIM117", # Disallow compound with statements
+    # "ANN202", # Require type annotations on private methods
+    "ANN101", # Missing type annotation for self in method
+    "ANN102", # Missing type annotation for cls in classmethod
+]
+
+select = [
+    "ANN", # Add type annotations
+]

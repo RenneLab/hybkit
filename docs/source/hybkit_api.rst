@@ -16,6 +16,7 @@ hybkit API
     :mod:`~hybkit.analysis`       Classes for predefined analyses of hyb records
     :mod:`~hybkit.plot`           Plotting methods for analysis results
     :mod:`~hybkit.util`           Support methods for executable scripts
+    :mod:`~hybkit.errors`         Error classes for the hybkit package
     ============================= =====================================================
 
 .. toctree::
@@ -27,3 +28,4 @@ hybkit API
    hybkit.plot
    hybkit.settings
    hybkit.util
+   hybkit.errors

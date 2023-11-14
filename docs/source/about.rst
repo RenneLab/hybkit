@@ -23,6 +23,21 @@ Changelog
 ---------
 
 
+    * 0.3.4 (ongoing) Changes include:
+
+      * Misc Bugfixes and Refinements
+      * Switch code linting to Ruff
+      * Add hybkit.errors module and HybkitError classes
+      * Moved printing of warnings to python logging module
+      * Add option for direct passage of file-like object for construction of
+        HybFile and ViennaFile
+      * Add HybRecord.to_csv_header(), HybRecord.to_fields(),
+        and HybRecord.to_fields_header() methods
+      * Refine description of HybFile.open() constructor method
+      * Add typing_extensions dependency
+      * Add Python3.8-compatible type hints to API
+      * Documentation Updates
+
     * 0.3.3 (2023-09) Changes include:
 
       * Misc Bugfixes and Refinements

@@ -6,16 +6,17 @@
 """This module contains settings information for hybkit classes and methods."""
 
 import copy
+from typing import Dict, List
 
 
 # ----- Begin Settings Helper Functions -----
 # Util : Settings Helper Functions
-def _all_str_cases(in_str):
+def _all_str_cases(in_str: str) -> List[str]:
     return [in_str.lower(), in_str.title(), in_str.upper()]
 
 
 # Util : Settings Helper Functions
-def _settings_info_to_settings(settings_info_dict):
+def _settings_info_to_settings(settings_info_dict: Dict) -> dict:
     ret_dict = {}
     for key in settings_info_dict:
         ret_dict[key] = copy.deepcopy(settings_info_dict[key][0])
@@ -48,6 +49,12 @@ MIRNA_TYPES = ['miRNA', 'microRNA']
 ANALYSIS_TYPE_OPTIONS_HYB = ['energy', 'type', 'mirna', 'target']
 ANALYSIS_TYPE_OPTIONS_FOLD = ['fold']
 ANALYSIS_TYPE_OPTIONS = [*ANALYSIS_TYPE_OPTIONS_HYB, *ANALYSIS_TYPE_OPTIONS_FOLD]
+
+#: Minimum number of fields in hyb line:
+MIN_RECORD_FIELDS = 15
+
+#: Maximum number of fields in hyb line:
+MAX_RECORD_FIELDS = 16
 
 # #: Default minimum Gibbs Free Energy for bins in :class:`EnergyAnalysis`
 # #: (range: ENERGY_MIN_BIN <= 0).

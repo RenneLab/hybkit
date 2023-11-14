@@ -5,12 +5,14 @@
 
 """Setup module for the hybkit project."""
 
-import setuptools
-import os
-import hybkit
-import glob
 import fnmatch
+import glob
+import os
 import pprint
+
+import setuptools
+
+# import hybkit
 
 # Set project directory
 proj_dir = os.path.abspath(os.path.dirname(__file__))
@@ -25,7 +27,7 @@ with open(os.path.join(proj_dir, 'README.rst'), encoding='utf-8') as f:
 # Get the remaining project details variables from the "__about__.py" file.
 about_vars = {}
 with open(os.path.join(proj_dir, 'hybkit', '__about__.py')) as f:
-    exec(f.read(), about_vars)
+    exec(f.read(), about_vars)  #noqa: S102
 
 # Dynamically generate reference data file tuples:
 data_files = []
@@ -37,12 +39,12 @@ for item in glob.glob('docs/**', recursive=True):
         data_file_dirs.append(item)
 
 ignore_file_patterns = []
-with open('.gitignore', 'r') as git_ignore:
+with open('.gitignore') as git_ignore:
     for line in git_ignore:
-        line = line.strip()
-        if line.startswith('#') or not line:
+        use_line = line.strip()
+        if use_line.startswith('#') or not use_line:
             continue
-        ignore_file_patterns.append(line)
+        ignore_file_patterns.append(use_line)
 
 for dir_name in data_file_dirs:
     file_list = [f for f in glob.glob(os.path.join(dir_name, '*'))

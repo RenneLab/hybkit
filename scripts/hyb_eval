@@ -3,7 +3,7 @@
 # Renne Lab, University of Florida
 # Hybkit Project : http://www.github.com/RenneLab/hybkit
 
-"""
+r"""
 Read hyb files (and optional matched fold files) and evaluate the contained hybrids.
 
 This utility reads in one or more files in hyb-format
@@ -66,18 +66,32 @@ Evaluation Types:
                         --mirna_types miRNA kshv-miRNA
 """
 
-import os
 import argparse
 import contextlib
+import os
+from typing import List, Optional, Union
+
 import hybkit
+from hybkit import HybkitMiscError
+from hybkit.__about__ import (
+    __author__,
+    __contact__,
+    __credits__,
+    __date__,
+    __deprecated__,
+    __email__,
+    __license__,
+    __maintainer__,
+    __status__,
+    __version__,
+)
 
-# Import module-level dunder-names:
-from hybkit.__about__ import (__author__, __contact__, __credits__, __date__, __deprecated__,
-                              __email__, __license__, __maintainer__, __status__, __version__)
-
+# ----- Linting Directives:
+# ruff: noqa: F401 SLF001
 
 # Create Command-line Argument Parser
-def make_parser():
+def make_parser() -> argparse.ArgumentParser:
+    """Create the command-line argument parser for the hyb_eval script."""
     parser_components = [
         hybkit.util.cmb_hyb_fold_io_parser,
         hybkit.util.cmb_out_opts_parser,
@@ -102,22 +116,22 @@ def make_parser():
 
 
 # Define main script function.
-def hyb_eval(in_hyb_files,
-             eval_types,
-             out_dir='.',
-             in_fold_files=None,
-             out_hyb_files=None,
-             out_fold_files=None,
-             out_suffix=hybkit.settings._EVAL_OUT_SUFFIX,
-             type_method=None,
-             type_params=None,
-             type_params_file=None,
-             set_dataset=None,
-             verbose=False,
-             silent=False,
-             ):
+def hyb_eval(
+        in_hyb_files: List[str],
+        eval_types: Union[str, List[str]],
+        out_dir: str = '.',
+        in_fold_files: Optional[List[str]] = None,
+        out_hyb_files: Optional[List[str]] = None,
+        out_fold_files: Optional[List[str]] = None,
+        out_suffix: str = hybkit.settings._EVAL_OUT_SUFFIX,
+        type_method: Optional[str] = None,
+        type_params: Optional[dict] = None,
+        type_params_file: Optional[str] = None,
+        set_dataset: Optional[str] = None,
+        verbose: bool = False,
+        silent: bool = False,
+        ) -> None:
     """Perform main script function."""
-
     if not silent:
         print('\nPerforming Evaluation of Hyb and Fold Files...')
 
@@ -126,7 +140,7 @@ def hyb_eval(in_hyb_files,
     do_mirna = ('mirna' in eval_types)
 
     if verbose:
-        print('\nPerforming Evaluation Types: ' + ', '.join([x for x in eval_types]))
+        print('\nPerforming Evaluation Types: ' + ', '.join(list(eval_types)))
         print()
 
     # Prepare for type eval.
@@ -139,18 +153,16 @@ def hyb_eval(in_hyb_files,
         if type_method != make_parser().get_default('type_method'):
             if verbose:
                 print('Setting non-default type finding method: %s' % type_method)
-            params = {}
             params_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
             if params_method_str is not None:
-                params_method = getattr(hybkit.HybRecord.TypeFinder, params_method_str)
-                if type_params is None:
+                param_method = getattr(hybkit.HybRecord.TypeFinder, params_method_str)
+                if type_params is None:  # noqa: SIM102
                     if hybkit.HybRecord.TypeFinder.param_methods_needs_file[type_method]:
                         if type_params_file is None:
                             message = 'Type-Finding Parameter Method: %s ' % type_method
                             message += 'requires an input file.\nPlease set type_params or '
                             message += 'type_params_file setting.'
-                            print(message)
-                            raise Exception(message)
+                            raise HybkitMiscError(message)
                         if verbose:
                             print('Using type parameter file: %s' % type_params_file)
                         param_method_str = hybkit.HybRecord.TypeFinder.param_methods[type_method]
@@ -160,7 +172,7 @@ def hyb_eval(in_hyb_files,
                     print()
             hybkit.HybRecord.TypeFinder.set_method(type_method, type_params)
 
-    if do_mirna:
+    if do_mirna:  # noqa: SIM102
         if verbose:
             print('Assigning types as miRNA:')
             print('   ', ', '.join(hybkit.settings.HybRecord_settings['mirna_types']), '\n')
@@ -200,19 +212,19 @@ def hyb_eval(in_hyb_files,
 
         if in_fold_file is not None:
             if any(in_fold_file.endswith(s) for s in hybkit.settings.VIENNA_SUFFIXES):
-                InFoldClass = hybkit.ViennaFile
+                in_fold_class = hybkit.ViennaFile
             elif any(in_fold_file.endswith(s) for s in hybkit.settings.CT_SUFFIXES):
-                InFoldClass = hybkit.CtFile
+                in_fold_class = hybkit.CtFile
             else:
                 raise ValueError('Unrecognized fold file type: %s' % in_fold_file)
-            OutFoldClass = hybkit.ViennaFile
+            out_fold_class = hybkit.ViennaFile
             in_fold_args = (in_fold_file, 'r')
             out_fold_args = (out_fold_file, 'w')
         else:
-            InFoldClass = contextlib.nullcontext
-            OutFoldClass = contextlib.nullcontext
-            in_fold_args = tuple()
-            out_fold_args = tuple()
+            in_fold_class = contextlib.nullcontext
+            out_fold_class = contextlib.nullcontext
+            in_fold_args = ()
+            out_fold_args = ()
 
         if verbose:
             print('Evaluating Files:')
@@ -223,20 +235,17 @@ def hyb_eval(in_hyb_files,
             if in_fold_files:
                 print('    Output Fold: ' + out_fold_file)
 
-        include_count = 0
-        exclude_count = 0
-
         # Start Record Iteration
         with hybkit.HybFile(in_hyb_file, 'r') as in_hyb, \
              hybkit.HybFile(out_hyb_file, 'w') as out_hyb, \
-             InFoldClass(*in_fold_args) as in_fold, \
-             OutFoldClass(*out_fold_args) as out_fold:
+             in_fold_class(*in_fold_args) as in_fold, \
+             out_fold_class(*out_fold_args) as out_fold:
             if in_fold_file is None:
                 record_iter = in_hyb
             else:
                 record_iter = hybkit.HybFoldIter(in_hyb, in_fold, combine=True)
 
-            for i, hyb_record in enumerate(record_iter, start=1):
+            for _i, hyb_record in enumerate(record_iter, start=1):
                 if set_dataset:
                     hyb_record.set_flag('dataset', file_label)
                 if do_type:
