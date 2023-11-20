@@ -23,7 +23,7 @@ Changelog
 ---------
 
 
-    * 0.3.4 (ongoing) Changes include:
+    * 0.3.4 (2023-11) Changes include:
 
       * Misc Bugfixes and Refinements
       * Switch code linting to Ruff

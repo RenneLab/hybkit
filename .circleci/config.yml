@@ -35,6 +35,7 @@ jobs:
       - run:
           name: Pytest-Test
           command: |
+            pip show pytest
             coverage run --source=. --omit="conf*",setup.py -m pytest
             coveralls
 
