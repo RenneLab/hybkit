@@ -28,6 +28,9 @@ hybkit
 .. image:: https://img.shields.io/pypi/pyversions/hybkit?logo=python&logoColor=white
    :target: https://pypi.org/project/hybkit/
    :alt: PyPI - Python Version
+.. image:: https://img.shields.io/badge/DOI-10.1093%2Fbioinformatics%2Fbtad721-0887BA?style=flat&logo=DOI&logoColor=white
+   :target: https://doi.org/10.1093/bioinformatics/btad721
+   :alt: Manuscript DOI, Journal Bioinformatics
 .. image:: https://img.shields.io/badge/License-GPLv3+-blue?logo=GNU
    :target: https://www.gnu.org/licenses/gpl-3.0.en.html
    :alt: GNU GPLv3+ License
