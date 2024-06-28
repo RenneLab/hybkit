@@ -22,6 +22,9 @@ Lead Developer
 Changelog
 ---------
 
+    * 0.3.5 (2024-06) Changes include:
+
+      * Misc Bugfixes
 
     * 0.3.4 (2023-11) Changes include:
 
