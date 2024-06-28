@@ -70,7 +70,6 @@ def _bool_from_string(value: Optional[Union[str, bool]]) -> bool:
     else:
         raise argparse.ArgumentTypeError('Boolean value expected. Provided: %s' % value)
 
-
 _custom_types = {
     'custom_bool_from_str': _bool_from_string,
     'str': str,
@@ -142,7 +141,7 @@ def file_exists(file_name: str, required_suffixes: Optional[List[str]]=None) -> 
                        )
             raise argparse.ArgumentTypeError(message)
 
-    # Normalize the file patha
+    # Normalize the file path
     file_name = os.path.normpath(file_name)
 
     # If global option set, then find the absolute path.
@@ -880,7 +879,7 @@ hyb_analyze_parser.add_argument(
     '-a', '--analysis_types',
     # required=True,
     nargs='+',
-    default='fold',
+    default=['fold'],
     action='store',
     choices=copy.deepcopy(settings.ANALYSIS_TYPE_OPTIONS),
     help=_this_arg_help
