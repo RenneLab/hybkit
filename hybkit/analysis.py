@@ -281,7 +281,10 @@ class Analysis:
                 raise HybkitArgError(message)
             else:
                 self.analysis_types.append(analysis_type.lower())
-        self.name = self._sanitize_name(name)
+        if name is not None:
+            self.name = self._sanitize_name(name)
+        else:
+            self.name = name 
 
         if quant_mode is None:
             self.quant_mode = self.settings['quant_mode']
