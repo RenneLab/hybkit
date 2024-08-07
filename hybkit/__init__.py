@@ -3394,7 +3394,7 @@ class HybFoldIter:
                 # Check for "Mismatch" errors
                 if (not error
                     and 'max_mismatch' in self.settings['error_checks']
-                    and FoldRecord.settings['allowed_mismatches'] > 0
+                    and FoldRecord.settings['allowed_mismatches'] >= 0
                         ):
                     hyb_fold_mismatches = next_fold_record.count_hyb_record_mismatches(next_hyb_record)
                     if hyb_fold_mismatches > FoldRecord.settings['allowed_mismatches']:
