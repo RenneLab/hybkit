@@ -7,6 +7,8 @@
 Automatic testing of hybkit CtFile Class.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 # from contextlib import nullcontext as does_not_raise
 # import pytest
 # import hybkit

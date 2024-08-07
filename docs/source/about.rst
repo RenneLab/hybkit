@@ -22,6 +22,10 @@ Lead Developer
 Changelog
 ---------
 
+    * 0.3.7-dev (ongoing) Changes include:
+
+      * Misc Bugfixes & Refinements
+
     * 0.3.6 (2024-08) Changes include:
 
       * Fix passing multiple error modes to --error_checks shell argument
