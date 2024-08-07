@@ -22,6 +22,13 @@ Lead Developer
 Changelog
 ---------
 
+    * 0.3.6 beta (2024-08) Changes include:
+
+      * Fix passing multiple error modes to --error_checks shell argument
+      * Change HybFoldIter error backend to non-recursive design
+      * Allow disabling of hyb / fold sequence mismatch checking by setting
+        mismatches to "-1"
+
     * 0.3.5 (2024-06) Changes include:
 
       * Misc Bugfixes

@@ -88,7 +88,12 @@ from hybkit.__about__ import (
     __status__,
     __version__,
 )
-from hybkit.errors import HybkitArgError, HybkitConstructorError, HybkitIterError, HybkitMiscError
+from hybkit.errors import (
+    HybkitArgError,
+    HybkitConstructorError,
+    HybkitIterError,
+    HybkitMiscError,
+)
 
 # ----- Begin Custom Types -----
 SegProps = Dict[str, Union[float, int, str]]
@@ -2453,6 +2458,8 @@ class FoldRecord:
         """
         if allowed_mismatches is None:
             allowed_mismatches = self.settings['allowed_mismatches']
+        if allowed_mismatches < 0:
+            return True
         mismatches = self.count_hyb_record_mismatches(hyb_record)
         return (mismatches <= allowed_mismatches)
 
@@ -2493,7 +2500,7 @@ class FoldRecord:
                 message += '                       %s\t' % (match_str)
                 message += '(%i of %i)\n' % (mismatch_count,
                                              self.settings['allowed_mismatches'])
-                message += 'dynamic FoldRecord Seq: %s\t(%i)\n' % (self.seq, len(self.seq))
+                message += 'Dynamic FoldRecord Seq:%s\t(%i)\n' % (self.seq, len(self.seq))
             raise HybkitMiscError(message)
 
     # Start FoldRecord Magic Methods
@@ -3348,99 +3355,105 @@ class HybFoldIter:
             Tuple[HybRecord, FoldRecord, str],
             ]:
         """Read and return (:class:`HybRecord`, :class:`FoldRecord`)."""
-        self.counters['total_read_attempts'] += 1
-        next_hyb_record = None
-        next_fold_record = None
-        iter_error_mode = self.iter_error_mode
-        try:
-            # Attempt to read next HybRecord
-            self.counters['hyb_record_read_attempts'] += 1
-            next_hyb_record = self.hybfile_handle.read_record()
-            # Attempt to read next FoldRecord
-            self.counters['fold_record_read_attempts'] += 1
-            next_fold_record = self.foldfile_handle.read_record(override_error_mode='return')
-            # Set initial loop variables
-            error = ''
+        do_skip = True
+        while do_skip:
             do_skip = False
-            # Check for "NoFold" error
-            if ('foldrecord_nofold' in self.settings['error_checks']
-                    and isinstance(next_fold_record, tuple)
-                    and next_fold_record[0] == 'NOFOLD'
-                ):
-                error = 'Improper FoldRecord: No Fold (Energy = 99*.*)'
+            self.counters['total_read_attempts'] += 1
+            next_hyb_record = None
+            next_fold_record = None
+            iter_error_mode = self.iter_error_mode
+            try:
+                # Attempt to read next HybRecord
+                self.counters['hyb_record_read_attempts'] += 1
+                next_hyb_record = self.hybfile_handle.read_record()
+                # Attempt to read next FoldRecord
+                self.counters['fold_record_read_attempts'] += 1
+                next_fold_record = self.foldfile_handle.read_record(override_error_mode='return')
+                # Set initial loop variables
+                error = ''
+                # Check for "NoFold" error
+                if ('foldrecord_nofold' in self.settings['error_checks']
+                        and isinstance(next_fold_record, tuple)
+                        and next_fold_record[0] == 'NOFOLD'
+                    ):
+                    id_string = next_fold_record[1].split()[0]
+                    error = 'Improper FoldRecord : %s : No Fold (Energy = 99*.*)' % id_string
 
-            # Check for "NoEnergy" error
-            if (not error and isinstance(next_fold_record, tuple)
-                    and next_fold_record[0] == 'NOENERGY'):
-                error = 'Improper FoldRecord: No Energy (no <Tab> in 3rd line)'
+                # Check for "NoEnergy" error
+                if (not error and isinstance(next_fold_record, tuple)
+                        and next_fold_record[0] == 'NOENERGY'):
+                    error = 'Improper FoldRecord: No Energy (no <Tab> in 3rd line)'
 
-            # Check for "InDel" errors
-            if (not error
-                    and 'hybrecord_indel' in self.settings['error_checks']
-                    and next_hyb_record.prop('has_indels')
-                ):
-                error = 'HybRecord: %s has InDels.' % str(next_hyb_record)
+                # Check for "InDel" errors
+                if (not error
+                        and 'hybrecord_indel' in self.settings['error_checks']
+                        and next_hyb_record.prop('has_indels')
+                    ):
+                    error = 'HybRecord: %s has InDels.' % str(next_hyb_record)
 
-            # Check for "Mismatch" errors
-            if not error and 'max_mismatch' in self.settings['error_checks']:
-                hyb_fold_mismatches = next_fold_record.count_hyb_record_mismatches(next_hyb_record)
-                if hyb_fold_mismatches > FoldRecord.settings['allowed_mismatches']:
-                    error = 'HybRecord: %s ' % str(next_hyb_record)
-                    error += 'has: %i ' % hyb_fold_mismatches
-                    error += 'mismatches of '
-                    error += '%i allowed ' % FoldRecord.settings['allowed_mismatches']
-
-            # Check for "EnergyMismatch" errors
-            if (not error
-                    and 'energy_mismatch' in self.settings['error_checks']
-                    and next_fold_record.energy is not None
-                    and next_hyb_record.energy not in {None, '.'}
-                    and str(next_fold_record.energy) != str(next_hyb_record.energy)
-                ):
-                    if not error:
+                # Check for "Mismatch" errors
+                if (not error
+                    and 'max_mismatch' in self.settings['error_checks']
+                    and FoldRecord.settings['allowed_mismatches'] > 0
+                        ):
+                    hyb_fold_mismatches = next_fold_record.count_hyb_record_mismatches(next_hyb_record)
+                    if hyb_fold_mismatches > FoldRecord.settings['allowed_mismatches']:
                         error = 'HybRecord: %s ' % str(next_hyb_record)
-                    error += 'has hyb-record / fold-record energy mismatch: '
-                    error += '%s / ' % str(next_hyb_record.energy)
-                    error += '%s\n' % str(next_fold_record.energy)
-                    error += next_fold_record.to_vienna_string()
+                        error += 'has: %i ' % hyb_fold_mismatches
+                        error += 'mismatches of '
+                        error += '%i allowed ' % FoldRecord.settings['allowed_mismatches']
 
-            # If an error exists, deal with it depending on the value of iter_error_mode
-            if error:
-                if iter_error_mode == 'raise':
-                    raise HybkitIterError('ERROR: ' + error)
-                elif iter_error_mode == 'warn_skip':
-                    logging.warning(error)
-                elif iter_error_mode == 'warn_return':
-                    logging.warning(error)
+                # Check for "EnergyMismatch" errors
+                if (not error
+                        and 'energy_mismatch' in self.settings['error_checks']
+                        and next_fold_record.energy is not None
+                        and next_hyb_record.energy not in {None, '.'}
+                        and str(next_fold_record.energy) != str(next_hyb_record.energy)
+                    ):
+                        if not error:
+                            error = 'HybRecord: %s ' % str(next_hyb_record)
+                        error += 'has hyb-record / fold-record energy mismatch: '
+                        error += '%s / ' % str(next_hyb_record.energy)
+                        error += '%s\n' % str(next_fold_record.energy)
+                        error += next_fold_record.to_vienna_string()
 
-                if 'skip' in iter_error_mode:
-                    self.sequential_skips += 1
-                    self.counters['pair_skips'] += 1
-                    if self.sequential_skips > self.settings['max_sequential_skips']:
-                        message = 'ERROR: Skipped %i ' % self.sequential_skips
-                        message += 'record pairs in a row '
-                        message += '(max: %i)\n' % self.settings['max_sequential_skips']
-                        message += 'Check for misalignment of records, or disable setting.'
-                        raise HybkitIterError(message)
-                    do_skip = True
+                # If an error exists, deal with it depending on the value of iter_error_mode
+                if error:
+                    if iter_error_mode == 'raise':
+                        raise HybkitIterError('ERROR: ' + error)
+                    elif iter_error_mode == 'warn_skip':
+                        logging.warning(error)
+                    elif iter_error_mode == 'warn_return':
+                        logging.warning(error)
 
-        except StopIteration:
-            raise
-        except BaseException:
-            message = 'Error at Counter iteration: '
-            message += '%s\n' % self.counters['total_read_attempts']
-            message += 'Last HybRecord: %s\n' % str(self.last_hyb_record)
-            message += 'Last FoldRecord: %s\n' % str(self.last_fold_record)
-            if next_hyb_record is not None:
-                message += 'Next HybRecord: %s\n' % str(next_hyb_record)
-            if next_fold_record is not None:
-                message += 'Next FoldRecord: %s\n' % str(next_fold_record)
-            message += '\n' + '\n'.join(self.report()) + '\n'
-            logging.warning(message)
-            raise
+                    if 'skip' in iter_error_mode:
+                        self.sequential_skips += 1
+                        self.counters['pair_skips'] += 1
+                        if self.sequential_skips > self.settings['max_sequential_skips']:
+                            message = 'ERROR: Skipped %i ' % self.sequential_skips
+                            message += 'record pairs in a row '
+                            message += '(max: %i)\n' % self.settings['max_sequential_skips']
+                            message += 'Check for misalignment of records, or disable setting.'
+                            raise HybkitIterError(message)
+                        do_skip = True
 
-        if do_skip:
-            return next(self)
+            except StopIteration:
+                raise
+            except BaseException:
+                message = 'Error at Counter iteration: '
+                message += '%s\n' % self.counters['total_read_attempts']
+                message += 'Last HybRecord: %s\n' % str(self.last_hyb_record)
+                message += 'Last FoldRecord: %s\n' % str(self.last_fold_record)
+                if next_hyb_record is not None:
+                    message += 'Next HybRecord: %s\n' % str(next_hyb_record)
+                if next_fold_record is not None:
+                    message += 'Next FoldRecord: %s\n' % str(next_fold_record)
+                message += '\n' + '\n'.join(self.report()) + '\n'
+                logging.warning(message)
+                raise
+
+        #if do_skip:
+        #    return next(self)
 
         if self.combine:
             next_hyb_record.set_fold_record(next_fold_record, allow_energy_mismatch=True)
