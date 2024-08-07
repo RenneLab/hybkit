@@ -7,6 +7,8 @@
 Automatic testing of hybkit ViennaFile Class.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 import os
 
 # import sys

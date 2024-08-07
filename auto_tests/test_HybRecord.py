@@ -7,6 +7,7 @@
 Automatic testing of the hybkit HybRecord class.
 """
 
+# ruff: noqa: ANN001 ANN201
 
 import copy
 
@@ -47,7 +48,10 @@ from auto_tests.test_helper_data import (
     TEST_SEG_PROPS_STR,
     TEST_SEQ_STR,
 )
-from auto_tests.test_helper_functions import get_expected_result_context, get_expected_result_string
+from auto_tests.test_helper_functions import (
+    get_expected_result_context,
+    get_expected_result_string,
+)
 from hybkit.errors import HybkitArgError, HybkitConstructorError, HybkitMiscError
 
 # Includes the following functions:

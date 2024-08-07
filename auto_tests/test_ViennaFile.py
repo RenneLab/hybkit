@@ -7,12 +7,18 @@
 Automatic testing of hybkit ViennaFile Class.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 import os
 
 import pytest
 
 import hybkit
-from auto_tests.test_helper_data import ART_HYB_VIENNA_PROPS_1, ART_HYB_VIENNA_PROPS_2, test_out_dir
+from auto_tests.test_helper_data import (
+    ART_HYB_VIENNA_PROPS_1,
+    ART_HYB_VIENNA_PROPS_2,
+    test_out_dir,
+)
 from auto_tests.test_helper_functions import get_expected_result_context
 from hybkit.errors import HybkitMiscError
 

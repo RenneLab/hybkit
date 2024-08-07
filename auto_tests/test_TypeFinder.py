@@ -7,6 +7,8 @@
 Automatic testing of the hybkit TypeFinder class.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 import copy
 import os
 

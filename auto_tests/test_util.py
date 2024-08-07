@@ -7,6 +7,8 @@
 Automatic testing of hybkit code.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 # import sys
 # import copy
 # from contextlib import nullcontext as does_not_raise

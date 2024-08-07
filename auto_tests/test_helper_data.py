@@ -7,6 +7,8 @@
 Helper data objects for automatic testing of hybkit code.
 """
 
+# ruff: noqa: ANN001 ANN201
+
 import copy
 import os
 
