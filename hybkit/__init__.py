@@ -1239,7 +1239,7 @@ class HybRecord:
             mode: ToFastaRecordArg = 'hybrid',
             annotate: bool = True,
             allow_mirna_dimers: bool = False
-        ) -> SeqRecord:
+        ) -> SeqRecord: # type: ignore
         """
         Return nucleotide sequence as BioPython SeqRecord object.
 
@@ -1469,8 +1469,8 @@ class HybRecord:
     @classmethod
     def from_fasta_records(
             cls,
-            seg1_record: SeqRecord,
-            seg2_record: SeqRecord,
+            seg1_record: SeqRecord, # type: ignore
+            seg2_record: SeqRecord, # type: ignore
             hyb_id: Optional[str] = None,
             energy: Optional[StrOrNum] = None,
             flags: Optional[FlagsDict] = None,

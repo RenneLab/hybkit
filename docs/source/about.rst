@@ -28,6 +28,7 @@ Changelog
       * Change HybFoldIter error backend to non-recursive design
       * Allow disabling of hyb / fold sequence mismatch checking by setting
         mismatches to "-1"
+      * Misc Bugfixes & Refinements
 
     * 0.3.5 (2024-06) Changes include:
 
