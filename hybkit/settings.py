@@ -261,7 +261,8 @@ HybFoldIter_settings_info = {
         """,
         'str',
         None,
-        {'choices': ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch']}
+        {'choices': ['hybrecord_indel', 'foldrecord_nofold', 'max_mismatch', 'energy_mismatch'],
+         'nargs': '+'}
     ],
     'iter_error_mode': [
         'warn_skip',

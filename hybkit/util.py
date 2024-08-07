@@ -689,7 +689,6 @@ for _cls_name, _cls_group in _class_settings_groups.items():
         _use_args.append(_flag)
         _use_kwargs = copy.deepcopy(_extra_kwargs)
         _use_kwargs['help'] = _description
-        _use_kwargs['type'] = _custom_types[_type_str]
         if _custom_type_choices[_type_str] is not None:
             _use_kwargs['choices'] = _custom_type_choices[_type_str]
         _use_kwargs['type'] = _custom_types[_type_str]
